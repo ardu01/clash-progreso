@@ -55,7 +55,9 @@ export function latestByTag(rows) {
   return map;
 }
 
-export async function seedBundled(paths) {
+const SEED_KEY = "cp-seeded";
+
+async function importMissing(paths) {
   const existing = await allExports();
   const have = new Set(existing.map((r) => r.tag + "@" + r.timestamp));
   for (const path of paths) {
@@ -67,5 +69,17 @@ export async function seedBundled(paths) {
     await putExport(exp);
     have.add(key);
   }
+}
+
+export async function seedBundled(paths) {
+  if (localStorage.getItem(SEED_KEY) === "1") return allExports();
+  await importMissing(paths);
+  localStorage.setItem(SEED_KEY, "1");
+  return allExports();
+}
+
+export async function restoreBundled(paths) {
+  await importMissing(paths);
+  localStorage.setItem(SEED_KEY, "1");
   return allExports();
 }

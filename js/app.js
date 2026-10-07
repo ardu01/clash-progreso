@@ -4,7 +4,8 @@ import {
   townHallLevel, upgradesOf,
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
-import { allExports, clearExports, latestByTag, putExport, seedBundled } from "./store.js";
+import { IMAGE_CACHE } from "./caches.js";
+import { allExports, clearExports, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -143,7 +144,7 @@ function goalChip(th, objetivo) {
 }
 
 function accountChip(meta) {
-  return `<span class="chip chip--muted chip--tiny">${esc(meta.chip)}</span>`;
+  return `<span class="chip chip--muted chip--sm">${esc(meta.chip)}</span>`;
 }
 
 function upgrades(exp) {
@@ -307,11 +308,12 @@ function renderProgreso(tag) {
     ${LEGAL}`;
 }
 
-function summaryCard(a, meta) {
+function summaryCard(a) {
   const sig = a.thSig ? `<p class="t-footnote c-2">TH${a.thSig}: ${fmtPct(a.sigMedia)}</p>` : "";
+  const sigOff = a.thSig ? `<p class="t-footnote c-2">TH${a.thSig}: ${fmtPct(a.sigOffense)}</p>` : "";
   return `<div class="section"><div class="card summary">
     <div><p class="t-footnote c-2">Media</p><p class="t-title1 num">${fmtPct(a.media)}</p><p class="t-footnote c-2">del máximo de TH${a.th}</p>${sig}</div>
-    <div><p class="t-footnote c-2">Ofensiva</p><p class="t-title1 num">—</p><p class="t-footnote c-2">Sin fórmula en los máximos. Laboratorio, héroes, mascotas y equipamiento van aparte.</p></div>
+    <div><p class="t-footnote c-2">Ofensiva</p><p class="t-title1 num">${fmtPct(a.offense)}</p><p class="t-footnote c-2">Media de laboratorio y héroes</p>${sigOff}</div>
   </div></div>`;
 }
 
@@ -551,13 +553,13 @@ function mejorasPorFin(all) {
   }
   const freeCard = free.length ? `<div class="section"><div class="card">
       <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, exp, b }) => {
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
-        return `<span class="chip chip--account">${thumb(1000001, { size: 22, th: a.th })} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
+        return `<span class="chip chip--account">${thumb(1000001, { size: 22, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
       }).join("")}</div>
     </div></div>` : "";
   const done = all.filter((u) => u.done);
-  const pending = all.filter((u) => !u.done);
+  const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end);
   const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Terminadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
@@ -609,11 +611,12 @@ function upRow(u) {
   const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
   const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
+  const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--thumb40${unknown ? " is-unknown" : ""}">
     ${thumb(u.id, { size: 40 })}
     <span class="row__main"><span class="row__title">${esc(title)}</span>
-      <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(QUEUE_LABEL[u.queue] || u.queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
-    <span class="row__trail trail-time"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}" style="font-weight:600">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
+      <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
+    <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
   </div></li>`;
 }
 
@@ -663,18 +666,18 @@ function renderEvolucion() {
       <p class="t-headline" style="margin:0 0 12px">Escalera de TH</p>
       ${ladderHtml()}
     </div></div>
-    <div class="section"><div class="card">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px">
+    <div class="section"><div class="card chart-wrap">
+      <div class="card__top">
         <p class="t-headline" style="margin:0">Progreso medio</p>
-        <select data-evo aria-label="Serie" style="font-size:16px">${evoOptions()}</select>
+        <select class="chart-select" data-evo aria-label="Serie">${evoOptions()}</select>
       </div>
       ${chartHtml()}
-      <p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>
+      ${seriesPoints().length < 2 ? `<p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>` : ""}
     </div></div>
     <div class="section"><div class="card">
       <p class="t-headline" style="margin:0 0 8px">Subidas pendientes</p>
       ${chartPending(stats.pending)}
-      <p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>
+      ${seriesPoints().length < 2 ? `<p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>` : ""}
     </div></div>
     ${LEGAL}`;
 }
@@ -777,22 +780,29 @@ function chartPending(pending) {
   </svg>`;
 }
 
+function imageTotalBytes() {
+  if (state.peso && state.peso.total_bytes != null) return state.peso.total_bytes;
+  return state.images.reduce((s, im) => s + (im.bytes || 0), 0);
+}
+
 function renderAjustes() {
   const imported = ROSTER.filter((r) => expOf(r.tag)).length;
-  const total = state.peso ? state.peso.total_bytes : 41314444;
-  const totalN = state.peso ? state.peso.total_archivos : state.images.length;
+  const total = imageTotalBytes();
+  const totalN = state.peso && state.peso.total_archivos != null ? state.peso.total_archivos : state.images.length;
   const bytes = state.dl.phase === "downloading" ? state.dl.doneBytes : state.cacheBytes;
   const count = state.dl.phase === "downloading" ? state.dl.doneCount : state.cacheCount;
+  const remain = Math.max(0, total - (state.dl.phase === "downloading" ? state.dl.doneBytes : state.cacheBytes));
   const p = total ? (bytes / total) * 100 : 0;
-  const done = count >= totalN && totalN > 0;
-  let status = `${fmtBytes(bytes)} de ~41 MB guardados`;
-  let btn = `<button class="btn btn--primary btn--block" data-dl="start" ${!navigator.onLine ? "disabled" : ""}>Descargar todas (~40 MB)</button>`;
+  const done = state.images.length > 0 && count >= state.images.length && state.dl.phase !== "downloading";
+  const remainLabel = fmtBytes(remain);
+  let status = `${fmtBytes(bytes)} de ${fmtBytes(total)} guardados`;
+  let btn = `<button class="btn btn--primary btn--block" data-dl="start" ${!navigator.onLine ? "disabled" : ""}>Descargar todas (${remainLabel})</button>`;
   let note = "Los ayuntamientos y los héroes ya están guardados. El resto de imágenes se guarda al verlas por primera vez. Recomendado con wifi.";
-  if (!navigator.onLine && state.dl.phase !== "downloading") {
+  if (state.dl.phase === "offline" || (!navigator.onLine && state.dl.phase !== "downloading")) {
     status = "Sin conexión. Conéctate para descargar.";
-    btn = `<button class="btn btn--primary btn--block" disabled>Descargar todas (~40 MB)</button>`;
+    btn = `<button class="btn btn--primary btn--block" disabled>Descargar todas (${remainLabel})</button>`;
   } else if (state.dl.phase === "downloading") {
-    status = `Descargando ${count} de ${totalN} · ${fmtBytes(bytes)} de ~41 MB`;
+    status = `Descargando ${count} de ${totalN} · ${fmtBytes(bytes)} de ${fmtBytes(total)}`;
     btn = `<button class="btn btn--secondary btn--block" data-dl="stop">Detener</button>`;
   } else if (state.dl.phase === "error") {
     status = `No se pudieron descargar ${state.dl.errors} imágenes`;
@@ -813,7 +823,8 @@ function renderAjustes() {
         <div class="section" style="margin-top:0"><ul class="list">
           <li><button class="row" data-go="#/importar"><span class="row__main"><span class="row__title">Importar JSON</span></span>${CHEV}</button></li>
           <li><div class="row"><span class="row__main"><span class="row__title">Cuentas importadas</span></span><span class="row__trail num">${imported} de 11</span></div></li>
-          <li><button class="row" data-wipe style="color:var(--red-text)"><span class="row__title">Borrar todos los datos</span></button></li>
+          <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
+          <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos incluidos</span></span></button></li>
         </ul></div>
         <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
           <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count} de ${totalN}</span></div>
@@ -1053,6 +1064,18 @@ function bind(r) {
     }
     if (ev.target.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
     if (ev.target.closest("[data-close]")) { location.hash = "#/roster"; return; }
+    if (ev.target.closest("[data-restore]")) {
+      state.alert = {
+        title: "¿Restaurar datos incluidos?",
+        msg: "Se volverán a cargar las 11 exportaciones del 7 oct 2026. Las importaciones más nuevas se conservan.",
+        buttons: [
+          { label: "Cancelar", cls: "" },
+          { label: "Restaurar", cls: "", act: "restore" },
+        ],
+      };
+      render();
+      return;
+    }
     if (ev.target.closest("[data-wipe]")) {
       state.alert = {
         title: "¿Borrar todos los datos?",
@@ -1072,6 +1095,11 @@ function bind(r) {
       const payload = b && b.payload;
       state.alert = null;
       if (act === "wipe") { await clearExports(); state.rows = []; state.latest = new Map(); showToast("ok", "Datos borrados"); }
+      if (act === "restore") {
+        state.rows = await restoreBundled(state.bundlePaths || []);
+        state.latest = latestByTag(state.rows);
+        showToast("ok", "Datos incluidos restaurados");
+      }
       if (act === "anyway") await commitOne(payload);
       if (act === "purge") await purgeImages();
       render();
@@ -1219,7 +1247,7 @@ async function downloadAll() {
   state.dlAbort = ctrl;
   state.dl = { phase: "downloading", doneBytes: state.cacheBytes, doneCount: state.cacheCount, errors: 0, note: "" };
   render();
-  const cache = await caches.open("cp-img-v1");
+  const cache = await caches.open(IMAGE_CACHE);
   let errors = 0;
   let bytes = 0;
   let count = 0;
@@ -1280,6 +1308,7 @@ function catalog(manifest) {
   for (const item of Object.values(manifest.items)) {
     const push = (im) => {
       if (!im || !im.ruta) return;
+      if (im.pesado === true || item.pesado === true) return;
       list.push({ url: "./assets/" + im.ruta, bytes: im.bytes || 0, precache: item.categoria === "townhall" || item.categoria === "hero" });
     };
     push(item.imagen);
@@ -1300,12 +1329,13 @@ async function boot() {
   state.peso = manifest.peso_imagenes;
   state.index = indexCaps(caps, manifest);
   state.images = catalog(manifest);
-  state.rows = await seedBundled(bundle.exportaciones.map((p) => "./" + p));
+  state.bundlePaths = bundle.exportaciones.map((p) => "./" + p);
+  state.rows = await seedBundled(state.bundlePaths);
   state.latest = latestByTag(state.rows);
   state.ready = true;
   render();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js")
+    navigator.serviceWorker.register("./sw.js", { type: "module" })
       .then(() => navigator.serviceWorker.ready)
       .then(() => measureCache())
       .catch(() => measureCache());

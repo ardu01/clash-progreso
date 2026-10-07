@@ -25,10 +25,15 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
 }
 .row--thumb44 { --row-inset: calc(var(--sp-4) + 44px + var(--sp-3)); min-height: 64px; }
 .row--thumb40 { --row-inset: calc(var(--sp-4) + 40px + var(--sp-3)); min-height: 60px; }
-.row__main  { flex: 1; min-width: 0; }
-.row__title { font-size: 1rem; line-height: 1.294; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row__sub   { font-size: 0.765rem; line-height: 1.385; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.row__main  { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row__title { display: block; min-width: 0; font-size: 1rem; line-height: 1.294; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row__sub   { display: block; min-width: 0; font-size: 0.765rem; line-height: 1.385; color: var(--label-2); font-variant-numeric: tabular-nums; }
 .row__trail { display: flex; align-items: center; gap: var(--sp-2); color: var(--label-2); font-variant-numeric: tabular-nums; text-align: right; flex-wrap: wrap; justify-content: flex-end; }
+.row__trail--stack { flex: none; flex-direction: column; align-items: flex-end; gap: 0; }
+.row__trail--stack > :first-child { color: var(--label); }
+.row__trail--stack > :first-child.soon { color: var(--tint); }
+.row__trail--stack > :first-child.done-label { color: var(--green-text); }
+.row.row--destructive { color: var(--red-text); }
 .chevron { width: 8px; height: 13px; flex: none; color: var(--label-3); }
 
 .thumb {
@@ -156,10 +161,10 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
 .chip--main    { background: var(--tint-soft); color: var(--tint); }
 .chip--second  { background: transparent; color: var(--tint); box-shadow: inset 0 0 0 1px var(--tint); }
 .chip--muted   { background: var(--fill-4); color: var(--label-2); font-weight: 400; }
-.chip--warn    { background: color-mix(in srgb, var(--orange) 16%, transparent); color: var(--orange-text); }
+.chip--warn    { background: color-mix(in srgb, var(--orange) 16%, var(--bg-2)); color: var(--orange-text); }
+.chip--sm      { height: 18px; padding: 0 6px; font-size: 0.706rem; }
 .chip--account { height: 28px; padding: 0 10px 0 3px; gap: 6px; }
 .chip--account .thumb { --size: 22px; padding: 1px; border-radius: 50%; }
-.chip--tiny { height: 18px; padding: 0 6px; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);

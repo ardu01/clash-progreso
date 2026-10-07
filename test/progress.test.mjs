@@ -51,14 +51,23 @@ const EXPECTED_EQ = {
 
 const CATS = ["defensas", "ejercito_edif", "laboratorio", "heroes", "mascotas", "equipamiento", "trampas", "recursos", "muros"];
 
-// Desvíos conocidos frente a snapshots.csv, con la regla uniforme de caps_clashrecord.json.
+// Desvíos conocidos frente a snapshots.csv.
+// Laboratorio: 4000109, 26000123 y 4000188 no entran en el máximo (siguen sin identificar).
+// Defensas frente a otro TH: instancias colocadas contra el máximo de ese TH; las que faltan
+// son el cupo de ClashRecord menos las colocadas (nunca negativo). Incluye Inferno Artillery,
+// que no tiene ficha en el manifiesto.
 const KNOWN = new Set([
-  "#R02YUVC0J pct_defensas",
-  "#R02YUVC0J pct_media",
-  "#R02YUVC0J pct_sig_defensas",
-  "#R02YUVC0J pct_sig_media",
+  "#28PLGP0G2 pct_laboratorio",
+  "#28PLGP0G2 pct_media",
   "#R00C8CPQC pct_sig_defensas",
+  "#R00C8CPQC pct_laboratorio",
+  "#R00C8CPQC pct_sig_laboratorio",
+  "#R00C8CPQC pct_media",
   "#R00C8CPQC pct_sig_media",
+  "#R02YUVC0J pct_defensas",
+  "#R02YUVC0J pct_sig_defensas",
+  "#R02YUVC0J pct_media",
+  "#R02YUVC0J pct_sig_media",
 ]);
 
 test("el equipamiento mostrado es el de la exportación, sin filtrar", () => {
@@ -108,19 +117,42 @@ test("redondeo par del muro 61,25", () => {
   assert.equal(pct(4291, 6175), 69.5);
 });
 
-test("constructores: héroes ocupan, laboratorio y casa de mascotas no", () => {
-  const c1 = exportsByTag.get("#28PLGP0G2");
-  const b = builderStatus(c1);
-  assert.equal(b.total, 5);
-  assert.equal(b.occupied, 6);
-  assert.equal(b.over, true);
-  assert.equal(b.free, null);
-  const c2 = builderStatus(exportsByTag.get("#R00C8CPQC"));
-  assert.equal(c2.total, 5);
-  assert.equal(c2.occupied, 5);
-  assert.equal(c2.free, 0);
-  assert.equal(c2.over, false);
+test("constructores: sin extra, con guardianes; nunca libres negativos", () => {
+  const c1 = builderStatus(exportsByTag.get("#28PLGP0G2"));
+  assert.equal(c1.total, 5);
+  assert.equal(c1.occupied, 6);
+  assert.equal(c1.over, true);
+  assert.equal(c1.free, null);
+  for (const roster of ROSTER) {
+    const b = builderStatus(exportsByTag.get(roster.tag));
+    assert.equal(b.known, true, roster.tag);
+    assert.ok(b.free == null || b.free >= 0, roster.tag);
+    if (roster.tag === "#28PLGP0G2") continue;
+    assert.equal(b.occupied, b.total, roster.tag);
+    assert.equal(b.over, false, roster.tag);
+  }
+  const v = builderStatus(exportsByTag.get("#GVUQ2C2VC"));
+  assert.equal(v.occupied, 4);
+  assert.equal(v.total, 4);
   const r = builderStatus(exportsByTag.get("#R02YUVC0J"));
+  assert.equal(r.occupied, 3);
   assert.equal(r.total, 3);
-  assert.ok(r.occupied <= r.total);
+});
+
+test("defensas frente a otro TH y al TH actual", () => {
+  const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  assert.equal(c2.cats.defensas.sigPct, 61.3);
+  const r = analyze(exportsByTag.get("#R02YUVC0J"), index);
+  assert.equal(r.cats.defensas.pct, 54.4);
+});
+
+test("ofensiva: media de laboratorio y héroes", () => {
+  const got = (tag) => analyze(exportsByTag.get(tag), index).offense;
+  assert.equal(got("#GUQUV98JG"), 43.2);
+  assert.equal(got("#R02YUVC0J"), 41.1);
+  assert.equal(got("#GUQUV98JG"), Number(byTag.get("#GUQUV98JG").pct_ofensiva));
+  assert.equal(got("#R02YUVC0J"), Number(byTag.get("#R02YUVC0J").pct_ofensiva));
+  // El CSV de C2 (34,2) aún cuenta Ruin Witch y Angry Spell. Sin esos máximos el laboratorio
+  // sube a 45,4 y la media con héroes (23,5) es 34,5.
+  assert.equal(got("#R00C8CPQC"), 34.5);
 });

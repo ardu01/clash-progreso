@@ -12,20 +12,12 @@ const ALIAS = {
   "Guardian-Long Shot": "107000000",
   "Guardian-Smasher": "107000001",
   "Guardian-Logger": "107000008",
-  // Única tropa, hechizo y máquina sin identificar del manifiesto, y únicos
-  // nombres de laboratorio del archivo de máximos que no tienen nombre_en.
-  // El máximo entra en el %; la interfaz sigue diciendo «sin identificar».
-  "Ruin Witch": "4000109",
-  "Angry Spell": "26000123",
-  "Sky Wagon": "4000188",
 };
 
 const RES_IDS = ["1000004", "1000002", "1000023", "1000005", "1000003", "1000024"];
 const ARMY_IDS = ["1000000", "1000006", "1000026", "1000007", "1000020", "1000029", "1000059", "1000014", "1000071", "1000068", "1000070"];
 const LAB_SECTIONS = new Set(["units", "spells", "siege_machines"]);
 const HUT = "1000015";
-const LAB_BUILDING = "1000007";
-const PET_HOUSE = "1000068";
 const WALL = "1000010";
 const TH_ID = "1000001";
 const CRAFT = "1000097";
@@ -75,6 +67,38 @@ export function averagePct(values) {
   return roundDiv(sumTenths, xs.length) / 10;
 }
 
+/** round(x, 1) de Python, el de offense_pct en roster_snapshot.py. */
+function pythonRound1(x) {
+  const neg = x < 0;
+  const v = Math.abs(x);
+  const cmp = (num, den) => {
+    const dv = new DataView(new ArrayBuffer(8));
+    dv.setFloat64(0, v);
+    const hi = dv.getUint32(0);
+    const exp = (hi >>> 20) & 0x7ff;
+    const mant = (BigInt(hi & 0xfffff) << 32n) | BigInt(dv.getUint32(4));
+    const frac = mant | (1n << 52n);
+    const e = BigInt(exp) - 1023n - 52n;
+    let left = frac * BigInt(den);
+    let right = BigInt(num);
+    if (e >= 0n) left <<= e;
+    else right <<= -e;
+    return left < right ? -1 : left > right ? 1 : 0;
+  };
+  let t = Math.max(0, Math.floor(v * 10) - 1);
+  while (cmp(t + 1, 10) >= 0) t += 1;
+  if (cmp(t, 10) === 0) return (neg ? -t : t) / 10;
+  const c = cmp(2 * t + 1, 20);
+  const pick = c < 0 ? t : c > 0 ? t + 1 : (t % 2 === 0 ? t : t + 1);
+  return (neg ? -pick : pick) / 10;
+}
+
+function offenseOf(lab, heroes) {
+  const xs = [lab, heroes].filter((v) => v != null);
+  if (!xs.length) return null;
+  return pythonRound1(xs.reduce((s, v) => s + v, 0) / xs.length);
+}
+
 export function itemName(item) {
   if (!item || item.estado === "sin_identificar") return null;
   return item.nombre_es || item.nombre_en || null;
@@ -119,6 +143,7 @@ export function indexCaps(caps, manifest) {
     byId.get(id).set(th, value);
   };
   let greedy = null;
+  let inferno = null;
   const craftMax = new Map();
   for (const [thKey, table] of Object.entries(caps)) {
     const th = Number(thKey);
@@ -130,6 +155,13 @@ export function indexCaps(caps, manifest) {
       if (name === "Greedy Raven") {
         if (!greedy) greedy = new Map();
         greedy.set(th, value.max);
+        continue;
+      }
+      // Arma del ayuntamiento: no tiene ficha en el manifiesto. Solo entra en el
+      // denominador de defensas cuando el cupo de ese TH es positivo.
+      if (name === "Inferno Artillery") {
+        if (!inferno) inferno = new Map();
+        inferno.set(th, { max: value.max, count: value.count });
         continue;
       }
       let id = ALIAS[name] || null;
@@ -150,6 +182,7 @@ export function indexCaps(caps, manifest) {
     items,
     byId,
     greedy,
+    inferno,
     craftMax,
     defenses: idsBy((it) => it.categoria === "defense"),
     traps: idsBy((it) => it.categoria === "trap"),
@@ -211,16 +244,56 @@ function craftedScore(exp, index, th) {
   return { num: types.reduce((s, t) => s + t.sum, 0), den: 3 * max, types, max };
 }
 
+/**
+ * Defensas frente a un TH (el actual o otro): cada instancia colocada se compara
+ * con el máximo de ese TH, aunque el cupo sea 0 (fusiones). Las que faltan son
+ * el recuento de ClashRecord menos las colocadas, nunca un número negativo.
+ */
+function defenseGroup(index, th, ids, bag) {
+  let num = 0;
+  let den = 0;
+  for (const id of ids) {
+    const cap = capAt(index, id, th);
+    if (!cap || cap.max == null) continue;
+    let cnt = cap.count;
+    if (cnt == null) cnt = 1;
+    const own = bag.get(id);
+    const owned = own ? own.cnt : 0;
+    let sum = 0;
+    if (own) {
+      for (const r of own.rows) {
+        const c = r.cnt || 1;
+        sum += Math.min(r.lvl || 0, cap.max) * c;
+      }
+    }
+    const missing = Math.max(0, (cnt || 0) - owned);
+    if (!owned && !missing) continue;
+    num += sum;
+    den += (owned + missing) * cap.max;
+  }
+  return { num, den };
+}
+
+function infernoScore(index, th) {
+  const cap = index.inferno && index.inferno.get(th);
+  if (!cap || cap.max == null) return { num: 0, den: 0 };
+  const cnt = cap.count == null ? 1 : cap.count;
+  const missing = Math.max(0, cnt);
+  if (!missing) return { num: 0, den: 0 };
+  return { num: 0, den: missing * cap.max };
+}
+
 function defensesScore(exp, index, th) {
   const b = placed(exp.buildings);
   const g = placed(exp.guardians);
-  const core = groupScore(index, th, index.defenses, b);
-  const huts = groupScore(index, th, [HUT], b);
-  const guards = groupScore(index, th, ["107000000", "107000001", "107000008"], g);
+  const core = defenseGroup(index, th, index.defenses, b);
+  const huts = defenseGroup(index, th, [HUT], b);
+  const guards = defenseGroup(index, th, ["107000000", "107000001", "107000008"], g);
   const craft = craftedScore(exp, index, th);
+  const weapon = infernoScore(index, th);
   return {
-    num: core.num + huts.num + guards.num + craft.num,
-    den: core.den + huts.den + guards.den + craft.den,
+    num: core.num + huts.num + guards.num + craft.num + weapon.num,
+    den: core.den + huts.den + guards.den + craft.den + weapon.den,
   };
 }
 
@@ -326,12 +399,16 @@ export function analyze(exp, index) {
   const mediaVals = CATEGORIES.map(({ key }) => cats[key].pct);
   const sigVals = CATEGORIES.map(({ key }) => cats[key].sigPct);
   const walls = cur.muros;
+  const offense = offenseOf(cats.laboratorio.pct, cats.heroes.pct);
+  const sigOffense = sig ? offenseOf(cats.laboratorio.sigPct, cats.heroes.sigPct) : null;
   return {
     th,
     thSig: th && th < 18 ? th + 1 : null,
     cats,
     media: averagePct(mediaVals),
     sigMedia: sig ? averagePct(sigVals) : null,
+    offense,
+    sigOffense,
     walls,
     heroes: heroRows(exp, index, th),
     pets: petRows(exp, index, th),
@@ -382,8 +459,6 @@ export function equipmentView(exp, index, th) {
   return pieces;
 }
 
-const QUEUE_SKIP_BUILDINGS = new Set([LAB_BUILDING, PET_HOUSE]);
-
 export function builderStatus(exp) {
   let total = 0;
   let known = false;
@@ -394,16 +469,16 @@ export function builderStatus(exp) {
     }
   }
   let occupied = 0;
-  for (const b of exp.buildings || []) {
-    if (b.timer == null) continue;
-    if (QUEUE_SKIP_BUILDINGS.has(String(b.data))) continue;
+  const consider = (it) => {
+    if (it.timer == null || it.extra) return;
     occupied += 1;
-  }
-  for (const sec of ["traps", "heroes"]) {
-    for (const it of exp[sec] || []) if (it.timer != null) occupied += 1;
+  };
+  for (const b of exp.buildings || []) consider(b);
+  for (const sec of ["traps", "heroes", "guardians"]) {
+    for (const it of exp[sec] || []) consider(it);
   }
   const over = known && occupied > total;
-  const free = known && !over ? total - occupied : null;
+  const free = known && !over ? Math.max(0, total - occupied) : null;
   return { known, total: known ? total : null, occupied, free, over };
 }
 
@@ -418,18 +493,14 @@ export function upgradesOf(exp) {
       timer: it.timer,
       end: (exp.timestamp + it.timer) * 1000,
       queue,
+      extra: !!it.extra,
       nuevo: (it.lvl || 0) === 0,
     });
   };
-  for (const b of exp.buildings || []) {
-    const id = String(b.data);
-    if (b.timer == null) continue;
-    if (id === LAB_BUILDING) push("buildings", b, "laboratorio");
-    else if (id === PET_HOUSE) push("buildings", b, "mascotas");
-    else push("buildings", b, "constructor");
-  }
+  for (const b of exp.buildings || []) push("buildings", b, "constructor");
   for (const it of exp.traps || []) push("traps", it, "constructor");
   for (const it of exp.heroes || []) push("heroes", it, "constructor");
+  for (const it of exp.guardians || []) push("guardians", it, "constructor");
   for (const it of exp.units || []) push("units", it, "laboratorio");
   for (const it of exp.spells || []) push("spells", it, "laboratorio");
   for (const it of exp.siege_machines || []) push("siege_machines", it, "laboratorio");

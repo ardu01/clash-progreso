@@ -1,5 +1,7 @@
-const SHELL = "cp-shell-v1";
-const IMAGES = "cp-img-v1";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js";
+
+const SHELL = SHELL_CACHE;
+const IMAGES = IMAGE_CACHE;
 
 const APP = [
   "./",
@@ -14,12 +16,14 @@ const APP = [
   "./js/progress.js",
   "./js/format.js",
   "./js/store.js",
+  "./js/caches.js",
   "./assets/manifest.json",
   "./data/caps_clashrecord.json",
   "./data/bundle.json",
   "./data/snapshots.csv",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon-180.png",
 ];
 
@@ -35,10 +39,12 @@ self.addEventListener("install", (event) => {
     const urls = [];
     for (const item of Object.values(man.items)) {
       if (item.categoria !== "townhall" && item.categoria !== "hero") continue;
-      if (item.imagen && item.imagen.ruta) urls.push("./assets/" + item.imagen.ruta);
-      for (const im of Object.values(item.imagenes_por_nivel || {})) {
-        if (im && im.ruta) urls.push("./assets/" + im.ruta);
-      }
+      const push = (im) => {
+        if (!im || !im.ruta || im.pesado === true || item.pesado === true) return;
+        urls.push("./assets/" + im.ruta);
+      };
+      push(item.imagen);
+      for (const im of Object.values(item.imagenes_por_nivel || {})) push(im);
     }
     await imgCache.addAll(urls);
     await self.skipWaiting();
@@ -71,14 +77,18 @@ async function cacheFirst(request) {
 }
 
 async function networkFirst(request) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 3000);
   try {
-    const res = await fetch(request);
+    const res = await fetch(request, { signal: ctrl.signal });
+    clearTimeout(timer);
     if (res.ok && request.method === "GET") {
       const cache = await caches.open(SHELL);
       cache.put(request, res.clone());
     }
     return res;
   } catch {
+    clearTimeout(timer);
     const hit = await caches.match(request);
     if (hit) return hit;
     if (request.mode === "navigate") {

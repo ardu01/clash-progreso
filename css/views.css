@@ -27,7 +27,7 @@
 .eq-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-  gap: 12px 6px;
+  gap: 12px 4px;
   margin: 0; padding: 0; list-style: none;
 }
 .eq {
@@ -74,6 +74,9 @@
 .ladder i.none      { visibility: hidden; }
 .ladder__val { font-size: 0.765rem; text-align: right; color: var(--label-2); font-variant-numeric: tabular-nums; }
 
+.card__top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.chart-wrap { position: relative; }
+.chart-select { appearance: none; -webkit-appearance: none; border: 0; background: none; color: var(--tint); font: 400 0.882rem/1.333 var(--font); text-align: right; }
 .chart { width: 100%; height: auto; display: block; overflow: visible; }
 .chart__grid line { stroke: var(--separator); stroke-width: 0.5; }
 .chart :is(.chart__y, .chart__x) text { fill: var(--label-2); font: 400 11px/13px var(--font); font-variant-numeric: tabular-nums; }
