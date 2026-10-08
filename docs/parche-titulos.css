@@ -1,0 +1,26 @@
+/* ==========================================================================
+   parche-titulos.css — revisión de Pages 1.1.0 (main 41f6807), 8 oct 2026
+   Probado inyectado sobre https://ardu01.github.io/clash-progreso/ a 390×844,
+   cuerpo de 17, 19, 23 y 28 px, claro y oscuro. A 17 px no cambia ningún píxel.
+   Solo CSS: no hace falta tocar el JS.
+   ========================================================================== */
+
+/* 1. Dynamic Type en filas (amplía el bloque de §5.3, css/components.css:287).
+      Va delante de las reglas de .row--account/.row--upgrade de ese bloque, para que el tag de
+      cuenta conserve su overflow-wrap: anywhere. Las insignias (.badge, .badge-id) ya son
+      inline-block + nowrap: bajan enteras a la línea siguiente si no caben. */
+@container (max-width: 19em) {
+  .row .row__title { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; }
+}
+
+/* 2a. Roster: el chip «Secundaria» baja bajo el nombre si no cabe (a 17 px cabe y no se mueve). */
+.account-card__title { flex-wrap: wrap; row-gap: var(--sp-1); }
+
+/* 2b. Mejoras «Por cuenta»: con el cuerpo de unos 23 px o más, la etiqueta de .slots ocupa su propia
+       línea y los puntos y el recuento bajan debajo. El contenedor es la columna de texto de la tarjeta
+       (278 px en 390: 12em ≈ cuerpo de 23,2 px o más). */
+.card > div:has(> .slots) { container-type: inline-size; min-width: 0; }
+@container (max-width: 12em) {
+  .slots { flex-wrap: wrap; row-gap: 2px; }
+  .slots__lbl { flex: 1 0 100%; min-width: 0; }
+}
