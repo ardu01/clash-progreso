@@ -494,13 +494,23 @@ export function mediaLine(changes) {
   return `${fmtPct(changes.mediaFrom)} → ${fmtPct(changes.mediaTo)}`;
 }
 
-/** Subtítulo de la fila «No válido»: archivo y motivo, sin el punto final. */
+/**
+ * Motivo corto de un archivo no válido, sin el punto final: solo el primero.
+ * Texto que no empieza por «{»: «Empieza por «muestra»» (la muestra de clipPreview).
+ */
+export function omitReason(item) {
+  const pe = item && item.parseError;
+  let reason = "";
+  if (pe && pe.preview) reason = `Empieza por «${pe.preview}»`;
+  else if (pe && pe.msg) reason = pe.msg;
+  else if (item && item.issues && item.issues.length) reason = item.issues[0];
+  return reason.replace(/\.$/, "");
+}
+
+/** Subtítulo de la fila «No válido»: archivo y primer motivo; « ·» va pegado al nombre. */
 export function omitSubtitle(item) {
   const name = item && item.name ? item.name : "";
-  let reason = "";
-  if (item && item.parseError && item.parseError.msg) reason = item.parseError.msg;
-  else if (item && item.issues && item.issues.length) reason = item.issues.join(" ");
-  reason = reason.replace(/\.$/, "");
-  if (name && reason) return `${name} · ${reason}`;
+  const reason = omitReason(item);
+  if (name && reason) return `${name}\u00a0· ${reason}`;
   return name || reason;
 }

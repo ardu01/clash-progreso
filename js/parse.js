@@ -4,7 +4,7 @@ const HELP_FILE = "Elige el JSON que exporta Clash of Clans.";
 /** Hasta 20 caracteres. Si el texto es más largo, la muestra acaba en «…». */
 function clipPreview(text) {
   const chars = Array.from(text);
-  if (chars.length > 20) return chars.slice(0, 16).join("") + "…";
+  if (chars.length > 20) return chars.slice(0, 16).join("").trimEnd() + "…";
   return chars.join("").trimEnd();
 }
 

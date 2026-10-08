@@ -8,7 +8,7 @@ import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, b
 import { parseLoose } from "../js/parse.js";
 import { fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle } from "../js/import.js";
+import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT } from "../js/import.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -288,6 +288,8 @@ test("parseLoose no menciona línea ni columna", () => {
   const spaced = parseLoose("abcdefghijklmnopqrs xyz");
   assert.equal(spaced.preview, "abcdefghijklmnop…");
   assert.equal(spaced.msg, "Lo que hay en el portapapeles no es una exportación. Empieza por «abcdefghijklmnop…».");
+  const gap = parseLoose("abcdefghijklmno  xyzzzz");
+  assert.equal(gap.preview, "abcdefghijklmno…");
   const trimmed = parseLoose("abcdefghijklmnopqrs ");
   assert.equal(trimmed.preview, "abcdefghijklmnopqrs");
 });
@@ -390,10 +392,27 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
 
-test("manifest.json coincide con la v1.3.1", () => {
+test("manifest.json coincide con la v1.3.2", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "b274e37d8ffaf19de6079a0057c65f3487c0cae8eec79aaf01ff3ccf9b22f882");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "cec90f014ab914a11cb05a9c33c86a371c3ac11f10bbde376671763b0cd16c31");
+  assert.equal(manifest.version_set_imagenes, "v1.3.2");
 });
+
+/** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
+function fnFromApp(signature, name, deps = {}) {
+  const src = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const start = src.indexOf(signature);
+  assert.ok(start >= 0, signature);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i += 1) {
+    if (src[i] === "{") depth += 1;
+    else if (src[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return new Function(...Object.keys(deps), `${src.slice(start, i + 1)}\nreturn ${name};`)(...Object.values(deps));
+    }
+  }
+  throw new Error(name + " sin cierre");
+}
 
 /** La función real de js/app.js, sin ejecutar el arranque del navegador. */
 function frameOfFromApp() {
@@ -590,9 +609,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.2 y cachés cp-shell-v6 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.2");
-  assert.equal(SHELL_CACHE, "cp-shell-v6");
+test("versión 1.1.3 y cachés cp-shell-v7 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.3");
+  assert.equal(SHELL_CACHE, "cp-shell-v7");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -601,11 +620,13 @@ test("versión 1.1.2 y cachés cp-shell-v6 / cp-img-v4", () => {
   assert.match(sw, /IMAGE_CACHE/);
   assert.equal(sw.includes("cp-shell-v5"), false);
   assert.equal(sw.includes("cp-shell-v6"), false);
+  assert.equal(sw.includes("cp-shell-v7"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v6/);
+  assert.match(caches, /cp-shell-v7/);
   assert.match(caches, /cp-img-v4/);
   assert.equal(caches.includes("cp-shell-v5"), false);
+  assert.equal(caches.includes("cp-shell-v6"), false);
   assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
@@ -730,9 +751,84 @@ test("la media sin cambio no repite el valor ni pone flecha", () => {
   assert.match(mediaLine(up.changes), /→/);
   assert.equal(mediaLine(up.changes).includes("sin cambio"), false);
   const bad = classifyEntries([{ name: "c1.json", text: "{", source: "file" }], importCtx(rows))[0];
-  assert.equal(omitSubtitle(bad), "c1.json · El archivo está incompleto");
+  assert.equal(omitSubtitle(bad), "c1.json\u00a0· El archivo está incompleto");
   const url = classifyEntries([{ name: "nota.txt", text: "https://link.clashofclans.com/x", source: "file" }], importCtx(rows))[0];
-  assert.equal(omitSubtitle(url), "nota.txt · El archivo no es una exportación. Empieza por «https://link.cla…»");
+  assert.equal(omitSubtitle(url), "nota.txt\u00a0· Empieza por «https://link.cla…»");
+  const shape = classifyEntries([{ name: "foo.json", text: '{"foo":1}', source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(shape), "foo.json\u00a0· Falta el tag de la cuenta");
+});
+
+test("1.1.3: la fila «No válido» lleva solo el primer motivo, sin punto final y con nbsp antes del ·", () => {
+  const rows = [...exportsByTag.values()];
+  const shape = classifyEntries([{ name: "estructura.json", text: '{"foo":1}', source: "file" }], importCtx(rows))[0];
+  assert.equal(shape.kind, "invalid");
+  assert.ok(shape.issues.length > 1);
+  assert.equal(omitReason(shape), "Falta el tag de la cuenta");
+  assert.equal(omitSubtitle(shape), "estructura.json\u00a0· Falta el tag de la cuenta");
+  assert.equal(omitSubtitle(shape).includes(shape.issues[1].replace(/\.$/, "")), false);
+  assert.equal(omitSubtitle(shape).includes(" · "), false);
+  assert.equal(omitSubtitle(shape).endsWith("."), false);
+  // La tarjeta de error de Pegar sigue con todos los motivos.
+  assert.equal(shape.issues[0], "Falta el tag de la cuenta.");
+  const noTh = classifyEntries([{ name: "sin-th.json", text: '{"tag":"#X","timestamp":1}', source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(noTh), "sin-th.json\u00a0· No se encuentra el ayuntamiento");
+  const empty = classifyEntries([{ name: "vacio.json", text: "  ", source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(empty), "vacio.json\u00a0· El archivo está vacío");
+  const pasted = classifyEntries([{ name: "", text: "{", source: "clipboard" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(pasted), "Pegado\u00a0· El texto está incompleto: parece cortado al copiar");
+});
+
+test("1.1.3: un texto que no empieza por «{» dice solo «Empieza por «…»»", () => {
+  const rows = [...exportsByTag.values()];
+  for (const source of ["file", "clipboard"]) {
+    const it = classifyEntries([{ name: "nota.txt", text: "https://link.clashofclans.com/x", source }], importCtx(rows))[0];
+    assert.equal(it.kind, "invalid");
+    assert.equal(omitReason(it), "Empieza por «https://link.cla…»");
+    assert.equal(omitSubtitle(it), "nota.txt\u00a0· Empieza por «https://link.cla…»");
+    assert.equal(omitSubtitle(it).includes("no es una exportación"), false);
+    // El mensaje completo de la tarjeta de Pegar no cambia.
+    assert.match(it.parseError.msg, /no es una exportación\. Empieza por «https:\/\/link\.cla…»\.$/);
+  }
+  const short = classifyEntries([{ name: "hola.txt", text: "hola", source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(short), "hola.txt\u00a0· Empieza por «hola»");
+});
+
+test("1.1.3: clipPreview quita los espacios antes de «…»", () => {
+  for (const source of ["clipboard", "file"]) {
+    assert.equal(parseLoose("abcdefghijklmno  xyzzzz", source).preview, "abcdefghijklmno…");
+    assert.equal(parseLoose("abcdefghijklmn\t\t  xyzzzz", source).preview, "abcdefghijklmn…");
+    assert.equal(parseLoose("abcdefghijklmnopqrs xyz", source).preview, "abcdefghijklmnop…");
+    assert.equal(parseLoose("abcdefghijklmnopqrs ", source).preview, "abcdefghijklmnopqrs");
+  }
+  const gap = parseLoose("abcdefghijklmno  xyzzzz", "file");
+  assert.equal(gap.msg, "El archivo no es una exportación. Empieza por «abcdefghijklmno…».");
+  assert.equal(/\s…/.test(gap.msg), false);
+});
+
+test("1.1.3: el lote ya no lleva el pie «No es una exportación válida.» y sí el de «Duplicada»", () => {
+  const omitFoot = fnFromApp("function omitFoot(items)", "omitFoot", { BAD_FOOT, DUP_FOOT, omitReason });
+  const rows = [...exportsByTag.values()];
+  const invalid = classifyEntries([
+    { name: "c1.json", text: "{", source: "file" },
+    { name: "nota.txt", text: "https://link.clashofclans.com/x", source: "file" },
+    { name: "estructura.json", text: '{"foo":1}', source: "file" },
+    { name: "vacio.json", text: "", source: "file" },
+    { name: "roto.json", text: '{"a":}', source: "file" },
+  ], importCtx(rows));
+  assert.ok(invalid.every((i) => i.kind === "invalid" && omitReason(i)));
+  const onlyBad = omitFoot(invalid);
+  assert.equal(onlyBad.includes(BAD_FOOT), false);
+  assert.equal(onlyBad.includes("No es una exportación válida."), false);
+  assert.equal(onlyBad, "");
+  const withDup = omitFoot([...invalid, { kind: "duplicate" }]);
+  assert.equal(withDup, `<p class="section-footer">${DUP_FOOT}</p>`);
+  // Red de seguridad: una fila no válida sin motivo sí lo mostraría.
+  assert.equal(omitFoot([{ kind: "invalid", name: "x.json" }]), `<p class="section-footer">${BAD_FOOT}</p>`);
+});
+
+test("1.1.3: los nombres de archivo largos del lote parten línea", () => {
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  assert.match(css, /\.row--account \.row__sub\s*\{\s*overflow-wrap:\s*break-word;\s*\}/);
 });
 
 test("ofensiva: media de laboratorio y héroes", () => {
