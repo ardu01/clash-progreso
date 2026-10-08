@@ -58,6 +58,7 @@ img { max-width: 100%; }
 }
 .section-header .num { text-transform: none; letter-spacing: 0; }
 .section-footer { margin: var(--sp-2) var(--sp-4) 0; font-size: 0.765rem; line-height: 1.385; color: var(--label-2); }
+.screen > .section:first-child { margin-top: var(--sp-4); }
 
 .navbar {
   position: fixed; z-index: 20; top: 0; left: 0; right: 0;

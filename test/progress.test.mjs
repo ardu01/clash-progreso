@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -260,6 +260,111 @@ test("parseLoose no menciona línea ni columna", () => {
   for (const result of [empty, other, cut]) {
     assert.equal(/línea|columna|position/i.test(result.msg + result.title), false);
   }
+  const emptyFile = parseLoose("   ", "file");
+  assert.equal(emptyFile.msg, "El archivo está vacío.");
+  assert.equal(/portapapeles|Copiar|Pegar/i.test(emptyFile.msg + emptyFile.help + emptyFile.title), false);
+  const otherFile = parseLoose("https://link.clashofclans.com/x", "file");
+  assert.equal(otherFile.msg, "El archivo no es una exportación. Empieza por «https://link.clashof».");
+  assert.equal(/portapapeles/i.test(otherFile.msg + otherFile.help), false);
+  const cutFile = parseLoose('{"tag":"#28PLGP0G2"', "file");
+  assert.equal(cutFile.msg, "El archivo está incompleto.");
+  assert.equal(/línea|columna|position/i.test(cutFile.msg), false);
+});
+
+const CAT_KEYS = ["defensas", "laboratorio", "ejercito_edif", "equipamiento", "mascotas", "heroes", "trampas", "recursos"];
+
+test("el máximo de cada fila sale de caps por nombre_en", () => {
+  const misses = [];
+  for (const roster of ROSTER) {
+    const exp = exportsByTag.get(roster.tag);
+    const a = analyze(exp, index);
+    for (const key of CAT_KEYS) {
+      for (const it of categoryItems(exp, index, key, a.th)) {
+        const line = levelLine(it);
+        assert.equal(/\bnull\b|\bundefined\b/.test(line.text), false, `${roster.tag} ${key} ${it.id || it.capsName}: ${line.text}`);
+        if (it.max == null) assert.equal(line.bar, false, `${roster.tag} ${key} ${it.id}`);
+        if (!it.id) continue;
+        const want = capsMaxFor(index, it.id, a.th);
+        if (want != null && it.max == null) {
+          misses.push(`${roster.tag} ${key} ${it.id} ${itemName(index.items[it.id]) || ""}: caps ${want}`);
+        }
+        if (want != null) assert.equal(it.max, want, `${roster.tag} ${key} ${it.id}`);
+      }
+    }
+    for (const it of [...(exp.heroes2 || []), ...(exp.units2 || [])]) {
+      const want = capsMaxFor(index, it.data, a.th);
+      if (want != null) misses.push(`${roster.tag} aldea ${it.data}: caps ${want}`);
+    }
+    const pets = categoryItems(exp, index, "mascotas", a.th);
+    if (a.cats.mascotas.pct == null) {
+      const phrase = categoryUnlock(pets);
+      assert.equal(phrase, 14, roster.tag);
+      assert.equal(/\bnull\b|\bundefined\b/.test(`Se desbloquea en TH${phrase}`), false);
+    }
+  }
+  assert.deepEqual(misses, []);
+
+  const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  const hero = (id) => c2.heroes.find((h) => h.id === id);
+  assert.deepEqual([hero("28000004").lvl, hero("28000004").max], [11, 45]);
+  assert.equal(levelLine(hero("28000004")).text, "Nv 11 / 45");
+  assert.deepEqual([hero("28000006").lvl, hero("28000006").max], [12, 80]);
+  assert.equal(levelLine(hero("28000006")).text, "Nv 12 / 80");
+  assert.deepEqual([hero("28000007").lvl, hero("28000007").max], [10, 15]);
+  assert.equal(levelLine(hero("28000007")).text, "Nv 10 / 15");
+  assert.equal(c2.cats.heroes.pct, 23.5);
+  assert.equal(c2.cats.equipamiento.pct, 58.6);
+  assert.equal(c2.offense, 34.5);
+
+  const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
+  assert.equal(c1.cats.equipamiento.pct, 61.6);
+  assert.equal(c1.cats.heroes.pct, Number(byTag.get("#28PLGP0G2").pct_heroes));
+
+  const th13 = analyze(exportsByTag.get("#GUQUV98JG"), index);
+  const rc = th13.heroes.find((h) => h.id === "28000004");
+  assert.equal(rc.lvl, 0);
+  assert.equal(rc.max, 25);
+  assert.deepEqual(levelLine(rc), { text: "Nv 0 / 25", bar: true });
+
+  const th11 = analyze(exportsByTag.get("#R02YUVC0J"), index);
+  const pets = categoryItems(exportsByTag.get("#R02YUVC0J"), index, "mascotas", th11.th);
+  const petLine = (id) => levelLine(pets.find((p) => p.id === id));
+  assert.deepEqual(petLine("73000000"), { text: "Disponible en TH14", bar: false });
+  assert.deepEqual(petLine("73000004"), { text: "Disponible en TH15", bar: false });
+  assert.deepEqual(petLine("73000016"), { text: "Disponible en TH17", bar: false });
+  assert.equal(categoryUnlock(pets), 14);
+  assert.equal(capsMaxFor(index, "1000007", 16) != null, true);
+  assert.equal(capsMaxFor(index, "1000015", 16) != null, true);
+
+  const bare = levelLine({ lvl: 4, max: null, unlockTh: null });
+  assert.deepEqual(bare, { text: "Nv 4", bar: false });
+});
+
+test("muros de C1 y de una cuenta TH11", () => {
+  const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
+  assert.equal(c1.walls.max, 19);
+  assert.deepEqual(c1.walls.hist, [
+    { lvl: 13, cnt: 273 },
+    { lvl: 14, cnt: 47 },
+    { lvl: 16, cnt: 2 },
+    { lvl: 17, cnt: 2 },
+    { lvl: 18, cnt: 1 },
+  ]);
+  const gap = c1.walls.hist.reduce((s, h) => s + (c1.walls.max - h.lvl) * h.cnt, 0);
+  assert.equal(gap, 1884);
+  const r = analyze(exportsByTag.get("#R02YUVC0J"), index);
+  assert.equal(r.walls.max, 12);
+  assert.deepEqual(r.walls.hist, [
+    { lvl: 1, cnt: 50 },
+    { lvl: 6, cnt: 211 },
+    { lvl: 7, cnt: 39 },
+  ]);
+  assert.equal(r.walls.hist.reduce((s, h) => s + (r.walls.max - h.lvl) * h.cnt, 0), 2011);
+});
+
+test("missing.json coincide con el archivo publicado", () => {
+  const buf = readFileSync(new URL("../assets/missing.json", import.meta.url));
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "53b293a3160900e693a3e950de291167ce7ec73e7ab14b5ec9535e61aa7e1fef");
 });
 
 test("ofensiva: media de laboratorio y héroes", () => {

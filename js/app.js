@@ -1,7 +1,7 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
-  equipmentView, helpersOf, indexCaps, initials, itemName, rarezaEs, rosterByTag,
-  townHallLevel, upgradesOf,
+  categoryUnlock, equipmentView, helpersOf, indexCaps, initials, itemName, levelLine,
+  rarezaEs, rosterByTag, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { IMAGE_CACHE } from "./caches.js";
@@ -357,14 +357,14 @@ function rowAccount(meta) {
   const exp = expOf(meta.tag);
   const flash = state.flash === meta.tag ? " is-flash" : "";
   if (!exp) {
-    return `<li><a class="row row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}">
+    return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}">
       <span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>
       <span class="row__main"><span class="row__title tag">${esc(meta.nombre)}</span><span class="row__sub"><span class="chip chip--muted">Sin importar</span></span></span>
       ${CHEV}</a></li>`;
   }
   const a = viewOf(meta.tag);
   const n = upgrades(exp).filter((u) => !u.done).length;
-  return `<li><a class="row row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(meta.tag)}, TH${a.th}, objetivo TH${meta.objetivo}, media ${fmtPct(a.media)}">
+  return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(meta.tag)}, TH${a.th}, objetivo TH${meta.objetivo}, media ${fmtPct(a.media)}">
     ${thumb(1000001, { size: 44, th: a.th })}
     <span class="row__main"><span class="row__title tag">${esc(meta.nombre)}</span><span class="row__sub">TH${a.th} → ${meta.objetivo} · ${n} mejoras</span></span>
     <span class="row__trail">${barHtml("defensas", a.thSig ? a.sigMedia : a.media, a.thSig ? markMedia(a) : null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num" style="font-weight:600;color:var(--label);font-size:0.882rem">${fmtPct(a.media)}</span>${CHEV}</span>
@@ -395,7 +395,7 @@ function renderProgreso(tag) {
       <button role="tab" data-seg="eq" aria-selected="${seg === "eq"}">Equipamiento</button>
     </div></div>
     ${body}
-    ${exp ? builderBaseSection(exp) : ""}
+    ${exp && seg !== "eq" ? builderBaseSection(exp) : ""}
     ${LEGAL}`;
 }
 
@@ -420,19 +420,28 @@ function catsBlock(exp, meta) {
     ${heroesCard(a)}`;
 }
 
+function catFoot(a, row) {
+  if (a.thSig && row.sigPct != null && row.pend != null) {
+    return `TH${a.thSig}: ${fmtPct(row.sigPct)} · faltan ${row.pend} niveles`;
+  }
+  if (row.pend != null) return `Faltan ${row.pend} niveles`;
+  if (a.thSig && row.sigPct != null) return `TH${a.thSig}: ${fmtPct(row.sigPct)}`;
+  return "";
+}
+
 function catRow(exp, meta, a, c) {
   const row = a.cats[c.key];
   const cls = "cat-" + CAT_CLASS[c.key];
-  if (c.key === "mascotas" && row.pct == null) {
-    return `<li><div class="row ${cls}"><span class="row__main"><span class="row__title"><span class="dot"></span>${esc(c.label)}</span><span class="row__sub">Se desbloquea en TH14</span></span></div></li>`;
+  if (row.pct == null) {
+    const n = categoryUnlock(categoryItems(exp, state.index, c.key, a.th));
+    const sub = n != null ? `Se desbloquea en TH${n}` : "";
+    return `<li><a class="row ${cls}" href="#/progreso/${meta.tag.slice(1)}/${c.key}"><span class="row__main"><span class="row__title"><span class="dot"></span>${esc(c.label)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
   }
   const maxed = row.pct != null && row.num >= row.den;
   const label = maxed ? (a.thSig ? `Máx TH${a.th}` : "Máx") : fmtPct(row.pct);
   const fill = a.thSig ? row.sigPct : row.pct;
   const mark = a.thSig ? row.mark : null;
-  const foot = a.thSig && row.sigPct != null
-    ? `TH${a.thSig}: ${fmtPct(row.sigPct)} · faltan ${row.pend} niveles`
-    : (row.pend != null ? `Faltan ${row.pend} niveles` : "");
+  const foot = catFoot(a, row);
   const href = c.key === "equipamiento" ? null : `#/progreso/${meta.tag.slice(1)}/${c.key}`;
   const inner = `<span class="row__main"><div class="prog ${cls}">
       <span class="row__title"><span class="dot"></span>${esc(c.label)}</span>
@@ -446,19 +455,28 @@ function catRow(exp, meta, a, c) {
   return `<li><a class="row" style="padding-top:12px;padding-bottom:12px" href="${href}">${inner}</a></li>`;
 }
 
+function wallParts(a) {
+  const w = a.walls;
+  const present = (w && w.hist ? w.hist : []).filter((h) => h.cnt);
+  const min = present.length ? Math.min(...present.map((h) => h.lvl)) : 0;
+  const span = w && w.max != null ? (w.max - min) || 1 : 1;
+  return present.map((h) => ({
+    ...h,
+    k: Math.min(1, 0.35 + 0.65 * ((h.lvl - min) / span)),
+    maxed: w && w.max != null && h.lvl >= w.max,
+  }));
+}
+
 function wallsCard(a) {
   const w = a.walls;
   if (!w || !w.pieces) return "";
-  const present = w.hist.filter((h) => h.cnt);
-  const min = present.length ? Math.min(...present.map((h) => h.lvl)) : 0;
-  const span = w.max - min || 1;
+  const present = wallParts(a);
   const segs = present.map((h) => {
-    const k = Math.min(1, 0.35 + 0.65 * ((h.lvl - min) / span));
-    const maxed = h.lvl >= w.max ? " is-max" : "";
-    return `<span class="${maxed.trim()}" style="--n:${h.cnt};--k:${k.toFixed(3)}"></span>`;
+    const maxed = h.maxed ? " is-max" : "";
+    return `<span class="${maxed.trim()}" style="--n:${h.cnt};--k:${h.k.toFixed(3)}"></span>`;
   }).join("");
   const chips = present.map((h) => {
-    const maxed = h.lvl >= w.max ? " is-max" : "";
+    const maxed = h.maxed ? " is-max" : "";
     return `<li class="${maxed.trim()}"><b>Nv ${h.lvl}</b> × ${h.cnt}</li>`;
   }).join("");
   const medio = w.pieces ? w.num / w.pieces : 0;
@@ -477,15 +495,20 @@ function heroesCard(a) {
   const rows = a.heroes.map((h) => {
     const item = state.index.items[h.id];
     const badge = item.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
-    if (!h.unlocked) {
-      return `<li><div class="row row--thumb40">${thumb(h.id, { size: 40 })}<span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "Héroe")}${badge}</span><span class="row__sub">Se desbloquea en TH${h.unlockTh}</span></span></div></li>`;
+    const line = levelLine(h);
+    const lvl = h.lvl == null ? 0 : h.lvl;
+    if (!line.bar) {
+      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}">
+        ${thumb(h.id, { size: 40 })}
+        <span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "Héroe")}${badge}</span><span class="row__sub">${esc(line.text)}</span></span>
+      </button></li>`;
     }
-    const p = h.max ? (h.lvl / h.max) * 100 : 0;
-    const maxed = h.lvl >= h.max;
-    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${h.lvl}" data-max="${h.max || ""}">
+    const p = h.max ? (lvl / h.max) * 100 : 0;
+    const maxed = lvl >= h.max;
+    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}">
       ${thumb(h.id, { size: 40 })}
-      <span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "")}${badge}</span><span class="row__sub num">Nv ${h.lvl} / ${h.max}</span></span>
-      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, label: `Nv ${h.lvl} de ${h.max}` })}</span>
+      <span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "")}${badge}</span><span class="row__sub num">${esc(line.text)}</span></span>
+      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, label: line.text })}</span>
     </button></li>`;
   }).join("");
   return `<div class="section"><div class="section-header"><span>Héroes</span></div><ul class="list">${rows}</ul></div>`;
@@ -553,15 +576,21 @@ function renderDetalle(tag, catKey) {
   const cat = CATEGORIES.find((c) => c.key === catKey);
   if (!meta || !exp || !cat) return `<div class="section"><div class="card empty"><p class="t-title3">No hay datos</p></div></div>${LEGAL}`;
   const a = viewOf(tag);
+  if (catKey === "muros") return renderMuros(a);
   const row = a.cats[catKey];
   const items = categoryItems(exp, state.index, catKey, a.th);
   const groups = groupDetail(items);
   const maxed = row.num != null && row.den && row.num >= row.den;
-  const head = `<div class="section"><div class="card"><div class="prog cat-${CAT_CLASS[catKey]}">
+  const head = row.pct == null
+    ? `<div class="section"><div class="card"><div class="prog cat-${CAT_CLASS[catKey]}">
+        <span class="t-headline">${esc(cat.label)}</span>
+        <span class="prog__foot">${esc(categoryUnlock(items) != null ? `Se desbloquea en TH${categoryUnlock(items)}` : "")}</span>
+      </div></div></div>`
+    : `<div class="section"><div class="card"><div class="prog cat-${CAT_CLASS[catKey]}">
       <span class="t-headline">${esc(cat.label)}</span>
       <span class="prog__pct num${maxed ? " is-max" : ""}">${maxed ? (a.thSig ? `Máx TH${a.th}` : "Máx") : fmtPct(row.pct)}</span>
       ${barHtml(catKey, a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { lg: true, maxed, label: `${cat.label} ${fmtPct(row.pct)}` })}
-      <span class="prog__foot">${a.thSig ? `TH${a.thSig}: ${fmtPct(row.sigPct)} · faltan ${row.pend} niveles` : `Faltan ${row.pend} niveles`}</span>
+      <span class="prog__foot">${esc(catFoot(a, row))}</span>
     </div></div></div>`;
   const blocks = ["Pendientes", "Sin desbloquear", "Al máximo", "Sin identificar"].map((title) => {
     const list = groups[title];
@@ -595,15 +624,26 @@ function groupDetail(items) {
   return g;
 }
 
+function rowLevel(it, a, catKey) {
+  const line = levelLine(it);
+  const lvl = it.lvl == null || Number.isNaN(it.lvl) ? 0 : it.lvl;
+  let text = line.text;
+  if (line.bar && it.maxNext != null && a.thSig) text += ` · TH${a.thSig}: ${it.maxNext}`;
+  const p = line.bar && it.max ? Math.min(100, (lvl / it.max) * 100) : 0;
+  const bar = line.bar
+    ? barHtml(catKey, p, null, { mini: true, maxed: it.max != null && lvl >= it.max, label: text })
+    : "";
+  return { text, bar, lvl };
+}
+
 function detailRow(it, catKey, a) {
+  const lv = rowLevel(it, a, catKey);
   if (it.capsOnly) {
     const title = it.capsName;
-    const sub = it.max != null ? `Nv ${it.lvl} / ${it.max}${it.maxNext != null ? ` · TH${a.thSig}: ${it.maxNext}` : ""}` : `Nv ${it.lvl}`;
-    const p = it.max ? Math.min(100, (it.lvl / it.max) * 100) : 0;
-    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${it.lvl}" data-max="${it.max || ""}">
+    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${lv.lvl}" data-max="${it.max || ""}">
       ${emptyNamedThumb(title, 40)}
-      <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub num">${esc(sub)}</span></span>
-      ${it.max != null ? barHtml(catKey, p, null, { mini: true, maxed: it.lvl >= it.max, label: sub }) : ""}
+      <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub num">${esc(lv.text)}</span></span>
+      ${lv.bar}
     </button></li>`;
   }
   const meta = state.index.items[it.id];
@@ -612,13 +652,50 @@ function detailRow(it, catKey, a) {
   const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const idBadge = unknown ? `<span class="badge badge-id">${esc(it.id)}</span>` : "";
   const cnt = it.cnt > 1 ? ` ×${it.cnt}` : "";
-  const sub = it.max != null ? `Nv ${it.lvl} / ${it.max}${it.maxNext != null ? ` · TH${a.thSig}: ${it.maxNext}` : ""}` : `Nv ${it.lvl}`;
-  const p = it.max ? Math.min(100, (it.lvl / it.max) * 100) : 0;
-  return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${it.lvl}" data-max="${it.max || ""}">
+  return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}">
     ${thumb(it.id, { size: 40 })}
-    <span class="row__main"><span class="row__title">${esc(title)}${cnt ? ` <span class="num">${cnt.trim()}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(sub)}</span></span>
-    ${it.max != null ? barHtml(catKey, p, null, { mini: true, maxed: it.lvl >= it.max, label: sub }) : ""}
+    <span class="row__main"><span class="row__title">${esc(title)}${cnt ? ` <span class="num">${cnt.trim()}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(lv.text)}</span></span>
+    ${lv.bar}
   </button></li>`;
+}
+
+function renderMuros(a) {
+  const w = a.walls || { pieces: 0, num: 0, max: null, hist: [] };
+  const parts = wallParts(a);
+  const medio = w.pieces ? w.num / w.pieces : 0;
+  const aria = parts.map((h) => `${h.cnt} de nivel ${h.lvl}`).join(", ");
+  const segs = parts.map((h) => `<span class="${h.maxed ? "is-max" : ""}" style="--n:${h.cnt};--k:${h.k.toFixed(3)}"></span>`).join("");
+  const chips = parts.map((h) => `<li class="${h.maxed ? "is-max" : ""}"><b>Nv ${h.lvl}</b> × ${h.cnt}</li>`).join("");
+  const piezas = `${w.pieces} ${w.pieces === 1 ? "pieza" : "piezas"}`;
+  const row = a.cats.muros;
+  const maxed = row.num != null && row.den && row.num >= row.den;
+  const rows = parts.map((h) => {
+    const faltan = w.max - h.lvl;
+    const niveles = faltan * h.cnt;
+    const sub = h.maxed
+      ? `Máx TH${a.th}`
+      : `Faltan ${faltan} por pieza · ${niveles === 1 ? "1 nivel" : `${niveles} niveles`}`;
+    const trail = h.cnt === 1 ? "1 pieza" : `${h.cnt} piezas`;
+    return `<li class="row wall-row${h.maxed ? " is-max" : ""}">
+      <span class="wall-swatch" style="--k:${h.k.toFixed(3)}"></span>
+      <span class="row__main"><span class="row__title">Nv ${h.lvl}</span><span class="row__sub">${esc(sub)}</span></span>
+      <span class="row__trail">${trail}</span>
+    </li>`;
+  }).join("");
+  return `<div class="section"><div class="card cat-muros">
+    <div class="prog">
+      <span class="t-headline">Muros</span>
+      <span class="prog__pct num${maxed ? " is-max" : ""}">${fmtPct(row.pct)}</span>
+      ${barHtml("muros", a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { lg: true, maxed, label: `Muros ${fmtPct(row.pct)}` })}
+    </div>
+    <div class="walls" role="img" aria-label="Muros: ${esc(aria)}" style="margin-top:12px">${segs}</div>
+    <ul class="wall-chips">${chips}</ul>
+    <p class="prog__foot">${piezas} · nivel medio ${fmtNum(medio)}${w.max != null ? ` · máximo TH${a.th}: Nv ${w.max}` : ""}</p>
+  </div></div>
+  <div class="section"><div class="section-header"><span>Por nivel</span><span class="num">${piezas}</span></div>
+    <ul class="list wall-list">${rows}</ul>
+  </div>
+  ${LEGAL}`;
 }
 
 function builderBaseSection(exp) {
@@ -722,7 +799,7 @@ function mejorasPorCuenta() {
           <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
         </div>
       </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
-  }).join("") + helpersBlock();
+  }).join("");
 }
 
 function slotsHtml(b, labN, petN, pets) {
@@ -731,7 +808,7 @@ function slotsHtml(b, labN, petN, pets) {
   if (!b.known) ctor = `<div class="slots"><span class="slots__lbl">Constructores</span><span class="num">${b.occupied} ocupados</span></div>`;
   else if (b.over) ctor = `<div class="slots" role="img" aria-label="Constructores: ${b.occupied} ocupados"><span class="slots__lbl">Constructores</span>${dots(b.occupied, b.occupied)}<span class="num">${b.occupied}</span></div>`;
   else ctor = `<div class="slots" role="img" aria-label="Constructores: ${b.occupied} de ${b.total}"><span class="slots__lbl">Constructores</span>${dots(b.total, b.occupied)}<span class="num">${b.occupied}/${b.total}</span></div>`;
-  const lab = `<div class="slots"><span class="slots__lbl">Laboratorio</span>${labN ? `<i class="on"></i>` : `<i class="free"></i>`}<span class="num">${labN}</span></div>`;
+  const lab = `<div class="slots" role="img" aria-label="Laboratorio: ${labN}"><span class="slots__lbl">Laboratorio</span>${dots(labN, labN)}<span class="num">${labN}</span></div>`;
   const pet = pets ? `<div class="slots"><span class="slots__lbl">Mascotas</span>${petN ? `<i class="on"></i>` : `<i class="free"></i>`}<span class="num">${petN}</span></div>` : "";
   return ctor + lab + pet;
 }
@@ -746,7 +823,7 @@ function upRow(u) {
   const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
-  return `<li><div class="row row--thumb40${unknown ? " is-unknown" : ""}">
+  return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
     ${thumb(u.id, { size: 40 })}
     <span class="row__main"><span class="row__title">${esc(title)}${badge}</span>
       <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
@@ -769,8 +846,13 @@ function helpersBlock() {
   const lis = rows.map((h) => {
     const title = nameOf(h.id) || "Sin identificar";
     const done = h.end <= state.now;
-    return `<li><div class="row row--thumb40"><span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">Ayudante · ${accountChip(h.meta)} · no suma constructor</span></span>
-      <span class="row__trail trail-time"><span class="num" style="font-weight:600">${done ? "Disponible" : esc(fmtRemain(h.end, state.now) || "")}</span><span class="t-footnote c-2 num">${esc(fmtWhen(h.end))}</span></span></div></li>`;
+    const soon = !done && h.end - state.now < 3600000;
+    const remain = done ? "Disponible" : (fmtRemain(h.end, state.now) || "en < 1 min");
+    return `<li><div class="row row--upgrade row--thumb40">
+      ${thumb(h.id, { size: 40 })}
+      <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">Ayudante · ${accountChip(h.meta)} · no suma constructor</span></span>
+      <span class="row__trail row__trail--stack"><span class="t-subhead num${soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(h.end))}</span></span>
+    </div></li>`;
   }).join("");
   return `<div class="section"><div class="section-header"><span>Ayudantes</span></div><ul class="list">${lis}</ul><p class="section-footer">El tiempo es el enfriamiento desde la exportación. No dan constructores extra.</p></div>`;
 }
@@ -801,7 +883,7 @@ function renderEvolucion() {
       ${ladderHtml()}
     </div></div>
     <div class="section"><div class="card chart-wrap">
-      <div class="card__top">
+      <div class="card__top card__top--chart">
         <p class="t-headline" style="margin:0">Progreso medio</p>
         <select class="chart-select" data-evo aria-label="Serie">${evoOptions()}</select>
       </div>
@@ -876,7 +958,7 @@ function seriesPoints() {
 
 function evoOptions() {
   const cur = state.evo;
-  const opts = [`<option value="roster"${cur === "roster" ? " selected" : ""}>Roster (media de las cuentas del día)</option>`];
+  const opts = [`<option value="roster"${cur === "roster" ? " selected" : ""}>Media del roster</option>`];
   for (const meta of ROSTER) {
     opts.push(`<option value="${esc(meta.tag)}"${cur === meta.tag ? " selected" : ""}>${esc(meta.nombre)}</option>`);
   }
@@ -968,7 +1050,7 @@ function renderAjustes() {
           <p class="t-footnote c-2" style="margin:8px 0 0">${esc(note)}</p>
         </div></div>
         <div class="section-header"><span>Acerca de</span></div>
-        <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">1.0.0</span></div></li></ul></div>
+        <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">1.1.0</span></div></li></ul></div>
         <div class="section"><div class="card t-footnote">
           <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.</p>
           <p>Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
@@ -1058,7 +1140,7 @@ function reviewCard(it, idx) {
   if (it.parseError) {
     const p = it.parseError;
     const msg = p.preview
-      ? `Lo que hay en el portapapeles no es una exportación. Empieza por «<span class="tag">${esc(p.preview)}</span>».`
+      ? esc(p.msg).replace(esc(p.preview), `<span class="tag">${esc(p.preview)}</span>`)
       : esc(p.msg);
     return `<div class="card"><p class="t-headline">${esc(p.title)}</p><p class="t-subhead msg-err" role="alert">${msg}</p><p class="t-footnote c-2">${esc(p.help || "")}</p></div>`;
   }
@@ -1122,8 +1204,7 @@ function fichaSheet() {
         <div style="display:flex;justify-content:center">${emptyNamedThumb(f.name, 96)}</div>
         <p class="t-title3">${esc(f.name)}</p>
         <p class="t-title2 num">Nv ${f.lvl == null ? "—" : f.lvl}${esc(max)}</p>
-        <p class="t-footnote c-2">Sin imagen. El Fan Kit no tiene ningún recurso de la Inferno Artillery; las escenas de TH17 no sirven como miniatura.</p>
-        <p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
+        <p class="t-footnote c-2">Sin imagen</p>`);
   }
   const item = state.index.items[f.id];
   const unknown = !item || item.estado === "sin_identificar";
@@ -1134,7 +1215,12 @@ function fichaSheet() {
   const notes = [];
   if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
   if (item && item.nombre_pendiente) notes.push(`<p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
-  if (item && item.rareza) notes.push(`<p class="t-footnote c-2">${esc(rarezaEs(item.rareza))}${item.heroe ? " · " + esc(heroLabel(item.heroe)) : ""}</p>`);
+  if (item && (item.rareza || item.heroe)) {
+    const parts = [];
+    if (item.rareza) parts.push(rarezaEs(item.rareza));
+    if (item.heroe) parts.push(heroLabel(item.heroe));
+    notes.push(`<p class="t-footnote c-2">${esc(parts.join(" · "))}</p>`);
+  }
   if (item && item.estado === "id_deducido") notes.push(`<p class="t-footnote c-2">ID deducido por descarte</p>`);
   const max = f.max ? ` / ${f.max}` : "";
   return fichaFrame(`
@@ -1336,12 +1422,12 @@ function reviewImport() {
   let items = [];
   if (ui.mode === "file") {
     items = ui.items.map((it) => {
-      const parsed = parseLoose(it.text);
+      const parsed = parseLoose(it.text, "file");
       if (!parsed.ok) return parseFail(parsed, it.name);
       return validateExport(parsed.value, it.name);
     });
   } else {
-    const parsed = parseLoose(ui.text);
+    const parsed = parseLoose(ui.text, "clipboard");
     if (!parsed.ok) items = [parseFail(parsed, "Pegado")];
     else items = [validateExport(parsed.value, "Pegado")];
   }

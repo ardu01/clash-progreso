@@ -16,6 +16,12 @@ const ALIAS = {
   "Guardian-Logger": "107000008",
 };
 
+/** nombre_en del manifiesto → clave de caps_clashrecord.json. Nunca `nombre`. */
+const EN_TO_CAPS = {
+  Laboratory: "Lab",
+  "Builder's Hut": "Builder Hut",
+};
+
 const RES_IDS = ["1000004", "1000002", "1000023", "1000005", "1000003", "1000024"];
 const ARMY_IDS = ["1000000", "1000006", "1000026", "1000007", "1000020", "1000029", "1000059", "1000014", "1000071", "1000068", "1000070"];
 const LAB_SECTIONS = new Set(["units", "spells", "siege_machines"]);
@@ -167,15 +173,7 @@ export function indexCaps(caps, manifest) {
         inferno.set(th, { max: value.max, count: value.count });
         continue;
       }
-      let id = ALIAS[name] || null;
-      if (!id && byEn.has(name)) id = byEn.get(name);
-      if (!id) {
-        const m = /^(.*) \([^)]+\)$/.exec(name);
-        if (m && byEn.has(m[1])) {
-          const cand = byEn.get(m[1]);
-          if (items[cand] && items[cand].categoria === "hero_equipment") id = cand;
-        }
-      }
+      let id = idForCapsName(name, items, byEn);
       if (!id || !items[id]) continue;
       put(id, th, { max: value.max, count: value.count });
     }
@@ -192,12 +190,101 @@ export function indexCaps(caps, manifest) {
     heroes: HERO_ORDER.filter((id) => items[id]),
     pets: idsBy((it) => it.categoria === "pet"),
     labIds: idsBy((it) => LAB_SECTIONS.has(it.seccion_exportacion)),
+    raw: caps,
   };
+}
+
+function idForCapsName(name, items, byEn) {
+  if (ALIAS[name]) return ALIAS[name];
+  if (byEn.has(name)) return byEn.get(name);
+  for (const [en, key] of Object.entries(EN_TO_CAPS)) {
+    if (key === name && byEn.has(en)) return byEn.get(en);
+  }
+  const m = /^(.*) \(([^)]+)\)$/.exec(name);
+  if (!m) return null;
+  let cand = byEn.get(m[1]) || null;
+  if (!cand) {
+    for (const [en, key] of Object.entries(EN_TO_CAPS)) {
+      if (key === m[1] && byEn.has(en)) cand = byEn.get(en);
+    }
+  }
+  if (!cand || !items[cand] || items[cand].categoria !== "hero_equipment") return null;
+  return cand;
 }
 
 function capAt(index, id, th) {
   const row = index.byId.get(String(id));
   return row ? row.get(th) || null : null;
+}
+
+function capsBaseName(item) {
+  if (!item || !item.nombre_en || item.estado === "sin_identificar") return null;
+  return EN_TO_CAPS[item.nombre_en] || item.nombre_en;
+}
+
+/** Máximo en caps para este id y TH. null si esa clave no existe en el TH. */
+export function capsMaxFor(index, id, th) {
+  const cap = capAt(index, id, th);
+  if (cap && cap.max != null) return cap.max;
+  const item = index.items[String(id)];
+  const sec = (item && item.seccion_exportacion) || "";
+  // La aldea del constructor reutiliza nombres ingleses (Baby Dragon) que en caps
+  // son de la aldea principal. Esas filas no tienen clave propia.
+  if (!item || sec.endsWith("2") || sec.includes("builder") || String(item.categoria || "").includes("builder")) {
+    return null;
+  }
+  const table = index.raw && index.raw[String(th)];
+  const base = capsBaseName(item);
+  if (table && base) {
+    const keys = [];
+    if (item.categoria === "hero_equipment" && item.heroe) keys.push(`${base} (${item.heroe})`);
+    keys.push(base);
+    for (const [capsName, aliasId] of Object.entries(ALIAS)) {
+      if (aliasId === String(id)) keys.push(capsName);
+    }
+    for (const key of keys) {
+      if (table[key] && table[key].max != null) return table[key].max;
+    }
+    if (item.categoria === "hero_equipment") {
+      for (const [key, value] of Object.entries(table)) {
+        const m = /^(.*) \(([^)]+)\)$/.exec(key);
+        if (!m || m[1] !== base || value.max == null) continue;
+        if (!item.heroe || m[2] === item.heroe) return value.max;
+      }
+    }
+  }
+  return null;
+}
+
+function firstCapTh(index, id) {
+  const map = index.byId.get(String(id));
+  if (!map) return null;
+  const ths = [...map.keys()].filter((th) => {
+    const cap = map.get(th);
+    return cap && cap.max != null;
+  }).sort((a, b) => a - b);
+  return ths.length ? ths[0] : null;
+}
+
+/**
+ * Texto de una fila. Con máximo en este TH: «Nv nivel / max».
+ * Con clave en otro TH: «Disponible en THn», sin barra.
+ * Sin ninguna clave: «Nv N», sin barra y sin «/ max».
+ */
+export function levelLine(row) {
+  const lvl = row.lvl == null || Number.isNaN(row.lvl) ? 0 : row.lvl;
+  if (row.max != null) return { text: `Nv ${lvl} / ${row.max}`, bar: true };
+  if (row.unlockTh != null) return { text: `Disponible en TH${row.unlockTh}`, bar: false };
+  return { text: `Nv ${lvl}`, bar: false };
+}
+
+export function categoryUnlock(rows) {
+  let n = null;
+  for (const row of rows || []) {
+    if (row.max != null || row.unlockTh == null) continue;
+    if (n == null || row.unlockTh < n) n = row.unlockTh;
+  }
+  return n;
 }
 
 function placed(list) {
@@ -449,11 +536,13 @@ export function equipmentView(exp, index, th) {
     const id = String(it.data);
     const meta = index.items[id] || null;
     const cap = meta && meta.estado !== "sin_identificar" ? capAt(index, id, th) : null;
+    const max = cap && cap.max != null ? cap.max : null;
     return {
       i,
       id,
       lvl: it.lvl || 0,
-      max: cap ? cap.max : null,
+      max,
+      unlockTh: max != null ? null : firstCapTh(index, id),
       meta,
       heroe: meta && meta.heroe ? meta.heroe : null,
       unknown: !meta || meta.estado === "sin_identificar",
@@ -544,10 +633,11 @@ function infernoDetail(index, th) {
       cnt: cur.count || 1,
       max: cur.max,
       maxNext: nxt && nxt.max != null ? nxt.max : null,
+      unlockTh: null,
     };
   }
   if (!cur && nxt && (nxt.count || 0) > 0) {
-    return { ...base, cnt: nxt.count || 1, max: nxt.max, maxNext: null };
+    return { ...base, cnt: nxt.count || 1, max: nxt.max, maxNext: null, unlockTh: null };
   }
   return null;
 }
@@ -578,6 +668,7 @@ export function categoryItems(exp, index, key, th) {
         rows.push({
           id, lvl, cnt, max,
           maxNext: capN && capN.max != null ? capN.max : null,
+          unlockTh: max != null ? null : firstCapTh(index, id),
           section,
         });
       }
@@ -585,7 +676,12 @@ export function categoryItems(exp, index, key, th) {
     const ownedCnt = own ? own.cnt : 0;
     const missing = Math.max(0, cntCap - ownedCnt);
     if (missing && max != null) {
-      rows.push({ id, lvl: 0, cnt: missing, max, maxNext: capN ? capN.max : null, section, missing: true });
+      rows.push({
+        id, lvl: 0, cnt: missing, max,
+        maxNext: capN ? capN.max : null,
+        unlockTh: max != null ? null : firstCapTh(index, id),
+        section, missing: true,
+      });
     }
   };
 
@@ -639,12 +735,14 @@ export function categoryItems(exp, index, key, th) {
         // sigue visible
       }
       seen.add(id);
+      const max = cap ? cap.max : null;
       rows.push({
         id,
         lvl: own ? own.it.lvl || 0 : 0,
         cnt: 1,
-        max: cap ? cap.max : null,
+        max,
         maxNext: capN ? capN.max : null,
+        unlockTh: max != null ? null : firstCapTh(index, id),
         section: own ? own.sec : index.items[id].seccion_exportacion,
         missing: !own,
       });
@@ -652,7 +750,9 @@ export function categoryItems(exp, index, key, th) {
     for (const [id, own] of have) {
       if (seen.has(id)) continue;
       rows.push({
-        id, lvl: own.it.lvl || 0, cnt: 1, max: null, maxNext: null, section: own.sec, missing: false,
+        id, lvl: own.it.lvl || 0, cnt: 1, max: null, maxNext: null,
+        unlockTh: firstCapTh(index, id),
+        section: own.sec, missing: false,
       });
     }
     return rows;

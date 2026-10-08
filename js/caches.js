@@ -1,2 +1,2 @@
-export const SHELL_CACHE = "cp-shell-v3";
-export const IMAGE_CACHE = "cp-img-v3";
+export const SHELL_CACHE = "cp-shell-v4";
+export const IMAGE_CACHE = "cp-img-v4";
