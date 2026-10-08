@@ -200,6 +200,9 @@ li + li > .row::before {
 .btn:active { opacity: 0.7; }
 .btn[disabled] { background: var(--fill-3); color: var(--label-2); cursor: default; opacity: 1; }
 .btn--primary   { background: var(--go); color: #FFFFFF; box-shadow: 0 3px 0 #14380A; }
+@media (prefers-contrast: more) {
+  .btn--primary { background: #7BC02C; color: #1B3A06; }
+}
 .btn--secondary { background: var(--tint-soft); color: var(--tint); }
 .btn--plain     { background: transparent; color: var(--tint); font-weight: 400; min-height: 44px; }
 .btn--destructive { background: transparent; color: var(--red-text); font-weight: 400; }
