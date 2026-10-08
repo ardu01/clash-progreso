@@ -1,6 +1,6 @@
 import { parseLoose } from "./parse.js";
 import {
-  analyze, capsMaxFor, categoryKeyFor, categoryOrder, presentItem, upgradesOf,
+  analyze, capsMaxFor, categoryKeyFor, categoryOrder, outsidePct, presentItem, upgradesOf,
 } from "./progress.js";
 import { fmtFin, fmtNum, fmtPct } from "./format.js";
 
@@ -57,8 +57,8 @@ export function olderHelp(ts) {
 }
 
 export function unknownMsg(n) {
-  const word = n === 1 ? "ítem" : "ítems";
-  return `${n} ${word} sin identificar: se guardan igual.`;
+  if (n === 1) return "1 ítem sin identificar: se guarda igual.";
+  return `${n} ítems sin identificar: se guardan igual.`;
 }
 
 export function overMaxMsg(n) {
@@ -185,13 +185,11 @@ function mediaDelta(from, to) {
   return { text: "sin cambio", dir: "flat" };
 }
 
-function countUnknown(exp, index) {
+function countUnknown(exp, index, th) {
   let n = 0;
   const { map } = levelsOf(exp);
   for (const bag of map.values()) {
-    const meta = index.items[String(bag.id)];
-    if (meta && meta.categoria === "crafting_module") continue;
-    if (presentItem(index, bag.id).unknown) n += bag.cnt;
+    if (outsidePct(index, bag.id, th)) n += bag.cnt;
   }
   return n;
 }
@@ -282,7 +280,7 @@ export function diffExports(prev, next, index, now = Date.now()) {
     more: Math.max(0, rows.length - 8),
     totalChanges: rows.length,
     levelDelta,
-    unknownCount: countUnknown(next, index),
+    unknownCount: countUnknown(next, index, aNext.th),
     overMaxCount: countOverMax(next, index, aNext.th),
     view: aNext,
   };
@@ -492,5 +490,17 @@ export function statusText(item) {
 export function mediaLine(changes) {
   if (!changes || changes.mediaTo == null) return "";
   if (changes.mediaFrom == null) return fmtPct(changes.mediaTo);
+  if (changes.delta && changes.delta.dir === "flat") return `${fmtPct(changes.mediaTo)} · sin cambio`;
   return `${fmtPct(changes.mediaFrom)} → ${fmtPct(changes.mediaTo)}`;
+}
+
+/** Subtítulo de la fila «No válido»: archivo y motivo, sin el punto final. */
+export function omitSubtitle(item) {
+  const name = item && item.name ? item.name : "";
+  let reason = "";
+  if (item && item.parseError && item.parseError.msg) reason = item.parseError.msg;
+  else if (item && item.issues && item.issues.length) reason = item.issues.join(" ");
+  reason = reason.replace(/\.$/, "");
+  if (name && reason) return `${name} · ${reason}`;
+  return name || reason;
 }

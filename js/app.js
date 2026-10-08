@@ -1,14 +1,14 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
   capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
-  itemName, levelLine, overMaxLabel, rarezaEs, rosterByTag, townHallLevel, upgradesOf,
+  itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, rosterByTag, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
-  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, overMaxMsg,
+  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, omitSubtitle, overMaxMsg,
   sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
@@ -704,20 +704,19 @@ function renderDetalle(tag, catKey) {
   const blocks = ["Pendientes", "Sin desbloquear", "Al máximo", "Sin identificar"].map((title) => {
     const list = groups[title];
     if (!list || !list.length) return "";
-    const outside = title === "Sin identificar" ? unidentifiedOutside(list) : 0;
+    const outside = title === "Sin identificar" ? unidentifiedOutside(list, a.th) : 0;
     const note = outside
-      ? `<p class="section-footer">${outside} ${outside === 1 ? "ítem" : "ítems"} sin identificar no ${outside === 1 ? "cuenta" : "cuentan"} en el % salvo cuando el archivo de máximos les da un tope (laboratorio, defensas crafteadas y el guardián sin ficha).</p>`
+      ? `<p class="section-footer">${outside === 1 ? "1 ítem sin identificar no cuenta en el %." : `${outside} ítems sin identificar no cuentan en el %.`}</p>`
       : "";
     return `<div class="section"><div class="section-header"><span>${title}</span></div><ul class="list">${list.map((it) => detailRow(it, catKey, a)).join("")}</ul>${note}</div>`;
   }).join("");
   return head + blocks + LEGAL;
 }
 
-function unidentifiedOutside(list) {
+function unidentifiedOutside(list, th) {
   let n = 0;
   for (const it of list) {
-    const meta = it.id ? state.index.items[it.id] : null;
-    if (meta && meta.categoria === "crafting_module") continue;
+    if (!it.id || !outsidePct(state.index, it.id, th)) continue;
     n += it.cnt > 0 ? it.cnt : 1;
   }
   return n;
@@ -1341,12 +1340,22 @@ function msgLine(cls, role, html) {
   return `<p class="msg ${cls}" role="${role}"><span>${html}</span></p>`;
 }
 
+function previewMsgHtml(msg, preview) {
+  const chars = Array.from(preview);
+  const last = chars.pop() || "";
+  const head = chars.join("");
+  const needle = `«${preview}».`;
+  const at = msg.indexOf(needle);
+  const headHtml = head ? `<span class="tag">${esc(head)}</span>` : "";
+  const wrapped = `«${headHtml}<span class="nowrap"><span class="tag">${esc(last)}</span>».</span>`;
+  if (at < 0) return esc(msg).replace(esc(preview), `<span class="tag">${esc(preview)}</span>`);
+  return esc(msg.slice(0, at)) + wrapped + esc(msg.slice(at + needle.length));
+}
+
 function errorCard(it) {
   if (it.parseError) {
     const p = it.parseError;
-    const msg = p.preview
-      ? esc(p.msg).replace(esc(p.preview), `<span class="tag">${esc(p.preview)}</span>`)
-      : esc(p.msg);
+    const msg = p.preview ? previewMsgHtml(p.msg, p.preview) : esc(p.msg);
     return `<div class="card" data-import-focus tabindex="-1">
       <p class="t-headline">${esc(p.title)}</p>
       ${msgLine("msg-err", "alert", msg)}
@@ -1409,11 +1418,15 @@ function kvHtml(it, ch) {
   if (!ch.first && it.prevTimestamp) rows.push(["Último punto", fmtWhen(it.prevTimestamp * 1000)]);
   if (ch.mediaTo != null && (ch.first || ch.mediaFrom == null)) rows.push(["Media", fmtPct(ch.mediaTo)]);
   else if (ch.mediaFrom != null) {
-    let media = mediaLine(ch);
-    if (ch.delta && ch.delta.dir === "up") media += ` <span class="delta delta--up">${esc(ch.delta.text)}</span>`;
-    else if (ch.delta && ch.delta.dir === "down") media += ` <span class="delta delta--down">${esc(ch.delta.text)}</span>`;
-    else if (ch.delta) media += ` <span class="delta">${esc(ch.delta.text)}</span>`;
-    rows.push(["Media", media]);
+    if (ch.delta && ch.delta.dir === "flat") {
+      rows.push(["Media", `${fmtPct(ch.mediaTo)} · <span class="delta">sin cambio</span>`]);
+    } else {
+      let media = mediaLine(ch);
+      if (ch.delta && ch.delta.dir === "up") media += ` <span class="delta delta--up">${esc(ch.delta.text)}</span>`;
+      else if (ch.delta && ch.delta.dir === "down") media += ` <span class="delta delta--down">${esc(ch.delta.text)}</span>`;
+      else if (ch.delta) media += ` <span class="delta">${esc(ch.delta.text)}</span>`;
+      rows.push(["Media", media]);
+    }
   }
   rows.push(["Mejoras en curso", ch.first ? String(ch.upsTo) : `${ch.upsFrom} → ${ch.upsTo}`]);
   if (ch.nextAt) rows.push(["Próxima", fmtWhen(ch.nextAt)]);
@@ -1477,7 +1490,7 @@ function batchRow(it) {
   const trail = trailingLabel(it);
   const color = it.kind === "older" ? " trail-warn" : it.kind === "invalid" ? " trail-bad" : "";
   if (it.kind === "invalid" || !it.value) {
-    return `<li><div class="row row--account"><span class="row__main"><span class="row__title">No válido</span><span class="row__sub">${esc(it.name || "")}</span></span></div></li>`;
+    return `<li><div class="row row--account"><span class="row__main"><span class="row__title">No válido</span><span class="row__sub">${esc(omitSubtitle(it))}</span></span></div></li>`;
   }
   const exp = it.value;
   const th = townHallLevel(exp);
@@ -1526,30 +1539,47 @@ function classifyCtx() {
   return { rows: state.rows, accounts: allAccounts(), index: state.index, now: state.now };
 }
 
-async function paintFrame() {
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+const VALIDATING_MS = 150;
+
+function armValidating() {
+  clearTimeout(armValidating._t);
+  armValidating._t = setTimeout(() => {
+    state.importUi.phase = "validating";
+    render();
+  }, VALIDATING_MS);
 }
 
-async function validateTexts(entries) {
-  state.importUi.phase = "validating";
+function disarmValidating() {
+  clearTimeout(armValidating._t);
+  armValidating._t = 0;
+}
+
+function yieldTurn() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function validateTexts(entries, opts = {}) {
+  if (!opts.armed) armValidating();
   state.importUi.saveError = false;
-  render();
-  await paintFrame();
+  for (let i = 0; i < entries.length; i += 1) await yieldTurn();
   const items = classifyEntries(entries, classifyCtx());
+  disarmValidating();
   state.importUi.items = items;
   state.importUi.focus = null;
   state.importUi.fromBatch = false;
   state.importUi.saveError = false;
   state.importUi.needsFocus = true;
-  state.importUi.phase = items.length > 1 ? "batch" : "single";
+  state.importUi.phase = opts.fromFiles || items.length > 1 ? "batch" : "single";
   render();
 }
 
 async function doPaste() {
+  armValidating();
   let text = "";
   try {
     text = await navigator.clipboard.readText();
   } catch {
+    disarmValidating();
     state.importUi.items = [{ name: "Pegado", kind: "invalid", parseError: PASTE_DENIED, value: null, skip: true }];
     state.importUi.phase = "single";
     state.importUi.focus = null;
@@ -1559,7 +1589,7 @@ async function doPaste() {
     return;
   }
   state.importUi.text = text || "";
-  await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }]);
+  await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }], { armed: true });
 }
 
 function resetImport(mode) {
@@ -1964,19 +1994,14 @@ function bind(r) {
     const list = [...files.files];
     if (!list.length) return;
     state.importUi.mode = "file";
-    state.importUi.phase = "validating";
-    render();
-    await paintFrame();
-    const entries = [];
-    for (const file of list) entries.push({ name: file.name, text: await file.text(), source: "file" });
-    state.importUi.mode = "file";
-    state.importUi.items = classifyEntries(entries, classifyCtx());
-    state.importUi.focus = null;
-    state.importUi.fromBatch = false;
     state.importUi.saveError = false;
-    state.importUi.needsFocus = true;
-    state.importUi.phase = state.importUi.items.length > 1 ? "batch" : "single";
-    render();
+    armValidating();
+    const entries = [];
+    for (const file of list) {
+      entries.push({ name: file.name, text: await file.text(), source: "file" });
+      await yieldTurn();
+    }
+    await validateTexts(entries, { fromFiles: true, armed: true });
   };
 }
 

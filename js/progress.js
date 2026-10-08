@@ -595,6 +595,18 @@ export function presentItem(index, id) {
   };
 }
 
+/**
+ * Aviso «sin identificar»: el ítem se muestra con «?» y no tiene tope en caps
+ * para este TH tras ALIAS. El estado del manifiesto no decide. Los módulos del
+ * taller no entran: suman en Defensas por craftedScore.
+ */
+export function outsidePct(index, id, th) {
+  const meta = index.items[String(id)];
+  if (meta && meta.categoria === "crafting_module") return false;
+  if (!presentItem(index, id).unknown) return false;
+  return capsMaxFor(index, id, th) == null;
+}
+
 /** Chip de la ficha cuando el nivel importado supera el máximo de caps. */
 export function overMaxLabel(lvl, max) {
   if (max == null || lvl == null || !(lvl > max)) return null;
