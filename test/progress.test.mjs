@@ -400,6 +400,8 @@ test("manifest.json coincide con la v1.4.1", () => {
 
 /** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
 function fnFromApp(signature, name, deps = {}) {
+  // 1.1.5: ayudantes nuevos de settleSheetFocus/rememberSheetFocus; los tests que no los usan reciben una versión neutra.
+  deps = { sheetViewOf: (key) => key, keepVisible: () => {}, ...deps };
   const src = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const start = src.indexOf(signature);
   assert.ok(start >= 0, signature);
@@ -609,9 +611,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.4 y cachés cp-shell-v8 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.4");
-  assert.equal(SHELL_CACHE, "cp-shell-v8");
+test("versión 1.1.5 y cachés cp-shell-v9 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.5");
+  assert.equal(SHELL_CACHE, "cp-shell-v9");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -624,11 +626,12 @@ test("versión 1.1.4 y cachés cp-shell-v8 / cp-img-v4", () => {
   assert.equal(sw.includes("cp-shell-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v8/);
+  assert.match(caches, /cp-shell-v9/);
   assert.match(caches, /cp-img-v4/);
   assert.equal(caches.includes("cp-shell-v5"), false);
   assert.equal(caches.includes("cp-shell-v6"), false);
   assert.equal(caches.includes("cp-shell-v7"), false);
+  assert.equal(caches.includes("cp-shell-v8"), false);
   assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
@@ -1372,4 +1375,110 @@ test("1.1.4: Esc en un subpaso de Importar deja el foco dentro del sheet", () =>
   assert.equal(state.importUi.phase, "batch");
   assert.equal(sheet.contains(doc.active), true);
   assert.equal(doc.active, h2);
+});
+
+const esc115 = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+test("1.1.5: la celda de equipamiento dice «ID deducido» como las filas", () => {
+  const eqCell = fnFromApp("function eqCell(p)", "eqCell", {
+    nameOf: (id) => ({ 9: "Puño de fuego" })[id] || "", thumb: () => "<span></span>", esc: esc115,
+  });
+  const ded = eqCell({ id: 9, lvl: 12, max: 18, meta: { estado: "id_deducido" } });
+  assert.match(ded, /aria-label="Puño de fuego, nivel 12 de 18, ID deducido"/);
+  assert.match(ded, /eq__cap--soft">ID deducido</);
+  const ok = eqCell({ id: 9, lvl: 12, max: 18, meta: { estado: "ok" } });
+  assert.match(ok, /aria-label="Puño de fuego, nivel 12 de 18"/);
+  const unk = eqCell({ id: 90000077, lvl: 3, unknown: true, meta: { estado: "sin_identificar" } });
+  assert.match(unk, /aria-label="Sin identificar, ID 90000077, nivel 3"/);
+});
+
+test("1.1.5: con overMax la celda dice «nivel N, máximo desactualizado»", () => {
+  const eqCell = fnFromApp("function eqCell(p)", "eqCell", {
+    nameOf: (id) => ({ 9: "Puño de fuego" })[id] || "", thumb: () => "<span></span>", esc: esc115,
+  });
+  const over = eqCell({ lvl: 22, max: 18, overMax: true });
+  assert.match(over, /nivel 22, máximo desactualizado/);
+  assert.doesNotMatch(over, /de 18/);
+  const ded = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "id_deducido" } });
+  assert.match(ded, /aria-label="Puño de fuego, nivel 22, máximo desactualizado, ID deducido"/);
+  const plain = eqCell({ id: 9, lvl: 7 });
+  assert.match(plain, /aria-label="Puño de fuego, nivel 7"/);
+  const plainDed = eqCell({ id: 9, lvl: 7, meta: { estado: "id_deducido" } });
+  assert.match(plainDed, /aria-label="Puño de fuego, nivel 7, ID deducido"/);
+});
+
+test("1.1.5: la alerta tiene nombre y descripción, y Cancelar es la acción segura", () => {
+  const state = { alert: { title: "¿Borrar todos los datos?", msg: "Se eliminarán…", buttons: [{ label: "Cancelar" }, { label: "Borrar", cls: "is-destructive", act: "wipe" }] } };
+  const renderAlert = fnFromApp("function renderAlert()", "renderAlert", { state, esc: esc115 });
+  const html = renderAlert();
+  assert.match(html, /role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-msg"/);
+  assert.match(html, /id="alert-title">¿Borrar todos los datos\?</);
+  assert.match(html, /data-alert="0" data-alert-cancel>Cancelar</);
+  assert.doesNotMatch(html, /data-alert="1" data-alert-cancel/);
+});
+
+test("1.1.5: con una alerta abierta, Esc cancela y Tab no sale de la alerta", () => {
+  const doc = { active: null, get activeElement() { return this.active; } };
+  const mk = (i) => ({ i, focus() { doc.active = this; } });
+  const btns = [mk(0), mk(1)];
+  doc.querySelectorAll = (sel) => (sel === ".alert [data-alert]" ? btns : []);
+  let renders = 0;
+  const state = { alert: { buttons: [{}, {}] } };
+  const onAlertKey = fnFromApp("function onAlertKey(ev)", "onAlertKey", { state, document: doc, render: () => { renders += 1; } });
+  const ev = (key, shiftKey = false) => ({ key, shiftKey, prevented: false, preventDefault() { this.prevented = true; } });
+  doc.active = btns[1];
+  let e = ev("Tab");
+  assert.equal(onAlertKey(e), true);
+  assert.equal(e.prevented, true);
+  assert.equal(doc.active, btns[0]);
+  assert.equal(onAlertKey(ev("Tab", true)), true);
+  assert.equal(doc.active, btns[1]);
+  assert.equal(onAlertKey(ev("Escape")), true);
+  assert.equal(state.alert, null);
+  assert.equal(renders, 1);
+  assert.equal(onAlertKey(ev("Escape")), false);
+});
+
+test("1.1.5: al abrir la alerta el foco va a Cancelar y al cerrarla vuelve al control que la abrió", () => {
+  const doc = { active: null, get activeElement() { return this.active; } };
+  const el = (name, extra = {}) => ({ name, attrs: {}, classList: { contains: (c) => (extra.cls || []).includes(c) }, setAttribute(k, v) { this.attrs[k] = v; }, focus() { doc.active = this; }, dataset: extra.dataset || {}, ...extra });
+  const restore = el("restore");
+  const wipe = el("wipe");
+  const sheet = el("sheet", { cls: ["sheet"] });
+  const cancel = el("cancel");
+  const destr = el("destr");
+  let open = true;
+  const box = { querySelector: (sel) => (sel === "[data-alert-cancel]" ? cancel : destr), contains: (n) => n === cancel || n === destr };
+  const backdrop = el("backdrop", { cls: ["alert-backdrop"] });
+  const app = { children: [sheet, backdrop] };
+  doc.getElementById = () => app;
+  doc.querySelector = (sel) => (sel === ".alert" ? (open ? box : null) : sel === ".sheet h2" ? el("h2") : null);
+  doc.querySelectorAll = (sel) => (sel === "[data-restore]" ? [restore] : sel === ".sheet__body button" ? [wipe, restore] : []);
+  const state = { alertShown: false, alertReturn: null };
+  const settleAlert = fnFromApp("function settleAlert()", "settleAlert", { document: doc, state });
+  const rememberAlertOpener = fnFromApp("function rememberAlertOpener(", "rememberAlertOpener", { document: doc, state });
+  doc.active = restore;
+  rememberAlertOpener(restore, "[data-restore]");
+  settleAlert();
+  assert.equal(doc.active, cancel);
+  assert.equal(sheet.attrs.inert, "");
+  assert.equal(backdrop.attrs.inert, undefined);
+  doc.active = destr;
+  settleAlert();
+  assert.equal(doc.active, destr, "un redibujado con la alerta abierta no mueve el foco");
+  open = false;
+  settleAlert();
+  assert.equal(doc.active, restore);
+  assert.equal(state.alertShown, false);
+});
+
+test("1.1.5: «Descargar todas» actualiza solo la tarjeta y el sheet no se reanima", () => {
+  const src = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const body = src.slice(src.indexOf("async function downloadAll()"), src.indexOf("async function purgeImages()"));
+  const loop = body.slice(body.indexOf("if (count % 4 === 0)"), body.indexOf("} catch (err)"));
+  assert.match(loop, /patchOfflineDl\(\)/);
+  assert.doesNotMatch(loop, /render\(\)/);
+  assert.doesNotMatch(src, /offline-dl__status" aria-live/);
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  assert.match(css, /#app\[data-sheet-keep="true"\] \.sheet \{ animation: none; \}/);
 });
