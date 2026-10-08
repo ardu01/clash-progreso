@@ -952,7 +952,7 @@ El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se rese
 <link rel="manifest" href="./manifest.webmanifest">
 ```
 
-`manifest.webmanifest`: `"lang": "es"`, `"name": "Clash Progreso"`, `"display": "standalone"`, `"start_url": "./#/roster"`, `"scope": "./"`, `"background_color": "#F2F2F7"`, `"theme_color": "#F2F2F7"`. El icono de la app **no** puede ser un asset del Fan Kit modificado (recortado o con fondo añadido). Propongo un icono tipográfico propio: "CP" en SF Pro Bold blanco sobre `#0066CC`, 180×180, sin arte de Supercell.
+`manifest.webmanifest`: `"lang": "es"`, `"name": "Clash Progreso"`, `"display": "standalone"`, `"start_url": "./#/roster"`, `"scope": "./"`, `"background_color": "#F2F2F7"`, `"theme_color": "#F2F2F7"`. El icono de la app **no** puede ser un asset del Fan Kit modificado (recortado o con fondo añadido). Desde 1.1.6 es arte propio, el que eligió Miguel (opción B): un castillo en un cartel de madera, con aro verde y marco dorado. Las rutas no cambian: `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-512.png` e `icons/apple-touch-icon-180.png`.
 
 Con `black-translucent` el contenido pasa por debajo de la barra de estado. Por eso **todo** el padding superior sale de `env(safe-area-inset-top)` (59 px en iPhone 15/16, 47 px en modelos con notch). iOS dibuja la hora en blanco, así que en modo claro la nav bar colapsada (material claro) puede dejarla con poco contraste sobre fondo claro. Hay que probarlo en un dispositivo real. Si se ve mal, se cambia a `default` y el padding superior pasa a 0 (iOS reserva la franja).
 
@@ -2022,3 +2022,9 @@ Especificación de 1.1.5:
 - **Celdas de equipamiento** (§7b.2, §9): «nivel N de M»; si el nivel supera el máximo, «nivel N, máximo desactualizado» (el mismo aviso que el chip de la ficha); «ID deducido» al final. Sin máximo, «nivel N».
 - **Alertas y Dynamic Type** (§5.12): letra en `rem` y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`.
 - Checklist §10.25–27.
+
+## Nota de cambios (8 oct 2026, 1.1.5 publicada e icono de 1.1.6)
+
+1.1.5 está en main (`9b5cc61`). `docs/sistema.md` de `9b5cc61` es la base de este cambio.
+
+1.1.6 solo cambia el icono de la PWA (§6.1): castillo en un cartel de madera, aro verde y marco dorado, el que eligió Miguel (opción B). Se sustituyen los cuatro PNG de `icons/`. No hay cambio de lógica, de `assets/` ni de los PNG del Fan Kit. `APP_VERSION` es `1.1.6`, `SHELL_CACHE` es `cp-shell-v10` e `IMAGE_CACHE` sigue en `cp-img-v4`.
