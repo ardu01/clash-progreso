@@ -1,0 +1,2396 @@
+{
+ "images/builder-base/bb-baby-dragon.png": {
+  "x": 24,
+  "y": 0,
+  "w": 142,
+  "h": 166
+ },
+ "images/builder-base/bb-battle-copter.png": {
+  "x": 0,
+  "y": 0,
+  "w": 1024,
+  "h": 1412
+ },
+ "images/builder-base/bb-battle-machine.png": {
+  "x": 0,
+  "y": 5,
+  "w": 1024,
+  "h": 1361
+ },
+ "images/builder-base/bb-beta-minion.png": {
+  "x": 0,
+  "y": 1,
+  "w": 166,
+  "h": 165
+ },
+ "images/builder-base/bb-bomber.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/builder-base/bb-boxer-giant.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/builder-base/bb-cannon-cart.png": {
+  "x": 0,
+  "y": 9,
+  "w": 120,
+  "h": 111
+ },
+ "images/builder-base/bb-drop-ship.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/builder-base/bb-electrofire-wizard.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/builder-base/bb-hog-glider.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/builder-base/bb-night-witch.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/builder-base/bb-power-pekka.png": {
+  "x": 0,
+  "y": 7,
+  "w": 166,
+  "h": 159
+ },
+ "images/builder-base/bb-raged-barbarian.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/builder-base/bb-sneaky-archer.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/buildings/army-camp-11.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 80
+ },
+ "images/buildings/army-camp-7.png": {
+  "x": 65,
+  "y": 66,
+  "w": 173,
+  "h": 182
+ },
+ "images/buildings/army-camp-8.png": {
+  "x": 5,
+  "y": 9,
+  "w": 90,
+  "h": 66
+ },
+ "images/buildings/army-camp-9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 86
+ },
+ "images/buildings/army-camp.png": {
+  "x": 366,
+  "y": 566,
+  "w": 293,
+  "h": 239
+ },
+ "images/buildings/barracks-11.png": {
+  "x": 0,
+  "y": 0,
+  "w": 238,
+  "h": 233
+ },
+ "images/buildings/barracks-12.png": {
+  "x": 0,
+  "y": 0,
+  "w": 263,
+  "h": 233
+ },
+ "images/buildings/barracks-13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 437,
+  "h": 437
+ },
+ "images/buildings/barracks-14.png": {
+  "x": 3,
+  "y": 20,
+  "w": 99,
+  "h": 101
+ },
+ "images/buildings/barracks-17.png": {
+  "x": 116,
+  "y": 43,
+  "w": 833,
+  "h": 969
+ },
+ "images/buildings/barracks.png": {
+  "x": 97,
+  "y": 57,
+  "w": 851,
+  "h": 920
+ },
+ "images/buildings/blacksmith-1-2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 109,
+  "h": 126
+ },
+ "images/buildings/blacksmith-3-4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 109,
+  "h": 128
+ },
+ "images/buildings/blacksmith-5-6.png": {
+  "x": 0,
+  "y": 0,
+  "w": 109,
+  "h": 128
+ },
+ "images/buildings/blacksmith.png": {
+  "x": 0,
+  "y": 0,
+  "w": 110,
+  "h": 129
+ },
+ "images/buildings/bob-s-hut.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 151
+ },
+ "images/buildings/builder-s-hut.png": {
+  "x": 424,
+  "y": 436,
+  "w": 181,
+  "h": 225
+ },
+ "images/buildings/clan-castle-11.png": {
+  "x": 87,
+  "y": 37,
+  "w": 337,
+  "h": 324
+ },
+ "images/buildings/clan-castle-6.png": {
+  "x": 57,
+  "y": 55,
+  "w": 176,
+  "h": 184
+ },
+ "images/buildings/clan-castle-7.png": {
+  "x": 54,
+  "y": 60,
+  "w": 178,
+  "h": 179
+ },
+ "images/buildings/clan-castle-8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 460,
+  "h": 520
+ },
+ "images/buildings/clan-castle.png": {
+  "x": 366,
+  "y": 381,
+  "w": 291,
+  "h": 362
+ },
+ "images/buildings/dark-barracks-6.png": {
+  "x": 0,
+  "y": 0,
+  "w": 221,
+  "h": 265
+ },
+ "images/buildings/dark-barracks-7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 232,
+  "h": 258
+ },
+ "images/buildings/dark-barracks-8.png": {
+  "x": 7,
+  "y": 9,
+  "w": 193,
+  "h": 215
+ },
+ "images/buildings/dark-barracks-9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 150,
+  "h": 150
+ },
+ "images/buildings/dark-barracks.png": {
+  "x": 385,
+  "y": 404,
+  "w": 244,
+  "h": 316
+ },
+ "images/buildings/dark-elixir-drill-2.png": {
+  "x": 83,
+  "y": 69,
+  "w": 125,
+  "h": 165
+ },
+ "images/buildings/dark-elixir-drill-3.png": {
+  "x": 83,
+  "y": 71,
+  "w": 121,
+  "h": 164
+ },
+ "images/buildings/dark-elixir-drill-4.png": {
+  "x": 83,
+  "y": 64,
+  "w": 126,
+  "h": 165
+ },
+ "images/buildings/dark-elixir-drill-5.png": {
+  "x": 63,
+  "y": 55,
+  "w": 153,
+  "h": 192
+ },
+ "images/buildings/dark-elixir-drill-6.png": {
+  "x": 67,
+  "y": 55,
+  "w": 156,
+  "h": 192
+ },
+ "images/buildings/dark-elixir-drill-7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 121
+ },
+ "images/buildings/dark-elixir-drill-8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 97,
+  "h": 121
+ },
+ "images/buildings/dark-elixir-drill-9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 220,
+  "h": 263
+ },
+ "images/buildings/dark-elixir-drill.png": {
+  "x": 81,
+  "y": 65,
+  "w": 193,
+  "h": 250
+ },
+ "images/buildings/dark-elixir-storage-4.png": {
+  "x": 58,
+  "y": 54,
+  "w": 170,
+  "h": 191
+ },
+ "images/buildings/dark-elixir-storage-5.png": {
+  "x": 55,
+  "y": 54,
+  "w": 179,
+  "h": 206
+ },
+ "images/buildings/dark-elixir-storage-6.png": {
+  "x": 55,
+  "y": 51,
+  "w": 180,
+  "h": 194
+ },
+ "images/buildings/dark-elixir-storage-7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 435,
+  "h": 473
+ },
+ "images/buildings/dark-elixir-storage.png": {
+  "x": 502,
+  "y": 658,
+  "w": 3071,
+  "h": 2845
+ },
+ "images/buildings/dark-spell-factory-3.png": {
+  "x": 67,
+  "y": 86,
+  "w": 150,
+  "h": 128
+ },
+ "images/buildings/dark-spell-factory-4.png": {
+  "x": 59,
+  "y": 78,
+  "w": 170,
+  "h": 132
+ },
+ "images/buildings/dark-spell-factory-5.png": {
+  "x": 4,
+  "y": 2,
+  "w": 92,
+  "h": 76
+ },
+ "images/buildings/dark-spell-factory.png": {
+  "x": 36,
+  "y": 29,
+  "w": 501,
+  "h": 190
+ },
+ "images/buildings/elixir-collector-10.png": {
+  "x": 70,
+  "y": 65,
+  "w": 138,
+  "h": 165
+ },
+ "images/buildings/elixir-collector-11.png": {
+  "x": 68,
+  "y": 64,
+  "w": 139,
+  "h": 167
+ },
+ "images/buildings/elixir-collector-12.png": {
+  "x": 67,
+  "y": 63,
+  "w": 153,
+  "h": 168
+ },
+ "images/buildings/elixir-collector-13.png": {
+  "x": 1,
+  "y": 10,
+  "w": 97,
+  "h": 115
+ },
+ "images/buildings/elixir-collector-14.png": {
+  "x": 0,
+  "y": 2,
+  "w": 100,
+  "h": 125
+ },
+ "images/buildings/elixir-collector-4.png": {
+  "x": 93,
+  "y": 87,
+  "w": 103,
+  "h": 128
+ },
+ "images/buildings/elixir-collector-5.png": {
+  "x": 81,
+  "y": 75,
+  "w": 126,
+  "h": 153
+ },
+ "images/buildings/elixir-collector-6.png": {
+  "x": 70,
+  "y": 69,
+  "w": 185,
+  "h": 155
+ },
+ "images/buildings/elixir-collector-7.png": {
+  "x": 76,
+  "y": 63,
+  "w": 140,
+  "h": 167
+ },
+ "images/buildings/elixir-collector-8.png": {
+  "x": 70,
+  "y": 71,
+  "w": 148,
+  "h": 156
+ },
+ "images/buildings/elixir-collector-9.png": {
+  "x": 70,
+  "y": 61,
+  "w": 149,
+  "h": 164
+ },
+ "images/buildings/elixir-collector.png": {
+  "x": 6,
+  "y": 10,
+  "w": 161,
+  "h": 204
+ },
+ "images/buildings/elixir-storage-11.png": {
+  "x": 43,
+  "y": 58,
+  "w": 190,
+  "h": 189
+ },
+ "images/buildings/elixir-storage-13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 540,
+  "h": 505
+ },
+ "images/buildings/elixir-storage-14.png": {
+  "x": 6,
+  "y": 3,
+  "w": 88,
+  "h": 83
+ },
+ "images/buildings/elixir-storage-15.png": {
+  "x": 10,
+  "y": 3,
+  "w": 83,
+  "h": 84
+ },
+ "images/buildings/elixir-storage-16.png": {
+  "x": 25,
+  "y": 12,
+  "w": 234,
+  "h": 222
+ },
+ "images/buildings/elixir-storage-17.png": {
+  "x": 412,
+  "y": 496,
+  "w": 3179,
+  "h": 2936
+ },
+ "images/buildings/elixir-storage-4.png": {
+  "x": 69,
+  "y": 89,
+  "w": 154,
+  "h": 137
+ },
+ "images/buildings/elixir-storage-5.png": {
+  "x": 98,
+  "y": 104,
+  "w": 93,
+  "h": 102
+ },
+ "images/buildings/elixir-storage-6.png": {
+  "x": 89,
+  "y": 96,
+  "w": 109,
+  "h": 123
+ },
+ "images/buildings/elixir-storage-7.png": {
+  "x": 81,
+  "y": 83,
+  "w": 124,
+  "h": 141
+ },
+ "images/buildings/elixir-storage-9.png": {
+  "x": 71,
+  "y": 65,
+  "w": 147,
+  "h": 176
+ },
+ "images/buildings/elixir-storage.png": {
+  "x": 359,
+  "y": 454,
+  "w": 304,
+  "h": 291
+ },
+ "images/buildings/gold-mine-10.png": {
+  "x": 61,
+  "y": 75,
+  "w": 161,
+  "h": 130
+ },
+ "images/buildings/gold-mine-11.png": {
+  "x": 64,
+  "y": 71,
+  "w": 165,
+  "h": 138
+ },
+ "images/buildings/gold-mine-12.png": {
+  "x": 63,
+  "y": 66,
+  "w": 163,
+  "h": 148
+ },
+ "images/buildings/gold-mine-15.png": {
+  "x": 34,
+  "y": 41,
+  "w": 132,
+  "h": 118
+ },
+ "images/buildings/gold-mine-5.png": {
+  "x": 64,
+  "y": 103,
+  "w": 156,
+  "h": 103
+ },
+ "images/buildings/gold-mine-6.png": {
+  "x": 62,
+  "y": 102,
+  "w": 162,
+  "h": 105
+ },
+ "images/buildings/gold-mine-7.png": {
+  "x": 72,
+  "y": 96,
+  "w": 151,
+  "h": 105
+ },
+ "images/buildings/gold-mine-8.png": {
+  "x": 71,
+  "y": 83,
+  "w": 151,
+  "h": 115
+ },
+ "images/buildings/gold-mine-9.png": {
+  "x": 70,
+  "y": 78,
+  "w": 152,
+  "h": 125
+ },
+ "images/buildings/gold-mine.png": {
+  "x": 0,
+  "y": 0,
+  "w": 272,
+  "h": 239
+ },
+ "images/buildings/gold-storage-10.png": {
+  "x": 59,
+  "y": 53,
+  "w": 175,
+  "h": 194
+ },
+ "images/buildings/gold-storage-11.png": {
+  "x": 62,
+  "y": 44,
+  "w": 189,
+  "h": 190
+ },
+ "images/buildings/gold-storage-12.png": {
+  "x": 51,
+  "y": 47,
+  "w": 184,
+  "h": 197
+ },
+ "images/buildings/gold-storage-14.png": {
+  "x": 1,
+  "y": 13,
+  "w": 104,
+  "h": 107
+ },
+ "images/buildings/gold-storage-4.png": {
+  "x": 71,
+  "y": 79,
+  "w": 145,
+  "h": 145
+ },
+ "images/buildings/gold-storage-5.png": {
+  "x": 68,
+  "y": 77,
+  "w": 146,
+  "h": 149
+ },
+ "images/buildings/gold-storage-6.png": {
+  "x": 71,
+  "y": 75,
+  "w": 143,
+  "h": 153
+ },
+ "images/buildings/gold-storage-7.png": {
+  "x": 67,
+  "y": 60,
+  "w": 166,
+  "h": 164
+ },
+ "images/buildings/gold-storage-9.png": {
+  "x": 54,
+  "y": 56,
+  "w": 176,
+  "h": 167
+ },
+ "images/buildings/gold-storage.png": {
+  "x": 646,
+  "y": 609,
+  "w": 2713,
+  "h": 2746
+ },
+ "images/buildings/helper-hut.png": {
+  "x": 147,
+  "y": 175,
+  "w": 654,
+  "h": 676
+ },
+ "images/buildings/hero-hall-3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 332
+ },
+ "images/buildings/hero-hall-4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 344
+ },
+ "images/buildings/hero-hall-5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 344
+ },
+ "images/buildings/hero-hall-6.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 344
+ },
+ "images/buildings/hero-hall-9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 357
+ },
+ "images/buildings/hero-hall.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 371
+ },
+ "images/buildings/laboratory-10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 148,
+  "h": 140
+ },
+ "images/buildings/laboratory-13.png": {
+  "x": 4,
+  "y": 22,
+  "w": 204,
+  "h": 185
+ },
+ "images/buildings/laboratory-8.png": {
+  "x": 71,
+  "y": 80,
+  "w": 155,
+  "h": 133
+ },
+ "images/buildings/laboratory-9.png": {
+  "x": 43,
+  "y": 90,
+  "w": 154,
+  "h": 129
+ },
+ "images/buildings/laboratory.png": {
+  "x": 24,
+  "y": 66,
+  "w": 546,
+  "h": 479
+ },
+ "images/buildings/pet-house-8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/buildings/pet-house.png": {
+  "x": 383,
+  "y": 451,
+  "w": 244,
+  "h": 276
+ },
+ "images/buildings/spell-factory-4.png": {
+  "x": 52,
+  "y": 62,
+  "w": 183,
+  "h": 167
+ },
+ "images/buildings/spell-factory-5.png": {
+  "x": 13,
+  "y": 16,
+  "w": 190,
+  "h": 183
+ },
+ "images/buildings/spell-factory-6.png": {
+  "x": 0,
+  "y": 8,
+  "w": 110,
+  "h": 101
+ },
+ "images/buildings/spell-factory-7.png": {
+  "x": 0,
+  "y": 21,
+  "w": 220,
+  "h": 197
+ },
+ "images/buildings/spell-factory.png": {
+  "x": 51,
+  "y": 167,
+  "w": 925,
+  "h": 720
+ },
+ "images/buildings/wall-1.png": {
+  "x": 18,
+  "y": 10,
+  "w": 39,
+  "h": 50
+ },
+ "images/buildings/wall-10.png": {
+  "x": 16,
+  "y": 6,
+  "w": 44,
+  "h": 58
+ },
+ "images/buildings/wall-11.png": {
+  "x": 13,
+  "y": 5,
+  "w": 49,
+  "h": 61
+ },
+ "images/buildings/wall-12.png": {
+  "x": 0,
+  "y": 0,
+  "w": 75,
+  "h": 71
+ },
+ "images/buildings/wall-13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 75,
+  "h": 71
+ },
+ "images/buildings/wall-14.png": {
+  "x": 12,
+  "y": 0,
+  "w": 52,
+  "h": 65
+ },
+ "images/buildings/wall-15.png": {
+  "x": 14,
+  "y": 8,
+  "w": 48,
+  "h": 57
+ },
+ "images/buildings/wall-16.png": {
+  "x": 8,
+  "y": 0,
+  "w": 58,
+  "h": 71
+ },
+ "images/buildings/wall-17.png": {
+  "x": 268,
+  "y": 151,
+  "w": 504,
+  "h": 724
+ },
+ "images/buildings/wall-5.png": {
+  "x": 12,
+  "y": 6,
+  "w": 52,
+  "h": 57
+ },
+ "images/buildings/wall-6.png": {
+  "x": 20,
+  "y": 10,
+  "w": 36,
+  "h": 50
+ },
+ "images/buildings/wall-7.png": {
+  "x": 18,
+  "y": 3,
+  "w": 39,
+  "h": 63
+ },
+ "images/buildings/wall-8.png": {
+  "x": 17,
+  "y": 5,
+  "w": 41,
+  "h": 59
+ },
+ "images/buildings/wall.png": {
+  "x": 472,
+  "y": 469,
+  "w": 80,
+  "h": 118
+ },
+ "images/buildings/workshop-1.png": {
+  "x": 88,
+  "y": 108,
+  "w": 107,
+  "h": 118
+ },
+ "images/buildings/workshop-2.png": {
+  "x": 88,
+  "y": 75,
+  "w": 109,
+  "h": 151
+ },
+ "images/buildings/workshop-3.png": {
+  "x": 0,
+  "y": 1,
+  "w": 120,
+  "h": 118
+ },
+ "images/buildings/workshop-6.png": {
+  "x": 0,
+  "y": 1,
+  "w": 120,
+  "h": 118
+ },
+ "images/buildings/workshop.png": {
+  "x": 59,
+  "y": 13,
+  "w": 294,
+  "h": 411
+ },
+ "images/dark-spells/bat-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 116
+ },
+ "images/dark-spells/earthquake-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/dark-spells/haste-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/dark-spells/ice-block-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 1024,
+  "h": 1024
+ },
+ "images/dark-spells/overgrowth-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 1024,
+  "h": 1024
+ },
+ "images/dark-spells/poison-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/dark-spells/skeleton-spell.png": {
+  "x": 0,
+  "y": 14,
+  "w": 166,
+  "h": 151
+ },
+ "images/dark-troops/apprentice-warden.png": {
+  "x": 0,
+  "y": 0,
+  "w": 859,
+  "h": 833
+ },
+ "images/dark-troops/bowler.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/dark-troops/druid.png": {
+  "x": 74,
+  "y": 87,
+  "w": 847,
+  "h": 937
+ },
+ "images/dark-troops/furnace.png": {
+  "x": 149,
+  "y": 47,
+  "w": 722,
+  "h": 977
+ },
+ "images/dark-troops/golem.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/dark-troops/headhunter.png": {
+  "x": 16,
+  "y": 101,
+  "w": 778,
+  "h": 715
+ },
+ "images/dark-troops/hog-rider.png": {
+  "x": 0,
+  "y": 0,
+  "w": 163,
+  "h": 166
+ },
+ "images/dark-troops/ice-golem.png": {
+  "x": 0,
+  "y": 0,
+  "w": 564,
+  "h": 501
+ },
+ "images/dark-troops/lava-hound.png": {
+  "x": 1,
+  "y": 0,
+  "w": 165,
+  "h": 166
+ },
+ "images/dark-troops/minion.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/dark-troops/valkyrie.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/dark-troops/witch.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/defenses/air-defense-10.png": {
+  "x": 7,
+  "y": 1,
+  "w": 90,
+  "h": 132
+ },
+ "images/defenses/air-defense-11.png": {
+  "x": 5,
+  "y": 0,
+  "w": 91,
+  "h": 134
+ },
+ "images/defenses/air-defense-12.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 135
+ },
+ "images/defenses/air-defense-13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 135
+ },
+ "images/defenses/air-defense-4.png": {
+  "x": 65,
+  "y": 79,
+  "w": 116,
+  "h": 145
+ },
+ "images/defenses/air-defense-7.png": {
+  "x": 47,
+  "y": 56,
+  "w": 152,
+  "h": 191
+ },
+ "images/defenses/air-defense-8.png": {
+  "x": 52,
+  "y": 52,
+  "w": 141,
+  "h": 199
+ },
+ "images/defenses/air-defense-9.png": {
+  "x": 23,
+  "y": 49,
+  "w": 196,
+  "h": 233
+ },
+ "images/defenses/air-defense.png": {
+  "x": 426,
+  "y": 394,
+  "w": 199,
+  "h": 302
+ },
+ "images/defenses/air-sweeper-3.png": {
+  "x": 84,
+  "y": 85,
+  "w": 119,
+  "h": 137
+ },
+ "images/defenses/air-sweeper-4.png": {
+  "x": 83,
+  "y": 86,
+  "w": 121,
+  "h": 136
+ },
+ "images/defenses/air-sweeper-5.png": {
+  "x": 77,
+  "y": 82,
+  "w": 131,
+  "h": 169
+ },
+ "images/defenses/air-sweeper-6.png": {
+  "x": 78,
+  "y": 82,
+  "w": 133,
+  "h": 143
+ },
+ "images/defenses/air-sweeper.png": {
+  "x": 78,
+  "y": 80,
+  "w": 131,
+  "h": 143
+ },
+ "images/defenses/archer-tower-1.png": {
+  "x": 92,
+  "y": 69,
+  "w": 106,
+  "h": 152
+ },
+ "images/defenses/archer-tower-10.png": {
+  "x": 81,
+  "y": 63,
+  "w": 127,
+  "h": 164
+ },
+ "images/defenses/archer-tower-11.png": {
+  "x": 81,
+  "y": 61,
+  "w": 127,
+  "h": 168
+ },
+ "images/defenses/archer-tower-12.png": {
+  "x": 81,
+  "y": 60,
+  "w": 128,
+  "h": 169
+ },
+ "images/defenses/archer-tower-13.png": {
+  "x": 81,
+  "y": 61,
+  "w": 128,
+  "h": 168
+ },
+ "images/defenses/archer-tower-14.png": {
+  "x": 79,
+  "y": 56,
+  "w": 132,
+  "h": 178
+ },
+ "images/defenses/archer-tower-15.png": {
+  "x": 82,
+  "y": 58,
+  "w": 125,
+  "h": 174
+ },
+ "images/defenses/archer-tower-16.png": {
+  "x": 5,
+  "y": 7,
+  "w": 91,
+  "h": 118
+ },
+ "images/defenses/archer-tower-17.png": {
+  "x": 6,
+  "y": 6,
+  "w": 91,
+  "h": 119
+ },
+ "images/defenses/archer-tower-18.png": {
+  "x": 4,
+  "y": 6,
+  "w": 95,
+  "h": 121
+ },
+ "images/defenses/archer-tower-20.png": {
+  "x": 5,
+  "y": 5,
+  "w": 93,
+  "h": 121
+ },
+ "images/defenses/archer-tower-3.png": {
+  "x": 94,
+  "y": 68,
+  "w": 102,
+  "h": 154
+ },
+ "images/defenses/archer-tower-4.png": {
+  "x": 91,
+  "y": 66,
+  "w": 108,
+  "h": 157
+ },
+ "images/defenses/archer-tower-6.png": {
+  "x": 91,
+  "y": 66,
+  "w": 107,
+  "h": 158
+ },
+ "images/defenses/archer-tower-7.png": {
+  "x": 89,
+  "y": 65,
+  "w": 112,
+  "h": 159
+ },
+ "images/defenses/archer-tower-8.png": {
+  "x": 89,
+  "y": 66,
+  "w": 112,
+  "h": 158
+ },
+ "images/defenses/archer-tower-9.png": {
+  "x": 81,
+  "y": 63,
+  "w": 127,
+  "h": 164
+ },
+ "images/defenses/archer-tower.png": {
+  "x": 15,
+  "y": 10,
+  "w": 168,
+  "h": 222
+ },
+ "images/defenses/bomb-tower-1.png": {
+  "x": 27,
+  "y": 59,
+  "w": 178,
+  "h": 176
+ },
+ "images/defenses/bomb-tower-11.png": {
+  "x": 167,
+  "y": 53,
+  "w": 688,
+  "h": 932
+ },
+ "images/defenses/bomb-tower-2.png": {
+  "x": 80,
+  "y": 58,
+  "w": 130,
+  "h": 177
+ },
+ "images/defenses/bomb-tower-3.png": {
+  "x": 53,
+  "y": 53,
+  "w": 166,
+  "h": 198
+ },
+ "images/defenses/bomb-tower-4.png": {
+  "x": 79,
+  "y": 53,
+  "w": 128,
+  "h": 198
+ },
+ "images/defenses/bomb-tower-5.png": {
+  "x": 80,
+  "y": 49,
+  "w": 128,
+  "h": 185
+ },
+ "images/defenses/bomb-tower-6.png": {
+  "x": 87,
+  "y": 49,
+  "w": 157,
+  "h": 184
+ },
+ "images/defenses/bomb-tower-9.png": {
+  "x": 7,
+  "y": 0,
+  "w": 87,
+  "h": 126
+ },
+ "images/defenses/bomb-tower.png": {
+  "x": 428,
+  "y": 449,
+  "w": 168,
+  "h": 246
+ },
+ "images/defenses/cannon-1.png": {
+  "x": 197,
+  "y": 190,
+  "w": 106,
+  "h": 121
+ },
+ "images/defenses/cannon-10.png": {
+  "x": 115,
+  "y": 135,
+  "w": 271,
+  "h": 230
+ },
+ "images/defenses/cannon-11.png": {
+  "x": 96,
+  "y": 120,
+  "w": 308,
+  "h": 259
+ },
+ "images/defenses/cannon-12.png": {
+  "x": 111,
+  "y": 121,
+  "w": 278,
+  "h": 259
+ },
+ "images/defenses/cannon-13.png": {
+  "x": 112,
+  "y": 117,
+  "w": 277,
+  "h": 267
+ },
+ "images/defenses/cannon-14.png": {
+  "x": 88,
+  "y": 107,
+  "w": 325,
+  "h": 286
+ },
+ "images/defenses/cannon-15.png": {
+  "x": 92,
+  "y": 108,
+  "w": 316,
+  "h": 284
+ },
+ "images/defenses/cannon-2.png": {
+  "x": 184,
+  "y": 183,
+  "w": 133,
+  "h": 135
+ },
+ "images/defenses/cannon-7.png": {
+  "x": 131,
+  "y": 156,
+  "w": 238,
+  "h": 189
+ },
+ "images/defenses/cannon-8.png": {
+  "x": 132,
+  "y": 154,
+  "w": 237,
+  "h": 193
+ },
+ "images/defenses/cannon-9.png": {
+  "x": 131,
+  "y": 150,
+  "w": 238,
+  "h": 200
+ },
+ "images/defenses/cannon.png": {
+  "x": 27,
+  "y": 44,
+  "w": 146,
+  "h": 112
+ },
+ "images/defenses/eagle-artillery-1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 152,
+  "h": 169
+ },
+ "images/defenses/eagle-artillery-2.png": {
+  "x": 13,
+  "y": 10,
+  "w": 296,
+  "h": 355
+ },
+ "images/defenses/eagle-artillery-3.png": {
+  "x": 12,
+  "y": 0,
+  "w": 209,
+  "h": 244
+ },
+ "images/defenses/eagle-artillery.png": {
+  "x": 1,
+  "y": 8,
+  "w": 189,
+  "h": 222
+ },
+ "images/defenses/firespitter-1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 250,
+  "h": 270
+ },
+ "images/defenses/firespitter.png": {
+  "x": 14,
+  "y": 53,
+  "w": 581,
+  "h": 546
+ },
+ "images/defenses/hidden-tesla-1.png": {
+  "x": 98,
+  "y": 89,
+  "w": 82,
+  "h": 135
+ },
+ "images/defenses/hidden-tesla-10.png": {
+  "x": 108,
+  "y": 90,
+  "w": 74,
+  "h": 111
+ },
+ "images/defenses/hidden-tesla-2.png": {
+  "x": 104,
+  "y": 85,
+  "w": 83,
+  "h": 141
+ },
+ "images/defenses/hidden-tesla-3.png": {
+  "x": 103,
+  "y": 84,
+  "w": 83,
+  "h": 143
+ },
+ "images/defenses/hidden-tesla-4.png": {
+  "x": 103,
+  "y": 89,
+  "w": 84,
+  "h": 135
+ },
+ "images/defenses/hidden-tesla-5.png": {
+  "x": 104,
+  "y": 87,
+  "w": 83,
+  "h": 137
+ },
+ "images/defenses/hidden-tesla-7.png": {
+  "x": 96,
+  "y": 68,
+  "w": 101,
+  "h": 166
+ },
+ "images/defenses/hidden-tesla-8.png": {
+  "x": 95,
+  "y": 63,
+  "w": 103,
+  "h": 175
+ },
+ "images/defenses/hidden-tesla-9.png": {
+  "x": 90,
+  "y": 47,
+  "w": 112,
+  "h": 205
+ },
+ "images/defenses/hidden-tesla.png": {
+  "x": 0,
+  "y": 0,
+  "w": 80,
+  "h": 119
+ },
+ "images/defenses/inferno-tower-1.png": {
+  "x": 91,
+  "y": 52,
+  "w": 105,
+  "h": 187
+ },
+ "images/defenses/inferno-tower-2.png": {
+  "x": 82,
+  "y": 47,
+  "w": 125,
+  "h": 197
+ },
+ "images/defenses/inferno-tower-3.png": {
+  "x": 89,
+  "y": 51,
+  "w": 111,
+  "h": 190
+ },
+ "images/defenses/inferno-tower-4.png": {
+  "x": 76,
+  "y": 47,
+  "w": 135,
+  "h": 199
+ },
+ "images/defenses/inferno-tower-5.png": {
+  "x": 72,
+  "y": 42,
+  "w": 148,
+  "h": 208
+ },
+ "images/defenses/inferno-tower-6.png": {
+  "x": 8,
+  "y": 9,
+  "w": 84,
+  "h": 128
+ },
+ "images/defenses/inferno-tower-7.png": {
+  "x": 4,
+  "y": 7,
+  "w": 90,
+  "h": 130
+ },
+ "images/defenses/inferno-tower-8.png": {
+  "x": 1,
+  "y": 7,
+  "w": 96,
+  "h": 131
+ },
+ "images/defenses/inferno-tower.png": {
+  "x": 241,
+  "y": 215,
+  "w": 108,
+  "h": 167
+ },
+ "images/defenses/monolith-2.png": {
+  "x": 739,
+  "y": 226,
+  "w": 651,
+  "h": 1158
+ },
+ "images/defenses/monolith.png": {
+  "x": 222,
+  "y": 216,
+  "w": 156,
+  "h": 217
+ },
+ "images/defenses/mortar-10.png": {
+  "x": 117,
+  "y": 111,
+  "w": 267,
+  "h": 279
+ },
+ "images/defenses/mortar-11.png": {
+  "x": 3,
+  "y": 8,
+  "w": 94,
+  "h": 92
+ },
+ "images/defenses/mortar-12.png": {
+  "x": 1,
+  "y": 8,
+  "w": 99,
+  "h": 92
+ },
+ "images/defenses/mortar-13.png": {
+  "x": 1,
+  "y": 6,
+  "w": 98,
+  "h": 94
+ },
+ "images/defenses/mortar-7.png": {
+  "x": 152,
+  "y": 141,
+  "w": 197,
+  "h": 218
+ },
+ "images/defenses/mortar-8.png": {
+  "x": 130,
+  "y": 139,
+  "w": 240,
+  "h": 222
+ },
+ "images/defenses/mortar-9.png": {
+  "x": 125,
+  "y": 123,
+  "w": 250,
+  "h": 255
+ },
+ "images/defenses/mortar.png": {
+  "x": 808,
+  "y": 984,
+  "w": 436,
+  "h": 455
+ },
+ "images/defenses/multi-archer-tower.png": {
+  "x": 102,
+  "y": 25,
+  "w": 392,
+  "h": 540
+ },
+ "images/defenses/revenge-tower.png": {
+  "x": 113,
+  "y": 37,
+  "w": 369,
+  "h": 541
+ },
+ "images/defenses/ricochet-cannon.png": {
+  "x": 76,
+  "y": 46,
+  "w": 458,
+  "h": 528
+ },
+ "images/defenses/scattershot-2.png": {
+  "x": 3,
+  "y": 6,
+  "w": 266,
+  "h": 244
+ },
+ "images/defenses/scattershot.png": {
+  "x": 382,
+  "y": 448,
+  "w": 245,
+  "h": 275
+ },
+ "images/defenses/spell-tower-1.png": {
+  "x": 7,
+  "y": 29,
+  "w": 387,
+  "h": 542
+ },
+ "images/defenses/spell-tower.png": {
+  "x": 4,
+  "y": 29,
+  "w": 392,
+  "h": 542
+ },
+ "images/defenses/wizard-tower-1.png": {
+  "x": 65,
+  "y": 63,
+  "w": 153,
+  "h": 175
+ },
+ "images/defenses/wizard-tower-10.png": {
+  "x": 63,
+  "y": 46,
+  "w": 157,
+  "h": 197
+ },
+ "images/defenses/wizard-tower-11.png": {
+  "x": 1,
+  "y": 2,
+  "w": 98,
+  "h": 114
+ },
+ "images/defenses/wizard-tower-13.png": {
+  "x": 0,
+  "y": 1,
+  "w": 100,
+  "h": 117
+ },
+ "images/defenses/wizard-tower-2.png": {
+  "x": 64,
+  "y": 63,
+  "w": 157,
+  "h": 175
+ },
+ "images/defenses/wizard-tower-4.png": {
+  "x": 63,
+  "y": 63,
+  "w": 157,
+  "h": 175
+ },
+ "images/defenses/wizard-tower-5.png": {
+  "x": 64,
+  "y": 62,
+  "w": 157,
+  "h": 176
+ },
+ "images/defenses/wizard-tower-7.png": {
+  "x": 63,
+  "y": 61,
+  "w": 165,
+  "h": 182
+ },
+ "images/defenses/wizard-tower-8.png": {
+  "x": 67,
+  "y": 40,
+  "w": 158,
+  "h": 203
+ },
+ "images/defenses/wizard-tower-9.png": {
+  "x": 63,
+  "y": 49,
+  "w": 163,
+  "h": 194
+ },
+ "images/defenses/wizard-tower.png": {
+  "x": 413,
+  "y": 442,
+  "w": 193,
+  "h": 273
+ },
+ "images/defenses/x-bow-1.png": {
+  "x": 99,
+  "y": 91,
+  "w": 302,
+  "h": 319
+ },
+ "images/defenses/x-bow-3.png": {
+  "x": 68,
+  "y": 75,
+  "w": 365,
+  "h": 350
+ },
+ "images/defenses/x-bow-4.png": {
+  "x": 69,
+  "y": 84,
+  "w": 363,
+  "h": 332
+ },
+ "images/defenses/x-bow-5.png": {
+  "x": 0,
+  "y": 3,
+  "w": 100,
+  "h": 95
+ },
+ "images/defenses/x-bow-6.png": {
+  "x": 5,
+  "y": 3,
+  "w": 91,
+  "h": 91
+ },
+ "images/defenses/x-bow.png": {
+  "x": 22,
+  "y": 17,
+  "w": 557,
+  "h": 571
+ },
+ "images/guardians/logger.png": {
+  "x": 36,
+  "y": 335,
+  "w": 988,
+  "h": 689
+ },
+ "images/guardians/longshot.png": {
+  "x": 92,
+  "y": 275,
+  "w": 725,
+  "h": 697
+ },
+ "images/guardians/smasher.png": {
+  "x": 134,
+  "y": 67,
+  "w": 676,
+  "h": 914
+ },
+ "images/helpers/alchemist.png": {
+  "x": 320,
+  "y": 320,
+  "w": 584,
+  "h": 531
+ },
+ "images/helpers/builder-s-apprentice.png": {
+  "x": 246,
+  "y": 311,
+  "w": 778,
+  "h": 575
+ },
+ "images/helpers/lab-assistant.png": {
+  "x": 222,
+  "y": 245,
+  "w": 574,
+  "h": 668
+ },
+ "images/hero-equipment/action-figure.png": {
+  "x": 0,
+  "y": 18,
+  "w": 499,
+  "h": 455
+ },
+ "images/hero-equipment/archer-puppet.png": {
+  "x": 0,
+  "y": 0,
+  "w": 492,
+  "h": 512
+ },
+ "images/hero-equipment/barbarian-puppet.png": {
+  "x": 20,
+  "y": 0,
+  "w": 472,
+  "h": 512
+ },
+ "images/hero-equipment/dark-crown.png": {
+  "x": 24,
+  "y": 42,
+  "w": 295,
+  "h": 258
+ },
+ "images/hero-equipment/dark-orb.png": {
+  "x": 44,
+  "y": 58,
+  "w": 415,
+  "h": 411
+ },
+ "images/hero-equipment/earthquake-boots.png": {
+  "x": 27,
+  "y": 43,
+  "w": 485,
+  "h": 464
+ },
+ "images/hero-equipment/electro-boots.png": {
+  "x": 0,
+  "y": 0,
+  "w": 332,
+  "h": 332
+ },
+ "images/hero-equipment/electro-fangs.png": {
+  "x": 11,
+  "y": 3,
+  "w": 285,
+  "h": 316
+ },
+ "images/hero-equipment/eternal-tome.png": {
+  "x": 9,
+  "y": 18,
+  "w": 497,
+  "h": 494
+ },
+ "images/hero-equipment/fire-heart.png": {
+  "x": 47,
+  "y": 62,
+  "w": 399,
+  "h": 356
+ },
+ "images/hero-equipment/fireball.png": {
+  "x": 0,
+  "y": 0,
+  "w": 512,
+  "h": 604
+ },
+ "images/hero-equipment/frost-flake.png": {
+  "x": 18,
+  "y": 24,
+  "w": 296,
+  "h": 284
+ },
+ "images/hero-equipment/frozen-arrow.png": {
+  "x": 0,
+  "y": 41,
+  "w": 453,
+  "h": 471
+ },
+ "images/hero-equipment/giant-arrow.png": {
+  "x": 11,
+  "y": 21,
+  "w": 477,
+  "h": 477
+ },
+ "images/hero-equipment/giant-gauntlet.png": {
+  "x": 22,
+  "y": 6,
+  "w": 463,
+  "h": 488
+ },
+ "images/hero-equipment/haste-vial.png": {
+  "x": 20,
+  "y": 28,
+  "w": 481,
+  "h": 472
+ },
+ "images/hero-equipment/healer-puppet.png": {
+  "x": 50,
+  "y": 0,
+  "w": 462,
+  "h": 512
+ },
+ "images/hero-equipment/healing-tome.png": {
+  "x": 9,
+  "y": 18,
+  "w": 497,
+  "h": 494
+ },
+ "images/hero-equipment/henchmen-puppet.png": {
+  "x": 0,
+  "y": 17,
+  "w": 478,
+  "h": 495
+ },
+ "images/hero-equipment/heroic-torch.png": {
+  "x": 105,
+  "y": 75,
+  "w": 205,
+  "h": 432
+ },
+ "images/hero-equipment/hog-rider-puppet.png": {
+  "x": 15,
+  "y": 0,
+  "w": 486,
+  "h": 512
+ },
+ "images/hero-equipment/invisibility-vial.png": {
+  "x": 5,
+  "y": 67,
+  "w": 503,
+  "h": 438
+ },
+ "images/hero-equipment/lavaloon-puppet.png": {
+  "x": 20,
+  "y": 1,
+  "w": 270,
+  "h": 327
+ },
+ "images/hero-equipment/life-gem.png": {
+  "x": 8,
+  "y": 0,
+  "w": 496,
+  "h": 500
+ },
+ "images/hero-equipment/magic-mirror.png": {
+  "x": 60,
+  "y": 8,
+  "w": 381,
+  "h": 498
+ },
+ "images/hero-equipment/metal-pants.png": {
+  "x": 26,
+  "y": 101,
+  "w": 451,
+  "h": 374
+ },
+ "images/hero-equipment/meteor-staff.png": {
+  "x": 30,
+  "y": 25,
+  "w": 458,
+  "h": 460
+ },
+ "images/hero-equipment/rage-gem.png": {
+  "x": 0,
+  "y": 6,
+  "w": 493,
+  "h": 486
+ },
+ "images/hero-equipment/rage-vial.png": {
+  "x": 10,
+  "y": 53,
+  "w": 499,
+  "h": 450
+ },
+ "images/hero-equipment/rocket-backpack.png": {
+  "x": 92,
+  "y": 38,
+  "w": 348,
+  "h": 425
+ },
+ "images/hero-equipment/rocket-spear.png": {
+  "x": 12,
+  "y": 19,
+  "w": 299,
+  "h": 301
+ },
+ "images/hero-equipment/royal-gem.png": {
+  "x": 37,
+  "y": 38,
+  "w": 433,
+  "h": 446
+ },
+ "images/hero-equipment/seeking-shield.png": {
+  "x": 13,
+  "y": 49,
+  "w": 498,
+  "h": 447
+ },
+ "images/hero-equipment/snake-bracelet.png": {
+  "x": 43,
+  "y": 36,
+  "w": 439,
+  "h": 449
+ },
+ "images/hero-equipment/spiky-ball.png": {
+  "x": 72,
+  "y": 90,
+  "w": 372,
+  "h": 362
+ },
+ "images/hero-equipment/stick-horse.png": {
+  "x": 55,
+  "y": 27,
+  "w": 387,
+  "h": 457
+ },
+ "images/hero-equipment/vampstache.png": {
+  "x": 0,
+  "y": 48,
+  "w": 511,
+  "h": 399
+ },
+ "images/heroes/archer-queen.png": {
+  "x": 2,
+  "y": 0,
+  "w": 164,
+  "h": 225
+ },
+ "images/heroes/barbarian-king.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 225
+ },
+ "images/heroes/dragon-duke.png": {
+  "x": 0,
+  "y": 10,
+  "w": 166,
+  "h": 215
+ },
+ "images/heroes/grand-warden.png": {
+  "x": 0,
+  "y": 0,
+  "w": 184,
+  "h": 292
+ },
+ "images/heroes/minion-prince.png": {
+  "x": 125,
+  "y": 22,
+  "w": 702,
+  "h": 893
+ },
+ "images/heroes/royal-champion.png": {
+  "x": 0,
+  "y": 1,
+  "w": 165,
+  "h": 164
+ },
+ "images/pets/angry-jelly.png": {
+  "x": 272,
+  "y": 294,
+  "w": 471,
+  "h": 591
+ },
+ "images/pets/diggy.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 119
+ },
+ "images/pets/electro-owl.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/pets/frosty.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/pets/lassi.png": {
+  "x": 1,
+  "y": 0,
+  "w": 118,
+  "h": 120
+ },
+ "images/pets/mighty-yak.png": {
+  "x": 0,
+  "y": 7,
+  "w": 120,
+  "h": 113
+ },
+ "images/pets/phoenix.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/pets/poison-lizard.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 128
+ },
+ "images/pets/sneezy.png": {
+  "x": 125,
+  "y": 31,
+  "w": 997,
+  "h": 893
+ },
+ "images/pets/spirit-fox.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/pets/unicorn.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/siege-machines/battle-blimp.png": {
+  "x": 2,
+  "y": 0,
+  "w": 115,
+  "h": 120
+ },
+ "images/siege-machines/battle-drill.png": {
+  "x": 176,
+  "y": 95,
+  "w": 677,
+  "h": 852
+ },
+ "images/siege-machines/flame-flinger.png": {
+  "x": 13,
+  "y": 0,
+  "w": 94,
+  "h": 120
+ },
+ "images/siege-machines/log-launcher.png": {
+  "x": 168,
+  "y": 115,
+  "w": 688,
+  "h": 806
+ },
+ "images/siege-machines/siege-barracks.png": {
+  "x": 107,
+  "y": 61,
+  "w": 810,
+  "h": 951
+ },
+ "images/siege-machines/stone-slammer.png": {
+  "x": 113,
+  "y": 83,
+  "w": 274,
+  "h": 348
+ },
+ "images/siege-machines/troop-launcher.png": {
+  "x": 53,
+  "y": 8,
+  "w": 459,
+  "h": 587
+ },
+ "images/siege-machines/wall-wrecker.png": {
+  "x": 5,
+  "y": 0,
+  "w": 110,
+  "h": 120
+ },
+ "images/spells/clone-spell.png": {
+  "x": 0,
+  "y": 6,
+  "w": 166,
+  "h": 160
+ },
+ "images/spells/freeze-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/spells/healing-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/spells/invisibility-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/spells/jump-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/spells/lightning-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 120
+ },
+ "images/spells/rage-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/spells/recall-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 498,
+  "h": 498
+ },
+ "images/spells/revive-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 1024,
+  "h": 1024
+ },
+ "images/spells/totem-spell.png": {
+  "x": 0,
+  "y": 38,
+  "w": 1024,
+  "h": 986
+ },
+ "images/townhalls/town-hall-11.png": {
+  "x": 34,
+  "y": 1,
+  "w": 977,
+  "h": 1058
+ },
+ "images/townhalls/town-hall-12.png": {
+  "x": 165,
+  "y": 75,
+  "w": 648,
+  "h": 856
+ },
+ "images/townhalls/town-hall-13.png": {
+  "x": 107,
+  "y": 58,
+  "w": 827,
+  "h": 853
+ },
+ "images/townhalls/town-hall-14.png": {
+  "x": 66,
+  "y": 156,
+  "w": 834,
+  "h": 781
+ },
+ "images/townhalls/town-hall-15.png": {
+  "x": 92,
+  "y": 120,
+  "w": 839,
+  "h": 698
+ },
+ "images/townhalls/town-hall-16.png": {
+  "x": 128,
+  "y": 60,
+  "w": 761,
+  "h": 885
+ },
+ "images/townhalls/town-hall-17.png": {
+  "x": 197,
+  "y": 143,
+  "w": 606,
+  "h": 729
+ },
+ "images/townhalls/town-hall-18.png": {
+  "x": 143,
+  "y": 109,
+  "w": 761,
+  "h": 778
+ },
+ "images/traps/air-bomb-1-2.png": {
+  "x": 88,
+  "y": 58,
+  "w": 113,
+  "h": 173
+ },
+ "images/traps/air-bomb.png": {
+  "x": 89,
+  "y": 55,
+  "w": 111,
+  "h": 179
+ },
+ "images/traps/bomb-1-2.png": {
+  "x": 95,
+  "y": 74,
+  "w": 100,
+  "h": 142
+ },
+ "images/traps/bomb-3-4.png": {
+  "x": 90,
+  "y": 77,
+  "w": 110,
+  "h": 136
+ },
+ "images/traps/bomb-5-6.png": {
+  "x": 89,
+  "y": 73,
+  "w": 112,
+  "h": 144
+ },
+ "images/traps/bomb-7-8.png": {
+  "x": 88,
+  "y": 77,
+  "w": 114,
+  "h": 136
+ },
+ "images/traps/bomb-9-10.png": {
+  "x": 73,
+  "y": 90,
+  "w": 145,
+  "h": 138
+ },
+ "images/traps/bomb.png": {
+  "x": 41,
+  "y": 32,
+  "w": 45,
+  "h": 48
+ },
+ "images/traps/giant-bomb-1-2.png": {
+  "x": 54,
+  "y": 55,
+  "w": 181,
+  "h": 179
+ },
+ "images/traps/giant-bomb-3-4.png": {
+  "x": 55,
+  "y": 54,
+  "w": 180,
+  "h": 182
+ },
+ "images/traps/giant-bomb-5-6.png": {
+  "x": 53,
+  "y": 60,
+  "w": 184,
+  "h": 170
+ },
+ "images/traps/giant-bomb.png": {
+  "x": 0,
+  "y": 0,
+  "w": 127,
+  "h": 102
+ },
+ "images/traps/giga-bomb.png": {
+  "x": 28,
+  "y": 46,
+  "w": 942,
+  "h": 772
+ },
+ "images/traps/seeking-air-mine-1-2.png": {
+  "x": 82,
+  "y": 55,
+  "w": 125,
+  "h": 179
+ },
+ "images/traps/seeking-air-mine.png": {
+  "x": 40,
+  "y": 44,
+  "w": 210,
+  "h": 201
+ },
+ "images/traps/skeleton-trap-1-2.png": {
+  "x": 66,
+  "y": 52,
+  "w": 205,
+  "h": 186
+ },
+ "images/traps/skeleton-trap.png": {
+  "x": 66,
+  "y": 52,
+  "w": 204,
+  "h": 186
+ },
+ "images/traps/spring-trap-1-2.png": {
+  "x": 72,
+  "y": 79,
+  "w": 145,
+  "h": 131
+ },
+ "images/traps/spring-trap-3-4.png": {
+  "x": 73,
+  "y": 78,
+  "w": 143,
+  "h": 133
+ },
+ "images/traps/spring-trap.png": {
+  "x": 73,
+  "y": 77,
+  "w": 144,
+  "h": 136
+ },
+ "images/traps/tornado-trap-1.png": {
+  "x": 50,
+  "y": 71,
+  "w": 179,
+  "h": 152
+ },
+ "images/traps/tornado-trap.png": {
+  "x": 65,
+  "y": 72,
+  "w": 71,
+  "h": 56
+ },
+ "images/troops/archer.png": {
+  "x": 0,
+  "y": 0,
+  "w": 143,
+  "h": 166
+ },
+ "images/troops/baby-dragon.png": {
+  "x": 24,
+  "y": 0,
+  "w": 142,
+  "h": 166
+ },
+ "images/troops/balloon.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/barbarian.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/dragon-rider.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 159
+ },
+ "images/troops/dragon.png": {
+  "x": 0,
+  "y": 0,
+  "w": 154,
+  "h": 166
+ },
+ "images/troops/electro-dragon.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/troops/electro-titan.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ },
+ "images/troops/giant.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/goblin.png": {
+  "x": 0,
+  "y": 2,
+  "w": 166,
+  "h": 164
+ },
+ "images/troops/healer.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/meteor-golem.png": {
+  "x": 126,
+  "y": 41,
+  "w": 750,
+  "h": 900
+ },
+ "images/troops/miner.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/pekka.png": {
+  "x": 0,
+  "y": 0,
+  "w": 166,
+  "h": 166
+ },
+ "images/troops/root-rider.png": {
+  "x": 0,
+  "y": 0,
+  "w": 909,
+  "h": 809
+ },
+ "images/troops/thrower.png": {
+  "x": 322,
+  "y": 96,
+  "w": 569,
+  "h": 720
+ },
+ "images/troops/wall-breaker.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 166
+ },
+ "images/troops/wizard.png": {
+  "x": 0,
+  "y": 1,
+  "w": 166,
+  "h": 165
+ },
+ "images/troops/yeti.png": {
+  "x": 0,
+  "y": 0,
+  "w": 165,
+  "h": 165
+ }
+}

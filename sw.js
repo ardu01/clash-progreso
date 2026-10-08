@@ -25,6 +25,7 @@ const APP = [
   "./js/filters.js",
   "./js/backup.js",
   "./assets/manifest.json",
+  "./assets/cajas-alfa.json",
   "./data/caps_clashrecord.json",
   "./data/bundle.json",
   "./data/snapshots.csv",
