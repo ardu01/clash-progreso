@@ -172,19 +172,6 @@
     "cuentas": 1
   },
   {
-    "id": 107000008,
-    "key": "guardians/107000008",
-    "nombre": null,
-    "nombre_en": null,
-    "categoria": "guardian",
-    "estado": "sin_identificar",
-    "motivo": "ID no presente en los datos estáticos disponibles (coc.py 4.0.0); no se inventa nombre ni se asigna imagen.",
-    "niveles_en_exportaciones": [
-      1
-    ],
-    "cuentas": 1
-  },
-  {
     "id": 103000011,
     "key": "crafting/103000011",
     "nombre": null,

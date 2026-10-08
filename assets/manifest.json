@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "version_set_imagenes": "v1.2",
+  "version_set_imagenes": "v1.3",
   "versiones_congeladas": {
     "v1": "v1/ (130 archivos, 41.314.444 bytes)",
     "v1.1": "v1.1/ (148 archivos, 46.506.107 bytes)",
-    "v1.2": "v1.2/ (este set, congelado tras generarse)"
+    "v1.2": "v1.2/ (184 archivos, 60.458.372 bytes)",
+    "v1.3": "v1.3/ (este set, congelado tras generarse)"
   },
-  "generado": "2026-10-07T23:16:56+02:00",
+  "generado": "2026-10-08T06:44:18+02:00",
   "descripcion": "Mapa ID de exportación de Clash of Clans -> imagen oficial del Supercell Fan Kit (PNG copiado byte a byte, sin modificar).",
   "exportaciones": [
     "c1_principal_2026-10-07.json",
@@ -121,8 +122,8 @@
     "guardian": {
       "total": 3,
       "ok": 2,
-      "faltante": 0,
-      "sin_identificar": 1
+      "id_deducido": 1,
+      "faltante": 0
     },
     "builder_base_hero": {
       "total": 2,
@@ -148,16 +149,16 @@
     }
   },
   "peso_imagenes": {
-    "total_bytes": 60458372,
-    "total_archivos": 184,
+    "total_bytes": 60950695,
+    "total_archivos": 185,
     "precache_instalacion_bytes": 9624126,
     "precache_instalacion_archivos": 14,
     "precache_categorias": [
       "townhall",
       "hero"
     ],
-    "descarga_completa_bytes": 60458372,
-    "descarga_completa_archivos": 184,
+    "descarga_completa_bytes": 60950695,
+    "descarga_completa_archivos": 185,
     "umbral_pesado_bytes": 3000000,
     "pesados": [],
     "rendiciones_cdn_por_peso": [
@@ -170,6 +171,7 @@
       "images/buildings/pet-house.png",
       "images/buildings/spell-factory.png",
       "images/defenses/scattershot.png",
+      "images/guardians/logger.png",
       "images/guardians/longshot.png",
       "images/guardians/smasher.png",
       "images/helpers/alchemist.png",
@@ -198,6 +200,7 @@
       "images/defenses/ricochet-cannon.png",
       "images/defenses/scattershot.png",
       "images/defenses/x-bow.png",
+      "images/guardians/logger.png",
       "images/guardians/longshot.png",
       "images/guardians/smasher.png",
       "images/helpers/alchemist.png",
@@ -427,7 +430,7 @@
     "helpers/93000003": "93000003",
     "guardians/longshot": "107000000",
     "guardians/smasher": "107000001",
-    "guardians/107000008": "107000008",
+    "guardians/logger": "107000008",
     "builder-base/bb-battle-machine": "28000003",
     "builder-base/bb-battle-copter": "28000005",
     "builder-base/bb-raged-barbarian": "4000031",
@@ -10913,20 +10916,61 @@
         1
       ],
       "cuentas": 1,
-      "key": "guardians/107000008",
-      "nombre": null,
-      "nombre_en": null,
-      "nombre_pendiente": false,
+      "key": "guardians/logger",
+      "nombre": "Logger",
+      "nombre_en": "Logger",
+      "nombre_pendiente": true,
       "nombre_propuesto": null,
       "nombre_propuesto_evidencia": null,
-      "nombre_pendiente_motivo": null,
-      "fuente_nombre": null,
+      "nombre_pendiente_motivo": "Nombre en español sin confirmar",
+      "fuente_nombre": "/workspace/coc/analyze.py (INFERRED, línea 12: 107000008:'Logger') + deducción del equipo (Clash, decisión del Líder): caps_clashrecord.json TH18 tiene exactamente 3 guardianes (Guardian-Long Shot, Guardian-Smasher, Guardian-Logger) y C1 tiene 3 IDs de guardián (107000000 y 107000001 verificados)",
       "categoria": "guardian",
-      "estado": "sin_identificar",
+      "estado": "id_deducido",
       "id_verificado": false,
-      "imagen": null,
-      "motivo": "ID no presente en los datos estáticos disponibles (coc.py 4.0.0); no se inventa nombre ni se asigna imagen.",
-      "nota_interna": null
+      "imagen": {
+        "ruta": "images/guardians/logger.png",
+        "formato": "png",
+        "bytes": 492323,
+        "pesado": false,
+        "ancho": 1024,
+        "alto": 1024,
+        "modo_color": "RGBA",
+        "tiene_canal_alfa": true,
+        "fondo_transparente": true,
+        "porcentaje_pixeles_transparentes": 75.6,
+        "sujeto_toca_esquinas": false,
+        "caja_visible": {
+          "x": 36,
+          "y": 335,
+          "w": 988,
+          "h": 689
+        },
+        "ocupacion": 0.6492,
+        "tipo_visual": "recorte_sobre_transparente",
+        "sha256_original": "2132d193cbb9b487ecce2786cef574404f47b17e408229e5a05d4b67bacae8cc",
+        "sha256_copia": "2132d193cbb9b487ecce2786cef574404f47b17e408229e5a05d4b67bacae8cc",
+        "copia_identica": true,
+        "origen": {
+          "fuente": "Supercell Fan Kit – Clash of Clans \"Game assets\" (https://fankit.supercell.com/d/vkEdmkUCngKw/game-assets)",
+          "archivo_local_origen": "coc/assets/oficial/rendiciones_cdn/guardians/Guardian_Logger_01_w1024.png",
+          "archivo_original_fankit_local": "coc/assets/oficial/guardians/Guardian_Logger_01.png",
+          "fankit_asset_id": null,
+          "titulo_fankit": "Guardian_Logger_01",
+          "url_pagina_asset": null,
+          "url_cdn": "https://media.ffycdn.net/eu/supercell/kRCfdQZDYt1fTGxZHxzR.png",
+          "url_descargada": "https://media.ffycdn.net/eu/supercell/kRCfdQZDYt1fTGxZHxzR.png?width=1024",
+          "url_busqueda": "https://fankit.supercell.com/d/vkEdmkUCngKw/game-assets?q=Guardian_Logger_01",
+          "nota": "página firmada no capturada; ID leído de la vista previa de la búsqueda del Fan Kit (?q=guardian), emparejado por orden de la cuadrícula y anclado con guardian_smasher_01 (EtYR29vp8YvoGcnxYiau) y guardian_longshot_01 (9NTnoEF51KLghKUE5SKE); comprobado a ojo",
+          "variante": "con sombra en el suelo (la misma que guardian_longshot_01 y guardian_smasher_01); no se usa Guardian_Logger_01_withoutGroundshadows",
+          "rendicion": "rendición reducida del CDN oficial (?width=1024) del original 3072x3072 (3771109 bytes > 3 MB); descargada tal cual, sin modificar por nosotros. Decisión del Líder: el Logger usa siempre la rendición ?width=1024, por coherencia con Longshot y Smasher",
+          "fecha_descarga": "2026-10-08",
+          "verificado_contra_cdn": "2026-10-08"
+        }
+      },
+      "seleccion": "nivel exacto (máximo de las exportaciones); rendición ?width=1024 por decisión del Líder, por coherencia con Longshot y Smasher",
+      "nivel_representado_en_imagen": 1,
+      "motivo": "ID no presente en los datos estáticos de coc.py 4.0.0; deducido por descarte: único guardián restante (3 guardianes en los caps de TH18, 3 IDs de guardián en C1, 2 de ellos verificados).",
+      "nota_interna": "ID deducido por descarte (v1.3): 107000008 no está en los datos estáticos de coc.py 4.0.0. Nombre en inglés de analyze.py; sin nombre oficial en español verificado."
     },
     "28000003": {
       "id": 28000003,

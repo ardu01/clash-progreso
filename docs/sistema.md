@@ -379,7 +379,8 @@ Las vistas raíz empiezan por `h1.large-title`, así que la última regla solo a
   color: inherit; text-decoration: none;
 }
 a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), var(--label) 6%); }
-.row + .row::before {                      /* separador que arranca donde empieza el texto */
+.row + .row::before,
+li + li > .row::before {                   /* separador que arranca donde empieza el texto; también si cada fila va en su <li> (1.1.1) */
   content: ""; position: absolute; top: 0; right: 0;
   left: var(--row-inset, var(--sp-4));
   height: 0.5px; background: var(--separator);
@@ -397,7 +398,7 @@ button.row { width: 100%; border: 0; background: none; font: inherit; letter-spa
 .chevron    { width: 8px; height: 13px; flex: none; color: var(--label-3); }
 ```
 
-**Dynamic Type en filas.** La `.list` es contenedor (`container-type: inline-size`, como `.sheet__body` en §8.6). Con `19em` de ancho o menos (cuerpo de unos 19 px o más en 390 px: 358 px / 19 px = 18,8em) las filas con trailing ancho pasan a dos líneas: texto arriba y trailing debajo, alineado con el texto. Los títulos de **todas** las filas de lista (`.row__title`: detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes…) dejan de recortarse y bajan de línea con `overflow-wrap: break-word` (solo se parte una palabra si no cabe sola). Las insignias `.badge` y `.badge-id` son `inline-block` + `nowrap`: bajan enteras a la línea siguiente, así que «ID deducido» y el ID de los «Sin identificar» se ven siempre. La miniatura, la barra mini y el trailing siguen centrados en vertical (`align-items: center` de `.row`) y alineados a la derecha. A tamaño normal (17 px, 21,1em) no cambia nada. Clases que pone el JS: `.row--account` en las filas TH13/TH11 del Roster (§7a) y `.row--upgrade` en las filas de mejora y de ayudante (§7c).
+**Dynamic Type en filas.** La `.list` es contenedor (`container-type: inline-size`, como `.sheet__body` en §8.6). Con `19em` de ancho o menos (cuerpo de unos 19 px o más en 390 px: 358 px / 19 px = 18,8em) las filas con trailing ancho pasan a dos líneas: texto arriba y trailing debajo, alineado con el texto. Los títulos de **todas** las filas de lista (`.row__title`: detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes…) dejan de recortarse y bajan de línea con `overflow-wrap: break-word` (solo se parte una palabra si no cabe sola). Las insignias `.badge` y `.badge-id` son `inline-block` + `nowrap`: bajan enteras a la línea siguiente, así que «ID deducido» y el ID de los «Sin identificar» se ven siempre. La miniatura, la barra mini y el trailing siguen centrados en vertical (`align-items: center` de `.row`) y alineados a la derecha. A tamaño normal (17 px, 21,1em) no cambia nada. Clases que pone el JS: `.row--account` en las filas TH13/TH11 del Roster (§7a) y en todas las filas del lote de Importar (§8.4: el tag o alias no se recorta y el trailing `+3 niveles` / `Sin cambios` / `Duplicada`… baja a su propia línea, alineado con el texto; desde 1.1.1), y `.row--upgrade` en las filas de mejora y de ayudante (§7c).
 
 ```css
 .list { container-type: inline-size; }
@@ -429,7 +430,7 @@ button.row { width: 100%; border: 0; background: none; font: inherit; letter-spa
 - `container-type` aplica contención de layout: `.list` pasa a ser bloque contenedor de los descendientes `position: absolute`/`fixed`. Dentro de una lista no hay ninguno (los separadores `::before` cuelgan de `.row`, que es `relative`).
 - El `padding-left` va con el combinador `~` para que una fila sin miniatura no deje el hueco.
 
-Los separadores solo aparecen entre `.row` hermanas: dentro de `.list` van directamente `a.row`, `button.row` o `li.row` (no `li > a.row`).
+Los separadores aparecen entre `.row` hermanas (`a.row`, `button.row`, `div.row` o `li.row` directamente dentro de `.list`) y, desde 1.1.1, también cuando cada fila va envuelta en su `<li>` (`ul.list > li > a.row`, selector `li + li > .row::before`). Antes de 1.1.1 las listas con `li > .row` salían sin separadores. Dentro de un mismo `<li>` no se ponen dos `.row`.
 
 Chevron (SVG de UI, no es un ítem del juego): `<svg class="chevron" viewBox="0 0 8 13" aria-hidden="true"><path d="M1.5 1.5 6.5 6.5 1.5 11.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
@@ -499,11 +500,13 @@ El `overflow: hidden` de `.thumb` recorta lo ampliado solo en pantalla. Con la v
 | Estado | Miniatura | Badge (junto al nombre) | Nombre | ¿Cuenta en %? |
 |---|---|---|---|---|
 | `ok` (122) | imagen | ninguno | `nombre_es ?? nombre_en` | sí |
-| `id_deducido` (v1: 1, el Duque Dragón 28000007; v1.1: 4, el Duque Dragón más Fire Heart 90000052, Rocket Backpack 90000053 y Electro Fangs 90000059) | imagen (o iniciales si no tiene) | **`ID deducido`** (`.badge.badge--soft`) | `nombre_es ?? nombre_en` | sí, con la nota "ID deducido por descarte" en la ficha |
+| `id_deducido` (v1: 1, el Duque Dragón 28000007; v1.1: 4, el Duque Dragón más Fire Heart 90000052, Rocket Backpack 90000053 y Electro Fangs 90000059) | imagen (o iniciales si no tiene) | **`ID deducido`** (`.badge.badge--soft`) | `nombre_es ?? nombre_en` (con `nombre_pendiente`, `nombre_en`; §7b.1, Logger) | sí, con la nota "ID deducido por descarte" en la ficha |
 | `faltante` (55: defensas sin asset, muros, 18 edificios, ayudantes, guardianes, aldea del constructor…) | `.thumb--empty` con **iniciales** | ninguno en listas; `Sin imagen oficial` en la ficha | nombre | sí |
-| `sin_identificar` (v1: 25, con 8 equipamientos, módulos/tipos crafteados, 1 tropa, 1 asedio, 1 hechizo, 1 ayudante y 1 guardián; v1.1: 22, con 5 equipamientos) | `.thumb--unknown` con **"?"** | en listas solo `ID 90000016` (`.badge.badge-id`), porque el título ya dice "Sin identificar"; en la ficha, además `sin identificar` (`.badge`) | "Sin identificar" en cursiva | **no** (no hay máximo conocido) |
+| `sin_identificar` (v1: 25, con 8 equipamientos, módulos/tipos crafteados, 1 tropa, 1 asedio, 1 hechizo, 1 ayudante y 1 guardián; v1.1: 22, con 5 equipamientos) | `.thumb--unknown` con **"?"** | en listas solo `ID 90000016` (`.badge.badge-id`), porque el título ya dice "Sin identificar"; en la ficha, además `sin identificar` (`.badge`) | "Sin identificar" en cursiva | **no**, salvo que `caps_clashrecord.json` tenga tope para ese ID en el TH de la cuenta (ver «Qué cuenta en el %», abajo). Los `crafting_module` suman en Defensas vía `craftedScore` |
 | cargando (online) | `--thumb-bg` liso, imagen invisible hasta `load` | — | — | — |
 | no está en caché y no hay conexión | `.thumb--offline`: rayado diagonal, sin texto | — | — | — |
+
+**Qué cuenta en el % (regla única; decisión del equipo, 8 oct 2026).** El `estado` del manifiesto decide la miniatura, el badge y el nombre, **nunca** si un ítem cuenta. Cuenta en el % el ítem que tiene tope en `caps_clashrecord.json` para el TH de la cuenta, buscado por ID (ID → `ALIAS` de `js/progress.js` → `items[id].nombre_en` → `caps[TH][clave]`, §7b.1 y nota del PR #2), y entonces lleva barra y `Nv N / máx`. Es lo que ya hace `summarize()`/`analyze()` en 1.1.1. Por eso un ítem `sin_identificar` con tope sí cuenta (hoy 107000008 en C1, `Nv 1 / 5`, vía `ALIAS` `Guardian-Logger`). La única excepción son los módulos del taller (`categoria === "crafting_module"`, 102000033–102000041): no tienen tope propio, pero suman en Defensas a través de `craftedScore`. Matices que no cambian: en Equipamiento no cuentan las piezas en nivel 1 (§7b.2) y los «Disponible en THn» no tienen tope en el TH actual. **Todo aviso «N ítems sin identificar»** (detalle de categoría §7b.1, vista previa §8.4) cuenta los ítems que se muestran con **"?"** (desconocidos) **y** no tienen tope tras `ALIAS` (sin contar los `crafting_module`), nunca por el `estado`, así que el aviso y el % no pueden contradecirse. Los ítems conocidos sin clave en caps (Ayuntamiento, Estación de crafteo, Cabaña de B.O.B) no entran en el aviso aunque tampoco cuenten en el %. Además, el aviso cuenta solo los ítems de las secciones que alimentan el %; los ayudantes quedan fuera porque no son categoría de progreso (`SECTIONS`, `js/import.js:7`, no incluye `helpers`); por eso `93000003` («?» en C1) no suma.
 
 ```css
 /* faltante: caja neutra con iniciales */
@@ -789,7 +792,13 @@ No lleva ilustraciones ni iconos: solo texto y acción.
 
 ### 5.11 Skeleton (cargando datos)
 
-Los datos se leen de almacenamiento local y tardan muy poco. El skeleton solo aparece si la carga pasa de 150 ms. Es distinto del `.thumb--offline` rayado: el skeleton es liso y pulsa.
+Los datos se leen de almacenamiento local y tardan muy poco. Es distinto del `.thumb--offline` rayado: el skeleton es liso y pulsa.
+
+**Regla de los 150 ms** (vale para este skeleton y para «Validando…» de Importar, §8.3):
+- Al empezar la carga se arranca un **temporizador de 150 ms**. Si el resultado llega antes, se pinta directamente el resultado y el skeleton **no llega a pintarse nunca**.
+- Solo si el temporizador vence sin resultado se pinta el skeleton, y se queda hasta que llega el resultado.
+- Está prohibido pintarlo siempre y quitarlo uno o dos frames después: eso es un destello (1.1.1 lo hacía en Importar, ~33 ms).
+- Si el trabajo es síncrono (p. ej. validar varias exportaciones), se cede el hilo entre trozos (`await` entre archivos) para que el temporizador pueda vencer.
 
 ```css
 .sk { background: var(--fill-4); border-radius: 6px; color: transparent; }
@@ -1119,7 +1128,16 @@ Referencia: iPhone 15/16, 393×852 pt, safe area superior de 59 e inferior de 34
 - "Sin desbloquear" (`lvl` 0, `Nv 0 / 5`).
   - **Ítems que solo están en `caps_clashrecord.json`** (sin ID ni entrada en el manifiesto; hoy la Inferno Artillery, defensa de TH17, 1 unidad, máx. 5, decidido por Clash el 8 oct 2026): aparecen aquí con la miniatura de `faltante` (iniciales `IA`) y el nombre tal como viene en `caps_clashrecord.json` (en inglés y sin badge en la lista). El trailing sigue la regla general de máximos: si el TH de la cuenta tiene la clave, `Nv 0 / 5` con barra vacía; si no la tiene, `Disponible en TH17` sin barra (C2, TH16, corregido el 8 oct 2026 a propuesta de Clash). El % lo decide Clash. Su ficha no tiene `.badge-id` y lleva solo las notas `Sin imagen` y `Nombre en español sin confirmar`. [Nota interna, no se muestra: Imágenes comprobó el 8 oct 2026 que el Fan Kit no tiene ningún recurso de la Inferno Artillery.] Entra en el PR de imágenes. No se le inventa un ID.
 - "Al máximo" (`Máx` en `--green-text`).
-- "Sin identificar", al final, con el aviso "N ítems sin identificar no cuentan en el %". N solo cuenta los que quedan fuera del %: los `crafting_module` (102000033–102000041) no entran, porque sí cuentan en Defensas.
+- "Sin identificar", al final, con el aviso `.section-footer` `N ítems sin identificar no cuentan en el %.` (singular: `1 ítem sin identificar no cuenta en el %.`).
+  - N solo cuenta los que de verdad quedan fuera del %, con la **misma comprobación que decide el %** (§5.4, «Qué cuenta en el %»), no con el `estado` del manifiesto: no entran los que tienen tope en `caps_clashrecord.json` para el TH de la cuenta y llevan barra (p. ej. 107000008 en C1, `Nv 1 / 5`), ni los `crafting_module` (102000033–102000041), que sí cuentan en Defensas vía `craftedScore`.
+  - **Si N es 0, no hay aviso** (el grupo puede seguir saliendo, p. ej. con los módulos). El texto termina en «en el %.»: la coletilla de 1.1.1 «salvo cuando el archivo de máximos les da un tope (laboratorio, defensas crafteadas y el guardián sin ficha)» se quita, porque con esta regla nunca es cierta.
+  - Con el manifiesto v1.2 y los datos del 07/10: Defensas no lleva aviso en ninguna de las 11 cuentas; Laboratorio de C1 lleva `3 ítems…`. La suma de estos avisos más las piezas sin identificar de Equipamiento es la N de la vista previa de Importar (§8.4).
+- **Logger (107000008, guardián de TH18)**: aceptado como Logger por la clave `Guardian-Logger` de caps (`ALIAS` en `js/progress.js`, decisión del equipo del 8 oct 2026). Imágenes lo pasa a `id_deducido` en el próximo set de imágenes. Se presenta como el Duque Dragón y la Inferno Artillery:
+  - título de fila = `nombre_en` `Logger`, **sin inventar nombre en español**; `.badge` `ID deducido`;
+  - en la ficha, la footnote `Nombre en español sin confirmar` y la nota de `id_deducido` (§5.4);
+  - imagen del Fan Kit solo si existe; si no, miniatura `faltante` con iniciales y `Sin imagen` en la ficha;
+  - los porcentajes no cambian: ya cuenta hoy (`Nv 1 / 5` en C1).
+  - Mientras el manifiesto lo tenga como `sin_identificar` (v1.2), la app sigue leyendo el `estado` (§5.4) y lo pinta con «?» e `ID 107000008` en el grupo «Sin identificar», con su barra, pero **no** entra en N.
 
 **Detalle de Muros** (`#/progreso/<tag>/muros`). No hay ítems sueltos, así que la estructura cambia:
 - **Tarjeta** (`.card.cat-muros`): el mismo `.prog` grande que el resto de detalles (`Muros` + `69,5 %`, `.bar--lg` con doble referencia y pie `TH12: 40,7 % · faltan 2011 niveles` o `Faltan 1884 niveles` en C1). Debajo, la barra apilada `.walls` (con `margin-top: 12px`), los chips `.wall-chips` y el pie `.prog__foot` `325 piezas · nivel medio 13,2 · máximo TH18: Nv 19` (§5.6). Es la misma tarjeta que en la pestaña Categorías más la línea de referencia del TH siguiente.
@@ -1140,7 +1158,7 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
 
 **Cabecera** (`.card`):
 - `Equipamiento` (t-headline) y a la derecha **`43 piezas`** (`.t-headline .num`), el contador grande y siempre visible.
-- Footnote c-2: `34 con imagen · 1 sin imagen · 8 sin identificar · 13 en nivel 1`.
+- Footnote c-2: `34 con imagen · 1 sin imagen · 8 sin identificar · 13 en nivel 1` (ejemplo del manifiesto v1; con el v1.2, C1 tiene 5 sin identificar en Equipamiento).
 - `.prog` con el % de la categoría y la nota `El % no cuenta piezas en nivel 1 ni sin identificar`, la misma regla de `summarize()`.
 
 **Grupos por héroe**: el campo `heroe` del manifiesto permite agruparlas. Los grupos siguen el orden del juego: Rey Bárbaro (8) · Reina Arquera (7) · Gran Centinela (7) · Luchadora real (7) · Príncipe Esbirro (6) · Duque Dragón (solo si hay piezas con ese `heroe`). Las piezas con `heroe: null` van a un último grupo **"Héroe sin identificar"**: en la v1 son las 8 sin identificar; en la v1.1, Fire Heart, Rocket Backpack y Electro Fangs pasan a `id_deducido` y van al grupo de su héroe si el manifiesto trae `heroe` (si no, se quedan en el último grupo con su nombre y badge), y quedan 5 sin identificar (90000016, 90000056, 90000057, 90000060, 90000061), que siguen contando en el total de piezas. Cada grupo es una `.card` con:
@@ -1434,9 +1452,9 @@ guarda al verlas por primera vez. Recomendado con wifi.
 | 2 | **Vacío · en Safari** (no instalada) | Igual que 1, con la tarjeta «Estás en Safari» encima del seg. Condición: `navigator.standalone === false` (propiedad que solo existe en iOS) | **Pegar** | |
 | 3 | **Vacío · Archivos** | Seg. Tarjeta «Desde Archivos». La lista «Con un Atajo de iOS» queda **fuera** mientras el Atajo esté aplazado | **Elegir archivos…** | |
 | 4 | **Atajo** (pantalla dentro del sheet) · **APLAZADA** | **Aplazada el 7 oct 2026** hasta que Miguel pruebe el Atajo en su iPhone. No se implementa en este PR; el diseño se guarda aquí y en la maqueta (`#/atajo`, con la marca «Aplazada»). Lead `‹ Importar`, título «Atajo», acciones en orden y cómo lanzarlo (§8.7) | **Elegir archivos…** | |
-| 5 | **Validando** | Solo si tarda más de 150 ms (misma regla que §5.11). Tarjeta con `.sk` (miniatura de 96 y 3 líneas), `aria-busy="true"` | **Validando…** (deshabilitado) | |
-| 6 | **Vista previa** (1 cuenta) | Tarjeta `.preview` + `dl.kv`; sección «Cambios» con la lista de §8.5 | **Importar** | Pegar otra |
-| 7 | **Lote** (varios archivos) | Resumen `12 archivos · 11 listos · 1 omitido`; grupos «Listos para importar» y «Se omiten» con filas `.row--thumb44` | **Importar 11 cuentas** | |
+| 5 | **Validando** | **Solo si la validación no ha terminado 150 ms después** del toque en Pegar / Revisar, del pegado a mano o de elegir archivos (temporizador, regla de §5.11). Si termina antes, se pasa directo a la vista previa, al error o al lote **sin pintar Validando: nunca un destello**. Tarjeta con `.sk` (miniatura de 96 y 3 líneas), `aria-busy="true"` | **Validando…** (deshabilitado) | |
+| 6 | **Vista previa** (1 cuenta, **solo desde Pegar**) | Tarjeta `.preview` + `dl.kv`; sección «Cambios» con la lista de §8.5 | **Importar** | Pegar otra |
+| 7 | **Lote** (desde Archivos, **uno o varios** archivos) | Resumen `12 archivos · 11 listos · 1 omitido` (con uno: `1 archivo · 1 listo`); grupos «Listos para importar» y «Se omiten» con filas `.row--thumb44` | **Importar 11 cuentas** (con uno: **Importar 1 cuenta**) | |
 | 8 | **Éxito** | Se cierra el sheet y vuelve a Roster con toast `.toast--ok`; la tarjeta o fila afectada lleva `.is-flash` 1,2 s | | |
 | 9 | **Error · no se puede leer** | Seg + tarjeta de error (variantes en §8.4) | **Pegar de nuevo** (en Archivos: **Elegir otros archivos**) | |
 | 10 | **Tag desconocido** | Tarjeta con el tag como título, TH y fecha, más el aviso. **No se importa sin más** | **Añadir como cuenta nueva…** | Pegar otra |
@@ -1445,6 +1463,8 @@ guarda al verlas por primera vez. Recomendado con wifi.
 | 12 | **Duplicado** (misma cuenta y mismo `timestamp`) | Tarjeta de vista previa + info; se descarta | **Pegar otra** | |
 | 14 | **Éxito · cuenta nueva** | Roster desplazado hasta «Otras cuentas», con la fila nueva en `.is-flash` y el toast | | |
 | 13 | Error al guardar | El sheet sigue abierto; `.msg-err` encima del botón en `.sheet__actions` | **Reintentar** | |
+
+**Archivos siempre abre el lote** (decisión del 8 oct 2026, 1.1.2): elegir **un solo archivo** abre el lote `1 archivo · 1 listo` (o `1 archivo · 1 cuenta nueva`, `1 archivo · 0 listos · 1 no válido`…), **nunca** la vista previa suelta con «Pegar otra», que en 1.1.1 llevaba a la pestaña Pegar sin venir de ella. La vista previa de esa cuenta se abre tocando su fila (lead `‹ Importar`). Los estados 6, 10, 11 y 12 con «Pegar otra» y el 9 con «Pegar de nuevo» son del flujo Pegar; desde Archivos esos casos son filas del lote.
 
 En el **lote**, cada archivo pasa por las mismas reglas y la fila dice en palabras en qué caso está (§8.4). Si dos archivos traen la misma cuenta, el más nuevo actualiza y el resto va como «Más antigua» al histórico; dos con el mismo `timestamp` cuentan una sola vez y el otro sale como «Duplicada». El orden de las filas es el fijo del Roster (C1, C2, TH13, TH11), con los tags ajenos al final. Opcional: al tocar una fila se abre la vista previa de esa cuenta dentro del sheet, con lead `‹ Importar`.
 
@@ -1477,7 +1497,7 @@ En el **lote**, cada archivo pasa por las mismas reglas y la fila dice en palabr
 - Cabecera `Para lanzarlo sin salir del juego`. Filas: `Toque atrás` / `Ajustes → Accesibilidad → Tocar → Toque atrás.` · `Botón de Acción` / `En los iPhone que lo tienen.`
 - Footer: `El Atajo no puede abrir esta app ni pasarle datos directamente: se entienden a través de los archivos.`
 
-**Validando**: botón `Validando…` y `role="status"` oculto: `Validando la exportación`.
+**Validando** (solo si vence el temporizador de 150 ms, §8.3): botón `Validando…` y `role="status"` oculto: `Validando la exportación`.
 
 **Vista previa** (ejemplo de la maqueta, C2 con la simulación del vie 09/10 18:00):
 ```
@@ -1499,8 +1519,11 @@ CAMBIOS                                        3
 [img] Reina Arquera     Nv 29 → 30 · Héroes
 Al importar se añade un punto a Evolución.
 ```
+- Título, línea del tag y línea de fecha van en tres bloques (`div`) dentro de `.preview__main`, separados por su `gap: 2px`; nada de `<p>` con margen ni de `<span>` en línea.
+- Fila **Media** (§8.5): si cambia, `48,8 % → 48,9 %` y la `.delta` (`+0,1`); si no cambia, `49,0 % · sin cambio`, **sin flecha ni valor repetido**. A 17 px la línea con cambio puede ocupar dos líneas en el `dd`: la `.delta` baja entera (`nowrap`), nunca se separa el signo de la cifra.
 - Línea de fecha: `Datos del <fmtFin>` (hora de Madrid, §3). El título es el alias del Roster (`C1 Principal`, `C2 Secundaria`) o el tag en `.tag`. La línea del tag lleva `→ objetivo THn` solo si el objetivo es mayor que el TH.
 - Variantes: `Primera exportación de esta cuenta en este iPhone.` (`.section-footer`, sin «Último punto» ni lista) · `Sin cambios desde el último punto. Se añadirá igualmente un punto a Evolución.` (en lugar de la lista) · si sube de TH, la primera fila `dt` es `Ayuntamiento` con `TH16 → TH17`, y si la media baja va la footnote `La media se compara ahora con los máximos de TH17.`
+- La lista «Cambios» va en su propia `.section` (cabecera + `.list` + footer), con el margen de sección del sheet, no pegada a la tarjeta (1.1.1). Si solo cambia el TH y no hay cambios de ítems, no hay sección «Cambios»: solo el footer `Al importar se añade un punto a Evolución.`
 - Cabecera de la lista: `Cambios` con el número a la derecha (`.num`). La referencia ya está en la fila `Último punto`; con un título largo y texto grande, el número quedaba en mitad de la frase.
 - `role="status"` oculto: `Exportación de C2 Secundaria lista para importar`.
 
@@ -1510,6 +1533,7 @@ Al importar se añade un punto a Evolución.
 - Fila de cuenta nueva: `a.row`/`button.row` con chevron, título = tag (`.tag`), subtítulo `TH16 · datos del mié 07/10 21:23` y trailing `Añadir…`. Al tocarla se abre la pantalla 10b. Footer: `No es una de tus cuentas. Tócala si quieres añadirla; si no, no se importa.`
 - Subtítulo de fila: `TH16 · datos del vie 09/10 18:00`.
 - Trailing en palabras: `+3 niveles` · `+1 nivel` · `Sin cambios` (también se importa y añade punto) · `Primera` · `Más antigua` (`--orange-text`, va al histórico) | en «Se omiten»: `Duplicada` · `No válido` (`--red-text`).
+- Fila de archivo no válido (no hay tag que mostrar): título `No válido`, subtítulo = nombre del archivo, **sin trailing** (para no repetir «No válido»), también `.row--account`.
 - Footer de «Se omiten», según el caso: `Misma cuenta y misma hora que una ya guardada.` · `No es una exportación válida.`
 - Primario: `Importar 11 cuentas` · `Importar 1 cuenta`. Las cuentas nuevas no entran en ese número: se añaden una a una desde su fila. Si no queda ninguna lista: `Elegir otros archivos`.
 
@@ -1521,8 +1545,12 @@ Al importar se añade un punto a Evolución.
 | No se confirmó el globo «Pegar» (`readText()` rechaza) | `No se ha pegado nada` | `iOS necesita que confirmes el pegado.` | `Al tocar Pegar aparece un globo «Pegar» encima del botón: tócalo. También puedes mantener pulsado el cuadro de texto.` |
 | Texto cortado: empieza por `{` y no cierra, o el error de parseo es de fin de texto | `No se pudo leer la exportación` | `El texto está incompleto: parece cortado al copiar.` | `Vuelve a Clash of Clans y toca Copiar otra vez en Exportar datos.` |
 | Otro texto (no empieza por `{`) | `No se pudo leer la exportación` | `Lo que hay en el portapapeles no es una exportación. Empieza por «https://link.cla…».` (primeros 20 caracteres, en `.tag`) | igual |
+| Empieza por `{` y termina en `}`, pero no se puede leer | `No se pudo leer la exportación` | `El texto no es una exportación válida.` | igual |
 | JSON válido que no es una exportación | `No es una exportación de Clash of Clans` | `Falta el tag de la cuenta.` · `Falta la fecha de exportación.` · `No se encuentra el ayuntamiento.` (uno por línea) | igual |
 | Archivo ilegible (lote) | fila en «Se omiten» con `No válido`, subtítulo = nombre del archivo | | |
+
+- **«Empieza por «…».»: el final va pegado.** Todo el mensaje va en el único `<span>` de `.msg` (§8.6) y la muestra en `.tag`. El último carácter de la muestra, el `»` y el `.` van juntos en un `span.nowrap`: con la muestra `https://link.clashof` (20 caracteres): `Empieza por «<span class="tag">https://link.clasho</span><span class="nowrap"><span class="tag">f</span>».</span>`. Un `&nbsp;` no basta: no hay espacio que sustituir y `overflow-wrap: anywhere` corta entre cualquier par de caracteres. Así la línea puede partirse dentro de la muestra, pero nunca deja `.`, `»` ni `».` solos (en 1.1.1 el `.` quedaba solo en otra línea a 28 px; probado con 7 muestras de 17 a 32 px, sin huérfanos ni desborde).
+- **Textos al leer un archivo** (`parseLoose(text, "file")`, en la app desde 1.1.0): vacío → `No hay nada que leer` / `El archivo está vacío.` / `Elige otra exportación JSON.` · no empieza por `{` → `El archivo no es una exportación. Empieza por «…».` · cortado → `El archivo está incompleto.` · no se puede leer → `El archivo no es una exportación válida.`. Título `No se pudo leer la exportación` y ayuda `Elige el JSON que exporta Clash of Clans.` en los tres últimos. En 1.1.1 salen en la tarjeta de error al elegir un solo archivo; con «Archivos siempre abre el lote» (§8.3) ese archivo pasa a ser una fila «No válido» (punto abierto en §8.11).
 
 **Casos de la cuenta**
 - Tag desconocido: `.msg-warn` `#QL0Y2P8CU no es una de tus cuentas.` + footnote `Si es una cuenta tuya nueva, añádela. Si copiaste desde otra cuenta por error, cambia de cuenta en el juego y vuelve a copiar.` Subtítulo de la tarjeta: `TH16 · sin objetivo`. Primario `Añadir como cuenta nueva…` (los puntos suspensivos indican que pide confirmación) y `.btn--plain` `Pegar otra`. «Importar igualmente» desaparece.
@@ -1564,16 +1592,24 @@ objetivo TH18 + TH17 + 9×TH15 no cambia.
 **Dónde aparece la cuenta nueva**
 - **Roster**: sección `Otras cuentas` con el número a la derecha (`.section-header` + `.num`), **después de TH11** y antes del enlace «Ajustes y aviso legal». Una fila `.row.row--thumb44` por cuenta, como las TH13/TH11: TH en `.thumb--44`, título = alias o tag (`.tag`), subtítulo `TH16 · sin objetivo · 8 mejoras`, trailing `.bar--mini` **sin marca** (media frente a su TH) + `48,8 %` + chevron.
 - **Progreso**: al final del selector de cuenta. **Mejoras**: con su chip corto (`16·8CU`). **Evolución**: sus puntos se guardan, pero ni la tarjeta Objetivo ni la escalera la cuentan hasta que decida el líder.
-- **Ajustes → Datos**: fila `.row.row--destructive` `Quitar #QL0Y2P8CU` (o el alias), con alerta `¿Quitar #QL0Y2P8CU?` / `Se borrarán su alias y sus importaciones de este iPhone.` / `Cancelar` · **`Quitar`** (`.is-destructive`). Las 11 cuentas fijas no se pueden quitar.
+- **Ajustes → Datos**: fila `.row.row--destructive` `Quitar #QL0Y2P8CU` (o el alias), con alerta `¿Quitar #QL0Y2P8CU?` / `Se borrarán su alias y sus importaciones de este iPhone.` / `Cancelar` · **`Quitar`** (`.is-destructive`). Al quitarla: toast `.toast--ok` `Cuenta quitada` (1.1.1). Las 11 cuentas fijas no se pueden quitar.
 - Más antigua: `.msg-warn` `Es más antigua que la última guardada (vie 09/10 18:00).` + footnote `Se añadirá solo al histórico. Roster, Progreso y Mejoras seguirán con la del vie 09/10 18:00.`
+  - La `dl.kv` de esa tarjeta compara **desde la exportación antigua hasta el último punto** (p. ej. `Mejoras en curso 6 → 8`), y `Equipamiento` dice las piezas de la antigua (1.1.1).
 - Duplicado (misma cuenta y mismo `timestamp`): `.msg-info` `Duplicada: ya hay una exportación de esta cuenta con la misma hora (mié 07/10 21:22). Se descarta.` + footnote `Si has cambiado algo en el juego, vuelve a copiar: cada copia lleva su propia hora.`
 - Sin cambios con otro `timestamp`: **no** es duplicado. Se importa y añade punto (§8.4, vista previa, variante «Sin cambios»).
-- Ítems sin identificar (no bloquea): `.msg-info` `4 ítems sin identificar: se guardan igual.` (C2). El recuento solo incluye los que quedan fuera del %. Los de `categoria` `crafting_module` del manifiesto (102000033–102000041) no entran: cuentan en Defensas. No se les pone nombre ni se añade otra línea en la vista previa.
+- Ítems sin identificar (no bloquea): `.msg-info` `4 ítems sin identificar: se guardan igual.` (C2 con el manifiesto v1.2; singular `1 ítem sin identificar: se guarda igual.`). Si N es 0, no hay línea.
+  - N cuenta solo los ítems que se muestran con **"?"** (desconocidos) **y** quedan fuera del %, con la **misma comprobación que decide el %** (§5.4, «Qué cuenta en el %»: sin tope en `caps_clashrecord.json` para el TH de la cuenta, buscado por ID tras `ALIAS`), nunca con el `estado` del manifiesto. No entran:
+    - los ítems conocidos sin clave en caps (Ayuntamiento, Estación de crafteo, Cabaña de B.O.B): tienen nombre, así que no son «sin identificar»;
+    - los ayudantes: el aviso cuenta solo los ítems de las secciones que alimentan el %; los ayudantes quedan fuera porque no son categoría de progreso (`SECTIONS` en `js/import.js:7` no incluye `helpers`; `93000003` de C1 no suma);
+    - los que tienen tope y llevan barra (p. ej. 107000008, Logger, en C1: `Nv 1 / 5`);
+    - los módulos del taller (`categoria === "crafting_module"`, `102000033`–`41`): no tienen nombre, pero `craftedScore` los suma en Defensas. No se añade ninguna línea por los módulos en la vista previa, y no se les inventa nombre.
+  - **Mismo número en los dos sitios**: la vista previa y los avisos «Sin identificar» de los detalles de categoría (§7b.1, Defensas incluida) usan la misma función, así que no pueden diferir. La N de la vista previa = suma de los avisos de todas las categorías de esa cuenta + piezas sin identificar de Equipamiento. Con el manifiesto v1.2 y los datos del 07/10: **C1 = 8** (Laboratorio 3 + Equipamiento 5; Defensas sin aviso); C2 y las 9 TH13/TH11 = 4 (Equipamiento; Defensas sin aviso). 1.1.1 da 9 en C1 porque cuenta 107000008.
+  - (Decisión de Diseño del 8 oct, tras Clash e Imágenes; ampliada el 8 oct con la regla del tope y el Logger.)
 - **ID fuera del manifiesto** (`items[String(id)]` es undefined, típico de una cuenta nueva o de una actualización del juego): se muestra como `sin_identificar`, con `.thumb` «?» y `.badge.badge-id` con su ID, sin nombre inventado, y la vista no se rompe. Si tampoco está en `caps_clashrecord.json`, queda fuera de los porcentajes, igual que los tres sin identificar actuales. Se avisa a Imágenes para buscarlo en el Fan Kit.
 - Error al guardar: `.msg-err` `No se pudo guardar en este iPhone. Vuelve a intentarlo.` y botón `Reintentar`. No se usa toast porque taparía el botón del sheet.
 
 **Éxito** (toast `.toast--ok`, 3 s)
-- `C2 Secundaria actualizada` · `#GVPU80R80 actualizada` · `Añadida al histórico de C2 Secundaria` · `11 cuentas actualizadas` · `10 cuentas actualizadas · 1 al histórico` · `Cuenta añadida: #QL0Y2P8CU`.
+- `C2 Secundaria actualizada` · `#GVPU80R80 actualizada` · `Añadida al histórico de C2 Secundaria` · `11 cuentas actualizadas` · `10 cuentas actualizadas · 1 al histórico` (con una: `1 cuenta actualizada · 1 al histórico`) · `2 al histórico` (solo antiguas) · `Cuenta añadida: #QL0Y2P8CU`. Al quitar una cuenta añadida: `Cuenta quitada`.
 - En Roster, `.large-sub` pasa a `11 cuentas · última importación vie 09/10 18:00`.
 
 ### 8.5 Validación y comparación
@@ -1583,7 +1619,8 @@ objetivo TH18 + TH17 + 9×TH15 no cambia.
 **Safari no da posición en los errores de JSON.** JavaScriptCore devuelve `JSON Parse error: Expected '}'` o `Unexpected identifier "https"`, sin «position N» (comprobado con JavaScriptCore vía Bun 1.4.2). El `parseLoose` del PR busca `position` y en el iPhone nunca encontrará nada, así que el texto antiguo «(línea 3, columna 18)» desaparece. Las variantes de la tabla salen de mirar el propio texto: vacío, empieza o no por `{` y si termina en `}`.
 
 **Cambios desde el último punto** (el último punto es la exportación más nueva guardada de ese tag):
-- Media: `48,8 % → 48,9 %` y delta `.delta`: `+0,1` en `--green-text` si sube y `−0,3` en `--label-2` si baja. **Nunca rojo**. Si la diferencia es menor de 0,05 se escribe `sin cambio`.
+- Media: `48,8 % → 48,9 %` y delta `.delta`: `+0,1` en `--green-text` si sube y `−0,3` en `--label-2` si baja. **Nunca rojo**. La `.delta` va en `white-space: nowrap`.
+- Si la diferencia es menor de 0,05: `49,0 % · sin cambio` (valor nuevo, ` · ` y `sin cambio` en `.delta` sin modificador), **sin flecha ni valor repetido**. En 1.1.1 salía `49,0 % → 49,0 % sin cambio`, que a 17 px partía línea.
 - Mejoras en curso: `antes → ahora` y, en otra fila, `Próxima` con `<fmtFin>` (en una sola fila partía línea a 17 px).
 - Lista de niveles: por cada `(sección, data)` se compara la suma de `lvl × cnt`. Si solo cambia una instancia: `Nv 9 → 10`. Si cambian varias: `+3 niveles`. Si aparece una instancia nueva: `Nuevo`. Los muros van en **una sola fila** `Muro` · `+12 niveles`. Cada fila lleva la categoría tras « · ».
 - Orden de la lista: el **orden fijo de categorías de §2** (Héroes en 6.º lugar, también en C1) y, dentro de cada una, por nombre. Como mucho 8 filas; si hay más, footer `Y 5 cambios más.`
@@ -1617,6 +1654,7 @@ CSS nuevo (los mensajes `.msg-*` adoptan los nombres que ya usa `css/views.css` 
 
 /* Mensajes en línea: el punto es decoración; el significado va en el texto */
 .msg { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-3) 0 0; font-size: 0.882rem; line-height: 1.333; }
+.msg > span { min-width: 0; overflow-wrap: anywhere; }       /* todo el texto en UN span: .msg es flex (1.1.1) */
 .msg::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--label-3); transform: translateY(-1px); }
 .msg-err  { color: var(--red-text); }
 .msg-err::before  { background: var(--red); }
@@ -1625,9 +1663,12 @@ CSS nuevo (los mensajes `.msg-*` adoptan los nombres que ya usa `css/views.css` 
 .msg-info { color: var(--label-2); }
 .sheet__actions .msg { margin: 0 0 var(--sp-2); }
 
-.delta { font-weight: 600; font-variant-numeric: tabular-nums; }
+.delta { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }   /* el signo nunca se separa de la cifra */
 .delta--up   { color: var(--green-text); }
 .delta--down { color: var(--label-2); }                      /* nunca rojo */
+.nowrap { white-space: nowrap; }                             /* «…».: último carácter + » + . juntos (§8.4) */
+.trail-warn { color: var(--orange-text); font-weight: 600; } /* trailing «Más antigua» del lote */
+.trail-bad  { color: var(--red-text); font-weight: 600; }    /* «No válido»; desde 1.1.1 esa fila no lleva trailing */
 .sheet__actions .btn + .btn { margin-top: var(--sp-1); }
 
 /* Campo de texto en fila (alias de cuenta nueva). 1rem ≥ 16 px: Safari no hace zoom al enfocar */
@@ -1644,7 +1685,8 @@ CSS nuevo (los mensajes `.msg-*` adoptan los nombres que ya usa `css/views.css` 
   @keyframes flash-out { to { background: var(--bg-2); } }
 }
 
-/* Dynamic Type: el sheet es el contenedor; 19em ≈ cuerpo de 21 px o más en 393 px */
+/* Dynamic Type: el sheet es el contenedor; 19em ≈ cuerpo de 21 px o más en 393 px.
+   En la app, este bloque va en css/views.css DETRÁS de las reglas base de .preview/.kv (ver nota debajo) */
 .sheet__body { container-type: inline-size; }
 @container (max-width: 19em) {
   .preview { grid-template-columns: 1fr; row-gap: var(--sp-3); }
@@ -1656,6 +1698,11 @@ CSS nuevo (los mensajes `.msg-*` adoptan los nombres que ya usa `css/views.css` 
 ```
 
 Con `prefers-reduced-motion`, `.is-flash` se queda fijo y lo quita el JS a los 1,2 s.
+
+Notas de implementación (aprendidas en 1.1.1):
+- **Texto de `.msg` en un solo `<span>`** (`msgLine(cls, role, html)` en `js/app.js`). `.msg` es flex: cada hijo en línea (texto suelto, `.tag`, `<b>`) sería un elemento flex aparte y «Empieza por «…».» salía en columnas. Con `.msg > span { min-width: 0; overflow-wrap: anywhere }` el texto fluye como un párrafo y una URL larga parte línea sin desbordar.
+- **Cada bloque `@container` va en la misma hoja que sus reglas base y detrás de ellas.** Con la misma especificidad, gana la regla que va después en la cascada: en 1.1.1 el bloque de `.preview`/`.kv` estaba en `components.css` y lo anulaban las reglas base de `views.css`, que carga después (orden: `tokens.css`, `base.css`, `components.css`, `views.css`). Ahora va en `views.css`, justo detrás de `.kv dd`.
+- `.trail-warn` / `.trail-bad` son las clases de la app para los trailing en color del lote (§8.4).
 
 ### 8.7 Llegada desde un Atajo de iOS, sin backend
 
@@ -1708,6 +1755,8 @@ El Atajo solo comprueba que hay `tag`; la validación de verdad la hace la app.
   - Todo el texto del sheet va en `rem`. El chrome es fijo, como en iOS: barra del sheet a 17 px y segmented a 13 px.
   - `.sheet__body` es contenedor (`container-type: inline-size`). Con cuerpo de 21 px o más (≤ 19em en 393 px), la miniatura de la vista previa baja a 72 px y se apila encima, y `.kv` pasa a una columna (etiqueta encima y valor a la izquierda). El chip del título baja de línea.
   - Las filas de pasos dejan el texto largo en `.row__sub`, que sí parte línea. El título de fila es corto porque lleva `ellipsis`.
+  - Las filas del lote llevan `.row--account` (§5.3): con la `.list` a 19em o menos, el tag o alias no se recorta ni se parte a mitad de palabra y el trailing (`+3 niveles`, `Sin cambios`, `Duplicada`…) baja a su propia línea, alineado con el texto (comprobado a 28 px en 1.1.1).
+  - Los mensajes `.msg` fluyen como un párrafo (§8.6) y «Empieza por «…».» no deja la puntuación final sola (§8.4).
   - Los botones de 50 px crecen con el texto. Con dos botones en `.sheet__actions`, el cuerpo sigue desplazándose por detrás.
   - Capturas a 23 px y 28 px en `capturas/importar/`.
 - **Safe areas**: el sheet empieza en `env(safe-area-inset-top) + 10px` y termina con `padding-bottom: env(safe-area-inset-bottom)`, así que el primario queda por encima del indicador de inicio (34 px). En horizontal, los márgenes usan `--margin-l` / `--margin-r` (§4). El toast de éxito sale ya sobre Roster, por encima de la tab bar.
@@ -1738,6 +1787,23 @@ El Atajo solo comprueba que hay `tag`; la validación de verdad la hace la app.
 5. **Nivel por encima del máximo** (matiz a la regla 3): nivel real en la ficha con el chip «Máximo desactualizado»; en el % de la categoría y en la media cuenta como el máximo, sin pasar del 100 % (§8.5).
 
 Sigue abierto: los nombres en español de los menús del juego (`Ajustes → Más ajustes → Exportar datos → Copiar`), a confirmar con Miguel.
+
+### 8.11 Decisiones del 8 oct 2026 (especificación de 1.1.2)
+
+Tras la revisión de diseño del PR #3 (1.1.1, `528c3d4`) y las de Clash e Imágenes:
+1. **«N ítems sin identificar»** (vista previa §8.4 y avisos de los detalles de categoría §7b.1, Defensas incluida) cuenta **solo** los ítems que se muestran con "?" **y** no tienen tope en caps para ese TH tras `ALIAS` (la misma comprobación que decide el %), no con el `estado` del manifiesto; los conocidos sin clave en caps (Ayuntamiento, Estación de crafteo, Cabaña de B.O.B) no entran. Fuera del recuento: los ítems con tope y barra (107000008 en C1) y los `crafting_module` (102000033–41, vía `craftedScore`). Se quita la coletilla «salvo cuando el archivo de máximos les da un tope…»; con N = 0 no hay aviso. 1.1.2 lleva un test: C1 da el mismo número en la vista previa y en la suma de avisos (8), las otras 10 cuentas dan 4, Defensas de C1 sin aviso y 107000008 fuera.
+2. **107000008 = Logger** (`Guardian-Logger`): presentación de `id_deducido` como el Duque Dragón y la Inferno Artillery (§7b.1). El % no cambia.
+3. **«Validando…» solo tras 150 ms** (temporizador, §5.11 y §8.3), nunca como destello.
+4. **Archivos siempre abre el lote**, también con un solo archivo (`1 archivo · 1 listo`); nunca la vista previa suelta con «Pegar otra» (§8.3).
+5. **Media sin cambio**: `49,0 % · sin cambio`, sin flecha ni valor repetido; con cambio, `49,0 % → 50,1 %` y la `.delta` en `nowrap` (§8.5).
+6. **«Empieza por «…».»**: último carácter, `»` y `.` juntos en `span.nowrap` dentro del único `<span>` de `.msg` (§8.4).
+
+7. **Archivo ilegible en el lote** (decidido por Diseño): la fila «No válido» lleva de subtítulo `<archivo> · <motivo sin punto final>` (p. ej. `c1.json · El archivo está incompleto`), con el mismo `.row--account` de dos líneas y sin texto a la derecha. Los textos de archivo de `parseLoose` se siguen usando ahí.
+8. **Muestra recortada con «…»**: si el texto pegado o el archivo tiene más de 20 caracteres, la muestra de «Empieza por» lleva «…» al final (`https://link.cla…`, como en la tabla de §8.4). El grupo `span.nowrap` de la decisión 6 queda como `…».`. Si tiene 20 caracteres o menos, va sin «…».
+9. **Singular**: `1 ítem sin identificar: se guarda igual.`
+
+Pendiente de otros:
+- **Aviso, sin decisión pendiente.** Mientras el manifiesto tenga 107000008 como `sin_identificar` (v1.2), sale con «?» e `ID 107000008` en el grupo «Sin identificar» de Defensas de C1, pero ya no cuenta en N. El cambio de presentación llega con el set de imágenes que lo pase a `id_deducido`. No hay excepción en el código.
 
 ---
 
@@ -1779,7 +1845,7 @@ Sigue abierto: los nombres en español de los menús del juego (`Ajustes → Má
 4. [ ] `viewport-fit=cover`, `black-translucent`, los dos `theme-color` y `format-detection`. Paddings con `env(safe-area-inset-*)`. Tab bar de 49 + safe area.
 5. [ ] Cuatro pestañas (Roster · Progreso · Mejoras · Evolución) con material y fallback sólido. Ajustes como botón en la nav de Roster que abre un sheet. Large Title que colapsa.
 6. [ ] Imágenes desde `manifest.items[String(id)]`. El TH sale de `imagenes_por_nivel[lvl]`. `.thumb` con `object-fit: contain` y PNG sin editar. `width`/`height` fijos, `loading="lazy"` y `decoding="async"`.
-7. [ ] Los cuatro estados del manifiesto con su estilo: `ok` imagen, `id_deducido` imagen + badge "ID deducido", `faltante` iniciales, `sin_identificar` "?" + badge de ID, más `.thumb--offline` rayado. Estado leído siempre del manifiesto; `pesado: true` sin imagen en listas (v1.1). Nada de `assets/wiki/`, emojis ni iconos genéricos.
+7. [ ] Los cuatro estados del manifiesto con su estilo: `ok` imagen, `id_deducido` imagen + badge "ID deducido", `faltante` iniciales, `sin_identificar` "?" + badge de ID, más `.thumb--offline` rayado. Estado leído siempre del manifiesto (y nunca usado para decidir el %, §5.4); 107000008 como Logger `id_deducido` (`nombre_en`, «ID deducido», «Nombre en español sin confirmar», «Sin imagen» si no hay imagen) en cuanto el manifiesto lo marque así; `pesado: true` sin imagen en listas (v1.1). Nada de `assets/wiki/`, emojis ni iconos genéricos.
 8. [ ] **Equipamiento: el nº de piezas mostradas = `equipment.length` de la exportación** en cada cuenta (hoy C1 43 · C2 39 · #GUQUV98JG 38 · #GVG9GCYUV 38 · #R02YVYLJ8 38 · #GJPJP9JP0 35 · #GVPU80R80 33 · #GVUQ2C2VC 35 · #GVVYVU802 33 · #GVPU2CJR8 33 · #R02YUVC0J 33). El contador "N piezas" coincide, las sin identificar salen con etiqueta y nivel al final de su grupo y no hay deduplicado ni filtro por nivel 1.
 9. [ ] Barras con doble referencia (relleno, marca del TH actual y final del TH siguiente), % en texto y verde solo al máximo. **Nunca rojo por progreso bajo.**
 10. [ ] Categorías en el orden fijo de §2. Héroes en 6.º lugar y sin destacar como cuello de botella (sobre todo en C1).
@@ -1787,10 +1853,17 @@ Sigue abierto: los nombres en español de los menús del juego (`Ajustes → Má
 12. [ ] Muros: barra apilada por nivel + chips + nivel medio, con datos del CSV o de la exportación.
 13. [ ] Mejoras: fin = `timestamp + timer` en Europe/Madrid, `Nuevo` para `lvl 0`, `Terminada · pendiente de reimportar` si ya pasó, orden por fin y libres solo con total conocido.
 14. [ ] Evolución: objetivo TH18 + TH17 + 9×TH15, subidas pendientes (hoy 29), escalera de TH, gráficos SVG con tokens y estado de snapshot único.
-15. [ ] Importación (§8): **Pegar** valida en el acto y Archivos admite varios. Vista previa con cuenta (tag), TH, fecha en hora de Madrid y cambios desde el último punto, en el orden de §2. Casos JSON no válido / tag ajeno («Añadir como cuenta nueva…», sin «Importar igualmente») / más antigua / duplicado (mismo `timestamp`) con los textos de §8.4. Sin cambios = punto nuevo. Cuentas añadidas tras las 11 y sin objetivo. Nivel por encima del máximo: real en la ficha con «Máximo desactualizado» y topado en los %. Aviso «Estás en Safari». Nada de «línea/columna», nada de rojo por bajar la media, y el Atajo sigue aplazado.
+15. [ ] Importación (§8): **Pegar** valida en el acto y Archivos admite varios. Vista previa con cuenta (tag), TH, fecha en hora de Madrid y cambios desde el último punto, en el orden de §2. Casos JSON no válido / tag ajeno («Añadir como cuenta nueva…», sin «Importar igualmente») / más antigua / duplicado (mismo `timestamp`) con los textos de §8.4. Sin cambios = punto nuevo. Cuentas añadidas tras las 11 y sin objetivo. Nivel por encima del máximo: real en la ficha con «Máximo desactualizado» y topado en los %. Aviso «Estás en Safari». Nada de «línea/columna», nada de rojo por bajar la media, y el Atajo sigue aplazado. Desde 1.1.2:
+    - «Validando…» solo si la validación pasa de 150 ms (se comprueba con CPU normal, donde no debe verse, y ralentizada ×20, donde sí), sin destello;
+    - Archivos con **1 archivo** abre el lote `1 archivo · 1 listo` y no hay «Pegar otra» en el flujo Archivos;
+    - Media `49,0 % · sin cambio` en una línea a 17 px; con cambio, la `.delta` nunca se parte;
+    - «Empieza por «…».» sin `.`, `»` ni `».` solos de 17 a 28 px;
+    - «N ítems sin identificar» con la misma comprobación que el %: hay un test en `test/` que da C1 = 8 en la vista previa y en la suma de avisos, 4 en las otras 10 cuentas, Defensas de C1 sin aviso y 107000008 fuera; solo cuentan los «?» sin tope, no los conocidos sin clave en caps; ningún aviso dice «salvo cuando…»;
+    - textos de `.msg` en un solo `<span>`, fila «No válido» sin trailing y toasts de §8.4 (incluido `Cuenta quitada`).
 16. [ ] Ajustes: descarga de imágenes con sus 6 estados, progreso en bytes reales y "~40 MB". Al instalar solo se precachean la app, los datos, el manifiesto, los TH y los héroes.
 17. [ ] Aviso de la Fan Content Policy **literal en inglés** al pie de cada vista y sheet (Caption 1, `--label-2`), con la versión completa en Ajustes → Acerca de.
-18. [ ] Dynamic Type a 23 px (`html { font-size: 23px }` inyectado): ningún tag de cuenta recortado en Roster; ningún título de fila con «…» (detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes) y «ID deducido» y los ID de «Sin identificar» enteros; restante y hora de Mejoras bajo el título; select de Evolución bajo «Progreso medio» y sin cortar; sin desborde horizontal. A 17 px, nada se mueve respecto a la versión anterior salvo lo que se arregla.
+18. [ ] Dynamic Type a 23 px (`html { font-size: 23px }` inyectado): ningún tag de cuenta recortado en Roster; ningún título de fila con «…» (detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes) y «ID deducido» y los ID de «Sin identificar» enteros; restante y hora de Mejoras bajo el título; select de Evolución bajo «Progreso medio» y sin cortar; sin desborde horizontal. En Importar a 28 px: vista previa y `.kv` en una columna (el `@container` va detrás de las reglas base, §8.6), filas del lote con el trailing en su propia línea y sin palabras partidas. A 17 px, nada se mueve respecto a la versión anterior salvo lo que se arregla.
+20. [ ] Separadores de 0,5 px en todas las listas, también con `li > .row` (`li + li > .row::before`, §5.3), con la sangría de `--row-inset`; ninguno encima de la primera fila.
 19. [ ] `prefers-reduced-motion`, objetivos de 44 px, `aria-label` en barras, celdas y gráficos. Rutas relativas (GitHub Pages bajo `/clash-progreso/`) y ninguna petición a terceros.
 
 ---
@@ -1823,6 +1896,12 @@ Revisado con `maqueta/` (datos reales del 07/10, imágenes v1 congeladas, captur
   - un nivel por encima del máximo se muestra real en la ficha y cuenta como máximo en los %;
   - CSS nuevo `.row__input`.
 - 8 oct 2026: regla de presentación para ítems que solo están en `caps_clashrecord.json` (Inferno Artillery), en §7 «Detalle de categoría».
+
+## Nota de cambios (8 oct 2026, 1.1.1 publicada y especificación de 1.1.2)
+
+- **Texto único con el repo.** Este archivo y `docs/sistema.md` de `528c3d4` (1.1.1) solo diferían en dos puntos y quedan unificados: el aviso «Sin identificar» de §7b.1 (la regla de 1.1.1 solo vivía en el repo) y el recuento de §8.4 (la nota de Diseño del 8 oct solo vivía aquí). Desde ahora `docs/sistema.md` del repo es una copia literal de este archivo.
+- **Lo que 1.1.1 hizo y no estaba escrito:** separadores también en listas de `<li>` (`li + li > .row::before`, §5.3); `.msg > span` y texto de `.msg` en un solo `<span>` (`msgLine()`); el `@container` de `.preview`/`.kv` en `views.css` detrás de sus reglas base (§8.6); `.delta` en `nowrap`; `.trail-warn` / `.trail-bad`; filas del lote con `.row--account` y el trailing en su propia línea a ≤ 19em (§5.3, §8.8); fila «No válido» sin trailing; título, tag y fecha de la vista previa en `div`; «Cambios» en su propia `.section` y sin sección si solo cambia el TH; textos de error de archivo y `El texto no es una exportación válida.` (§8.4); toasts `Cuenta quitada`, `1 cuenta actualizada · 1 al histórico` y `N al histórico`; en «Más antigua», la `dl.kv` compara desde la exportación antigua hasta el último punto.
+- **Especificación de 1.1.2** (§8.11): «N ítems sin identificar» solo «?» y sin tope en caps tras `ALIAS` (no el `estado`), mismo número en vista previa y avisos, sin la coletilla «salvo cuando…» y sin aviso con N = 0 (§5.4, §7b.1, §8.4); 107000008 = Logger con presentación `id_deducido` (§7b.1); «Validando…» solo tras 150 ms con temporizador (§5.11, §8.3); Archivos siempre al lote, también con 1 archivo (§8.3); Media `49,0 % · sin cambio` (§8.4, §8.5); «».» pegado con `span.nowrap` (§8.4, §8.6). Checklist §10.7, §10.15, §10.18 y §10.20 al día.
 
 ## Nota de cambios (8 oct 2026, revisión de Pages)
 

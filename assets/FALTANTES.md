@@ -1,6 +1,6 @@
 # Ítems sin imagen oficial
 
-Generado por `tools/build.py` (2026-10-07) a partir de las 11 exportaciones `/workspace/coc/*_2026-10-07.json`. Total: **26** ítems: **4 faltantes** (ítem identificado sin imagen oficial) y **22 sin identificar** (ID sin nombre verificable).
+Generado por `tools/build.py` (2026-10-07) y actualizado por `tools/build_v1.3.py` (set v1.3, 2026-10-08) a partir de las 11 exportaciones `/workspace/coc/*_2026-10-07.json`. Total: **25** ítems: **4 faltantes** (ítem identificado sin imagen oficial) y **21 sin identificar** (ID sin nombre verificable).
 
 No se ha sustituido ningún hueco por imágenes de wikis, Fandom, CDNs no oficiales ni `coc/assets/wiki/`. Cuando `estado` no sea `ok` ni `id_deducido`, la PWA debe mostrar un marcador genérico propio, sin arte de Supercell.
 
@@ -55,12 +55,6 @@ No se ha sustituido ningún hueco por imágenes de wikis, Fandom, CDNs no oficia
 |---|---|---|---|---|---|---|---|
 | 93000003 | `helpers/93000003` | — | — | sin_identificar | 1 | 1 | — |
 
-## Guardianes (1)
-
-| ID | key | nombre | nombre_en | estado | niveles en export. | cuentas | motivo |
-|---|---|---|---|---|---|---|---|
-| 107000008 | `guardians/107000008` | — | — | sin_identificar | 1 | 1 | — |
-
 ## Estación de crafteo: tipos (3)
 
 | ID | key | nombre | nombre_en | estado | niveles en export. | cuentas | motivo |
@@ -102,4 +96,5 @@ Regla del Líder (v1.2): nivel exacto máximo de las exportaciones o, si no est�
 
 - Equipamiento con ID deducido por el asesor Clash, sin fuente oficial (`estado: id_deducido`, `id_verificado: false`): 90000052 = Fire Heart, 90000053 = Rocket Backpack, 90000059 = Electro Fangs.
 - Equipamiento aún sin identificar: 90000016, 90000056, 90000057, 90000060 y 90000061. En `coc/assets/oficial/equipment/` quedan PNG oficiales sin ID asignado (Flame Blower, Stun Blast, Monolith Arrow). No se asignan sin verificar.
-- Los IDs 93000003 (ayudante), 107000008 (guardián), 4000109 (tropa), 4000188 (máquina de asedio) y 26000123 (hechizo) tampoco están en los datos estáticos.
+- Los IDs 93000003 (ayudante), 4000109 (tropa), 4000188 (máquina de asedio) y 26000123 (hechizo) tampoco están en los datos estáticos.
+- v1.3: 107000008 ya no está en esta lista. Es el Logger (`estado: id_deducido`, `id_verificado: false`, `key: guardians/logger`), deducido por descarte (los caps de TH18 tienen exactamente 3 guardianes y C1 tiene 3 IDs de guardián, 2 verificados; `analyze.py` línea 12). Nombre en inglés «Logger» con `nombre_pendiente` (nombre en español sin confirmar). Imagen oficial: Fan Kit `Guardian_Logger_01` (con sombra, como Longshot y Smasher), rendición `?width=1024` del original 3072x3072 (3771109 bytes), por decisión del Líder y por coherencia con los otros dos guardianes.
