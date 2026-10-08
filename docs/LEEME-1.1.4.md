@@ -1,10 +1,10 @@
-# Propuesta de Diseño para 1.1.4 (auditoría de main `1b898df`, 1.1.3)
+# Entrega 1.1.4 (auditoría de main `1b898df`, 1.1.3)
 
-8 oct 2026 · Diseño. **No modifica el master** (`/workspace/clash-pwa-diseno/sistema.md`): los cambios de especificación van redactados abajo (§S) para aplicarlos cuando se aprueben.
+8 oct 2026 · Diseño. Los 10 puntos y los borradores de §S están aplicados en esta versión. `docs/sistema.md` incluye la especificación de 1.1.4. Las capturas de la auditoría no van en el repo: eran solo referencia.
 
 **Banco de pruebas.** Playwright con Chrome a 390×844 (DPR 3, safe area 59/34) y 375×667 (iPhone SE, DPR 2, 20/0). UA de iPhone, `es-ES`, `Europe/Madrid`, reloj fijo `2026-10-08 06:00` (Madrid). Claro y oscuro, a 17 y 28 px (23 px en las comprobaciones de fechas). Se recorrieron 61 vistas por configuración: Roster; Progreso de C1, C2, #GUQUV98JG (TH13) y #R02YUVC0J (TH11) en cada categoría, más Equipamiento y fichas; Mejoras (por fin y por cuenta); Evolución; Ajustes; Importar (Pegar y Archivos). Además se probaron teclado y foco, nombres accesibles y movimiento reducido.
 
-**Evidencias.** Las capturas están en `/workspace/pr4-review-caps/114/` (`evid/` con antes y después, `sweep/<disp>-<tema>-<px>/`) y las mediciones en `evid/evid.json`, `a11y.json` y `sweep/*/audit.json`. Cada arreglo marcado como «verificado» se probó inyectando el cambio, sin desborde horizontal ni recortes nuevos a 17 y 28 px.
+**Evidencias.** La auditoría guardó capturas de antes y después fuera del repo. Cada arreglo marcado como «verificado» se probó inyectando el cambio, sin desborde horizontal ni recortes nuevos a 17 y 28 px.
 
 ---
 
@@ -157,7 +157,7 @@
 
 ---
 
-## §S. Cambios de especificación propuestos para `sistema.md` (borrador; el master no se ha tocado)
+## §S. Cambios de especificación aplicados en `docs/sistema.md`
 
 **§5.3, CSS de filas.** Añadir tras la regla `.row__title` (l. ~386):
 ```css

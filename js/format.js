@@ -46,7 +46,7 @@ export function fmtNum(n, digits = 1) {
 }
 
 export function fmtFin(ms) {
-  return finFmt.format(new Date(ms)).replace(/,/g, "");
+  return finFmt.format(new Date(ms)).replace(/,/g, "").replace(/ /g, "\u00a0");
 }
 
 export function madridDayKey(ms) {
@@ -79,7 +79,7 @@ export function fmtRemain(end, now = Date.now()) {
 
 export function fmtBytes(n) {
   const mb = n / 1000000;
-  return new Intl.NumberFormat("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(mb) + " MB";
+  return new Intl.NumberFormat("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(mb) + "\u00a0MB";
 }
 
 export const LEGAL = `<footer class="legal">
