@@ -11,9 +11,9 @@ En 1.1.4, `downloadAll()` llamaba a `render()` cada 4 imágenes. `render()` sust
 En 1.1.5:
 
 - `patchOfflineDl()` cambia solo el recuento `N de M`, `--p`, el `aria-label` de la barra y el texto de estado. `render()` queda para el cambio de fase (empezar, detener, terminar, error o sin espacio).
-- `render()` marca `#app[data-sheet-keep]` cuando el sheet es el mismo. La regla `#app[data-sheet-keep="true"] .sheet { animation: none; }` evita `sheet-in`.
+- `render()` marca `#app[data-sheet-keep]` cuando el sheet es el mismo. La regla `#app[data-sheet-keep="true"] .sheet { animation: none; }` evita `sheet-in`. La misma marca evita que el cambio de modo en Importar vuelva a subir el sheet.
 - El scroll de `.sheet__body` se conserva si la vista es la misma (en Importar: mismo modo, fase y fila). `keepVisible()` desplaza lo justo para que el control con foco se vea entero, anillo incluido.
-- El texto visible de la descarga no lleva `aria-live`. `announce()` escribe en `#announcer` (`.sr-only`, `aria-live="polite"`), fuera de `#app`, creado en `boot()`. Anuncia al 25, 50 y 75 % (por bytes) y el estado final: terminado, detenido, error o sin espacio. Lo mismo sirve para que el cambio de modo en Importar no vuelva a subir el sheet.
+- El texto visible de la descarga no lleva `aria-live`. `announce()` escribe en `#announcer` (`.sr-only`, `aria-live="polite"`), fuera de `#app`, creado en `boot()`. Anuncia al 25, 50 y 75 % (por bytes) y el estado final: terminado, detenido, error o sin espacio.
 
 ## Alertas de Ajustes
 

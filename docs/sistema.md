@@ -851,7 +851,7 @@ Los datos se leen de almacenamiento local y tardan muy poco. Es distinto del `.t
 .alert__actions .is-destructive { color: var(--red-text); }
 ```
 
-La alerta escala con Dynamic Type: letra en `rem` (17/13 px a tamaño normal) y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`.
+La alerta escala con Dynamic Type: letra en `rem` (17/13 px a tamaño normal) y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`. Lleva `max-height: calc(100dvh − 2 márgenes)` y `overflow: auto`: si no cabe, se desplaza por dentro y nunca se sale de la pantalla (con los textos de hoy no llega a pasar; la más alta, en SE a 28 px, mide 276 px).
 
 El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se reservan para acciones que borran o sustituyen datos: "Borrar todos los datos", "Restaurar datos incluidos", "Borrar imágenes guardadas" y "Quitar cuenta" (§7e, §8.4). Son las cuatro de la app; no hay `confirm()` nativos. "Importar igualmente" ya no existe; un tag ajeno se ofrece como cuenta nueva (§8.10, decisión 1).
 
@@ -1217,6 +1217,10 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
     <li><button class="eq is-unknown" aria-label="Sin identificar, ID 90000016, nivel 17">
       <span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>
       <span class="eq__lvl num">17</span><span class="eq__cap">sin identificar</span></button></li>
+    <!-- nivel por encima del máximo de caps (§8.5): -->
+    <li><button class="eq is-over" aria-label="Botas de terremoto, nivel 18, máximo desactualizado">
+      <span class="thumb thumb--52"><img src="./images/hero-equipment/earthquake-boots.png" alt="" width="52" height="52" loading="lazy" decoding="async"></span>
+      <span class="eq__lvl num">18</span><span class="eq__cap eq__cap--warn">máx. 15</span></button></li>
   </ul>
 </section>
 ```
@@ -1256,6 +1260,8 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
   text-align: center;
 }
 .eq__cap--soft { color: var(--tint); font-style: normal; }   /* "ID deducido" bajo la miniatura */
+.eq.is-over .eq__lvl { background: color-mix(in srgb, var(--orange) 16%, var(--bg-2)); color: var(--orange-text); box-shadow: 0 0 0 1px var(--orange); }  /* nivel > máximo de caps: colores de .chip--warn, opaco */
+.eq__cap--warn { color: var(--orange-text); font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }   /* "máx. M" bajo la miniatura */
 ```
 
 - Medidas: en 393 px el ancho útil es 393 − 32 de márgenes − 24 de padding = 337, así que caben **6 columnas** de 52 con hueco horizontal de 4 px (332 px). En 375 px caben 5.
@@ -1263,8 +1269,14 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
 - Cada celda es un `<button>` de 52×52 como mínimo (objetivo táctil ≥ 44) y al tocarla se abre la ficha (§7b.1) con nombre, nivel, máximo de TH, rareza traducida (`Common` → Común, `Epic` → Épica), héroe e ID.
 - Las piezas `sin_identificar` llevan la etiqueta visible "sin identificar" bajo la miniatura (2 líneas de 10 px, cursiva) y su nivel en el badge. **No se omite ninguna.**
 - Las piezas `id_deducido` (v1.1) llevan su nombre y «ID deducido» en el `aria-label`, como las filas (§9), además de su imagen o iniciales y la etiqueta `.eq__cap.eq__cap--soft` "ID deducido" bajo la miniatura.
+- Las piezas con el nivel por encima del máximo de caps (`overMax`, §8.5) llevan `.eq.is-over`: el badge con los colores del chip «Máximo desactualizado» (`.chip--warn`, opaco) y, bajo la miniatura, la etiqueta `.eq__cap.eq__cap--warn` «máx. M», con el máximo de caps que se ha quedado viejo. No llevan el verde de `.is-max`. Así el aviso no depende del color: la etiqueta lo dice en texto, y la ficha añade el chip. Si además es `id_deducido`, van las dos etiquetas, «máx. M» y debajo «ID deducido», en el mismo orden que el `aria-label`. No se calcula ni se inventa ningún máximo nuevo.
 - Estados de la miniatura: los de §5.4. La única `faltante` de hoy (Noble Iron, 90000047) va con iniciales "NI".
-- `aria-label` de cada celda: "<nombre>, nivel N de M; si el nivel supera el máximo, "nivel N, máximo desactualizado"" (+ ", ID deducido"). Sin máximo, "<nombre>, nivel N" (+ ", ID deducido"). O "Sin identificar, ID X, nivel N".
+- `aria-label` de cada celda:
+  - con máximo: «<nombre>, nivel N de M»;
+  - si el nivel supera el máximo: «<nombre>, nivel N, máximo desactualizado», sin «de M»;
+  - sin máximo: «<nombre>, nivel N»;
+  - en los tres casos, «, ID deducido» al final si la pieza es `id_deducido`;
+  - las sin identificar: «Sin identificar, ID X, nivel N».
 
 **Estados**: sin cuentas importadas, `.empty` con **Importar JSON**. Si la cuenta elegida no está importada, `.empty` con "Esta cuenta aún no tiene datos" y el botón. Si la exportación no trae `equipment` (no pasa hoy), aparece "La exportación no incluye equipamiento".
 
@@ -1678,7 +1690,7 @@ objetivo TH18 + TH17 + 9×TH15 no cambia.
 - No se calcula ni se muestra ningún máximo nuevo aquí. Los % salen del mismo cálculo que Progreso (`caps_clashrecord.json`).
 
 **Nivel por encima del máximo** (regla 3, matiz del líder): si un nivel importado supera el máximo de `caps_clashrecord.json` para ese TH, el máximo de la tabla se ha quedado viejo. Se distingue así:
-- **Nivel real, siempre a la vista**: la lista de cambios dice el nivel real (`Nv 15 → 16`), y la ficha del ítem muestra `Nv 16 / 15` con el chip `.chip.chip--warn` `Máximo desactualizado` junto al nivel.
+- **Nivel real, siempre a la vista**: la lista de cambios dice el nivel real (`Nv 15 → 16`), y la ficha del ítem muestra `Nv 16 / 15` con el chip `.chip.chip--warn` `Máximo desactualizado` junto al nivel. En la rejilla de Equipamiento, la celda lleva el badge en los colores de ese chip y la etiqueta «máx. 15» (§7b.2). Las filas de detalle ya enseñan los dos números (`Nv 16 / 15`).
 - **En los porcentajes cuenta como el máximo**: el % de su categoría, la media y la vista previa usan `min(nivel, máximo)`. Nunca pasan del 100 % ni hinchan la media.
 - No se corrige ni se inventa el máximo: sigue siendo el de `caps_clashrecord.json` hasta que se actualice esa tabla.
 - En la vista previa basta un `.msg-info` `1 nivel supera el máximo conocido: cuenta como máximo.` (plural: `3 niveles superan…`). No bloquea ni pide nada.
@@ -1882,7 +1894,7 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
   - **`--label-3` no se usa nunca para texto informativo.**
   - `.badge` neutra (`--fill-3`) solo sobre `--bg-2`. Sobre `--bg` (sheets) da 4,09:1, así que en sheets lleva fondo `--bg-2` (5,2:1).
 - **Objetivos táctiles ≥ 44×44 px**: filas (mínimo 44; cuentas 64), celdas de equipamiento (52), pestañas, `.btn-text`, segmented (área ampliada con `::after`) y botones de 50 px. Al menos 6 px entre objetivos.
-- **Nada solo por color**: cada barra lleva `%` en texto. Cada barra suelta lleva aria-label; dentro de una fila la barra es aria-hidden y la fila lleva el aria-label completo. "Máx", "Terminada", "Nuevo", "sin identificar" e "ID deducido" van siempre en palabra. Los puntos de categoría siempre llevan el nombre al lado.
+- **Nada solo por color**: cada barra lleva `%` en texto. Cada barra suelta lleva aria-label; dentro de una fila la barra es aria-hidden y la fila lleva el aria-label completo. "Máx", "Terminada", "Nuevo", "sin identificar", "ID deducido" y "máx. M" (nivel por encima del máximo, §7b.2) van siempre en palabra. Los puntos de categoría siempre llevan el nombre al lado.
 - **Dynamic Type**: escala en `rem` sobre `-apple-system-body`. El layout aguanta hasta ~23 px de body (primer tamaño de accesibilidad) con contenedores (`@container`, nunca `@media` en `em`, que en Safari no sigue a `-apple-system-body`). `.list` (§5.3) y `.chart-wrap` (§7d) se reordenan a partir de 19 px aprox. Los títulos de fila pueden llevar `ellipsis` a tamaño normal; a partir de 19 px aprox. (`.list` ≤ 19em) **ningún título de fila se recorta**: baja de línea con `overflow-wrap: break-word`, y las insignias «ID deducido» y de ID bajan enteras (§5.3). **El tag de cuenta del Roster no se recorta nunca**. El trailing de Roster y Mejoras baja a su propia línea (el `flex: none` de `.row__trail--stack` solo vale a tamaño normal), el select del gráfico pasa debajo del título y las tarjetas no tienen alturas fijas. A 28 px no se recorta nada en Roster, Progreso, detalles de categoría, Mejoras («Por fin», «Por cuenta» y Ayudantes), Evolución, Muros ni Ajustes: el chip «Secundaria» de C2 baja bajo el nombre (§7a) y la etiqueta de `.slots` ocupa su propia línea con los puntos y el recuento debajo (§7c). El chrome (tab bar a 10 px, nav compacta a 17 px, segmented a 13 px y badge de nivel a 11 px) es fijo, como en iOS.
 - **`prefers-reduced-motion`**:
   ```css
@@ -1898,7 +1910,7 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
   - Cada fila es un único `<a>`/`<button>` con un texto completo, sin repeticiones:
     - en el Roster, "C2 Secundaria, TH16, objetivo TH17, media 48,8 %";
     - en el detalle, "Príncipe Esbirro, nivel 31 de 95" (+ ", ID deducido");
-    - en la rejilla de equipamiento, "<nombre>, nivel N de M" (+ ", ID deducido"); si el nivel supera el máximo, "nivel N, máximo desactualizado";
+    - en la rejilla de equipamiento, "<nombre>, nivel N de M"; si el nivel supera el máximo, "<nombre>, nivel N, máximo desactualizado"; en los dos, ", ID deducido" al final si procede;
     - en Categorías, "Defensas, 70,1 %, TH17 64,0 %, faltan 190 niveles".
     La barra de dentro de una fila es decorativa (`aria-hidden="true"`); las barras sueltas siguen con `role="img"` y `aria-label`. Las tablas `.sr-only` usan fechas legibles (`07/10`), nunca ISO. El `input[type=file]` oculto lleva `tabindex="-1"` y `aria-hidden`.
   - Gráficos y escalera con `role="img"` y tabla `.sr-only`.
@@ -1956,6 +1968,11 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
     - VoiceOver solo oye 25/50/75 % y el estado final.
     En Importar, cambiar de modo o de paso no vuelve a subir el sheet.
 27. [ ] Celdas de equipamiento: «nivel N de M»; si el nivel supera el máximo, «nivel N, máximo desactualizado»; las `id_deducido` llevan «, ID deducido» al final, como las filas.
+28. [ ] Celda de equipamiento con el nivel por encima del máximo (`overMax`): se ve sin VoiceOver.
+    - badge con los colores de `.chip--warn` y etiqueta «máx. M» bajo la miniatura, sin el verde de `.is-max` y sin rojo;
+    - contraste ≥ 4,5:1 del badge y de la etiqueta, en claro y en oscuro;
+    - con `id_deducido`, «máx. M» y debajo «ID deducido»;
+    - sin `overMax` la rejilla no cambia.
 
 ---
 
@@ -2022,3 +2039,13 @@ Especificación de 1.1.5:
 - **Celdas de equipamiento** (§7b.2, §9): «nivel N de M»; si el nivel supera el máximo, «nivel N, máximo desactualizado» (el mismo aviso que el chip de la ficha); «ID deducido» al final. Sin máximo, «nivel N».
 - **Alertas y Dynamic Type** (§5.12): letra en `rem` y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`.
 - Checklist §10.25–27.
+
+## Nota de cambios (8 oct 2026, 1.1.5 aprobada y especificación de 1.1.6)
+
+1.1.5 es el PR #7 (`127f449`), aprobado y pendiente de fusión. `docs/sistema.md` de `127f449` es la base de este cambio.
+
+Especificación de 1.1.6:
+- **Celda `overMax` visible** (§7b.2, §8.5, §9): `.eq.is-over` con el badge en los colores de `.chip--warn` y la etiqueta `.eq__cap--warn` «máx. M». En 1.1.5 el aviso solo llegaba a VoiceOver y la celda, sin el verde, se veía como una pieza a medio subir. Ninguna otra rejilla o fila da el aviso solo a VoiceOver: las filas de detalle enseñan `Nv N / M` a la vista y dicen «nivel N de M».
+- **Texto** (§7b.2, §9): el `aria-label` de la celda, sin comillas anidadas y con el nombre y «ID deducido» también en el caso `overMax`.
+- **Alertas** (§5.12): la frase de Dynamic Type menciona `max-height` y `overflow: auto`.
+- Checklist §10.28.

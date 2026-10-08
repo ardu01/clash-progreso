@@ -455,7 +455,7 @@ function renderRoster() {
     <div class="section"><div class="section-header"><span>Principales</span></div><div class="stack">${cards}</div></div>
     ${groups.map((g) => `<div class="section"><div class="section-header"><span>${esc(g.title)}</span></div><ul class="list">${g.rows.map(rowAccount).join("")}</ul></div>`).join("")}
     ${otrasCuentas()}
-    <div class="section" style="text-align:center"><button class="btn btn--plain" data-go="#/ajustes">Ajustes y aviso legal</button></div>
+    <div class="section u-center"><button class="btn btn--plain" data-go="#/ajustes">Ajustes y aviso legal</button></div>
     ${LEGAL}`;
 }
 
@@ -509,7 +509,7 @@ function rowAccount(meta) {
   return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(meta.tag)}, TH${a.th}, objetivo TH${meta.objetivo}, media ${fmtPct(a.media)}">
     ${thumb(1000001, { size: 44, th: a.th })}
     <span class="row__main"><span class="row__title tag">${esc(meta.nombre)}</span><span class="row__sub">TH${a.th} → ${meta.objetivo} · ${n} mejoras</span></span>
-    <span class="row__trail">${barHtml("defensas", a.thSig ? a.sigMedia : a.media, a.thSig ? markMedia(a) : null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num" style="font-weight:600;color:var(--label);font-size:0.882rem">${fmtPct(a.media)}</span>${CHEV}</span>
+    <span class="row__trail">${barHtml("defensas", a.thSig ? a.sigMedia : a.media, a.thSig ? markMedia(a) : null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num row__pct">${fmtPct(a.media)}</span>${CHEV}</span>
   </a></li>`;
 }
 
@@ -530,7 +530,7 @@ function rowAdded(meta) {
   return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(meta.nombre)}, TH${a.th}, sin objetivo, media ${fmtPct(a.media)}">
     ${thumb(1000001, { size: 44, th: a.th })}
     <span class="row__main"><span class="row__title">${title}</span><span class="row__sub">${esc(sub)}</span></span>
-    <span class="row__trail">${barHtml("defensas", a.media, null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num" style="font-weight:600;color:var(--label);font-size:0.882rem">${fmtPct(a.media)}</span>${CHEV}</span>
+    <span class="row__trail">${barHtml("defensas", a.media, null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num row__pct">${fmtPct(a.media)}</span>${CHEV}</span>
   </a></li>`;
 }
 
@@ -579,8 +579,8 @@ function catsBlock(exp, meta) {
     ? `Relleno: nivel actual · Marca: máximo TH${a.th} · Final: máximo TH${a.thSig}`
     : `Relleno: nivel actual frente al máximo de TH${a.th}`;
   const rows = CATEGORIES.map((c) => catRow(exp, meta, a, c)).join("");
-  return `<p class="section-footer" style="margin-bottom:8px">${esc(legend)}</p>
-    <div class="section" style="margin-top:0"><ul class="list">${rows}</ul></div>
+  return `<p class="section-footer u-mb2">${esc(legend)}</p>
+    <div class="section u-mt0"><ul class="list">${rows}</ul></div>
     ${wallsCard(a)}
     ${heroesCard(a)}`;
 }
@@ -607,9 +607,9 @@ function catRow(exp, meta, a, c) {
       <span class="prog__foot">${esc(foot)}</span>
     </div></span>${href ? CHEV : ""}`;
   if (!href) {
-    return `<li><button class="row" data-seg="eq" style="padding-top:12px;padding-bottom:12px" aria-label="${esc(aria)}">${inner}</button></li>`;
+    return `<li><button class="row row--tall" data-seg="eq" aria-label="${esc(aria)}">${inner}</button></li>`;
   }
-  return `<li><a class="row" style="padding-top:12px;padding-bottom:12px" href="${href}" aria-label="${esc(aria)}">${inner}</a></li>`;
+  return `<li><a class="row row--tall" href="${href}" aria-label="${esc(aria)}">${inner}</a></li>`;
 }
 
 function wallParts(a) {
@@ -642,7 +642,7 @@ function wallsCard(a) {
     <div class="prog"><span class="t-headline">Muros</span><span class="prog__pct num">${fmtPct(a.cats.muros.pct)}</span>
       ${barHtml("muros", a.thSig ? a.cats.muros.sigPct : a.cats.muros.pct, a.thSig ? a.cats.muros.mark : null, { label: `Muros ${fmtPct(a.cats.muros.pct)}` })}
     </div>
-    <div class="walls" role="img" aria-label="Muros: ${esc(aria)}" style="margin-top:12px">${segs}</div>
+    <div class="walls u-mt3" role="img" aria-label="Muros: ${esc(aria)}">${segs}</div>
     <ul class="wall-chips">${chips}</ul>
     <p class="prog__foot">${w.pieces} piezas · nivel medio ${fmtNum(medio)} · máximo TH${a.th}: Nv ${w.max}</p>
   </div></div>`;
@@ -707,7 +707,7 @@ function equipBlock(exp, meta) {
   }
   const maxed = row.num != null && row.den && row.num >= row.den;
   return `<div class="section"><div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="t-headline" style="margin:0">Equipamiento</h2><span class="t-headline num">${pieces.length} piezas</span></div>
+      <div class="u-between"><h2 class="t-headline u-m0">Equipamiento</h2><span class="t-headline num">${pieces.length} piezas</span></div>
       <p class="t-footnote c-2">${withImg} con imagen · ${missing} sin imagen · ${unk} sin identificar · ${lvl1} en nivel 1</p>
       <div class="prog cat-equipamiento">
         <span>Progreso</span><span class="prog__pct num${maxed ? " is-max" : ""}">${fmtPct(row.pct)}</span>
@@ -725,10 +725,11 @@ function eqCell(p) {
   const aria = p.unknown
     ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}`
     : [name, level, p.overMax ? "máximo desactualizado" : "", deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
-  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : ""].filter(Boolean).join(" ");
+  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : "", p.overMax ? "is-over" : ""].filter(Boolean).join(" ");
+  const over = p.overMax ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>` : "";
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
-    : (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
+    : over + (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52 });
@@ -870,7 +871,7 @@ function renderMuros(a) {
       ${barHtml("muros", a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { lg: true, maxed, label: `Muros ${fmtPct(row.pct)}` })}
       <span class="prog__foot">${esc(catFoot(a, row))}</span>
     </div>
-    <div class="walls" role="img" aria-label="Muros: ${esc(aria)}" style="margin-top:12px">${segs}</div>
+    <div class="walls u-mt3" role="img" aria-label="Muros: ${esc(aria)}">${segs}</div>
     <ul class="wall-chips">${chips}</ul>
     <p class="prog__foot">${piezas} · nivel medio ${fmtNum(medio)}${w.max != null ? ` · máximo TH${a.th}: Nv ${w.max}` : ""}</p>
   </div></div>
@@ -943,8 +944,8 @@ function mejorasPorFin(all) {
     if (b.known && b.free > 0) free.push({ meta, exp, b });
   }
   const freeCard = free.length ? `<div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
+      <p class="t-headline u-m-b2">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
+      <div class="u-wrap6">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
         return `<span class="chip chip--account">${thumb(1000001, { size: 22, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
       }).join("")}</div>
@@ -972,15 +973,15 @@ function mejorasPorCuenta() {
     const labN = list.filter((u) => u.queue === "laboratorio" && !u.done).length;
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
     const warn = b.over ? `<span class="chip chip--warn">Revisar constructores</span>` : "";
-    const foot = b.over ? `<p class="t-footnote c-2" style="margin:8px 0 0">Hay más mejoras que constructores conocidos</p>` : "";
+    const foot = b.over ? `<p class="t-footnote c-2 u-m-t2">Hay más mejoras que constructores conocidos</p>` : "";
     const slots = slotsHtml(b, labN, petN, a.th >= 14);
-    return `<div class="section"><div class="card" style="display:flex;gap:8px;align-items:flex-start">
+    return `<div class="section"><div class="card u-hstack2">
         ${thumb(1000001, { size: 40, th: a.th })}
-        <div style="flex:1"><div class="t-headline">${esc(meta.featured ? meta.nombre : meta.tag)} ${warn}</div>
+        <div class="u-grow"><div class="t-headline">${esc(meta.featured ? meta.nombre : meta.tag)} ${warn}</div>
           ${slots}${foot}
-          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
+          <p class="t-footnote c-2 u-m-t2">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
         </div>
-      </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
+      </div><ul class="list u-mt2">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
   }).join("");
 }
 
@@ -1055,25 +1056,25 @@ function renderEvolucion() {
   return `<h1 class="large-title">Evolución</h1>
     <div class="section"><div class="card">
       <p class="t-footnote c-2">Objetivo: TH18 + TH17 + 9×TH15</p>
-      <p class="t-title1 num" style="margin:4px 0">${stats.pending} subidas de TH pendientes</p>
+      <p class="t-title1 num u-m-y1">${stats.pending} subidas de TH pendientes</p>
       ${barHtml("defensas", shown, null, { lg: true, plain: true, label: `${stats.done} de ${stats.possible} subidas desde TH11` })}
-      <p class="t-footnote c-2" style="margin-top:8px">${stats.done} de ${stats.possible} subidas desde TH11</p>
-      <p style="margin:8px 0 0"><span class="chip chip--goal-ok">${stats.atGoal} de ${ROSTER.length} en objetivo</span></p>
+      <p class="t-footnote c-2 u-mt2">${stats.done} de ${stats.possible} subidas desde TH11</p>
+      <p class="u-m-t2"><span class="chip chip--goal-ok">${stats.atGoal} de ${ROSTER.length} en objetivo</span></p>
     </div></div>
     <div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 12px">Escalera de TH</p>
+      <p class="t-headline u-m-b3">Escalera de TH</p>
       ${ladderHtml()}
     </div></div>
     <div class="section"><div class="card chart-wrap">
       <div class="card__top card__top--chart">
-        <p class="t-headline" style="margin:0">Progreso medio</p>
+        <p class="t-headline u-m0">Progreso medio</p>
         <select class="chart-select" data-evo aria-label="Serie">${evoOptions()}</select>
       </div>
       ${chartHtml()}
       ${seriesPoints().length < 2 ? `<p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>` : ""}
     </div></div>
     <div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 8px">Subidas pendientes</p>
+      <p class="t-headline u-m-b2">Subidas pendientes</p>
       ${chartPending(stats.pending)}
       ${seriesPoints().length < 2 ? `<p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>` : ""}
     </div></div>
@@ -1263,7 +1264,7 @@ function renderAjustes() {
       <div class="sheet__bar"><span></span><h2 id="aj-title" tabindex="-1">Ajustes</h2><button class="btn-text btn-text--bold" data-go="#/roster">OK</button></div>
       <div class="sheet__body">
         <div class="section-header"><span>Datos</span></div>
-        <div class="section" style="margin-top:0"><ul class="list">
+        <div class="section u-mt0"><ul class="list">
           <li><button class="row" data-go="#/importar"><span class="row__main"><span class="row__title">Importar JSON</span></span>${CHEV}</button></li>
           <li><div class="row"><span class="row__main"><span class="row__title">Cuentas importadas</span></span><span class="row__trail num">${imported} de 11</span></div></li>
           ${state.added.map((a) => {
@@ -1278,10 +1279,10 @@ function renderAjustes() {
           <div class="bar" style="--p:${Math.min(100, p)};--cat:var(--tint)" role="img" aria-label="${esc(status)}"><span class="bar__fill"></span></div>
           <p class="offline-dl__meta offline-dl__status">${esc(status)}</p>
           ${btn}
-          <p class="t-footnote c-2" style="margin:8px 0 0">${esc(note)}</p>
+          <p class="t-footnote c-2 u-m-t2">${esc(note)}</p>
         </div></div>
         <div class="section-header"><span>Acerca de</span></div>
-        <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li></ul></div>
+        <div class="section u-mt0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li></ul></div>
         <div class="section"><div class="card t-footnote">
           <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.</p>
           <p>Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
@@ -1336,7 +1337,7 @@ function segControl(paste) {
 function safariCard() {
   if (!inSafariTab()) return "";
   return `<div class="section"><div class="card">
-      <p class="t-headline" style="margin:0">Estás en Safari</p>
+      <p class="t-headline u-m0">Estás en Safari</p>
       <p class="t-subhead c-2">Lo que importes aquí se queda en Safari. La app de la pantalla de inicio guarda sus datos aparte: si la tienes instalada, ábrela desde su icono e importa allí.</p>
     </div></div>`;
 }
@@ -1361,17 +1362,17 @@ function pasteEntry() {
 
 function fileEntry() {
   return `<div class="section"><div class="section-header"><span>Desde Archivos</span></div>
-      <div class="card"><p class="t-body" style="margin:0">Elige uno o varios archivos .json, por ejemplo desde iCloud Drive. Puedes elegir todas tus cuentas a la vez.</p></div>
+      <div class="card"><p class="t-body u-m0">Elige uno o varios archivos .json, por ejemplo desde iCloud Drive. Puedes elegir todas tus cuentas a la vez.</p></div>
     </div>
     <p class="section-footer">Las exportaciones que ya están guardadas se omiten solas.</p>`;
 }
 
 function validatingCard() {
   return `<div class="section"><div class="card validating-card" aria-busy="true">
-      <div class="sk sk--thumb" style="--size:96px"></div>
+      <div class="sk sk--thumb sk--96"></div>
       <div class="sk sk--line"></div>
-      <div class="sk sk--line" style="width:80%"></div>
-      <div class="sk sk--line" style="width:45%"></div>
+      <div class="sk sk--line sk--w80"></div>
+      <div class="sk sk--line sk--w45"></div>
     </div></div>
     <p class="sr-only" role="status">Validando la exportación</p>`;
 }
@@ -1563,7 +1564,7 @@ function batchBody() {
   const ready = items.filter((i) => i.kind === "ready" || i.kind === "older");
   const neu = items.filter((i) => i.kind === "new");
   const omit = items.filter((i) => i.kind === "duplicate" || i.kind === "invalid");
-  const head = `<p class="t-subhead" style="margin:0 var(--margin-r) var(--sp-3) var(--margin-l)">${esc(batchSummary(state.importUi.items))}</p>`;
+  const head = `<p class="t-subhead inset-head">${esc(batchSummary(state.importUi.items))}</p>`;
   return head
     + batchGroup("Listos para importar", ready, "")
     + batchGroup(neu.length > 1 ? "Cuentas nuevas" : "Cuenta nueva", neu, `<p class="section-footer">${NEW_FOOT}</p>`)
@@ -1797,7 +1798,7 @@ function fichaSheet() {
   if (f.capsOnly) {
     const lines = capsFichaLines(f);
     return fichaFrame(`
-        <div style="display:flex;justify-content:center">${emptyNamedThumb(f.name, 96)}</div>
+        <div class="u-hcenter">${emptyNamedThumb(f.name, 96)}</div>
         <p class="t-title3">${esc(f.name)}</p>
         <p class="t-title2 num">${esc(lines[0])}</p>
         ${lines.slice(1).map((note) => `<p class="t-footnote c-2">${esc(note)}</p>`).join("")}`);
@@ -1822,7 +1823,7 @@ function fichaSheet() {
   const over = overMaxLabel(f.lvl, f.max);
   const overChip = over ? ` <span class="chip chip--warn">${esc(over)}</span>` : "";
   return fichaFrame(`
-        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true })}</div>
+        <div class="u-hcenter">${thumb(f.id, { size: 96, ficha: true })}</div>
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">${esc(line.text)}${overChip}</p>
         <p class="badge badge-id">${esc(f.id)}</p>

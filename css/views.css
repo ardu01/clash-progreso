@@ -51,13 +51,15 @@
   font: 700 11px/18px var(--font); text-align: center; letter-spacing: 0;
 }
 .eq.is-lvl1 .eq__lvl { color: var(--label-2); font-weight: 500; }
-.eq.is-max .eq__lvl { background: var(--green-soft); color: var(--green-text); box-shadow: 0 0 0 1px var(--green); }
+.eq.is-max .eq__lvl { background: color-mix(in srgb, var(--green) 16%, var(--bg-2)); color: var(--green-text); box-shadow: 0 0 0 1px var(--green); }
+.eq.is-over .eq__lvl { background: color-mix(in srgb, var(--orange) 16%, var(--bg-2)); color: var(--orange-text); box-shadow: 0 0 0 1px var(--orange); }
 .eq__cap {
   max-width: 60px;
   font: 400 10px/12px var(--font); color: var(--label-2); font-style: italic;
   text-align: center;
 }
 .eq__cap--soft { color: var(--tint); font-style: normal; }
+.eq__cap--warn { color: var(--orange-text); font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .card > div:has(> .slots) { container-type: inline-size; min-width: 0; }
 .slots { display: flex; align-items: center; gap: 4px; min-height: 22px; font-size: 0.765rem; color: var(--label-2); }
@@ -148,3 +150,26 @@
 .sheet .section { margin-bottom: var(--sp-5); }
 textarea:focus, .btn:focus { outline: none; }
 textarea:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; }
+
+/* 1.1.6: utilidades con tokens; sustituyen los style= fijos de js/app.js (los style= con datos, --p, --n, --k y --size, se quedan) */
+.u-center  { text-align: center; }
+.u-m0      { margin: 0; }
+.u-mt0     { margin-top: 0; }
+.u-mt2     { margin-top: var(--sp-2); }
+.u-mt3     { margin-top: var(--sp-3); }
+.u-mb2     { margin-bottom: var(--sp-2); }
+.u-m-b2    { margin: 0 0 var(--sp-2); }
+.u-m-b3    { margin: 0 0 var(--sp-3); }
+.u-m-t2    { margin: var(--sp-2) 0 0; }
+.u-m-y1    { margin: var(--sp-1) 0; }
+.u-grow    { flex: 1; }
+.u-hcenter { display: flex; justify-content: center; }
+.u-between { display: flex; justify-content: space-between; align-items: baseline; }
+.u-wrap6   { display: flex; flex-wrap: wrap; gap: 6px; }
+.u-hstack2 { display: flex; gap: var(--sp-2); align-items: flex-start; }
+.row--tall { padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
+.row__pct  { font-weight: 600; color: var(--label); font-size: 0.882rem; }
+.inset-head { margin: 0 var(--margin-r) var(--sp-3) var(--margin-l); }
+.sk--96    { --size: 96px; }
+.sk--w80   { width: 80%; }
+.sk--w45   { width: 45%; }

@@ -611,9 +611,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.5 y cachés cp-shell-v9 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.5");
-  assert.equal(SHELL_CACHE, "cp-shell-v9");
+test("versión 1.1.6 y cachés cp-shell-v10 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.6");
+  assert.equal(SHELL_CACHE, "cp-shell-v10");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -624,14 +624,16 @@ test("versión 1.1.5 y cachés cp-shell-v9 / cp-img-v4", () => {
   assert.equal(sw.includes("cp-shell-v6"), false);
   assert.equal(sw.includes("cp-shell-v7"), false);
   assert.equal(sw.includes("cp-shell-v8"), false);
+  assert.equal(sw.includes("cp-shell-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v9/);
+  assert.match(caches, /cp-shell-v10/);
   assert.match(caches, /cp-img-v4/);
   assert.equal(caches.includes("cp-shell-v5"), false);
   assert.equal(caches.includes("cp-shell-v6"), false);
   assert.equal(caches.includes("cp-shell-v7"), false);
   assert.equal(caches.includes("cp-shell-v8"), false);
+  assert.equal(caches.includes("cp-shell-v9"), false);
   assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
@@ -1481,4 +1483,64 @@ test("1.1.5: «Descargar todas» actualiza solo la tarjeta y el sheet no se rean
   assert.doesNotMatch(src, /offline-dl__status" aria-live/);
   const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
   assert.match(css, /#app\[data-sheet-keep="true"\] \.sheet \{ animation: none; \}/);
+});
+
+test("1.1.6: con overMax la celda se marca a la vista con «máx. M» y sin el verde de is-max", () => {
+  const eqCell = fnFromApp("function eqCell(p)", "eqCell", {
+    nameOf: (id) => ({ 9: "Puño de fuego" })[id] || "", thumb: () => "<span></span>", esc: esc115,
+  });
+  const over = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "ok" } });
+  assert.match(over, /class="eq is-over"/);
+  assert.doesNotMatch(over, /is-max/);
+  assert.match(over, /<span class="eq__cap eq__cap--warn">máx\. 18<\/span>/);
+  assert.match(over, /aria-label="Puño de fuego, nivel 22, máximo desactualizado"/);
+  // Deducido y overMax: las dos etiquetas, en el mismo orden que el aria-label.
+  const ded = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "id_deducido" } });
+  assert.match(ded, /eq__cap--warn">máx\. 18<\/span><span class="eq__cap eq__cap--soft">ID deducido<\/span>/);
+  // Sin overMax no cambia nada: al máximo, verde; por debajo o sin máximo, sin marca.
+  const at = eqCell({ id: 9, lvl: 18, max: 18, meta: { estado: "ok" } });
+  assert.match(at, /class="eq is-max"/);
+  for (const html of [at, eqCell({ id: 9, lvl: 12, max: 18 }), eqCell({ id: 9, lvl: 7 }), eqCell({ id: 90000077, lvl: 3, unknown: true })]) {
+    assert.doesNotMatch(html, /is-over|eq__cap--warn|máx\./);
+  }
+});
+
+test("1.1.6: la marca overMax usa los colores de .chip--warn, no el verde, y llega a 4,5:1", () => {
+  const css = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  const badge = css.match(/\.eq\.is-over \.eq__lvl \{([^}]*)\}/);
+  assert.ok(badge, "falta .eq.is-over .eq__lvl");
+  assert.match(badge[1], /background: color-mix\(in srgb, var\(--orange\) 16%, var\(--bg-2\)\)/);
+  assert.match(badge[1], /color: var\(--orange-text\)/);
+  assert.doesNotMatch(badge[1], /green|red/);
+  const cap = css.match(/\.eq__cap--warn \{([^}]*)\}/);
+  assert.ok(cap, "falta .eq__cap--warn");
+  assert.match(cap[1], /color: var\(--orange-text\)/);
+  assert.match(cap[1], /font-style: normal/);
+  // Contraste con los tokens reales, claro y oscuro.
+  const tokens = readFileSync(new URL("../css/tokens.css", import.meta.url), "utf8");
+  const dark = tokens.slice(tokens.indexOf("prefers-color-scheme: dark"));
+  const hex = (src, name) => {
+    const m = src.match(new RegExp(`--${name}:\\s*#([0-9A-Fa-f]{6})`));
+    return [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+  };
+  const lum = (c) => {
+    const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => { const x = lum(a); const y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const mix = (a, b, k) => a.map((v, i) => v * k + b[i] * (1 - k));
+  for (const src of [tokens, dark]) {
+    const bg2 = hex(src, "bg-2");
+    const text = hex(src, "orange-text");
+    assert.ok(ratio(text, mix(hex(src, "orange"), bg2, 0.16)) >= 4.5, "badge");
+    assert.ok(ratio(text, bg2) >= 4.5, "etiqueta");
+  }
+});
+
+test("1.1.6 (O1): el badge .eq.is-max es opaco, como pide §7b.2, porque pisa la miniatura", () => {
+  const css = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  const rule = css.match(/\.eq\.is-max \.eq__lvl \{([^}]*)\}/);
+  assert.ok(rule);
+  assert.match(rule[1], /background: color-mix\(in srgb, var\(--green\) 16%, var\(--bg-2\)\)/);
+  assert.doesNotMatch(rule[1], /--green-soft/);
 });
