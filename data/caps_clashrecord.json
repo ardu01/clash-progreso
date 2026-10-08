@@ -1,0 +1,4542 @@
+{
+ "13": {
+  "Barbarian King": {
+   "max": 75,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 75,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 50,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 50,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 25,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 9,
+   "count": null
+  },
+  "Archer": {
+   "max": 9,
+   "count": null
+  },
+  "Giant": {
+   "max": 10,
+   "count": null
+  },
+  "Goblin": {
+   "max": 8,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 9,
+   "count": null
+  },
+  "Balloon": {
+   "max": 9,
+   "count": null
+  },
+  "Wizard": {
+   "max": 10,
+   "count": null
+  },
+  "Healer": {
+   "max": 6,
+   "count": null
+  },
+  "Dragon": {
+   "max": 8,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 9,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 7,
+   "count": null
+  },
+  "Miner": {
+   "max": 7,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 4,
+   "count": null
+  },
+  "Yeti": {
+   "max": 3,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 9,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 10,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 8,
+   "count": null
+  },
+  "Golem": {
+   "max": 10,
+   "count": null
+  },
+  "Witch": {
+   "max": 5,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 6,
+   "count": null
+  },
+  "Bowler": {
+   "max": 5,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 5,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 3,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 2,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 4,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 4,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 4,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 4,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 4,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Cannon": {
+   "max": 19,
+   "count": 7
+  },
+  "Archer Tower": {
+   "max": 19,
+   "count": 8
+  },
+  "Mortar": {
+   "max": 13,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 11,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 13,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 12,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 8,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 8,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 7,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 4,
+   "count": 1
+  },
+  "Scattershot": {
+   "max": 2,
+   "count": 2
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 9,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 9,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 9,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 15,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 15,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 9,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 14,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 14,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 8,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 11,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 15,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 9,
+   "count": 1
+  },
+  "Lab": {
+   "max": 11,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 7,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 10,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 7,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 6,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 6,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 5,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 9,
+   "count": 7
+  },
+  "Spring Trap": {
+   "max": 8,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 8,
+   "count": 6
+  },
+  "Giant Bomb": {
+   "max": 7,
+   "count": 6
+  },
+  "Seeking Air Mine": {
+   "max": 4,
+   "count": 7
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 3
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 14,
+   "count": 300
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 15,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 15,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 15,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 15,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 18,
+   "count": null
+  }
+ },
+ "14": {
+  "Barbarian King": {
+   "max": 85,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 85,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 60,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 60,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 30,
+   "count": null
+  },
+  "L.A.S.S.I": {
+   "max": 10,
+   "count": null
+  },
+  "Electro Owl": {
+   "max": 10,
+   "count": null
+  },
+  "Mighty Yak": {
+   "max": 10,
+   "count": null
+  },
+  "Unicorn": {
+   "max": 10,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 10,
+   "count": null
+  },
+  "Archer": {
+   "max": 10,
+   "count": null
+  },
+  "Giant": {
+   "max": 10,
+   "count": null
+  },
+  "Goblin": {
+   "max": 8,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 10,
+   "count": null
+  },
+  "Balloon": {
+   "max": 10,
+   "count": null
+  },
+  "Wizard": {
+   "max": 10,
+   "count": null
+  },
+  "Healer": {
+   "max": 7,
+   "count": null
+  },
+  "Dragon": {
+   "max": 9,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 9,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 8,
+   "count": null
+  },
+  "Miner": {
+   "max": 8,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 5,
+   "count": null
+  },
+  "Yeti": {
+   "max": 4,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 3,
+   "count": null
+  },
+  "Electro Titan": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 10,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 11,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 9,
+   "count": null
+  },
+  "Golem": {
+   "max": 11,
+   "count": null
+  },
+  "Witch": {
+   "max": 5,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 6,
+   "count": null
+  },
+  "Bowler": {
+   "max": 6,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 6,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 3,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 3,
+   "count": null
+  },
+  "Druid": {
+   "max": 2,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 4,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 4,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 4,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 4,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 4,
+   "count": null
+  },
+  "Flame Flinger": {
+   "max": 4,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Ice Block Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Cannon": {
+   "max": 20,
+   "count": 7
+  },
+  "Archer Tower": {
+   "max": 20,
+   "count": 8
+  },
+  "Mortar": {
+   "max": 14,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 12,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 14,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 13,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 9,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 9,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 8,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 5,
+   "count": 1
+  },
+  "Scattershot": {
+   "max": 3,
+   "count": 2
+  },
+  "Builder Hut": {
+   "max": 4,
+   "count": 5
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 12,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 12,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 12,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 16,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 16,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 10,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 15,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 15,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 9,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 11,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 16,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 10,
+   "count": 1
+  },
+  "Lab": {
+   "max": 12,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 7,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 11,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 8,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 7,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 7,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 6,
+   "count": 1
+  },
+  "Pet House": {
+   "max": 4,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 10,
+   "count": 8
+  },
+  "Spring Trap": {
+   "max": 9,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 9,
+   "count": 7
+  },
+  "Giant Bomb": {
+   "max": 8,
+   "count": 7
+  },
+  "Seeking Air Mine": {
+   "max": 4,
+   "count": 8
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 4
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 15,
+   "count": 325
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 21,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 21,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 21,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 21,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 21,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 21,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 21,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 21,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 21,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 21,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 21,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 21,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 21,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 21,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 21,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 21,
+   "count": null
+  }
+ },
+ "15": {
+  "Barbarian King": {
+   "max": 90,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 90,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 70,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 65,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 40,
+   "count": null
+  },
+  "Dragon Duke": {
+   "max": 10,
+   "count": null
+  },
+  "L.A.S.S.I": {
+   "max": 15,
+   "count": null
+  },
+  "Electro Owl": {
+   "max": 10,
+   "count": null
+  },
+  "Mighty Yak": {
+   "max": 15,
+   "count": null
+  },
+  "Unicorn": {
+   "max": 10,
+   "count": null
+  },
+  "Frosty": {
+   "max": 10,
+   "count": null
+  },
+  "Diggy": {
+   "max": 10,
+   "count": null
+  },
+  "Poison Lizard": {
+   "max": 10,
+   "count": null
+  },
+  "Phoenix": {
+   "max": 10,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 11,
+   "count": null
+  },
+  "Archer": {
+   "max": 11,
+   "count": null
+  },
+  "Giant": {
+   "max": 11,
+   "count": null
+  },
+  "Goblin": {
+   "max": 9,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 11,
+   "count": null
+  },
+  "Balloon": {
+   "max": 10,
+   "count": null
+  },
+  "Wizard": {
+   "max": 11,
+   "count": null
+  },
+  "Healer": {
+   "max": 8,
+   "count": null
+  },
+  "Dragon": {
+   "max": 10,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 10,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 9,
+   "count": null
+  },
+  "Miner": {
+   "max": 9,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 6,
+   "count": null
+  },
+  "Yeti": {
+   "max": 5,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 3,
+   "count": null
+  },
+  "Electro Titan": {
+   "max": 3,
+   "count": null
+  },
+  "Root Rider": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 11,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 12,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 10,
+   "count": null
+  },
+  "Golem": {
+   "max": 12,
+   "count": null
+  },
+  "Witch": {
+   "max": 6,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 6,
+   "count": null
+  },
+  "Bowler": {
+   "max": 7,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 7,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 3,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 4,
+   "count": null
+  },
+  "Druid": {
+   "max": 3,
+   "count": null
+  },
+  "Furnace": {
+   "max": 2,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 5,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 5,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 4,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 4,
+   "count": null
+  },
+  "Flame Flinger": {
+   "max": 4,
+   "count": null
+  },
+  "Battle Drill": {
+   "max": 4,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 10,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Revive Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Ice Block Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Angry Spell": {
+   "max": 1,
+   "count": null
+  },
+  "Cannon": {
+   "max": 21,
+   "count": 7
+  },
+  "Archer Tower": {
+   "max": 21,
+   "count": 8
+  },
+  "Mortar": {
+   "max": 15,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 13,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 15,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 14,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 10,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 10,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 9,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 6,
+   "count": 1
+  },
+  "Scattershot": {
+   "max": 4,
+   "count": 2
+  },
+  "Builder Hut": {
+   "max": 5,
+   "count": 5
+  },
+  "Spell Tower": {
+   "max": 3,
+   "count": 2
+  },
+  "Monolith": {
+   "max": 2,
+   "count": 1
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 15,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 15,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 15,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 16,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 16,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 10,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 16,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 16,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 10,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 12,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 17,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 11,
+   "count": 1
+  },
+  "Lab": {
+   "max": 13,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 8,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 12,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 9,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 8,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 8,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 7,
+   "count": 1
+  },
+  "Pet House": {
+   "max": 8,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 11,
+   "count": 8
+  },
+  "Spring Trap": {
+   "max": 10,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 10,
+   "count": 7
+  },
+  "Giant Bomb": {
+   "max": 9,
+   "count": 7
+  },
+  "Seeking Air Mine": {
+   "max": 5,
+   "count": 8
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 4
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 16,
+   "count": 325
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 24,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 24,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 24,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 24,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 24,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 24,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 24,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 24,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 24,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 24,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 24,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 24,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 24,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 24,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 24,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 24,
+   "count": null
+  },
+  "Fire Heart (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Flame Blower (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Stun Blaster (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Backpack (Dragon Duke)": {
+   "max": 24,
+   "count": null
+  },
+  "Electro Fangs (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Revenge Deck (Dragon Duke)": {
+   "max": 24,
+   "count": null
+  }
+ },
+ "16": {
+  "Barbarian King": {
+   "max": 95,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 95,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 80,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 70,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 45,
+   "count": null
+  },
+  "Dragon Duke": {
+   "max": 15,
+   "count": null
+  },
+  "L.A.S.S.I": {
+   "max": 15,
+   "count": null
+  },
+  "Electro Owl": {
+   "max": 15,
+   "count": null
+  },
+  "Mighty Yak": {
+   "max": 15,
+   "count": null
+  },
+  "Unicorn": {
+   "max": 10,
+   "count": null
+  },
+  "Frosty": {
+   "max": 10,
+   "count": null
+  },
+  "Diggy": {
+   "max": 10,
+   "count": null
+  },
+  "Poison Lizard": {
+   "max": 10,
+   "count": null
+  },
+  "Phoenix": {
+   "max": 10,
+   "count": null
+  },
+  "Spirit Fox": {
+   "max": 10,
+   "count": null
+  },
+  "Angry Jelly": {
+   "max": 10,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 12,
+   "count": null
+  },
+  "Archer": {
+   "max": 12,
+   "count": null
+  },
+  "Giant": {
+   "max": 12,
+   "count": null
+  },
+  "Goblin": {
+   "max": 9,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 12,
+   "count": null
+  },
+  "Balloon": {
+   "max": 11,
+   "count": null
+  },
+  "Wizard": {
+   "max": 12,
+   "count": null
+  },
+  "Healer": {
+   "max": 9,
+   "count": null
+  },
+  "Dragon": {
+   "max": 11,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 11,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 10,
+   "count": null
+  },
+  "Miner": {
+   "max": 10,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 7,
+   "count": null
+  },
+  "Yeti": {
+   "max": 6,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 4,
+   "count": null
+  },
+  "Electro Titan": {
+   "max": 4,
+   "count": null
+  },
+  "Root Rider": {
+   "max": 3,
+   "count": null
+  },
+  "Thrower": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 12,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 13,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 11,
+   "count": null
+  },
+  "Golem": {
+   "max": 13,
+   "count": null
+  },
+  "Witch": {
+   "max": 7,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 7,
+   "count": null
+  },
+  "Bowler": {
+   "max": 8,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 8,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 3,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 4,
+   "count": null
+  },
+  "Druid": {
+   "max": 4,
+   "count": null
+  },
+  "Furnace": {
+   "max": 3,
+   "count": null
+  },
+  "Ruin Witch": {
+   "max": 2,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 5,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 5,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 5,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 5,
+   "count": null
+  },
+  "Flame Flinger": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Drill": {
+   "max": 4,
+   "count": null
+  },
+  "Troop Launcher": {
+   "max": 3,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 11,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 10,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Revive Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Totem Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 10,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Ice Block Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Angry Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Cannon": {
+   "max": 21,
+   "count": 3
+  },
+  "Archer Tower": {
+   "max": 21,
+   "count": 4
+  },
+  "Mortar": {
+   "max": 16,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 14,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 16,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 15,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 11,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 11,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 10,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 7,
+   "count": 1
+  },
+  "Scattershot": {
+   "max": 5,
+   "count": 2
+  },
+  "Builder Hut": {
+   "max": 6,
+   "count": 5
+  },
+  "Spell Tower": {
+   "max": 3,
+   "count": 2
+  },
+  "Monolith": {
+   "max": 3,
+   "count": 1
+  },
+  "Multi-Archer Tower": {
+   "max": 2,
+   "count": 2
+  },
+  "Ricochet Cannon": {
+   "max": 2,
+   "count": 2
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 18,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 18,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 18,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 17,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 17,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 11,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 17,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 17,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 11,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 12,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 18,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 12,
+   "count": 1
+  },
+  "Lab": {
+   "max": 14,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 9,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 13,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 10,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 8,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 9,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 8,
+   "count": 1
+  },
+  "Pet House": {
+   "max": 10,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 12,
+   "count": 8
+  },
+  "Spring Trap": {
+   "max": 11,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 11,
+   "count": 7
+  },
+  "Giant Bomb": {
+   "max": 10,
+   "count": 7
+  },
+  "Seeking Air Mine": {
+   "max": 6,
+   "count": 8
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 4
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 17,
+   "count": 325
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Fire Heart (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Flame Blower (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Stun Blaster (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Backpack (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Fangs (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Revenge Deck (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  }
+ },
+ "17": {
+  "Barbarian King": {
+   "max": 100,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 100,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 90,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 75,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 50,
+   "count": null
+  },
+  "Dragon Duke": {
+   "max": 20,
+   "count": null
+  },
+  "L.A.S.S.I": {
+   "max": 15,
+   "count": null
+  },
+  "Electro Owl": {
+   "max": 15,
+   "count": null
+  },
+  "Mighty Yak": {
+   "max": 15,
+   "count": null
+  },
+  "Unicorn": {
+   "max": 15,
+   "count": null
+  },
+  "Frosty": {
+   "max": 15,
+   "count": null
+  },
+  "Diggy": {
+   "max": 10,
+   "count": null
+  },
+  "Poison Lizard": {
+   "max": 15,
+   "count": null
+  },
+  "Phoenix": {
+   "max": 10,
+   "count": null
+  },
+  "Spirit Fox": {
+   "max": 10,
+   "count": null
+  },
+  "Angry Jelly": {
+   "max": 10,
+   "count": null
+  },
+  "Sneezy": {
+   "max": 10,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 12,
+   "count": null
+  },
+  "Archer": {
+   "max": 13,
+   "count": null
+  },
+  "Giant": {
+   "max": 13,
+   "count": null
+  },
+  "Goblin": {
+   "max": 9,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 13,
+   "count": null
+  },
+  "Balloon": {
+   "max": 12,
+   "count": null
+  },
+  "Wizard": {
+   "max": 13,
+   "count": null
+  },
+  "Healer": {
+   "max": 10,
+   "count": null
+  },
+  "Dragon": {
+   "max": 12,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 12,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 11,
+   "count": null
+  },
+  "Miner": {
+   "max": 11,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 8,
+   "count": null
+  },
+  "Yeti": {
+   "max": 7,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 5,
+   "count": null
+  },
+  "Electro Titan": {
+   "max": 4,
+   "count": null
+  },
+  "Root Rider": {
+   "max": 3,
+   "count": null
+  },
+  "Thrower": {
+   "max": 3,
+   "count": null
+  },
+  "Meteor Golem": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 13,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 14,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 12,
+   "count": null
+  },
+  "Golem": {
+   "max": 14,
+   "count": null
+  },
+  "Witch": {
+   "max": 7,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 7,
+   "count": null
+  },
+  "Bowler": {
+   "max": 9,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 9,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 3,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 4,
+   "count": null
+  },
+  "Druid": {
+   "max": 5,
+   "count": null
+  },
+  "Furnace": {
+   "max": 4,
+   "count": null
+  },
+  "Ruin Witch": {
+   "max": 3,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 5,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 5,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 5,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 5,
+   "count": null
+  },
+  "Flame Flinger": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Drill": {
+   "max": 5,
+   "count": null
+  },
+  "Troop Launcher": {
+   "max": 4,
+   "count": null
+  },
+  "Sky Wagon": {
+   "max": 2,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 12,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 11,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Revive Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Totem Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 11,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Ice Block Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Angry Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Cannon": {
+   "max": 21,
+   "count": 0
+  },
+  "Archer Tower": {
+   "max": 21,
+   "count": 2
+  },
+  "Mortar": {
+   "max": 17,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 15,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 17,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 16,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 12,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 12,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 11,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 7,
+   "count": 0
+  },
+  "Scattershot": {
+   "max": 6,
+   "count": 2
+  },
+  "Builder Hut": {
+   "max": 7,
+   "count": 5
+  },
+  "Spell Tower": {
+   "max": 4,
+   "count": 2
+  },
+  "Monolith": {
+   "max": 4,
+   "count": 1
+  },
+  "Multi-Archer Tower": {
+   "max": 3,
+   "count": 3
+  },
+  "Ricochet Cannon": {
+   "max": 3,
+   "count": 3
+  },
+  "Multi-Gear Tower": {
+   "max": 2,
+   "count": 1
+  },
+  "Firespitter": {
+   "max": 2,
+   "count": 2
+  },
+  "Inferno Artillery": {
+   "max": 5,
+   "count": 1
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 21,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 21,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 21,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 17,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 17,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 11,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 18,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 18,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 12,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 13,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 19,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 13,
+   "count": 1
+  },
+  "Lab": {
+   "max": 15,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 9,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 13,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 11,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 8,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 10,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 9,
+   "count": 1
+  },
+  "Pet House": {
+   "max": 11,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 13,
+   "count": 8
+  },
+  "Spring Trap": {
+   "max": 12,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 12,
+   "count": 7
+  },
+  "Giant Bomb": {
+   "max": 11,
+   "count": 8
+  },
+  "Seeking Air Mine": {
+   "max": 7,
+   "count": 9
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 4
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Giga Bomb": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 18,
+   "count": 325
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Fire Heart (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Flame Blower (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Stun Blaster (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Backpack (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Fangs (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Revenge Deck (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  }
+ },
+ "18": {
+  "Barbarian King": {
+   "max": 110,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 110,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 95,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 85,
+   "count": null
+  },
+  "Royal Champion": {
+   "max": 55,
+   "count": null
+  },
+  "Dragon Duke": {
+   "max": 25,
+   "count": null
+  },
+  "L.A.S.S.I": {
+   "max": 15,
+   "count": null
+  },
+  "Electro Owl": {
+   "max": 15,
+   "count": null
+  },
+  "Mighty Yak": {
+   "max": 15,
+   "count": null
+  },
+  "Unicorn": {
+   "max": 15,
+   "count": null
+  },
+  "Frosty": {
+   "max": 15,
+   "count": null
+  },
+  "Diggy": {
+   "max": 15,
+   "count": null
+  },
+  "Poison Lizard": {
+   "max": 15,
+   "count": null
+  },
+  "Phoenix": {
+   "max": 10,
+   "count": null
+  },
+  "Spirit Fox": {
+   "max": 10,
+   "count": null
+  },
+  "Angry Jelly": {
+   "max": 10,
+   "count": null
+  },
+  "Sneezy": {
+   "max": 10,
+   "count": null
+  },
+  "Greedy Raven": {
+   "max": 10,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 13,
+   "count": null
+  },
+  "Archer": {
+   "max": 14,
+   "count": null
+  },
+  "Giant": {
+   "max": 14,
+   "count": null
+  },
+  "Goblin": {
+   "max": 10,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 14,
+   "count": null
+  },
+  "Balloon": {
+   "max": 13,
+   "count": null
+  },
+  "Wizard": {
+   "max": 14,
+   "count": null
+  },
+  "Healer": {
+   "max": 11,
+   "count": null
+  },
+  "Dragon": {
+   "max": 13,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 13,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 12,
+   "count": null
+  },
+  "Miner": {
+   "max": 12,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 9,
+   "count": null
+  },
+  "Yeti": {
+   "max": 8,
+   "count": null
+  },
+  "Dragon Rider": {
+   "max": 6,
+   "count": null
+  },
+  "Electro Titan": {
+   "max": 5,
+   "count": null
+  },
+  "Root Rider": {
+   "max": 4,
+   "count": null
+  },
+  "Thrower": {
+   "max": 4,
+   "count": null
+  },
+  "Meteor Golem": {
+   "max": 3,
+   "count": null
+  },
+  "Minion": {
+   "max": 14,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 15,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 12,
+   "count": null
+  },
+  "Golem": {
+   "max": 15,
+   "count": null
+  },
+  "Witch": {
+   "max": 8,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 8,
+   "count": null
+  },
+  "Bowler": {
+   "max": 10,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 9,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 4,
+   "count": null
+  },
+  "Apprentice Warden": {
+   "max": 4,
+   "count": null
+  },
+  "Druid": {
+   "max": 6,
+   "count": null
+  },
+  "Furnace": {
+   "max": 4,
+   "count": null
+  },
+  "Ruin Witch": {
+   "max": 4,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 6,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 6,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 6,
+   "count": null
+  },
+  "Siege Barracks": {
+   "max": 6,
+   "count": null
+  },
+  "Log Launcher": {
+   "max": 6,
+   "count": null
+  },
+  "Flame Flinger": {
+   "max": 5,
+   "count": null
+  },
+  "Battle Drill": {
+   "max": 6,
+   "count": null
+  },
+  "Troop Launcher": {
+   "max": 4,
+   "count": null
+  },
+  "Sky Wagon": {
+   "max": 4,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 13,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 12,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Recall Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Revive Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Totem Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 12,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Ice Block Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Angry Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Cannon": {
+   "max": 21,
+   "count": 0
+  },
+  "Archer Tower": {
+   "max": 21,
+   "count": 2
+  },
+  "Mortar": {
+   "max": 18,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 16,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 17,
+   "count": 2
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 17,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 13,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 13,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 12,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 7,
+   "count": 0
+  },
+  "Scattershot": {
+   "max": 7,
+   "count": 2
+  },
+  "Builder Hut": {
+   "max": 8,
+   "count": 5
+  },
+  "Spell Tower": {
+   "max": 4,
+   "count": 2
+  },
+  "Monolith": {
+   "max": 5,
+   "count": 1
+  },
+  "Multi-Archer Tower": {
+   "max": 4,
+   "count": 3
+  },
+  "Ricochet Cannon": {
+   "max": 4,
+   "count": 3
+  },
+  "Multi-Gear Tower": {
+   "max": 3,
+   "count": 1
+  },
+  "Firespitter": {
+   "max": 3,
+   "count": 2
+  },
+  "Inferno Artillery": {
+   "max": 5,
+   "count": 0
+  },
+  "Super Wizard Tower": {
+   "max": 2,
+   "count": 2
+  },
+  "Guardian-Long Shot": {
+   "max": 5,
+   "count": 1
+  },
+  "Guardian-Smasher": {
+   "max": 5,
+   "count": 1
+  },
+  "Guardian-Logger": {
+   "max": 5,
+   "count": 1
+  },
+  "Revenge Tower": {
+   "max": 2,
+   "count": 1
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 30,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 30,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 30,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 17,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 17,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 11,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 19,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 19,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 13,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 14,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 19,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 14,
+   "count": 1
+  },
+  "Lab": {
+   "max": 16,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 9,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 13,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 12,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 8,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 10,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 9,
+   "count": 1
+  },
+  "Pet House": {
+   "max": 12,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 14,
+   "count": 8
+  },
+  "Spring Trap": {
+   "max": 13,
+   "count": 9
+  },
+  "Air Bomb": {
+   "max": 13,
+   "count": 7
+  },
+  "Giant Bomb": {
+   "max": 12,
+   "count": 8
+  },
+  "Seeking Air Mine": {
+   "max": 8,
+   "count": 9
+  },
+  "Skeleton Trap": {
+   "max": 5,
+   "count": 4
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Giga Bomb": {
+   "max": 4,
+   "count": 1
+  },
+  "Wall": {
+   "max": 19,
+   "count": 325
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 27,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 27,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 27,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 27,
+   "count": null
+  },
+  "Royal Gem (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Seeking Shield (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Hog Rider Puppet (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Haste Vial (Royal Champion)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Spear (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Boots (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Frost Flake (Royal Champion)": {
+   "max": 27,
+   "count": null
+  },
+  "Fire Heart (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Flame Blower (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Stun Blaster (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Rocket Backpack (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  },
+  "Electro Fangs (Dragon Duke)": {
+   "max": 18,
+   "count": null
+  },
+  "Revenge Deck (Dragon Duke)": {
+   "max": 27,
+   "count": null
+  }
+ },
+ "11": {
+  "Barbarian King": {
+   "max": 50,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 50,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 30,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 20,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 8,
+   "count": null
+  },
+  "Archer": {
+   "max": 8,
+   "count": null
+  },
+  "Giant": {
+   "max": 8,
+   "count": null
+  },
+  "Goblin": {
+   "max": 7,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 7,
+   "count": null
+  },
+  "Balloon": {
+   "max": 7,
+   "count": null
+  },
+  "Wizard": {
+   "max": 8,
+   "count": null
+  },
+  "Healer": {
+   "max": 5,
+   "count": null
+  },
+  "Dragon": {
+   "max": 6,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 7,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 5,
+   "count": null
+  },
+  "Miner": {
+   "max": 5,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 7,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 7,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 6,
+   "count": null
+  },
+  "Golem": {
+   "max": 7,
+   "count": null
+  },
+  "Witch": {
+   "max": 4,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 4,
+   "count": null
+  },
+  "Bowler": {
+   "max": 3,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 3,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 8,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 4,
+   "count": null
+  },
+  "Cannon": {
+   "max": 15,
+   "count": 7
+  },
+  "Archer Tower": {
+   "max": 15,
+   "count": 8
+  },
+  "Mortar": {
+   "max": 10,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 9,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 10,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 9,
+   "count": 4
+  },
+  "Bomb Tower": {
+   "max": 6,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 5,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 5,
+   "count": 2
+  },
+  "Eagle Artillery": {
+   "max": 2,
+   "count": 1
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 3,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 3,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 3,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 14,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 14,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 8,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 12,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 12,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 6,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 9,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 13,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 7,
+   "count": 1
+  },
+  "Lab": {
+   "max": 9,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 6,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 8,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 5,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 5,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 4,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 8,
+   "count": 6
+  },
+  "Spring Trap": {
+   "max": 6,
+   "count": 6
+  },
+  "Air Bomb": {
+   "max": 5,
+   "count": 5
+  },
+  "Giant Bomb": {
+   "max": 5,
+   "count": 5
+  },
+  "Seeking Air Mine": {
+   "max": 3,
+   "count": 5
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 3
+  },
+  "Tornado Trap": {
+   "max": 2,
+   "count": 1
+  },
+  "Wall": {
+   "max": 12,
+   "count": 300
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 12,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 12,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 12,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 12,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 12,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 12,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 12,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 12,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 12,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 12,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 12,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 12,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 12,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 12,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 12,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 12,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 15,
+   "count": null
+  }
+ },
+ "12": {
+  "Barbarian King": {
+   "max": 65,
+   "count": null
+  },
+  "Archer Queen": {
+   "max": 65,
+   "count": null
+  },
+  "Minion Prince": {
+   "max": 40,
+   "count": null
+  },
+  "Grand Warden": {
+   "max": 40,
+   "count": null
+  },
+  "Barbarian": {
+   "max": 9,
+   "count": null
+  },
+  "Archer": {
+   "max": 9,
+   "count": null
+  },
+  "Giant": {
+   "max": 9,
+   "count": null
+  },
+  "Goblin": {
+   "max": 8,
+   "count": null
+  },
+  "Wall Breaker": {
+   "max": 8,
+   "count": null
+  },
+  "Balloon": {
+   "max": 8,
+   "count": null
+  },
+  "Wizard": {
+   "max": 9,
+   "count": null
+  },
+  "Healer": {
+   "max": 5,
+   "count": null
+  },
+  "Dragon": {
+   "max": 7,
+   "count": null
+  },
+  "P.E.K.K.A": {
+   "max": 8,
+   "count": null
+  },
+  "Baby Dragon": {
+   "max": 6,
+   "count": null
+  },
+  "Miner": {
+   "max": 6,
+   "count": null
+  },
+  "Electro Dragon": {
+   "max": 3,
+   "count": null
+  },
+  "Yeti": {
+   "max": 2,
+   "count": null
+  },
+  "Minion": {
+   "max": 8,
+   "count": null
+  },
+  "Hog Rider": {
+   "max": 9,
+   "count": null
+  },
+  "Valkyrie": {
+   "max": 7,
+   "count": null
+  },
+  "Golem": {
+   "max": 9,
+   "count": null
+  },
+  "Witch": {
+   "max": 5,
+   "count": null
+  },
+  "Lava Hound": {
+   "max": 5,
+   "count": null
+  },
+  "Bowler": {
+   "max": 4,
+   "count": null
+  },
+  "Ice Golem": {
+   "max": 5,
+   "count": null
+  },
+  "Headhunter": {
+   "max": 2,
+   "count": null
+  },
+  "Wall Wrecker": {
+   "max": 3,
+   "count": null
+  },
+  "Battle Blimp": {
+   "max": 3,
+   "count": null
+  },
+  "Stone Slammer": {
+   "max": 3,
+   "count": null
+  },
+  "Lightning Spell": {
+   "max": 9,
+   "count": null
+  },
+  "Healing Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Rage Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Jump Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Freeze Spell": {
+   "max": 7,
+   "count": null
+  },
+  "Clone Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Invisibility Spell": {
+   "max": 3,
+   "count": null
+  },
+  "Poison Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Earthquake Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Haste Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Skeleton Spell": {
+   "max": 6,
+   "count": null
+  },
+  "Bat Spell": {
+   "max": 5,
+   "count": null
+  },
+  "Overgrowth Spell": {
+   "max": 2,
+   "count": null
+  },
+  "Cannon": {
+   "max": 17,
+   "count": 7
+  },
+  "Archer Tower": {
+   "max": 17,
+   "count": 8
+  },
+  "Mortar": {
+   "max": 12,
+   "count": 4
+  },
+  "Air Defense": {
+   "max": 10,
+   "count": 4
+  },
+  "Wizard Tower": {
+   "max": 11,
+   "count": 5
+  },
+  "Air Sweeper": {
+   "max": 7,
+   "count": 2
+  },
+  "Hidden Tesla": {
+   "max": 10,
+   "count": 5
+  },
+  "Bomb Tower": {
+   "max": 7,
+   "count": 2
+  },
+  "X-Bow": {
+   "max": 6,
+   "count": 4
+  },
+  "Inferno Tower": {
+   "max": 6,
+   "count": 3
+  },
+  "Eagle Artillery": {
+   "max": 3,
+   "count": 1
+  },
+  "Crafted Defense — Hot Candle": {
+   "max": 6,
+   "count": 1
+  },
+  "Crafted Defense — Hero Hunter": {
+   "max": 6,
+   "count": 1
+  },
+  "Crafted Defense — Cake-A-Pult": {
+   "max": 6,
+   "count": 1
+  },
+  "Gold Mine": {
+   "max": 15,
+   "count": 7
+  },
+  "Elixir Collector": {
+   "max": 15,
+   "count": 7
+  },
+  "Dark Elixir Drill": {
+   "max": 9,
+   "count": 3
+  },
+  "Gold Storage": {
+   "max": 13,
+   "count": 4
+  },
+  "Elixir Storage": {
+   "max": 13,
+   "count": 4
+  },
+  "Dark Elixir Storage": {
+   "max": 7,
+   "count": 1
+  },
+  "Helper Hut": {
+   "max": 1,
+   "count": 1
+  },
+  "Army Camp": {
+   "max": 10,
+   "count": 4
+  },
+  "Barracks": {
+   "max": 14,
+   "count": 1
+  },
+  "Clan Castle": {
+   "max": 8,
+   "count": 1
+  },
+  "Lab": {
+   "max": 10,
+   "count": 1
+  },
+  "Spell Factory": {
+   "max": 6,
+   "count": 1
+  },
+  "Dark Barracks": {
+   "max": 9,
+   "count": 1
+  },
+  "Hero Hall": {
+   "max": 6,
+   "count": 1
+  },
+  "Dark Spell Factory": {
+   "max": 6,
+   "count": 1
+  },
+  "Blacksmith": {
+   "max": 5,
+   "count": 1
+  },
+  "Workshop": {
+   "max": 3,
+   "count": 1
+  },
+  "Bomb": {
+   "max": 8,
+   "count": 6
+  },
+  "Spring Trap": {
+   "max": 7,
+   "count": 8
+  },
+  "Air Bomb": {
+   "max": 6,
+   "count": 6
+  },
+  "Giant Bomb": {
+   "max": 5,
+   "count": 6
+  },
+  "Seeking Air Mine": {
+   "max": 3,
+   "count": 6
+  },
+  "Skeleton Trap": {
+   "max": 4,
+   "count": 3
+  },
+  "Tornado Trap": {
+   "max": 3,
+   "count": 1
+  },
+  "Wall": {
+   "max": 13,
+   "count": 300
+  },
+  "Barbarian Puppet (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Rage Vial (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Earthquake Boots (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Vampstache (Barbarian King)": {
+   "max": 15,
+   "count": null
+  },
+  "Giant Gauntlet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Spiky Ball (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Snake Bracelet (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Stick Horse (Barbarian King)": {
+   "max": 18,
+   "count": null
+  },
+  "Archer Puppet (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Invisibility Vial (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Giant Arrow (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Healer Puppet (Archer Queen)": {
+   "max": 15,
+   "count": null
+  },
+  "Frozen Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Magic Mirror (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Action Figure (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Monolith Arrow (Archer Queen)": {
+   "max": 18,
+   "count": null
+  },
+  "Henchmen Puppet (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Dark Orb (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Metal Pants (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Noble Iron (Minion Prince)": {
+   "max": 15,
+   "count": null
+  },
+  "Dark Crown (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Meteor Staff (Minion Prince)": {
+   "max": 18,
+   "count": null
+  },
+  "Eternal Tome (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Life Gem (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Rage Gem (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Healing Tome (Grand Warden)": {
+   "max": 15,
+   "count": null
+  },
+  "Fireball (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Lavaloon Puppet (Grand Warden)": {
+   "max": 18,
+   "count": null
+  },
+  "Heroic Torch (Grand Warden)": {
+   "max": 18,
+   "count": null
+  }
+ }
+}
