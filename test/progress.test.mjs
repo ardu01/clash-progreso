@@ -4,8 +4,10 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, overMaxLabel, CATEGORIES } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
+import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
+import { classifyEntries, acceptedExports, foreignMsg, trailingLabel } from "../js/import.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -381,6 +383,178 @@ test("muros de C1 y de una cuenta TH11", () => {
 test("missing.json coincide con el archivo publicado", () => {
   const buf = readFileSync(new URL("../assets/missing.json", import.meta.url));
   assert.equal(createHash("sha256").update(buf).digest("hex"), "53b293a3160900e693a3e950de291167ce7ec73e7ab14b5ec9535e61aa7e1fef");
+});
+
+const V110 = {
+  "#28PLGP0G2": { media: 64, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [61.6, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
+  "#R00C8CPQC": { media: 49, sigMedia: 46.1, cats: { defensas: [66.9, 61.3], laboratorio: [45.4, 41.7], ejercito_edif: [86.2, 80.6], equipamiento: [58.6, 58.6], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
+  "#GUQUV98JG": { media: 62.9, sigMedia: 49.3, cats: { defensas: [69.2, 62.6], laboratorio: [53.7, 47.9], ejercito_edif: [83.3, 75.8], equipamiento: [67.9, 57.3], mascotas: [null, 0], heroes: [32.7, 28.1], trampas: [48.9, 39.6], recursos: [72.3, 67.4], muros: [75.3, 64.9] } },
+  "#GVG9GCYUV": { media: 60, sigMedia: 47.1, cats: { defensas: [68.6, 62], laboratorio: [45.6, 40.6], ejercito_edif: [81.7, 74.2], equipamiento: [80.8, 68.4], mascotas: [null, 0], heroes: [33.1, 28.4], trampas: [26.5, 21.5], recursos: [68.1, 63.4], muros: [75.4, 65] } },
+  "#R02YVYLJ8": { media: 58.6, sigMedia: 45.8, cats: { defensas: [65.9, 59.6], laboratorio: [44.1, 39.3], ejercito_edif: [78.3, 71.2], equipamiento: [73.5, 62.2], mascotas: [null, 0], heroes: [30.9, 26.6], trampas: [38.8, 31.4], recursos: [61.1, 56.9], muros: [75.9, 65.4] } },
+  "#GJPJP9JP0": { media: 41.8, sigMedia: 32.9, cats: { defensas: [42.5, 38.7], laboratorio: [34.1, 30.4], ejercito_edif: [68.3, 62.1], equipamiento: [54.5, 46.2], mascotas: [null, 0], heroes: [17.5, 15], trampas: [22, 17.8], recursos: [52.7, 49.1], muros: [42.9, 36.9] } },
+  "#GVPU80R80": { media: 51.8, sigMedia: 44, cats: { defensas: [55.5, 46.8], laboratorio: [48.1, 38.4], ejercito_edif: [79.6, 69.2], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [34.7, 24.8], trampas: [24.5, 19.7], recursos: [61.2, 56.6], muros: [51.3, 47.3] } },
+  "#GVUQ2C2VC": { media: 57.3, sigMedia: 48.8, cats: { defensas: [68.3, 57.5], laboratorio: [55.7, 44.5], ejercito_edif: [82.8, 72], equipamiento: [66.7, 55.6], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [18.4, 14.8], recursos: [67.7, 62.6], muros: [61.2, 56.5] } },
+  "#GVVYVU802": { media: 58.1, sigMedia: 49.2, cats: { defensas: [66.3, 55.8], laboratorio: [55.2, 44.1], ejercito_edif: [81.7, 71], equipamiento: [77.2, 63.8], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [28.2, 22.7], recursos: [58.4, 54], muros: [60.5, 55.9] } },
+  "#GVPU2CJR8": { media: 51.2, sigMedia: 43.4, cats: { defensas: [57.3, 48.2], laboratorio: [49.7, 39.7], ejercito_edif: [80.6, 70.1], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [38, 27.1], trampas: [19, 15.3], recursos: [55.9, 51.7], muros: [50, 46.2] } },
+  "#R02YUVC0J": { media: 49.2, sigMedia: 41.7, cats: { defensas: [54.4, 45.8], laboratorio: [47, 37.6], ejercito_edif: [77.4, 67.3], equipamiento: [57.4, 47], mascotas: [null, null], heroes: [35.3, 25.2], trampas: [19, 15.3], recursos: [59.3, 54.9], muros: [44.1, 40.7] } },
+};
+
+function latestOf(rows, tag) {
+  return rows.filter((r) => r.tag === tag).sort((a, b) => b.timestamp - a.timestamp)[0];
+}
+
+function importCtx(rows) {
+  return { rows, accounts: ROSTER, index, now: Date.parse("2026-10-08T12:00:00Z") };
+}
+
+test("los porcentajes de las 11 cuentas no cambian respecto a la 1.1.0", () => {
+  for (const roster of ROSTER) {
+    const a = analyze(exportsByTag.get(roster.tag), index);
+    const want = V110[roster.tag];
+    assert.equal(a.media, want.media, roster.tag + " media");
+    assert.equal(a.sigMedia, want.sigMedia, roster.tag + " sig");
+    for (const c of CATEGORIES) {
+      const pair = want.cats[c.key];
+      assert.equal(a.cats[c.key].pct, pair[0], roster.tag + " " + c.key);
+      assert.equal(a.cats[c.key].sigPct, pair[1], roster.tag + " sig " + c.key);
+    }
+  }
+  assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 61.6);
+  const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  assert.equal(c2.cats.defensas.pct, 66.9);
+  assert.equal(c2.cats.defensas.sigPct, 61.3);
+  assert.equal(catFoot(analyze(exportsByTag.get("#28PLGP0G2"), index), analyze(exportsByTag.get("#28PLGP0G2"), index).cats.muros), "Faltan 1884 niveles");
+});
+
+test("reimportar la misma exportación no añade punto ni cambia porcentajes", () => {
+  const rows = [...exportsByTag.values()];
+  const c1 = exportsByTag.get("#28PLGP0G2");
+  const before = {};
+  for (const roster of ROSTER) {
+    const a = analyze(latestOf(rows, roster.tag), index);
+    before[roster.tag] = { media: a.media, eq: a.cats.equipamiento.pct, def: a.cats.defensas.pct };
+  }
+  const item = classifyEntries([{ name: "c1.json", text: JSON.stringify(c1), source: "file" }], importCtx(rows))[0];
+  assert.equal(item.kind, "duplicate");
+  assert.equal(item.skip, true);
+  assert.equal(item.changes, null);
+  assert.match(item.kind, /duplicate/);
+  const next = acceptedExports(rows, [item]);
+  assert.equal(next.length, rows.length);
+  for (const roster of ROSTER) {
+    const a = analyze(latestOf(next, roster.tag), index);
+    assert.equal(a.media, before[roster.tag].media, roster.tag);
+    assert.equal(a.cats.equipamiento.pct, before[roster.tag].eq, roster.tag);
+    assert.equal(a.cats.defensas.pct, before[roster.tag].def, roster.tag);
+  }
+});
+
+test("un id desconocido con timestamp posterior sale como ? y queda fuera del %", () => {
+  const base = exportsByTag.get("#28PLGP0G2");
+  const exp = structuredClone(base);
+  exp.timestamp = base.timestamp + 30;
+  exp.equipment = exp.equipment.concat([{ data: 424242424, lvl: 8 }]);
+  const rows = [...exportsByTag.values()];
+  const item = classifyEntries([{ name: "nuevo.json", text: JSON.stringify(exp) }], importCtx(rows))[0];
+  assert.equal(item.kind, "ready");
+  assert.notEqual(item.kind, "duplicate");
+  const before = analyze(base, index);
+  const after = analyze(exp, index);
+  assert.equal(after.cats.equipamiento.pct, before.cats.equipamiento.pct);
+  assert.equal(after.media, before.media);
+  const piece = equipmentView(exp, index, after.th).find((p) => p.id === "424242424");
+  assert.ok(piece);
+  assert.equal(piece.unknown, true);
+  const pres = presentItem(index, piece.id);
+  assert.equal(pres.mark, "?");
+  assert.equal(pres.id, "424242424");
+  assert.equal(pres.title, "Sin identificar");
+  assert.equal(pres.outsidePercent, true);
+  const same = structuredClone(exp);
+  same.timestamp = base.timestamp;
+  const discarded = classifyEntries([{ name: "dup.json", text: JSON.stringify(same) }], importCtx(rows))[0];
+  assert.equal(discarded.kind, "duplicate");
+  assert.equal(discarded.changes, null);
+});
+
+test("un nivel por encima del máximo cuenta como el máximo y lleva el chip", () => {
+  const base = exportsByTag.get("#28PLGP0G2");
+  const cap = capsMaxFor(index, "90000000", 18);
+  assert.ok(cap > 1);
+  const over = structuredClone(base);
+  over.timestamp = base.timestamp + 90;
+  over.equipment.find((e) => String(e.data) === "90000000").lvl = cap + 1;
+  const atMax = structuredClone(base);
+  atMax.equipment.find((e) => String(e.data) === "90000000").lvl = cap;
+  const overView = analyze(over, index);
+  const maxView = analyze(atMax, index);
+  assert.equal(overView.cats.equipamiento.pct, maxView.cats.equipamiento.pct);
+  assert.ok(overView.cats.equipamiento.pct <= 100);
+  const piece = equipmentView(over, index, 18).find((p) => p.id === "90000000");
+  assert.equal(piece.lvl, cap + 1);
+  assert.equal(piece.max, cap);
+  assert.equal(piece.overMax, true);
+  assert.equal(overMaxLabel(piece.lvl, piece.max), "Máximo desactualizado");
+  assert.equal(levelLine(piece).text, `Nv ${cap + 1} / ${cap}`);
+  const rows = [...exportsByTag.values()];
+  const later = classifyEntries([{ name: "sobre.json", text: JSON.stringify(over) }], importCtx(rows))[0];
+  assert.equal(later.kind, "ready");
+  assert.ok(later.changes.overMaxCount >= 1);
+  assert.equal(trailingLabel(later).startsWith("+"), true);
+  const same = structuredClone(over);
+  same.timestamp = base.timestamp;
+  const discarded = classifyEntries([{ name: "dup.json", text: JSON.stringify(same) }], importCtx(rows))[0];
+  assert.equal(discarded.kind, "duplicate");
+  assert.equal(discarded.changes, null);
+  assert.equal(overMaxLabel(piece.lvl, piece.max) === "Máximo desactualizado" && discarded.changes === null, true);
+});
+
+test("validar una exportación: tag ajeno, más antigua y textos sin línea", () => {
+  const base = exportsByTag.get("#R00C8CPQC");
+  const rows = [...exportsByTag.values()];
+  const ctx = importCtx(rows);
+  const foreign = structuredClone(base);
+  foreign.tag = "#QL0Y2P8CU";
+  foreign.timestamp = base.timestamp + 5;
+  const neu = classifyEntries([{ name: "ajena", text: JSON.stringify(foreign) }], ctx)[0];
+  assert.equal(neu.kind, "new");
+  assert.equal(foreignMsg(foreign.tag), "#QL0Y2P8CU no es una de tus cuentas.");
+  assert.equal(/11 cuentas/.test(foreignMsg(foreign.tag)), false);
+  const older = structuredClone(base);
+  older.timestamp = base.timestamp - 100;
+  const old = classifyEntries([{ name: "vieja", text: JSON.stringify(older) }], ctx)[0];
+  assert.equal(old.kind, "older");
+  assert.equal(trailingLabel(old), "Más antigua");
+  const broken = classifyEntries([{ name: "rota", text: '{"timestamp":1}', source: "clipboard" }], ctx)[0];
+  assert.equal(broken.kind, "invalid");
+  assert.equal(broken.structural, true);
+  assert.deepEqual(broken.issues, ["Falta el tag de la cuenta.", "No se encuentra el ayuntamiento."]);
+  assert.equal(/línea|columna|position/i.test(broken.issues.join(" ")), false);
+  const fresh = structuredClone(base);
+  fresh.timestamp = base.timestamp + 8;
+  const again = classifyEntries([{ name: "igual", text: JSON.stringify(fresh) }], ctx)[0];
+  assert.equal(again.kind, "ready");
+  assert.equal(again.changes.noChanges, true);
+  assert.equal(trailingLabel(again), "Sin cambios");
+});
+
+test("versión 1.1.1 y cachés cp-shell-v5 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.1");
+  assert.equal(SHELL_CACHE, "cp-shell-v5");
+  assert.equal(IMAGE_CACHE, "cp-img-v4");
+  const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
+  assert.match(sw, /SHELL_CACHE/);
+  assert.match(sw, /IMAGE_CACHE/);
+  assert.equal(sw.includes("cp-shell-v4"), false);
+  assert.equal(sw.includes("cp-img-v5"), false);
+  assert.match(caches, /cp-shell-v5/);
+  assert.match(caches, /cp-img-v4/);
+  assert.equal(caches.includes("cp-shell-v4"), false);
+  assert.match(app, /APP_VERSION/);
+  assert.equal(app.includes("1.1.0"), false);
+  assert.match(app, /js\/import\.js|from "\.\/import\.js"/);
 });
 
 test("ofensiva: media de laboratorio y héroes", () => {

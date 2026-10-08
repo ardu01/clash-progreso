@@ -36,6 +36,20 @@ export async function putExport(exp) {
   });
 }
 
+export async function deleteTag(tag) {
+  const rows = await allExports();
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    const os = tx.objectStore(STORE);
+    for (const row of rows) {
+      if (row.tag === tag) os.delete([row.tag, row.timestamp]);
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 export async function clearExports() {
   const db = await openDb();
   return new Promise((resolve, reject) => {

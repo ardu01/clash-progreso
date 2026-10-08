@@ -1,12 +1,17 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
   capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
-  itemName, levelLine, rarezaEs, rosterByTag, townHallLevel, upgradesOf,
+  itemName, levelLine, overMaxLabel, rarezaEs, rosterByTag, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
-import { IMAGE_CACHE } from "./caches.js";
-import { parseLoose } from "./parse.js";
-import { allExports, clearExports, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
+import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
+import {
+  BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
+  PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
+  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, overMaxMsg,
+  sortBatch, statusText, successToast, trailingLabel, unknownMsg,
+} from "./import.js";
+import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -50,7 +55,10 @@ const state = {
   alert: null,
   flash: null,
   now: Date.now(),
-  importUi: { mode: "paste", text: "", items: [], reviewed: false },
+  importUi: freshImport(),
+  added: [],
+  flashTags: new Set(),
+  scrollAdded: false,
   dlAbort: null,
 };
 
@@ -71,6 +79,93 @@ function baseTab(r) {
   if (r.name === "detalle" || r.name === "progreso") return "progreso";
   if (r.name === "mejoras" || r.name === "evolucion" || r.name === "roster") return r.name;
   return "roster";
+}
+
+const ADDED_KEY = "cp-added";
+
+function freshImport() {
+  return {
+    active: false,
+    mode: "paste",
+    text: "",
+    phase: "entry",
+    items: [],
+    focus: null,
+    fromBatch: false,
+    saveError: false,
+    alias: "",
+    needsFocus: false,
+  };
+}
+
+function loadAdded() {
+  try {
+    const list = JSON.parse(localStorage.getItem(ADDED_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveAdded(list) {
+  localStorage.setItem(ADDED_KEY, JSON.stringify(list));
+}
+
+function accountFromAdded(a) {
+  const nombre = (a.alias || "").trim() || a.tag;
+  return {
+    tag: a.tag,
+    nombre,
+    chip: a.chip || String(a.tag).slice(-3),
+    role: null,
+    roleClass: "",
+    objetivo: null,
+    featured: false,
+    added: true,
+  };
+}
+
+function allAccounts() {
+  return ROSTER.concat(state.added.map(accountFromAdded));
+}
+
+function accountByTag(tag) {
+  const fixed = rosterByTag(tag);
+  if (fixed) return fixed;
+  const added = state.added.find((a) => a.tag === tag);
+  return added ? accountFromAdded(added) : null;
+}
+
+function makeChip(tag, th) {
+  const tail = String(tag || "").replace(/^#/, "");
+  const taken = new Set(allAccounts().map((a) => a.chip));
+  let n = 3;
+  let chip = `${th}·${tail.slice(-n)}`;
+  while (taken.has(chip) && n < tail.length) {
+    n += 1;
+    chip = `${th}·${tail.slice(-n)}`;
+  }
+  return chip;
+}
+
+function isFlash(tag) {
+  return state.flash === tag || (state.flashTags && state.flashTags.has(tag));
+}
+
+function armFlash(tags) {
+  const list = (Array.isArray(tags) ? tags : [tags]).filter(Boolean);
+  state.flashTags = new Set(list);
+  state.flash = list[0] || null;
+  clearTimeout(armFlash._t);
+  armFlash._t = setTimeout(() => {
+    state.flash = null;
+    state.flashTags = new Set();
+    document.querySelectorAll(".is-flash").forEach((el) => el.classList.remove("is-flash"));
+  }, 1200);
+}
+
+function inSafariTab() {
+  return typeof navigator !== "undefined" && navigator.standalone === false;
 }
 
 function expOf(tag) { return state.latest.get(tag) || null; }
@@ -313,13 +408,14 @@ function renderRoster() {
     ${empty}
     <div class="section"><div class="section-header"><span>Principales</span></div><div class="stack">${cards}</div></div>
     ${groups.map((g) => `<div class="section"><div class="section-header"><span>${esc(g.title)}</span></div><ul class="list">${g.rows.map(rowAccount).join("")}</ul></div>`).join("")}
+    ${otrasCuentas()}
     <div class="section" style="text-align:center"><button class="btn btn--plain" data-go="#/ajustes">Ajustes y aviso legal</button></div>
     ${LEGAL}`;
 }
 
 function featuredCard(meta) {
   const exp = expOf(meta.tag);
-  const flash = state.flash === meta.tag ? " is-flash" : "";
+  const flash = isFlash(meta.tag) ? " is-flash" : "";
   if (!exp) {
     return `<a class="card card--tap account-card${flash}" href="#/progreso/${meta.tag.slice(1)}">
       <span class="thumb thumb--72 thumb--empty" aria-hidden="true">TH</span>
@@ -355,7 +451,7 @@ function markMedia(a) {
 
 function rowAccount(meta) {
   const exp = expOf(meta.tag);
-  const flash = state.flash === meta.tag ? " is-flash" : "";
+  const flash = isFlash(meta.tag) ? " is-flash" : "";
   if (!exp) {
     return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}">
       <span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>
@@ -371,18 +467,41 @@ function rowAccount(meta) {
   </a></li>`;
 }
 
+function otrasCuentas() {
+  const rows = state.added.map(accountFromAdded).filter((meta) => expOf(meta.tag));
+  if (!rows.length) return "";
+  return `<div class="section" id="otras-cuentas"><div class="section-header"><span>Otras cuentas</span><span class="num">${rows.length}</span></div><ul class="list">${rows.map(rowAdded).join("")}</ul></div>`;
+}
+
+function rowAdded(meta) {
+  const exp = expOf(meta.tag);
+  const a = viewOf(meta.tag);
+  if (!exp || !a) return "";
+  const flash = isFlash(meta.tag) ? " is-flash" : "";
+  const n = upgrades(exp).filter((u) => !u.done).length;
+  const title = meta.nombre === meta.tag ? `<span class="tag">${esc(meta.tag)}</span>` : esc(meta.nombre);
+  const sub = `TH${a.th} · sin objetivo · ${n} mejoras`;
+  return `<li><a class="row row--account row--thumb44${flash}" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(meta.nombre)}, TH${a.th}, sin objetivo, media ${fmtPct(a.media)}">
+    ${thumb(1000001, { size: 44, th: a.th })}
+    <span class="row__main"><span class="row__title">${title}</span><span class="row__sub">${esc(sub)}</span></span>
+    <span class="row__trail">${barHtml("defensas", a.media, null, { mini: true, plain: true, label: fmtPct(a.media) })}<span class="num" style="font-weight:600;color:var(--label);font-size:0.882rem">${fmtPct(a.media)}</span>${CHEV}</span>
+  </a></li>`;
+}
+
 function renderProgreso(tag) {
-  const meta = rosterByTag(tag) || ROSTER[0];
+  const meta = accountByTag(tag) || ROSTER[0];
   const exp = expOf(meta.tag);
   const seg = state.seg[meta.tag] || localStorage.getItem("cp-seg-" + meta.tag) || "cats";
-  const options = ROSTER.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
+  const options = allAccounts().map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
   let body;
   if (!exp) {
     body = `<div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
   } else if (seg === "eq") body = equipBlock(exp, meta);
   else body = catsBlock(exp, meta);
   const a = exp ? viewOf(meta.tag) : null;
-  const sub = a ? `TH${a.th} · objetivo TH${meta.objetivo} · datos de ${fmtWhen(exp.timestamp * 1000)}` : "Sin importar";
+  const sub = !a ? "Sin importar" : meta.objetivo
+    ? `TH${a.th} · objetivo TH${meta.objetivo} · datos de ${fmtWhen(exp.timestamp * 1000)}`
+    : `TH${a.th} · sin objetivo · datos de ${fmtWhen(exp.timestamp * 1000)}`;
   return `<h1 class="large-title">Progreso</h1>
     <div class="section"><div class="list picker"><a class="row row--thumb44" href="#/progreso/${meta.tag.slice(1)}">
       ${exp ? thumb(1000001, { size: 44, th: a.th }) : `<span class="thumb thumb--44 thumb--empty">TH</span>`}
@@ -551,7 +670,7 @@ function equipBlock(exp, meta) {
 function eqCell(p) {
   const name = p.unknown ? "Sin identificar" : (nameOf(p.id) || "Pieza");
   const aria = p.unknown ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}` : `${name}, nivel ${p.lvl}`;
-  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max ? "is-max" : ""].filter(Boolean).join(" ");
+  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : ""].filter(Boolean).join(" ");
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
     : (p.meta && p.meta.estado === "id_deducido" ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
@@ -562,7 +681,7 @@ function eqCell(p) {
 }
 
 function renderDetalle(tag, catKey) {
-  const meta = rosterByTag(tag);
+  const meta = accountByTag(tag);
   const exp = expOf(tag);
   const cat = CATEGORIES.find((c) => c.key === catKey);
   if (!meta || !exp || !cat) return `<div class="section"><div class="card empty"><p class="t-title3">No hay datos</p></div></div>${LEGAL}`;
@@ -642,10 +761,10 @@ function detailRow(it, catKey, a) {
   const title = unknown ? "Sin identificar" : (nameOf(it.id) || "Ítem");
   const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const idBadge = unknown ? `<span class="badge badge-id">${esc(it.id)}</span>` : "";
-  const cnt = it.cnt > 1 ? ` ×${it.cnt}` : "";
+  const cnt = it.cnt > 1 ? `×${it.cnt}` : "";
   return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""}>
     ${thumb(it.id, { size: 40 })}
-    <span class="row__main"><span class="row__title">${esc(title)}${cnt ? ` <span class="num">${cnt.trim()}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(lv.text)}</span></span>
+    <span class="row__main"><span class="row__title">${esc(title)}${cnt ? `&nbsp;<span class="num">${cnt}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(lv.text)}</span></span>
     ${lv.bar}
   </button></li>`;
 }
@@ -722,7 +841,7 @@ function builderLine(exp) {
 
 function renderMejoras() {
   const all = [];
-  for (const meta of ROSTER) {
+  for (const meta of allAccounts()) {
     const exp = expOf(meta.tag);
     if (!exp) continue;
     for (const u of upgrades(exp)) all.push({ ...u, meta, exp });
@@ -735,7 +854,7 @@ function renderMejoras() {
       ? `<div class="card empty"><p class="t-title3">No hay mejoras en curso</p><p class="t-subhead c-2">Todas las colas están libres según la última importación.</p></div>`
       : mode === "cuenta" ? mejorasPorCuenta() : mejorasPorFin(all);
   return `<h1 class="large-title">Mejoras</h1>
-    <p class="large-sub">${active.length} en curso · ${ROSTER.filter((r) => expOf(r.tag)).length} cuentas</p>
+    <p class="large-sub">${active.length} en curso · ${allAccounts().filter((r) => expOf(r.tag)).length} cuentas</p>
     <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Orden de mejoras">
       <button role="tab" data-mej="fin" aria-selected="${mode !== "cuenta"}">Por fin</button>
       <button role="tab" data-mej="cuenta" aria-selected="${mode === "cuenta"}">Por cuenta</button>
@@ -746,7 +865,7 @@ function renderMejoras() {
 
 function mejorasPorFin(all) {
   const free = [];
-  for (const meta of ROSTER) {
+  for (const meta of allAccounts()) {
     const exp = expOf(meta.tag);
     if (!exp) continue;
     const b = builderStatus(exp);
@@ -773,7 +892,7 @@ function mejorasPorFin(all) {
 }
 
 function mejorasPorCuenta() {
-  return ROSTER.map((meta) => {
+  return allAccounts().map((meta) => {
     const exp = expOf(meta.tag);
     if (!exp) return "";
     const a = viewOf(meta.tag);
@@ -825,7 +944,7 @@ function upRow(u) {
 
 function helpersBlock() {
   const rows = [];
-  for (const meta of ROSTER) {
+  for (const meta of allAccounts()) {
     const exp = expOf(meta.tag);
     if (!exp) continue;
     for (const h of helpersOf(exp)) {
@@ -934,7 +1053,9 @@ function seriesPoints() {
     const list = byDay.get(day);
     if (state.evo === "roster") {
       const vals = [];
+      const rosterTags = new Set(ROSTER.map((r) => r.tag));
       for (const exp of list) {
+        if (!rosterTags.has(exp.tag)) continue;
         const a = analyze(exp, state.index);
         if (a.media != null) vals.push(a.media);
       }
@@ -1031,6 +1152,10 @@ function renderAjustes() {
         <div class="section" style="margin-top:0"><ul class="list">
           <li><button class="row" data-go="#/importar"><span class="row__main"><span class="row__title">Importar JSON</span></span>${CHEV}</button></li>
           <li><div class="row"><span class="row__main"><span class="row__title">Cuentas importadas</span></span><span class="row__trail num">${imported} de 11</span></div></li>
+          ${state.added.map((a) => {
+            const label = (a.alias || "").trim() || a.tag;
+            return `<li><button class="row row--destructive" data-quitar="${esc(a.tag)}"><span class="row__main"><span class="row__title">Quitar ${esc(label)}</span></span></button></li>`;
+          }).join("")}
           <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
           <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos incluidos</span></span></button></li>
         </ul></div>
@@ -1042,7 +1167,7 @@ function renderAjustes() {
           <p class="t-footnote c-2" style="margin:8px 0 0">${esc(note)}</p>
         </div></div>
         <div class="section-header"><span>Acerca de</span></div>
-        <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">1.1.0</span></div></li></ul></div>
+        <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li></ul></div>
         <div class="section"><div class="card t-footnote">
           <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.</p>
           <p>Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
@@ -1056,134 +1181,466 @@ function renderAjustes() {
 
 function renderImport() {
   const ui = state.importUi;
-  const paste = ui.mode !== "file";
-  const body = ui.reviewed ? importReview() : importEdit(paste);
+  const sub = ui.phase === "confirm";
+  const back = sub || ui.fromBatch;
+  const title = sub ? "Cuenta nueva" : "Importar";
+  const lead = back
+    ? `<button class="btn-text" data-im-back type="button"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Importar</button>`
+    : `<button class="btn-text" data-go="#/roster" type="button">Cancelar</button>`;
   return `<div class="sheet-backdrop" data-close="1"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="im-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><button class="btn-text" data-go="#/roster">Cancelar</button><h2 id="im-title">Importar</h2><span></span></div>
-      <div class="sheet__body">${body}${LEGAL}</div>
+      <div class="sheet__bar">${lead}<h2 id="im-title">${title}</h2><span></span></div>
+      <div class="sheet__body">${importBody()}${LEGAL}</div>
+      <input class="file-input" data-files type="file" accept=".json,application/json" multiple>
       <div class="sheet__actions">${importActions()}</div>
     </div>`;
 }
 
-function importEdit(paste) {
-  return `<div class="seg-wrap"><div class="seg" role="tablist">
-      <button role="tab" data-im="paste" aria-selected="${paste}">Pegar</button>
-      <button role="tab" data-im="file" aria-selected="${!paste}">Archivo</button>
-    </div></div>
-    ${paste ? `<div class="section"><div class="card"><textarea class="import-text" data-paste placeholder="Pega aquí el JSON exportado" autocapitalize="off" autocorrect="off" spellcheck="false">${esc(state.importUi.text)}</textarea></div>
-      <button class="btn btn--small btn--secondary" data-clip style="margin-top:8px">Pegar del portapapeles</button></div>`
-      : `<div class="section"><button class="btn btn--secondary btn--block" data-pick>Elegir archivos…</button>
-        <input class="file-input" data-files type="file" accept=".json,application/json" multiple>
-        <p class="t-footnote c-2">${state.importUi.items.length ? state.importUi.items.length + " archivos elegidos" : "Puedes elegir las 11 cuentas a la vez."}</p></div>`}
+function importBody() {
+  const ui = state.importUi;
+  if (ui.phase === "validating") return validatingCard();
+  if (ui.phase === "confirm") return confirmNew(currentImportItem());
+  if (ui.phase === "batch" && ui.focus == null) return batchBody();
+  if (ui.phase === "single" || ui.focus != null) return singleBody(currentImportItem());
+  return entryBody();
+}
+
+function currentImportItem() {
+  const ui = state.importUi;
+  if (ui.focus != null && ui.items[ui.focus]) return ui.items[ui.focus];
+  return ui.items.length === 1 ? ui.items[0] : null;
+}
+
+function segControl(paste) {
+  return `<div class="seg-wrap"><div class="seg" role="tablist" aria-label="Origen de la exportación">
+      <button type="button" role="tab" data-im="paste" aria-selected="${paste}">Pegar</button>
+      <button type="button" role="tab" data-im="file" aria-selected="${!paste}">Archivos</button>
+    </div></div>`;
+}
+
+function safariCard() {
+  if (!inSafariTab()) return "";
+  return `<div class="section"><div class="card">
+      <p class="t-headline" style="margin:0">Estás en Safari</p>
+      <p class="t-subhead c-2">Lo que importes aquí se queda en Safari. La app de la pantalla de inicio guarda sus datos aparte: si la tienes instalada, ábrela desde su icono e importa allí.</p>
+    </div></div>`;
+}
+
+function entryBody() {
+  const paste = state.importUi.mode !== "file";
+  return `${safariCard()}${segControl(paste)}${paste ? pasteEntry() : fileEntry()}`;
+}
+
+function pasteEntry() {
+  return `<div class="section"><div class="section-header"><span>Cómo copiar la exportación</span></div>
+      <div class="list">
+        <div class="row"><span class="row__main"><span class="row__title">1. En Clash of Clans</span><span class="row__sub">Entra en la cuenta que quieras importar.</span></span></div>
+        <div class="row"><span class="row__main"><span class="row__title">2. Ajustes → Más ajustes</span><span class="row__sub">En Exportar datos, toca Copiar.</span></span></div>
+        <div class="row"><span class="row__main"><span class="row__title">3. Vuelve aquí y toca Pegar</span><span class="row__sub">Verás la cuenta antes de guardar nada.</span></span></div>
+      </div></div>
+    <div class="section"><div class="section-header"><span>O pega el texto a mano</span></div>
+      <div class="list"><div class="row"><textarea class="json-input json-input--short" data-paste aria-label="Texto de la exportación" placeholder="Mantén pulsado aquí y elige Pegar" autocapitalize="off" autocorrect="off" spellcheck="false">${esc(state.importUi.text)}</textarea></div></div>
+    </div>
     <p class="section-footer">Los datos se guardan solo en este iPhone.</p>`;
+}
+
+function fileEntry() {
+  return `<div class="section"><div class="section-header"><span>Desde Archivos</span></div>
+      <div class="card"><p class="t-body" style="margin:0">Elige uno o varios archivos .json, por ejemplo desde iCloud Drive. Puedes elegir todas tus cuentas a la vez.</p></div>
+    </div>
+    <p class="section-footer">Las exportaciones que ya están guardadas se omiten solas.</p>`;
+}
+
+function validatingCard() {
+  return `<div class="section"><div class="card validating-card" aria-busy="true">
+      <div class="sk sk--thumb" style="--size:96px"></div>
+      <div class="sk sk--line"></div>
+      <div class="sk sk--line" style="width:80%"></div>
+      <div class="sk sk--line" style="width:45%"></div>
+    </div></div>
+    <p class="sr-only" role="status">Validando la exportación</p>`;
 }
 
 function importActions() {
   const ui = state.importUi;
-  if (!ui.reviewed) {
-    const ready = ui.mode === "file" ? ui.items.length > 0 : ui.text.trim().length > 0;
-    return `<button class="btn btn--primary btn--block" data-review ${ready ? "" : "disabled"}>Revisar</button>`;
+  const err = ui.saveError ? `<p class="msg msg-err" role="alert">No se pudo guardar en este iPhone. Vuelve a intentarlo.</p>` : "";
+  if (ui.phase === "validating") return `<button type="button" class="btn btn--primary btn--block" disabled>Validando…</button>`;
+  if (ui.phase === "confirm") return `${err}<button type="button" class="btn btn--primary btn--block" data-act="add-account">Añadir cuenta</button>`;
+  if (ui.phase === "batch" && ui.focus == null) {
+    const n = importCount(ui.items);
+    if (!n) return `<button type="button" class="btn btn--primary btn--block" data-act="pick">Elegir otros archivos</button>`;
+    const label = n === 1 ? "Importar 1 cuenta" : `Importar ${n} cuentas`;
+    return `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">${label}</button>`;
   }
-  const ok = ui.items.filter((it) => it.level !== "error" && !it.skip);
-  return `<button class="btn btn--primary btn--block" data-commit ${ok.length ? "" : "disabled"}>Importar${ok.length ? ` ${ok.length} ${ok.length === 1 ? "cuenta" : "cuentas"}` : ""}</button>`;
+  if (ui.phase === "batch" && ui.focus != null) {
+    const n = importCount(ui.items);
+    const label = n === 1 ? "Importar 1 cuenta" : `Importar ${n} cuentas`;
+    return n
+      ? `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">${label}</button>`
+      : `<button type="button" class="btn btn--primary btn--block" data-im-back>Volver</button>`;
+  }
+  if (ui.phase === "single") {
+    const it = currentImportItem();
+    if (!it) return "";
+    if (it.kind === "invalid") {
+      const file = ui.mode === "file";
+      return `<button type="button" class="btn btn--primary btn--block" data-act="${file ? "pick" : "paste"}">${file ? "Elegir otros archivos" : "Pegar de nuevo"}</button>`;
+    }
+    if (it.kind === "duplicate") {
+      return `<button type="button" class="btn btn--primary btn--block" data-act="paste-again">Pegar otra</button>`;
+    }
+    if (it.kind === "new") {
+      return `<button type="button" class="btn btn--primary btn--block" data-act="confirm-new">Añadir como cuenta nueva…</button>
+        <button type="button" class="btn btn--plain btn--block" data-act="paste-again">Pegar otra</button>`;
+    }
+    if (it.kind === "older") {
+      return `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">Añadir al histórico</button>
+        <button type="button" class="btn btn--plain btn--block" data-act="paste-again">Pegar otra</button>`;
+    }
+    return `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">Importar</button>
+      <button type="button" class="btn btn--plain btn--block" data-act="paste-again">Pegar otra</button>`;
+  }
+  if (ui.mode === "file") return `<button type="button" class="btn btn--primary btn--block" data-act="pick">Elegir archivos…</button>`;
+  const has = ui.text.trim().length > 0;
+  return `<button type="button" class="btn btn--primary btn--block" data-act="${has ? "review" : "paste"}" data-primary>${has ? "Revisar" : "Pegar"}</button>`;
 }
 
-function validateExport(value, name) {
-  const issues = [];
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return { name, level: "error", issues: [{ level: "error", msg: "No es un JSON de cuenta." }], value: null };
+function accountTitleHtml(meta, exp) {
+  if (!meta || !meta.nombre || meta.nombre === meta.tag || meta.nombre === exp.tag) {
+    return `<span class="tag">${esc((meta && meta.tag) || exp.tag)}</span>`;
   }
-  if (typeof value.tag !== "string" || !value.tag.startsWith("#")) issues.push({ level: "error", msg: "Falta el tag de la cuenta." });
-  if (!Number.isInteger(value.timestamp)) issues.push({ level: "error", msg: "Falta la fecha de exportación." });
-  const th = (value.buildings || []).find((b) => b.data === 1000001);
-  if (!th) issues.push({ level: "error", msg: "No se encuentra el ayuntamiento." });
-  if (issues.some((i) => i.level === "error")) return { name, level: "error", issues, value };
-  const known = rosterByTag(value.tag);
-  if (!known) issues.push({ level: "warn", msg: `${value.tag} no es una de tus 11 cuentas.`, foreign: true });
-  const prev = (state.rows || []).filter((r) => r.tag === value.tag);
-  const same = prev.find((r) => r.timestamp === value.timestamp);
-  const newest = prev.reduce((m, r) => Math.max(m, r.timestamp), 0);
-  if (same) {
-    issues.push({ level: "info", msg: `Ya importada (${fmtWhen(value.timestamp * 1000)}).` });
-    return { name, level: "info", issues, value, skip: true, known };
-  }
-  if (newest && value.timestamp < newest) issues.push({ level: "warn", msg: "Es más antigua que la actual: solo se añadirá al histórico." });
-  const unk = (value.equipment || []).filter((e) => {
-    const it = state.index.items[String(e.data)];
-    return it && it.estado === "sin_identificar";
-  }).length;
-  if (unk) issues.push({ level: "info", msg: `${unk} ítems sin identificar` });
-  const level = issues.some((i) => i.level === "error") ? "error" : issues.some((i) => i.level === "warn") ? "warn" : "ok";
-  return { name, level, issues, value, known, skip: false };
+  return esc(meta.nombre);
 }
 
-function importReview() {
-  const items = state.importUi.items;
-  const ready = items.filter((i) => i.level !== "error" && !i.skip).length;
-  const bad = items.filter((i) => i.level === "error").length;
-  const head = items.length > 1 ? `<p class="t-subhead" style="margin:0 var(--margin-l) 8px">${items.length} archivos · ${ready} listos · ${bad} con error</p>` : "";
-  const cards = items.map((it, idx) => reviewCard(it, idx)).join("");
-  return head + `<div class="section stack">${cards}</div>`;
+function roleChip(meta) {
+  if (!meta || !meta.role) return "";
+  return ` <span class="chip ${meta.roleClass}">${esc(meta.role)}</span>`;
 }
 
-function reviewCard(it, idx) {
+function previewSub(meta, exp, th) {
+  if (!meta) return `TH${th} · sin objetivo`;
+  if (!meta.objetivo) return `<span class="tag">${esc(exp.tag)}</span> · TH${th} · sin objetivo`;
+  const arrow = th < meta.objetivo ? ` → objetivo TH${meta.objetivo}` : "";
+  return `<span class="tag">${esc(exp.tag)}</span> · TH${th}${arrow}`;
+}
+
+function errorCard(it) {
   if (it.parseError) {
     const p = it.parseError;
     const msg = p.preview
       ? esc(p.msg).replace(esc(p.preview), `<span class="tag">${esc(p.preview)}</span>`)
       : esc(p.msg);
-    return `<div class="card"><p class="t-headline">${esc(p.title)}</p><p class="t-subhead msg-err" role="alert">${msg}</p><p class="t-footnote c-2">${esc(p.help || "")}</p></div>`;
+    return `<div class="card" data-import-focus tabindex="-1">
+      <p class="t-headline">${esc(p.title)}</p>
+      <p class="msg msg-err" role="alert">${msg}</p>
+      <p class="t-footnote c-2">${esc(p.help || "")}</p>
+    </div>`;
   }
-  const issues = (it.issues || []).map((iss) => {
-    const cls = iss.level === "error" ? "msg-err" : iss.level === "warn" ? "msg-warn" : "c-2";
-    return `<p class="t-subhead ${cls}" role="${iss.level === "error" ? "alert" : "status"}">${iss.level === "error" ? `<span class="dot-err"></span> ` : ""}${esc(iss.msg)}</p>`;
-  }).join("");
-  if (it.level === "error" || !it.value || !it.value.tag) {
-    const structural = it.level === "error" && it.value;
-    const title = structural ? "No es una exportación de Clash of Clans" : (it.name || "JSON");
-    const help = structural ? `<p class="t-footnote c-2">Vuelve a Clash of Clans y toca Copiar otra vez en Exportar datos.</p>` : "";
-    return `<div class="card"><p class="t-headline">${esc(title)}</p>${issues}${help}</div>`;
-  }
-  const exp = it.value;
-  const a = analyze(exp, state.index);
-  const meta = it.known;
-  const title = meta ? meta.nombre : exp.tag;
-  const prev = viewOf(exp.tag);
-  let delta = "";
-  if (prev && a.media != null && prev.media != null) {
-    const d = Math.round((a.media - prev.media) * 10) / 10;
-    const sign = d > 0 ? "+" : "";
-    delta = `<span class="${d < 0 ? "c-2" : ""}" style="${d > 0 ? "color:var(--green-text)" : ""}">${sign}${fmtNum(d)}</span>`;
-  }
-  const ups = upgradesOf(exp).filter((u) => (exp.timestamp + u.timer) * 1000 > Date.now());
-  const eqN = (exp.equipment || []).length;
-  const allow = (it.issues || []).some((i) => i.foreign)
-    ? `<button class="btn btn--small btn--secondary" data-anyway="${idx}">Importar igualmente</button>` : "";
-  return `<div class="card">
-    <div class="account-card">
-      ${thumb(1000001, { size: 96, th: a.th })}
-      <div>
-        <div class="account-card__title">${esc(title)} ${meta && meta.role ? `<span class="chip ${meta.roleClass}">${esc(meta.role)}</span>` : ""}</div>
-        <p class="t-footnote c-2 tag">${esc(exp.tag)} · TH${a.th}${meta ? ` → objetivo TH${meta.objetivo}` : ""}</p>
-        <p class="t-footnote c-2">Exportado ${esc(fmtWhen(exp.timestamp * 1000))}</p>
-      </div>
-    </div>
-    ${issues}
-    <div class="row"><span class="row__main">Media</span><span class="row__trail num">${fmtPct(a.media)} ${delta}</span></div>
-    <div class="row"><span class="row__main">Equipamiento</span><span class="row__trail num">${eqN} piezas</span></div>
-    <div class="row"><span class="row__main">Mejoras en curso</span><span class="row__trail num">${ups.length}${ups[0] ? " · próxima " + esc(fmtWhen((exp.timestamp + ups[0].timer) * 1000)) : ""}</span></div>
-    ${allow}
+  const lines = (it.issues || []).map((m) => `<p class="msg msg-err" role="alert">${esc(m)}</p>`).join("");
+  return `<div class="card" data-import-focus tabindex="-1">
+    <p class="t-headline">No es una exportación de Clash of Clans</p>
+    ${lines}
+    <p class="t-footnote c-2">${esc(STRUCTURE_HELP)}</p>
   </div>`;
 }
 
+function singleBody(it) {
+  if (!it) return entryBody();
+  if (it.kind === "invalid") return `${segControl(state.importUi.mode !== "file")}<div class="section">${errorCard(it)}</div>`;
+  return `<div class="section">${previewBlock(it)}</div>`;
+}
+
+function previewBlock(it) {
+  const exp = it.value;
+  const view = (it.changes && it.changes.view) || analyze(exp, state.index);
+  const meta = it.known;
+  const th = view.th;
+  const when = fmtWhen(exp.timestamp * 1000);
+  const st = statusText(it);
+  const ch = it.changes;
+  let extra = "";
+  if (it.kind === "new") {
+    extra = `<p class="msg msg-warn" role="alert">${esc(foreignMsg(exp.tag))}</p><p class="t-footnote c-2">${esc(FOREIGN_HELP)}</p>`;
+  } else if (it.kind === "duplicate") {
+    extra = `<p class="msg msg-info" role="status">${esc(duplicateMsg(it.duplicateAt || exp.timestamp))}</p><p class="t-footnote c-2">${esc(DUPLICATE_HELP)}</p>`;
+  } else if (it.kind === "older") {
+    extra = `<p class="msg msg-warn" role="alert">${esc(olderWarning(it.refTimestamp))}</p><p class="t-footnote c-2">${esc(olderHelp(it.refTimestamp))}</p>`;
+  }
+  const kv = it.kind === "new" || it.kind === "duplicate" ? "" : kvHtml(it, ch);
+  const notes = ch && it.kind !== "duplicate"
+    ? `${ch.unknownCount ? `<p class="msg msg-info" role="status">${esc(unknownMsg(ch.unknownCount))}</p>` : ""}${ch.overMaxCount ? `<p class="msg msg-info" role="status">${esc(overMaxMsg(ch.overMaxCount))}</p>` : ""}`
+    : "";
+  const foot = ch && ch.thUp && ch.mediaDown ? `<p class="t-footnote c-2">La media se compara ahora con los máximos de TH${ch.thTo}.</p>` : "";
+  const card = `<div class="card" data-import-focus tabindex="-1">
+      <div class="preview">
+        ${thumb(1000001, { size: 96, th })}
+        <div class="preview__main">
+          <div class="account-card__title">${accountTitleHtml(meta, exp)}${roleChip(meta)}</div>
+          <p class="t-footnote c-2">${previewSub(meta, exp, th)}</p>
+          <p class="t-footnote c-2">Datos del ${esc(when)}</p>
+        </div>
+      </div>
+      ${kv}${notes}${foot}${extra}
+    </div>${st ? `<p class="sr-only" role="status">${esc(st)}</p>` : ""}`;
+  return card + changesBlock(it);
+}
+
+function kvHtml(it, ch) {
+  if (!ch) return "";
+  const rows = [];
+  if (ch.thUp) rows.push(["Ayuntamiento", `TH${ch.thFrom} → TH${ch.thTo}`]);
+  if (!ch.first && it.prevTimestamp) rows.push(["Último punto", fmtWhen(it.prevTimestamp * 1000)]);
+  if (ch.mediaTo != null && (ch.first || ch.mediaFrom == null)) rows.push(["Media", fmtPct(ch.mediaTo)]);
+  else if (ch.mediaFrom != null) {
+    let media = mediaLine(ch);
+    if (ch.delta && ch.delta.dir === "up") media += ` <span class="delta delta--up">${esc(ch.delta.text)}</span>`;
+    else if (ch.delta && ch.delta.dir === "down") media += ` <span class="delta delta--down">${esc(ch.delta.text)}</span>`;
+    else if (ch.delta) media += ` <span class="delta">${esc(ch.delta.text)}</span>`;
+    rows.push(["Media", media]);
+  }
+  rows.push(["Mejoras en curso", ch.first ? String(ch.upsTo) : `${ch.upsFrom} → ${ch.upsTo}`]);
+  if (ch.nextAt) rows.push(["Próxima", fmtWhen(ch.nextAt)]);
+  rows.push(["Equipamiento", `${ch.eqCount} piezas`]);
+  return `<dl class="kv">${rows.map(([dt, dd]) => `<dt>${esc(dt)}</dt><dd>${dd}</dd>`).join("")}</dl>`;
+}
+
+function changesBlock(it) {
+  const ch = it.changes;
+  if (!ch || it.kind !== "ready") return "";
+  if (ch.first) return `<p class="section-footer">${FIRST_FOOT}</p>`;
+  if (ch.noChanges) return `<p class="section-footer">${NO_CHANGE_FOOT}</p>`;
+  const rows = ch.rows.map((row) => {
+    const badge = row.unknown ? `&nbsp;<span class="badge badge-id">${esc(row.id)}</span>` : "";
+    const title = row.unknown ? "Sin identificar" : esc(row.title);
+    return `<li><div class="row row--thumb40${row.unknown ? " is-unknown" : ""}">
+      ${thumb(row.id, { size: 40 })}
+      <span class="row__main"><span class="row__title">${title}${badge}</span><span class="row__sub">${esc(row.change)} · ${esc(row.category)}</span></span>
+    </div></li>`;
+  }).join("");
+  const more = ch.more ? `<p class="section-footer">Y ${ch.more} ${ch.more === 1 ? "cambio" : "cambios"} más.</p>` : "";
+  return `<div class="section-header"><span>Cambios</span><span class="num">${ch.totalChanges}</span></div>
+    <ul class="list">${rows}</ul>${more}<p class="section-footer">${EVOLUTION_FOOT}</p>`;
+}
+
+function batchBody() {
+  const indexed = state.importUi.items.map((it, i) => Object.assign({}, it, { _i: i }));
+  const items = sortBatch(indexed, allAccounts());
+  const ready = items.filter((i) => i.kind === "ready" || i.kind === "older");
+  const neu = items.filter((i) => i.kind === "new");
+  const omit = items.filter((i) => i.kind === "duplicate" || i.kind === "invalid");
+  const head = `<p class="t-subhead" style="margin:0 var(--margin-l) var(--sp-3) var(--margin-r)">${esc(batchSummary(state.importUi.items))}</p>`;
+  return head
+    + batchGroup("Listos para importar", ready, "")
+    + batchGroup(neu.length > 1 ? "Cuentas nuevas" : "Cuenta nueva", neu, `<p class="section-footer">${NEW_FOOT}</p>`)
+    + batchGroup("Se omiten", omit, omitFoot(omit));
+}
+
+function batchGroup(title, rows, foot) {
+  if (!rows.length) return "";
+  return `<div class="section"><div class="section-header"><span>${title}</span><span class="num">${rows.length}</span></div>
+    <ul class="list">${rows.map(batchRow).join("")}</ul>${foot}</div>`;
+}
+
+function omitFoot(items) {
+  const bits = [];
+  if (items.some((i) => i.kind === "duplicate")) bits.push(DUP_FOOT);
+  if (items.some((i) => i.kind === "invalid")) bits.push(BAD_FOOT);
+  return bits.map((t) => `<p class="section-footer">${t}</p>`).join("");
+}
+
+function spokenTrail(label) {
+  if (label.startsWith("+")) return "más " + label.slice(1);
+  if (label.startsWith("−")) return "menos " + label.slice(1);
+  return label;
+}
+
+function batchRow(it) {
+  const trail = trailingLabel(it);
+  const color = it.kind === "older" ? " trail-warn" : it.kind === "invalid" ? " trail-bad" : "";
+  if (it.kind === "invalid" || !it.value) {
+    return `<li><div class="row"><span class="row__main"><span class="row__title">No válido</span><span class="row__sub">${esc(it.name || "")}</span></span><span class="row__trail trail-bad">${esc(trail)}</span></div></li>`;
+  }
+  const exp = it.value;
+  const th = townHallLevel(exp);
+  const title = it.known ? accountTitleHtml(it.known, exp) : `<span class="tag">${esc(exp.tag)}</span>`;
+  const sub = `TH${th} · datos del ${fmtWhen(exp.timestamp * 1000)}`;
+  const aria = `${it.known ? it.known.nombre : exp.tag}, TH${th}, datos del ${fmtWhen(exp.timestamp * 1000)}, ${spokenTrail(trail)}`;
+  const chev = it.kind === "new" ? CHEV : "";
+  return `<li><button type="button" class="row row--thumb44" data-im-row="${it._i}" aria-label="${esc(aria)}">
+      ${thumb(1000001, { size: 44, th })}
+      <span class="row__main"><span class="row__title">${title}</span><span class="row__sub">${esc(sub)}</span></span>
+      <span class="row__trail${color}">${esc(trail)}</span>${chev}
+    </button></li>`;
+}
+
+function confirmNew(it) {
+  if (!it || !it.value) return "";
+  const exp = it.value;
+  const th = townHallLevel(exp);
+  const when = fmtWhen(exp.timestamp * 1000);
+  return `<div class="section"><div class="card preview" data-import-focus tabindex="-1">
+      ${thumb(1000001, { size: 96, th })}
+      <div class="preview__main">
+        <div class="account-card__title"><span class="tag">${esc(exp.tag)}</span></div>
+        <p class="t-footnote c-2">TH${th} · datos del ${esc(when)}</p>
+      </div>
+    </div></div>
+    <div class="section"><div class="section-header"><span>Datos de la exportación</span></div>
+      <div class="list">
+        <div class="row"><span class="row__main"><span class="row__title">Tag</span></span><span class="row__trail tag">${esc(exp.tag)}</span></div>
+        <div class="row"><span class="row__main"><span class="row__title">Ayuntamiento</span></span><span class="row__trail">TH${th}</span></div>
+        <div class="row"><span class="row__main"><span class="row__title">Datos del</span></span><span class="row__trail">${esc(when)}</span></div>
+      </div>
+      <p class="section-footer">La exportación no incluye el nombre del jugador.</p>
+    </div>
+    <div class="section"><div class="section-header"><span>En esta app</span></div>
+      <div class="list">
+        <label class="row"><span class="row__main"><span class="row__title">Alias</span></span><input class="row__input tag" data-alias maxlength="24" autocapitalize="words" autocorrect="off" enterkeyhint="done" autocomplete="off" placeholder="${esc(exp.tag)}" aria-label="Alias" value="${esc(state.importUi.alias)}"></label>
+        <div class="row"><span class="row__main"><span class="row__title">Objetivo</span></span><span class="row__trail">Sin objetivo</span></div>
+      </div>
+      <p class="section-footer">Opcional. Si lo dejas vacío se muestra el tag, como en las demás cuentas.</p>
+      <p class="section-footer">Aparecerá en Roster después de tus 11 cuentas, en «Otras cuentas». El objetivo TH18 + TH17 + 9×TH15 no cambia.</p>
+    </div>`;
+}
+
+function classifyCtx() {
+  return { rows: state.rows, accounts: allAccounts(), index: state.index, now: state.now };
+}
+
+async function validateTexts(entries) {
+  const started = Date.now();
+  let timer = setTimeout(() => {
+    state.importUi.phase = "validating";
+    render();
+  }, 150);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const items = classifyEntries(entries, classifyCtx());
+  clearTimeout(timer);
+  if (Date.now() - started < 150) {
+    /* la pantalla Validando solo sale si tarda más de 150 ms */
+  }
+  state.importUi.items = items;
+  state.importUi.focus = null;
+  state.importUi.fromBatch = false;
+  state.importUi.saveError = false;
+  state.importUi.needsFocus = true;
+  state.importUi.phase = items.length > 1 ? "batch" : "single";
+  render();
+}
+
+async function doPaste() {
+  let text = "";
+  try {
+    text = await navigator.clipboard.readText();
+  } catch {
+    state.importUi.items = [{ name: "Pegado", kind: "invalid", parseError: PASTE_DENIED, value: null, skip: true }];
+    state.importUi.phase = "single";
+    state.importUi.focus = null;
+    state.importUi.fromBatch = false;
+    state.importUi.needsFocus = true;
+    render();
+    return;
+  }
+  state.importUi.text = text || "";
+  await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }]);
+}
+
+function resetImport(mode) {
+  const next = mode || "paste";
+  state.importUi = freshImport();
+  state.importUi.active = true;
+  state.importUi.mode = next;
+  render();
+}
+
+function goBackImport() {
+  const ui = state.importUi;
+  ui.saveError = false;
+  if (ui.phase === "confirm" && ui.fromBatch) {
+    ui.phase = "batch";
+    ui.focus = null;
+    ui.fromBatch = false;
+    render();
+    return;
+  }
+  if (ui.phase === "confirm") {
+    ui.phase = "single";
+    render();
+    return;
+  }
+  if (ui.fromBatch) {
+    ui.phase = "batch";
+    ui.focus = null;
+    ui.fromBatch = false;
+    render();
+    return;
+  }
+  resetImport(ui.mode);
+}
+
+async function commitImport() {
+  const items = state.importUi.items.filter((it) => it.kind === "ready" || it.kind === "older");
+  if (!items.length) return;
+  try {
+    for (const it of items) await putExport(it.value);
+  } catch {
+    state.importUi.saveError = true;
+    render();
+    return;
+  }
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  armFlash(items.map((it) => it.value.tag));
+  showToast("ok", successToast(items));
+  state.importUi = freshImport();
+  location.hash = "#/roster";
+}
+
+async function addNewAccount() {
+  const it = currentImportItem();
+  if (!it || !it.value) return;
+  const alias = state.importUi.alias.trim().slice(0, 24);
+  const exp = it.value;
+  try {
+    await putExport(exp);
+  } catch {
+    state.importUi.saveError = true;
+    render();
+    return;
+  }
+  const chip = makeChip(exp.tag, townHallLevel(exp));
+  state.added.push({ tag: exp.tag, alias, añadida: true, chip });
+  saveAdded(state.added);
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  armFlash(exp.tag);
+  state.scrollAdded = true;
+  showToast("ok", addedToast(alias || exp.tag));
+  state.importUi = freshImport();
+  location.hash = "#/roster";
+}
+
+async function removeAdded(tag) {
+  state.added = state.added.filter((a) => a.tag !== tag);
+  saveAdded(state.added);
+  await deleteTag(tag);
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  if (state.selected === tag) {
+    state.selected = ROSTER[0].tag;
+    localStorage.setItem("cp-account", state.selected);
+  }
+  showToast("ok", "Cuenta quitada");
+}
+
+
 function fichaFrame(inner) {
   return `<div class="sheet-backdrop" data-close-ficha="1"></div>
-    <div class="sheet sheet--half" role="dialog" aria-modal="true">
+    <div class="sheet sheet--half" role="dialog" aria-modal="true" aria-labelledby="ficha-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2>Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
-      <div class="sheet__body" style="text-align:center">${inner}</div>
+      <div class="sheet__bar"><span></span><h2 id="ficha-title">Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
+      <div class="sheet__body"><div class="ficha">${inner}</div>${LEGAL}</div>
     </div>`;
 }
 
@@ -1215,10 +1672,12 @@ function fichaSheet() {
   }
   if (item && item.estado === "id_deducido") notes.push(`<p class="t-footnote c-2">ID deducido por descarte</p>`);
   const line = levelLine(f);
+  const over = overMaxLabel(f.lvl, f.max);
+  const overChip = over ? ` <span class="chip chip--warn">${esc(over)}</span>` : "";
   return fichaFrame(`
         <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true })}</div>
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
-        <p class="t-title2 num">${esc(line.text)}</p>
+        <p class="t-title2 num">${esc(line.text)}${overChip}</p>
         <p class="badge badge-id">${esc(f.id)}</p>
         ${notes.join("")}`);
 }
@@ -1257,6 +1716,14 @@ function screenFor(r) {
 
 function render() {
   const r = route();
+  if (r.name === "importar") {
+    if (!state.importUi.active) {
+      state.importUi = freshImport();
+      state.importUi.active = true;
+    }
+  } else if (state.importUi.active) {
+    state.importUi.active = false;
+  }
   if (r.name === "progreso" && r.tag) {
     state.selected = r.tag;
     localStorage.setItem("cp-account", r.tag);
@@ -1273,12 +1740,28 @@ function render() {
     io.observe(title);
   }
   paintOfflineThumbs();
+  if (state.importUi.needsFocus) {
+    state.importUi.needsFocus = false;
+    document.querySelector("[data-import-focus]")?.focus();
+  }
+  if (state.scrollAdded && r.name === "roster") {
+    state.scrollAdded = false;
+    document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
+  }
 }
 
 function bind(r) {
   document.getElementById("app").onclick = async (ev) => {
     const go = ev.target.closest("[data-go]");
-    if (go) { location.hash = go.dataset.go; return; }
+    if (go) {
+      const dest = go.dataset.go;
+      if (location.hash === dest) {
+        if (dest === "#/ajustes") measureCache();
+        return;
+      }
+      location.hash = dest;
+      return;
+    }
     const seg = ev.target.closest("[data-seg]");
     if (seg) {
       const tag = (route().tag) || state.selected;
@@ -1337,13 +1820,20 @@ function bind(r) {
       const act = b && b.act;
       const payload = b && b.payload;
       state.alert = null;
-      if (act === "wipe") { await clearExports(); state.rows = []; state.latest = new Map(); showToast("ok", "Datos borrados"); }
+      if (act === "wipe") {
+        await clearExports();
+        state.rows = [];
+        state.latest = new Map();
+        state.added = [];
+        saveAdded([]);
+        showToast("ok", "Datos borrados");
+      }
       if (act === "restore") {
         state.rows = await restoreBundled(state.bundlePaths || []);
         state.latest = latestByTag(state.rows);
         showToast("ok", "Datos incluidos restaurados");
       }
-      if (act === "anyway") await commitOne(payload);
+      if (act === "quitar") await removeAdded(payload);
       if (act === "purge") await purgeImages();
       render();
       return;
@@ -1362,28 +1852,69 @@ function bind(r) {
       }
       return;
     }
-    const im = ev.target.closest("[data-im]");
-    if (im) { state.importUi.mode = im.dataset.im; state.importUi.reviewed = false; render(); return; }
-    if (ev.target.closest("[data-pick]")) { document.querySelector("[data-files]")?.click(); return; }
-    if (ev.target.closest("[data-clip]")) {
-      try {
-        const text = await navigator.clipboard.readText();
-        state.importUi.text = text;
-        render();
-      } catch { /* pegado manual */ }
-      return;
-    }
-    if (ev.target.closest("[data-review]")) { reviewImport(); return; }
-    if (ev.target.closest("[data-commit]")) { await commitImport(); return; }
-    const anyway = ev.target.closest("[data-anyway]");
-    if (anyway) {
-      const item = state.importUi.items[Number(anyway.dataset.anyway)];
+    const quitar = ev.target.closest("[data-quitar]");
+    if (quitar) {
+      const tag = quitar.dataset.quitar;
+      const meta = accountByTag(tag);
+      const label = meta ? meta.nombre : tag;
       state.alert = {
-        title: "Importar igualmente",
-        msg: `${item.value.tag} no es una de tus 11 cuentas.`,
-        buttons: [{ label: "Cancelar" }, { label: "Importar", cls: "is-default", act: "anyway", payload: item }],
+        title: `¿Quitar ${label}?`,
+        msg: "Se borrarán su alias y sus importaciones de este iPhone.",
+        buttons: [
+          { label: "Cancelar" },
+          { label: "Quitar", cls: "is-destructive", act: "quitar", payload: tag },
+        ],
       };
       render();
+      return;
+    }
+    const im = ev.target.closest("[data-im]");
+    if (im) {
+      state.importUi.mode = im.dataset.im;
+      state.importUi.phase = "entry";
+      state.importUi.items = [];
+      state.importUi.focus = null;
+      state.importUi.fromBatch = false;
+      state.importUi.saveError = false;
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-im-back]")) { goBackImport(); return; }
+    const rowBtn = ev.target.closest("[data-im-row]");
+    if (rowBtn) {
+      const idx = Number(rowBtn.dataset.imRow);
+      const item = state.importUi.items[idx];
+      if (!item) return;
+      state.importUi.focus = idx;
+      state.importUi.fromBatch = true;
+      state.importUi.needsFocus = true;
+      if (item.kind === "new") {
+        state.importUi.phase = "confirm";
+        state.importUi.alias = "";
+      }
+      render();
+      return;
+    }
+    const actBtn = ev.target.closest("[data-act]");
+    if (actBtn) {
+      const name = actBtn.dataset.act;
+      if (name === "paste") { await doPaste(); return; }
+      if (name === "review") {
+        await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }]);
+        return;
+      }
+      if (name === "pick") { document.querySelector("[data-files]")?.click(); return; }
+      if (name === "paste-again") { resetImport("paste"); return; }
+      if (name === "commit") { await commitImport(); return; }
+      if (name === "confirm-new") {
+        state.importUi.phase = "confirm";
+        state.importUi.alias = "";
+        state.importUi.saveError = false;
+        state.importUi.needsFocus = true;
+        render();
+        return;
+      }
+      if (name === "add-account") { await addNewAccount(); return; }
     }
     const tab = ev.target.closest(".tabbar a[aria-current='page']");
     if (tab) { ev.preventDefault(); document.getElementById("screen")?.scrollTo?.({ top: 0 }); window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
@@ -1393,62 +1924,45 @@ function bind(r) {
   const evo = document.querySelector("[data-evo]");
   if (evo) evo.onchange = () => { state.evo = evo.value; localStorage.setItem("cp-evo", state.evo); render(); };
   const paste = document.querySelector("[data-paste]");
-  if (paste) paste.oninput = () => { state.importUi.text = paste.value; state.importUi.reviewed = false; const btn = document.querySelector("[data-review]"); if (btn) btn.disabled = !paste.value.trim(); };
+  if (paste) {
+    paste.oninput = () => {
+      state.importUi.text = paste.value;
+      const btn = document.querySelector("[data-primary]");
+      if (!btn) return;
+      const has = paste.value.trim().length > 0;
+      btn.textContent = has ? "Revisar" : "Pegar";
+      btn.dataset.act = has ? "review" : "paste";
+    };
+    paste.addEventListener("paste", () => {
+      setTimeout(() => {
+        state.importUi.text = paste.value;
+        paste.blur();
+        validateTexts([{ name: "Pegado", text: paste.value, source: "clipboard" }]);
+      }, 0);
+    });
+  }
+  const alias = document.querySelector("[data-alias]");
+  if (alias) alias.oninput = () => { state.importUi.alias = alias.value; };
   const files = document.querySelector("[data-files]");
   if (files) files.onchange = async () => {
-    const items = [];
-    for (const file of files.files) {
-      items.push({ name: file.name, text: await file.text() });
-    }
-    state.importUi.items = items;
-    state.importUi.reviewed = false;
+    const list = [...files.files];
+    if (!list.length) return;
+    const timer = setTimeout(() => {
+      state.importUi.phase = "validating";
+      render();
+    }, 150);
+    const entries = [];
+    for (const file of list) entries.push({ name: file.name, text: await file.text(), source: "file" });
+    clearTimeout(timer);
+    state.importUi.mode = "file";
+    state.importUi.items = classifyEntries(entries, classifyCtx());
+    state.importUi.focus = null;
+    state.importUi.fromBatch = false;
+    state.importUi.saveError = false;
+    state.importUi.needsFocus = true;
+    state.importUi.phase = state.importUi.items.length > 1 ? "batch" : "single";
     render();
   };
-}
-
-function parseFail(parsed, name) {
-  return { name, level: "error", issues: [{ level: "error", msg: parsed.msg }], value: null, parseError: parsed };
-}
-
-function reviewImport() {
-  const ui = state.importUi;
-  let items = [];
-  if (ui.mode === "file") {
-    items = ui.items.map((it) => {
-      const parsed = parseLoose(it.text, "file");
-      if (!parsed.ok) return parseFail(parsed, it.name);
-      return validateExport(parsed.value, it.name);
-    });
-  } else {
-    const parsed = parseLoose(ui.text, "clipboard");
-    if (!parsed.ok) items = [parseFail(parsed, "Pegado")];
-    else items = [validateExport(parsed.value, "Pegado")];
-  }
-  ui.items = items;
-  ui.reviewed = true;
-  render();
-}
-
-async function commitOne(item) {
-  if (!item || !item.value) return;
-  await putExport(item.value);
-  state.rows = await allExports();
-  state.latest = latestByTag(state.rows);
-  state.flash = item.value.tag;
-  showToast("ok", `${rosterByTag(item.value.tag)?.nombre || item.value.tag} actualizada`);
-  location.hash = "#/roster";
-}
-
-async function commitImport() {
-  const ok = state.importUi.items.filter((it) => it.level !== "error" && !it.skip && !(it.issues || []).some((i) => i.foreign));
-  if (!ok.length) return;
-  for (const it of ok) await putExport(it.value);
-  state.rows = await allExports();
-  state.latest = latestByTag(state.rows);
-  state.flash = ok.length === 1 ? ok[0].value.tag : null;
-  showToast("ok", ok.length === 1 ? `${rosterByTag(ok[0].value.tag)?.nombre || ok[0].value.tag} actualizada` : `${ok.length} cuentas actualizadas`);
-  state.importUi = { mode: "paste", text: "", items: [], reviewed: false };
-  location.hash = "#/roster";
 }
 
 function showToast(kind, text) {
@@ -1548,6 +2062,7 @@ function catalog(manifest) {
 }
 
 async function boot() {
+  state.added = loadAdded();
   render();
   const [manifest, caps, bundle] = await Promise.all([
     fetch("./assets/manifest.json").then((r) => r.json()),
@@ -1574,7 +2089,10 @@ async function boot() {
   }
 }
 
-window.addEventListener("hashchange", render);
+window.addEventListener("hashchange", () => {
+  render();
+  if (route().name === "ajustes") measureCache();
+});
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") { state.now = Date.now(); if (route().name === "mejoras") render(); }
 });

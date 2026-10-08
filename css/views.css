@@ -1,6 +1,6 @@
 .account-card { display: grid; grid-template-columns: 72px 1fr; column-gap: var(--sp-3); align-items: center; }
 .account-card > .thumb { grid-row: 1 / span 4; align-self: start; }
-.account-card__title { display: flex; align-items: center; gap: var(--sp-2); font: 600 1rem/1.294 var(--font); min-width: 0; }
+.account-card__title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); row-gap: var(--sp-1); font: 600 1rem/1.294 var(--font); min-width: 0; }
 .account-card__chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
 .account-card__bar { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); align-items: center; }
 .account-card__bar .num { font-weight: 600; font-size: 0.882rem; }
@@ -54,8 +54,13 @@
 }
 .eq__cap--soft { color: var(--tint); font-style: normal; }
 
+.card > div:has(> .slots) { container-type: inline-size; min-width: 0; }
 .slots { display: flex; align-items: center; gap: 4px; min-height: 22px; font-size: 0.765rem; color: var(--label-2); }
 .slots__lbl { min-width: 9.5em; }
+@container (max-width: 12em) {
+  .slots { flex-wrap: wrap; row-gap: 2px; }
+  .slots__lbl { flex: 1 0 100%; min-width: 0; }
+}
 .slots i { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--label-3); }
 .slots i.on   { background: var(--label-2); box-shadow: none; }
 .slots i.free { box-shadow: inset 0 0 0 1.5px var(--green-text); }
@@ -109,15 +114,20 @@
 .offline-dl.is-done .bar { --cat: var(--green); }
 .offline-dl__status { min-height: 1.385em; }
 
-.import-text {
-  width: 100%; min-height: 8.5em; resize: vertical; border: 0; background: transparent;
-  font: 400 13px/18px var(--font-mono);
-}
-.import-text::placeholder { color: var(--label-3); }
+.json-input { display: block; width: 100%; min-height: calc(8 * 18px); padding: 0; border: 0; resize: vertical;
+  background: transparent; color: var(--label); font: 400 13px/18px var(--font-mono); letter-spacing: 0; }
+.json-input::placeholder { color: var(--label-3); }
+.json-input:focus { outline: none; }
+.json-input--short { min-height: calc(3 * 18px); }
 .file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.msg-err { color: var(--red-text); }
-.msg-warn { color: var(--orange-text); }
-.dot-err { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex: none; }
+.preview { display: grid; grid-template-columns: 96px 1fr; column-gap: var(--sp-3); align-items: center; }
+.preview__main { min-width: 0; display: grid; gap: 2px; }
+.preview__main .account-card__title { flex-wrap: wrap; row-gap: 2px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2) var(--sp-3); margin: var(--sp-3) 0 0; padding-top: var(--sp-3); border-top: 0.5px solid var(--separator); }
+.kv dt { color: var(--label-2); white-space: nowrap; }
+.kv dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ficha { text-align: center; }
+.validating-card { display: grid; gap: var(--sp-3); }
 
 .group-label { margin: var(--sp-6) var(--margin-r) var(--sp-2) var(--margin-l); }
 .stack > * + * { margin-top: var(--sp-2); }

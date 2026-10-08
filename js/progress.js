@@ -319,6 +319,18 @@ function placed(list) {
   return map;
 }
 
+/** Suma de niveles que entra en el %. Un nivel por encima del máximo cuenta como el máximo. */
+function sumCapped(own, max) {
+  if (!own) return 0;
+  let sum = 0;
+  for (const r of own.rows) {
+    const lvl = r.lvl || 0;
+    const use = max == null ? lvl : Math.min(lvl, max);
+    sum += use * (r.cnt || 1);
+  }
+  return sum;
+}
+
 function groupScore(index, th, ids, bag) {
   let num = 0;
   let den = 0;
@@ -330,7 +342,7 @@ function groupScore(index, th, ids, bag) {
     if (!cnt) continue;
     const own = bag.get(id);
     const use = Math.max(cnt, own ? own.cnt : 0);
-    num += own ? own.sum : 0;
+    num += sumCapped(own, cap.max);
     den += use * cap.max;
   }
   return { num, den };
@@ -344,7 +356,7 @@ function craftedScore(exp, index, th) {
     if (String(b.data) !== CRAFT) continue;
     for (const t of b.types || []) {
       const modules = t.modules || [];
-      const sum = modules.reduce((s, m) => s + (m.lvl || 0), 0);
+      const sum = modules.reduce((s, m) => s + Math.min(m.lvl || 0, max), 0);
       types.push({ id: String(t.data), sum, modules });
     }
   }
@@ -427,7 +439,7 @@ function wallsScore(exp, index, th) {
     if (String(b.data) !== WALL) continue;
     const c = b.cnt || 1;
     pieces += c;
-    num += (b.lvl || 0) * c;
+    num += Math.min(b.lvl || 0, cap.max) * c;
     hist.set(b.lvl || 0, (hist.get(b.lvl || 0) || 0) + c);
   }
   const rows = [...hist.entries()].sort((a, b) => a[0] - b[0]).map(([lvl, cnt]) => ({ lvl, cnt }));
@@ -454,7 +466,7 @@ function eqScore(exp, index, th) {
     if ((it.lvl || 0) <= 1) continue;
     const cap = capAt(index, id, th);
     if (!cap) continue;
-    num += it.lvl;
+    num += Math.min(it.lvl, cap.max);
     den += cap.max;
   }
   return { num, den };
@@ -563,9 +575,64 @@ export function equipmentView(exp, index, th) {
       meta,
       heroe: meta && meta.heroe ? meta.heroe : null,
       unknown: !meta || meta.estado === "sin_identificar",
+      overMax: max != null && (it.lvl || 0) > max,
     };
   });
   return pieces;
+}
+
+/** Cómo se muestra un id. Sin ficha en el manifiesto: «?» y el id, fuera del %. */
+export function presentItem(index, id) {
+  const meta = index.items[String(id)] || null;
+  const unknown = !meta || meta.estado === "sin_identificar";
+  return {
+    id: String(id),
+    meta,
+    unknown,
+    title: unknown ? "Sin identificar" : (itemName(meta) || "Ítem"),
+    mark: unknown ? "?" : null,
+    outsidePercent: !meta,
+  };
+}
+
+/** Chip de la ficha cuando el nivel importado supera el máximo de caps. */
+export function overMaxLabel(lvl, max) {
+  if (max == null || lvl == null || !(lvl > max)) return null;
+  return "Máximo desactualizado";
+}
+
+const CAT_ORDER = [
+  "defensas", "laboratorio", "ejercito_edif", "equipamiento", "mascotas",
+  "heroes", "trampas", "recursos", "muros",
+];
+
+/** Categoría fija de §2 para un (sección, id). La aldea del constructor va aparte. */
+export function categoryKeyFor(index, id, section) {
+  const sid = String(id);
+  if (section === "heroes2" || section === "units2") return "aldea";
+  if (section === "heroes") return "heroes";
+  if (section === "pets") return "mascotas";
+  if (section === "equipment") return "equipamiento";
+  if (section === "traps") return "trampas";
+  if (LAB_SECTIONS.has(section)) return "laboratorio";
+  if (section === "guardians" || section === "crafting_modules") return "defensas";
+  if (sid === WALL) return "muros";
+  if (sid === TH_ID) return "ayuntamiento";
+  if (ARMY_IDS.includes(sid)) return "ejercito_edif";
+  if (RES_IDS.includes(sid)) return "recursos";
+  if (sid === HUT || sid === CRAFT || (index.defenses || []).includes(sid)) return "defensas";
+  const item = index.items[sid];
+  if (item && item.categoria === "defense") return "defensas";
+  if (item && item.categoria === "trap") return "trampas";
+  if (item && item.categoria === "hero") return "heroes";
+  if (item && item.categoria === "pet") return "mascotas";
+  if (item && item.categoria === "hero_equipment") return "equipamiento";
+  return "defensas";
+}
+
+export function categoryOrder(key) {
+  const i = CAT_ORDER.indexOf(key);
+  return i < 0 ? 50 : i;
 }
 
 export function builderStatus(exp) {
