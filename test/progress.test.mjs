@@ -1,7 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
-import { indexCaps, analyze, equipmentView, townHallLevel, pct, builderStatus, ROSTER } from "../js/progress.js";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER } from "../js/progress.js";
+import { parseLoose } from "../js/parse.js";
+
+const root = fileURLToPath(new URL("..", import.meta.url));
 
 const caps = JSON.parse(readFileSync(new URL("../data/caps_clashrecord.json", import.meta.url)));
 const manifest = JSON.parse(readFileSync(new URL("../assets/manifest.json", import.meta.url)));
@@ -59,11 +65,14 @@ const CATS = ["defensas", "ejercito_edif", "laboratorio", "heroes", "mascotas", 
 const KNOWN = new Set([
   "#28PLGP0G2 pct_laboratorio",
   "#28PLGP0G2 pct_media",
+  "#28PLGP0G2 pct_equipamiento",
   "#R00C8CPQC pct_sig_defensas",
   "#R00C8CPQC pct_laboratorio",
   "#R00C8CPQC pct_sig_laboratorio",
   "#R00C8CPQC pct_media",
   "#R00C8CPQC pct_sig_media",
+  "#R00C8CPQC pct_equipamiento",
+  "#R00C8CPQC pct_sig_equipamiento",
   "#R02YUVC0J pct_defensas",
   "#R02YUVC0J pct_sig_defensas",
   "#R02YUVC0J pct_media",
@@ -144,6 +153,113 @@ test("defensas frente a otro TH y al TH actual", () => {
   assert.equal(c2.cats.defensas.sigPct, 61.3);
   const r = analyze(exportsByTag.get("#R02YUVC0J"), index);
   assert.equal(r.cats.defensas.pct, 54.4);
+});
+
+test("nombres visibles salen de nombre o nombre_en", () => {
+  for (const item of Object.values(manifest.items)) {
+    const shown = itemName(item);
+    if (item.estado === "sin_identificar") {
+      assert.equal(shown, null);
+      continue;
+    }
+    if (item.nombre_pendiente) assert.equal(shown, item.nombre_en, String(item.id));
+    else assert.equal(shown, item.nombre, String(item.id));
+    assert.equal(shown.toLowerCase().includes("render"), false, shown);
+    if (item.nota_interna) assert.equal(shown.includes(item.nota_interna), false, String(item.id));
+    if (item.nombre_propuesto) assert.notEqual(shown, item.nombre_propuesto, String(item.id));
+  }
+  assert.equal(itemName(manifest.items["28000006"]), "Príncipe Esbirro");
+  assert.equal(itemName(manifest.items["1000068"]), "Pet House");
+  assert.equal(itemName(manifest.items["1000007"]), "Laboratorio");
+});
+
+test("las piezas id_deducido siguen en el recuento y salen de sin identificar", () => {
+  const pieces = equipmentView(exportsByTag.get("#28PLGP0G2"), index, 18);
+  assert.equal(pieces.length, 43);
+  for (const id of ["90000052", "90000053", "90000059"]) {
+    const piece = pieces.find((p) => p.id === id);
+    assert.ok(piece, id);
+    assert.equal(piece.unknown, false, id);
+    assert.equal(piece.meta.estado, "id_deducido");
+    assert.equal(piece.heroe, "Dragon Duke");
+    assert.equal(piece.meta.nombre_pendiente, false);
+  }
+  assert.equal(pieces.filter((p) => p.unknown).length, 5);
+  const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
+  assert.equal(c1.cats.equipamiento.pct, 61.6);
+  const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  assert.equal(c2.cats.equipamiento.pct, 58.6);
+  assert.equal(c2.cats.equipamiento.sigPct, 58.6);
+});
+
+test("Inferno Artillery solo en el detalle, sin id inventado", () => {
+  const c2 = categoryItems(exportsByTag.get("#R00C8CPQC"), index, "defensas", 16);
+  const row = c2.find((r) => r.capsOnly);
+  assert.ok(row);
+  assert.equal(row.capsName, "Inferno Artillery");
+  assert.equal(row.id, null);
+  assert.equal(row.lvl, 0);
+  assert.equal(row.max, 5);
+  const c1 = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "defensas", 18);
+  assert.equal(c1.some((r) => r.capsOnly), false);
+  const lab = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "laboratorio", 18);
+  const ids = new Set(lab.map((r) => r.id));
+  for (const unit of exportsByTag.get("#28PLGP0G2").units2) {
+    assert.equal(ids.has(String(unit.data)), false, String(unit.data));
+  }
+});
+
+test("184 sha256 coinciden con el manifiesto", () => {
+  assert.equal(manifest.peso_imagenes.total_archivos, 184);
+  assert.equal(manifest.peso_imagenes.total_bytes, 60458372);
+  assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 14);
+  assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 9624126);
+  const want = new Map();
+  for (const item of Object.values(manifest.items)) {
+    const images = [];
+    if (item.imagen) images.push(item.imagen);
+    for (const im of Object.values(item.imagenes_por_nivel || {})) images.push(im);
+    for (const im of images) {
+      if (im && im.ruta) want.set(im.ruta, im);
+    }
+  }
+  assert.equal(want.size, 184);
+  const dir = join(root, "assets/images");
+  const files = [];
+  const walk = (rel) => {
+    for (const name of readdirSync(join(dir, rel))) {
+      const next = rel ? rel + "/" + name : name;
+      if (statSync(join(dir, next)).isDirectory()) walk(next);
+      else files.push("images/" + next);
+    }
+  };
+  walk("");
+  assert.equal(files.length, 184);
+  for (const rel of files) {
+    const im = want.get(rel);
+    assert.ok(im, rel);
+    const buf = readFileSync(join(root, "assets", rel));
+    assert.equal(buf.length, im.bytes, rel);
+    assert.equal(createHash("sha256").update(buf).digest("hex"), im.sha256_copia, rel);
+  }
+});
+
+test("parseLoose no menciona línea ni columna", () => {
+  const empty = parseLoose("   ");
+  assert.equal(empty.ok, false);
+  assert.equal(empty.title, "No hay nada que pegar");
+  assert.equal(empty.msg, "El portapapeles está vacío.");
+  const other = parseLoose("https://link.clashofclans.com/x");
+  assert.equal(other.title, "No se pudo leer la exportación");
+  assert.equal(other.preview, "https://link.clashof");
+  assert.match(other.msg, /Empieza por «https:\/\/link\.clashof»/);
+  const cut = parseLoose('{"tag":"#28PLGP0G2"');
+  assert.equal(cut.msg, "El texto está incompleto: parece cortado al copiar.");
+  const ok = parseLoose('{"tag":"#28PLGP0G2","timestamp":1}');
+  assert.equal(ok.ok, true);
+  for (const result of [empty, other, cut]) {
+    assert.equal(/línea|columna|position/i.test(result.msg + result.title), false);
+  }
 });
 
 test("ofensiva: media de laboratorio y héroes", () => {

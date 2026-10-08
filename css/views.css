@@ -52,6 +52,7 @@
   font: 400 10px/12px var(--font); color: var(--label-2); font-style: italic;
   text-align: center;
 }
+.eq__cap--soft { color: var(--tint); font-style: normal; }
 
 .slots { display: flex; align-items: center; gap: 4px; min-height: 22px; font-size: 0.765rem; color: var(--label-2); }
 .slots__lbl { min-width: 9.5em; }

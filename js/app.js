@@ -5,6 +5,7 @@ import {
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { IMAGE_CACHE } from "./caches.js";
+import { parseLoose } from "./parse.js";
 import { allExports, clearExports, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
 
 const CAT_CLASS = {
@@ -25,6 +26,8 @@ const QUEUE_LABEL = {
   equipamiento: "Equipamiento",
 };
 const CHEV = `<svg class="chevron" viewBox="0 0 8 13" aria-hidden="true"><path d="M1.5 1.5 6.5 6.5 1.5 11.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const BB_HEROES = ["28000003", "28000005"];
+const BB_TROOPS = ["4000031", "4000032", "4000033", "4000034", "4000035", "4000036", "4000037", "4000038", "4000041", "4000042", "4000070", "4000106"];
 
 const state = {
   ready: false,
@@ -91,37 +94,124 @@ function imageRecord(item, th) {
   return item.imagen || null;
 }
 
+function frameOf(im, size) {
+  if (!im || im.tipo_visual === "tile_fondo_opaco" || !im.caja_visible) return null;
+  const ancho = Number(im.ancho);
+  const alto = Number(im.alto);
+  const { x, y, w, h } = im.caja_visible;
+  if (!ancho || !alto || !w || !h) return null;
+  const k = 1 / Math.max(ancho, alto);
+  const cx = (1 - ancho * k) / 2 + (x + w / 2) * k;
+  const cy = (1 - alto * k) / 2 + (y + h / 2) * k;
+  const lado = size * 0.84;
+  const z = Math.min(0.92 / Math.max(w * k, h * k), Math.max(ancho, alto) / (lado * 3), 8);
+  if (!(z >= 1.15)) return null;
+  const n = (v) => String(Math.round(v * 1000) / 1000);
+  return { cx: n(cx), cy: n(cy), z: n(z) };
+}
+
 function thumb(id, opts = {}) {
   const size = opts.size || 40;
   const known = [40, 44, 52, 72, 96].includes(size);
   const cls = known ? "thumb--" + size : "";
-  const style = known ? "" : ` style="--size:${size}px"`;
-  const item = state.index.items[String(id)];
+  const item = id == null ? null : state.index.items[String(id)];
   if (!item || item.estado === "sin_identificar") {
+    const style = known ? "" : ` style="--size:${size}px"`;
     return `<span class="thumb ${cls} thumb--unknown"${style} aria-hidden="true">?</span>`;
   }
   const label = nameOf(id) || "";
   const im = imageRecord(item, opts.th);
-  if (item.estado === "faltante" || !im) {
+  if (item.estado === "faltante" || !im || im.pesado === true) {
+    const style = known ? "" : ` style="--size:${size}px"`;
+    if (opts.ficha && im && im.pesado === true) {
+      return imageThumb(cls, size, label, im, opts);
+    }
     return `<span class="thumb ${cls} thumb--empty"${style} aria-hidden="true">${esc(initials(label))}</span>`;
   }
-  const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
-  const loading = opts.eager ? "eager" : "lazy";
-  const pri = opts.eager ? " fetchpriority=\"high\"" : "";
-  return `<span class="thumb ${cls}${tile}"${style} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+  return imageThumb(cls, size, label, im, opts);
 }
 
-window.__imgOk = (img) => img.classList.add("is-loaded");
+function imageThumb(cls, size, label, im, opts) {
+  const frame = frameOf(im, size);
+  const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
+  const enc = frame ? " thumb--encuadre" : "";
+  const vars = [];
+  if (![40, 44, 52, 72, 96].includes(size)) vars.push(`--size:${size}px`);
+  if (frame) vars.push(`--cx:${frame.cx}`, `--cy:${frame.cy}`, `--z:${frame.z}`);
+  const style = vars.length ? ` style="${vars.join(";")}"` : "";
+  const loading = opts.eager ? "eager" : "lazy";
+  const pri = opts.eager ? " fetchpriority=\"high\"" : "";
+  return `<span class="thumb ${cls}${tile}${enc}"${style} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+}
+
+function emptyNamedThumb(label, size) {
+  const known = [40, 44, 52, 72, 96].includes(size);
+  const cls = known ? "thumb--" + size : "";
+  const style = known ? "" : ` style="--size:${size}px"`;
+  return `<span class="thumb ${cls} thumb--empty"${style} aria-hidden="true">${esc(initials(label))}</span>`;
+}
+
+window.__imgOk = (img) => {
+  img.classList.add("is-loaded");
+  const box = img.closest(".thumb");
+  if (box) box.classList.remove("thumb--offline");
+};
 window.__imgErr = (img) => {
   const box = img.closest(".thumb");
-  if (!box) return;
-  img.remove();
-  if (!navigator.onLine) box.classList.add("thumb--offline");
-  else {
-    box.classList.add("thumb--empty");
-    box.textContent = box.dataset.initials || "?";
-  }
+  if (!box || box.dataset.checked === "1") return;
+  box.dataset.checked = "1";
+  resolveThumbFailure(img, box);
 };
+
+async function resolveThumbFailure(img, box) {
+  let offline = !navigator.onLine || box.classList.contains("thumb--offline");
+  if (!offline) {
+    try {
+      const res = await fetch(img.currentSrc || img.src);
+      if (res.status === 503 || res.status === 504) offline = true;
+    } catch {
+      offline = true;
+    }
+  }
+  if (!box.isConnected) return;
+  if (offline) {
+    box.classList.add("thumb--offline");
+    return;
+  }
+  img.remove();
+  box.classList.add("thumb--empty");
+  box.textContent = box.dataset.initials || "?";
+}
+
+async function paintOfflineThumbs() {
+  if (navigator.onLine) return;
+  const imgs = [...document.querySelectorAll(".thumb > img:not(.is-loaded)")];
+  if (!("caches" in window)) {
+    for (const img of imgs) img.closest(".thumb")?.classList.add("thumb--offline");
+    return;
+  }
+  await Promise.all(imgs.map(async (img) => {
+    const box = img.closest(".thumb");
+    if (!box || box.classList.contains("thumb--empty")) return;
+    let hit = null;
+    try { hit = await caches.match(img.src); } catch { hit = null; }
+    if (!box.isConnected || img.classList.contains("is-loaded")) return;
+    if (!hit) box.classList.add("thumb--offline");
+  }));
+}
+
+function retryOfflineThumbs() {
+  document.querySelectorAll(".thumb--offline").forEach((box) => {
+    box.classList.remove("thumb--offline");
+    delete box.dataset.checked;
+    const img = box.querySelector("img");
+    if (!img) return;
+    const src = img.getAttribute("src");
+    img.classList.remove("is-loaded");
+    img.removeAttribute("src");
+    img.src = src;
+  });
+}
 
 function barHtml(catKey, pctVal, mark, opts = {}) {
   const cls = ["bar"];
@@ -305,6 +395,7 @@ function renderProgreso(tag) {
       <button role="tab" data-seg="eq" aria-selected="${seg === "eq"}">Equipamiento</button>
     </div></div>
     ${body}
+    ${exp ? builderBaseSection(exp) : ""}
     ${LEGAL}`;
 }
 
@@ -447,7 +538,9 @@ function eqCell(p) {
   const name = p.unknown ? "Sin identificar" : (nameOf(p.id) || "Pieza");
   const aria = p.unknown ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}` : `${name}, nivel ${p.lvl}`;
   const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max ? "is-max" : ""].filter(Boolean).join(" ");
-  const cap = p.unknown ? `<span class="eq__cap">sin identificar</span>` : "";
+  const cap = p.unknown
+    ? `<span class="eq__cap">sin identificar</span>`
+    : (p.meta && p.meta.estado === "id_deducido" ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52 });
@@ -482,6 +575,12 @@ function renderDetalle(tag, catKey) {
 function groupDetail(items) {
   const g = { Pendientes: [], "Sin desbloquear": [], "Al máximo": [], "Sin identificar": [] };
   for (const it of items) {
+    if (it.capsOnly) {
+      if (!it.lvl) g["Sin desbloquear"].push(it);
+      else if (it.max != null && it.lvl >= it.max) g["Al máximo"].push(it);
+      else g.Pendientes.push(it);
+      continue;
+    }
     const meta = state.index.items[it.id];
     if (!meta || meta.estado === "sin_identificar") { g["Sin identificar"].push(it); continue; }
     if (!it.lvl) { g["Sin desbloquear"].push(it); continue; }
@@ -497,11 +596,21 @@ function groupDetail(items) {
 }
 
 function detailRow(it, catKey, a) {
+  if (it.capsOnly) {
+    const title = it.capsName;
+    const sub = it.max != null ? `Nv ${it.lvl} / ${it.max}${it.maxNext != null ? ` · TH${a.thSig}: ${it.maxNext}` : ""}` : `Nv ${it.lvl}`;
+    const p = it.max ? Math.min(100, (it.lvl / it.max) * 100) : 0;
+    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${it.lvl}" data-max="${it.max || ""}">
+      ${emptyNamedThumb(title, 40)}
+      <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub num">${esc(sub)}</span></span>
+      ${it.max != null ? barHtml(catKey, p, null, { mini: true, maxed: it.lvl >= it.max, label: sub }) : ""}
+    </button></li>`;
+  }
   const meta = state.index.items[it.id];
   const unknown = !meta || meta.estado === "sin_identificar";
   const title = unknown ? "Sin identificar" : (nameOf(it.id) || "Ítem");
   const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
-  const idBadge = unknown ? `<span class="badge">sin identificar</span> <span class="badge badge-id">${esc(it.id)}</span>` : "";
+  const idBadge = unknown ? `<span class="badge badge-id">${esc(it.id)}</span>` : "";
   const cnt = it.cnt > 1 ? ` ×${it.cnt}` : "";
   const sub = it.max != null ? `Nv ${it.lvl} / ${it.max}${it.maxNext != null ? ` · TH${a.thSig}: ${it.maxNext}` : ""}` : `Nv ${it.lvl}`;
   const p = it.max ? Math.min(100, (it.lvl / it.max) * 100) : 0;
@@ -510,6 +619,29 @@ function detailRow(it, catKey, a) {
     <span class="row__main"><span class="row__title">${esc(title)}${cnt ? ` <span class="num">${cnt.trim()}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(sub)}</span></span>
     ${it.max != null ? barHtml(catKey, p, null, { mini: true, maxed: it.lvl >= it.max, label: sub }) : ""}
   </button></li>`;
+}
+
+function builderBaseSection(exp) {
+  const byId = new Map();
+  for (const it of exp.heroes2 || []) byId.set(String(it.data), it);
+  for (const it of exp.units2 || []) byId.set(String(it.data), it);
+  if (!byId.size) return "";
+  const order = BB_HEROES.concat(BB_TROOPS);
+  const ids = order.filter((id) => byId.has(id)).concat([...byId.keys()].filter((id) => !order.includes(id)));
+  const lis = ids.map((id) => {
+    const it = byId.get(id);
+    const meta = state.index.items[id];
+    const unknown = !meta || meta.estado === "sin_identificar";
+    const title = unknown ? "Sin identificar" : (nameOf(id) || "Ítem");
+    const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
+    const idBadge = unknown ? `<span class="badge badge-id">${esc(id)}</span>` : "";
+    const lvl = it.lvl || 0;
+    return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
+      ${thumb(id, { size: 40 })}
+      <span class="row__main"><span class="row__title">${esc(title)}${badge}${idBadge}</span><span class="row__sub num">Nv ${lvl}</span></span>
+    </button></li>`;
+  }).join("");
+  return `<div class="section"><div class="section-header"><span>Aldea del constructor</span></div><ul class="list">${lis}</ul></div>`;
 }
 
 function builderLine(exp) {
@@ -606,15 +738,17 @@ function slotsHtml(b, labN, petN, pets) {
 
 function upRow(u) {
   const meta = u.meta;
-  const title = nameOf(u.id) || (state.index.items[u.id] ? "Sin identificar" : "Ítem");
-  const unknown = !state.index.items[u.id] || state.index.items[u.id].estado === "sin_identificar";
+  const item = state.index.items[u.id];
+  const title = nameOf(u.id) || (item ? "Sin identificar" : "Ítem");
+  const unknown = !item || item.estado === "sin_identificar";
+  const badge = item && item.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
   const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--thumb40${unknown ? " is-unknown" : ""}">
     ${thumb(u.id, { size: 40 })}
-    <span class="row__main"><span class="row__title">${esc(title)}</span>
+    <span class="row__main"><span class="row__title">${esc(title)}${badge}</span>
       <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
     <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
   </div></li>`;
@@ -921,12 +1055,22 @@ function importReview() {
 }
 
 function reviewCard(it, idx) {
+  if (it.parseError) {
+    const p = it.parseError;
+    const msg = p.preview
+      ? `Lo que hay en el portapapeles no es una exportación. Empieza por «<span class="tag">${esc(p.preview)}</span>».`
+      : esc(p.msg);
+    return `<div class="card"><p class="t-headline">${esc(p.title)}</p><p class="t-subhead msg-err" role="alert">${msg}</p><p class="t-footnote c-2">${esc(p.help || "")}</p></div>`;
+  }
   const issues = (it.issues || []).map((iss) => {
     const cls = iss.level === "error" ? "msg-err" : iss.level === "warn" ? "msg-warn" : "c-2";
     return `<p class="t-subhead ${cls}" role="${iss.level === "error" ? "alert" : "status"}">${iss.level === "error" ? `<span class="dot-err"></span> ` : ""}${esc(iss.msg)}</p>`;
   }).join("");
   if (it.level === "error" || !it.value || !it.value.tag) {
-    return `<div class="card"><p class="t-headline">${esc(it.name || "JSON")}</p>${issues}</div>`;
+    const structural = it.level === "error" && it.value;
+    const title = structural ? "No es una exportación de Clash of Clans" : (it.name || "JSON");
+    const help = structural ? `<p class="t-footnote c-2">Vuelve a Clash of Clans y toca Copiar otra vez en Exportar datos.</p>` : "";
+    return `<div class="card"><p class="t-headline">${esc(title)}</p>${issues}${help}</div>`;
   }
   const exp = it.value;
   const a = analyze(exp, state.index);
@@ -960,30 +1104,45 @@ function reviewCard(it, idx) {
   </div>`;
 }
 
+function fichaFrame(inner) {
+  return `<div class="sheet-backdrop" data-close-ficha="1"></div>
+    <div class="sheet sheet--half" role="dialog" aria-modal="true">
+      <div class="sheet__grabber"></div>
+      <div class="sheet__bar"><span></span><h2>Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
+      <div class="sheet__body" style="text-align:center">${inner}</div>
+    </div>`;
+}
+
 function fichaSheet() {
   const f = state.ficha;
   if (!f) return "";
+  if (f.capsOnly) {
+    const max = f.max ? ` / ${f.max}` : "";
+    return fichaFrame(`
+        <div style="display:flex;justify-content:center">${emptyNamedThumb(f.name, 96)}</div>
+        <p class="t-title3">${esc(f.name)}</p>
+        <p class="t-title2 num">Nv ${f.lvl == null ? "—" : f.lvl}${esc(max)}</p>
+        <p class="t-footnote c-2">Sin imagen. El Fan Kit no tiene ningún recurso de la Inferno Artillery; las escenas de TH17 no sirven como miniatura.</p>
+        <p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
+  }
   const item = state.index.items[f.id];
   const unknown = !item || item.estado === "sin_identificar";
   const title = unknown ? "Sin identificar" : (nameOf(f.id) || "Ítem");
   const badges = [];
   if (item && item.estado === "id_deducido") badges.push(`<span class="badge badge--soft">ID deducido</span>`);
   if (unknown) badges.push(`<span class="badge">sin identificar</span>`);
-  if (item && item.estado === "faltante") badges.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
-  if (item && item.rareza) badges.push(`<p class="t-footnote c-2">${esc(rarezaEs(item.rareza))}${item.heroe ? " · " + esc(heroLabel(item.heroe)) : ""}</p>`);
+  const notes = [];
+  if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
+  if (item && item.nombre_pendiente) notes.push(`<p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
+  if (item && item.rareza) notes.push(`<p class="t-footnote c-2">${esc(rarezaEs(item.rareza))}${item.heroe ? " · " + esc(heroLabel(item.heroe)) : ""}</p>`);
+  if (item && item.estado === "id_deducido") notes.push(`<p class="t-footnote c-2">ID deducido por descarte</p>`);
   const max = f.max ? ` / ${f.max}` : "";
-  return `<div class="sheet-backdrop" data-close-ficha="1"></div>
-    <div class="sheet sheet--half" role="dialog" aria-modal="true">
-      <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2>Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
-      <div class="sheet__body" style="text-align:center">
-        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96 })}</div>
+  return fichaFrame(`
+        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true })}</div>
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">Nv ${f.lvl == null ? "—" : f.lvl}${esc(max)}</p>
         <p class="badge badge-id">${esc(f.id)}</p>
-        ${item && item.estado === "id_deducido" ? `<p class="t-footnote c-2">ID deducido por descarte</p>` : ""}
-      </div>
-    </div>`;
+        ${notes.join("")}`);
 }
 
 function heroLabel(en) {
@@ -1035,6 +1194,7 @@ function render() {
     });
     io.observe(title);
   }
+  paintOfflineThumbs();
 }
 
 function bind(r) {
@@ -1058,7 +1218,11 @@ function bind(r) {
     }
     const ficha = ev.target.closest("[data-ficha]");
     if (ficha) {
-      state.ficha = { id: ficha.dataset.ficha, lvl: Number(ficha.dataset.lvl), max: ficha.dataset.max ? Number(ficha.dataset.max) : null };
+      const lvl = Number(ficha.dataset.lvl);
+      const max = ficha.dataset.max ? Number(ficha.dataset.max) : null;
+      state.ficha = ficha.dataset.capsName
+        ? { capsOnly: true, name: ficha.dataset.capsName, lvl, max }
+        : { id: ficha.dataset.ficha, lvl, max };
       render();
       return;
     }
@@ -1163,21 +1327,8 @@ function bind(r) {
   };
 }
 
-function parseLoose(text) {
-  try {
-    return { ok: true, value: JSON.parse(text) };
-  } catch (e) {
-    const pos = /position\s+(\d+)/i.exec(e.message);
-    let where = "";
-    if (pos) {
-      const n = Number(pos[1]);
-      const cut = text.slice(0, n);
-      const line = cut.split("\n").length;
-      const col = n - cut.lastIndexOf("\n");
-      where = ` (línea ${line}, columna ${col})`;
-    }
-    return { ok: false, msg: `No es un JSON válido${where}.` };
-  }
+function parseFail(parsed, name) {
+  return { name, level: "error", issues: [{ level: "error", msg: parsed.msg }], value: null, parseError: parsed };
 }
 
 function reviewImport() {
@@ -1186,12 +1337,12 @@ function reviewImport() {
   if (ui.mode === "file") {
     items = ui.items.map((it) => {
       const parsed = parseLoose(it.text);
-      if (!parsed.ok) return { name: it.name, level: "error", issues: [{ level: "error", msg: parsed.msg }], value: null };
+      if (!parsed.ok) return parseFail(parsed, it.name);
       return validateExport(parsed.value, it.name);
     });
   } else {
     const parsed = parseLoose(ui.text);
-    if (!parsed.ok) items = [{ name: "Pegado", level: "error", issues: [{ level: "error", msg: parsed.msg }], value: null }];
+    if (!parsed.ok) items = [parseFail(parsed, "Pegado")];
     else items = [validateExport(parsed.value, "Pegado")];
   }
   ui.items = items;
@@ -1352,6 +1503,13 @@ setInterval(() => {
   state.now = Date.now();
   if (route().name === "mejoras") render();
 }, 60000);
-window.addEventListener("online", () => { if (route().name === "ajustes") render(); });
+window.addEventListener("online", () => {
+  retryOfflineThumbs();
+  if (route().name === "ajustes") render();
+});
+window.addEventListener("offline", () => {
+  if (route().name === "ajustes") render();
+  else paintOfflineThumbs();
+});
 
 boot();

@@ -52,6 +52,10 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
   object-fit: contain; object-position: 50% 50%;
   display: block;
 }
+.thumb--encuadre > img {
+  transform-origin: calc(var(--cx) * 100%) calc(var(--cy) * 100%);
+  transform: translate(calc((0.5 - var(--cx)) * 100%), calc((0.5 - var(--cy)) * 100%)) scale(var(--z));
+}
 .thumb--40 { --size: 40px; }
 .thumb--44 { --size: 44px; }
 .thumb--52 { --size: 52px; }
@@ -221,6 +225,7 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
   position: fixed; z-index: 50;
   left: 50%; transform: translateX(-50%);
   bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--sp-3));
+  width: max-content;
   max-width: calc(100vw - 2 * var(--margin));
   display: flex; align-items: center; gap: var(--sp-2);
   padding: 12px 16px; border-radius: var(--r-pill);

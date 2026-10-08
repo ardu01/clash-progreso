@@ -1,9 +1,11 @@
 /**
  * Progreso de la aldea principal.
  * Máximos: únicamente data/caps_clashrecord.json (ClashRecord).
- * Nombres visibles: únicamente assets/manifest.json (nombre_es ?? nombre_en).
+ * Nombres visibles: únicamente assets/manifest.json (`nombre`, o `nombre_en`
+ * si `nombre_pendiente`). Nunca `nombre_propuesto` ni `nota_interna`.
  * Los nombres en inglés del archivo de máximos solo sirven para unir cada tope
- * con el id del manifiesto; no se muestran.
+ * con el id del manifiesto; no se muestran, salvo los ítems que solo están ahí
+ * (Inferno Artillery) y se listan en el detalle con ese nombre.
  */
 
 const ALIAS = {
@@ -101,7 +103,8 @@ function offenseOf(lab, heroes) {
 
 export function itemName(item) {
   if (!item || item.estado === "sin_identificar") return null;
-  return item.nombre_es || item.nombre_en || null;
+  if (item.nombre_pendiente) return item.nombre_en || null;
+  return item.nombre || item.nombre_es || item.nombre_en || null;
 }
 
 export function initials(name) {
@@ -519,6 +522,36 @@ export function helpersOf(exp) {
   }));
 }
 
+/**
+ * Inferno Artillery solo está en caps_clashrecord.json (sin ficha ni ID).
+ * En el detalle de defensas sale como hueco de nivel 0 cuando ese TH la cuenta.
+ */
+function infernoDetail(index, th) {
+  const next = th < 18 ? th + 1 : null;
+  const cur = index.inferno && index.inferno.get(th);
+  const nxt = next && index.inferno ? index.inferno.get(next) : null;
+  const base = {
+    capsOnly: true,
+    capsName: "Inferno Artillery",
+    id: null,
+    lvl: 0,
+    section: "caps",
+    missing: true,
+  };
+  if (cur && (cur.count || 0) > 0) {
+    return {
+      ...base,
+      cnt: cur.count || 1,
+      max: cur.max,
+      maxNext: nxt && nxt.max != null ? nxt.max : null,
+    };
+  }
+  if (!cur && nxt && (nxt.count || 0) > 0) {
+    return { ...base, cnt: nxt.count || 1, max: nxt.max, maxNext: null };
+  }
+  return null;
+}
+
 /** Filas de una categoría para el detalle. */
 export function categoryItems(exp, index, key, th) {
   const next = th < 18 ? th + 1 : null;
@@ -576,6 +609,8 @@ export function categoryItems(exp, index, key, th) {
         });
       }
     }
+    const weapon = infernoDetail(index, th);
+    if (weapon) rows.push(weapon);
     return rows;
   }
   if (key === "recursos" || key === "ejercito_edif") {
