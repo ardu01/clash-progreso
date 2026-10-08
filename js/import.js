@@ -189,6 +189,8 @@ function countUnknown(exp, index) {
   let n = 0;
   const { map } = levelsOf(exp);
   for (const bag of map.values()) {
+    const meta = index.items[String(bag.id)];
+    if (meta && meta.categoria === "crafting_module") continue;
     if (presentItem(index, bag.id).unknown) n += bag.cnt;
   }
   return n;
@@ -264,6 +266,7 @@ export function diffExports(prev, next, index, now = Date.now()) {
   return {
     first: !prev,
     noChanges: !!prev && rows.length === 0 && !thUp,
+    itemChanges: rows.length > 0,
     thFrom,
     thTo,
     thUp,
@@ -381,9 +384,13 @@ export function classifyEntries(entries, ctx) {
         const ref = newest && newest.timestamp > batchMax ? newest : keep[0].value;
         it.refTimestamp = ref.timestamp;
         it.prevTimestamp = newest ? newest.timestamp : null;
-        it.changes = newest
-          ? diffExports(newest, it.value, ctx.index, ctx.now)
-          : diffExports(null, it.value, ctx.index, ctx.now);
+        if (ref && ref.timestamp > it.value.timestamp) {
+          it.changes = diffExports(it.value, ref, ctx.index, ctx.now);
+          it.changes.view = analyze(it.value, ctx.index);
+          it.changes.eqCount = (it.value.equipment || []).length;
+        } else {
+          it.changes = diffExports(null, it.value, ctx.index, ctx.now);
+        }
       }
     }
   }

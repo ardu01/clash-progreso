@@ -18,7 +18,8 @@
   width: 100%; text-align: left; background: none; border: 0;
 }
 a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), var(--label) 6%); }
-.row + .row::before {
+.row + .row::before,
+li + li > .row::before {
   content: ""; position: absolute; top: 0; right: 0;
   left: var(--row-inset, var(--sp-4));
   height: 0.5px; background: var(--separator);
@@ -282,6 +283,7 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
 .sheet__actions .msg { margin: 0 0 var(--sp-2); }
 
 .msg { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-3) 0 0; font-size: 0.882rem; line-height: 1.333; }
+.msg > span { min-width: 0; overflow-wrap: anywhere; }
 .msg::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--label-3); transform: translateY(-1px); }
 .msg-err  { color: var(--red-text); }
 .msg-err::before  { background: var(--red); }
@@ -306,13 +308,6 @@ a.row:active, button.row:active { background: color-mix(in srgb, var(--bg-2), va
   @keyframes flash-out { to { background: var(--bg-2); } }
 }
 
-@container (max-width: 19em) {
-  .preview { grid-template-columns: 1fr; row-gap: var(--sp-3); }
-  .preview > .thumb { --size: 72px; }
-  .kv { grid-template-columns: 1fr; row-gap: 0; }
-  .kv dt { white-space: normal; }
-  .kv dd { text-align: left; margin-bottom: var(--sp-2); }
-}
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: sheet-in 320ms cubic-bezier(.2, .9, .3, 1); }
   @keyframes sheet-in { from { transform: translateY(100%); } }

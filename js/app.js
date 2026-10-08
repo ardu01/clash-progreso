@@ -384,14 +384,13 @@ function tabbar(r) {
 }
 
 function subImported() {
-  const n = ROSTER.filter((r) => expOf(r.tag)).length;
   let last = 0;
   for (const r of ROSTER) {
     const e = expOf(r.tag);
     if (e && e.timestamp > last) last = e.timestamp;
   }
-  if (!last) return `${n} de 11 cuentas`;
-  return `${n} de 11 · última ${fmtWhen(last * 1000)}`;
+  if (!last) return "11 cuentas";
+  return `11 cuentas · última importación ${fmtWhen(last * 1000)}`;
 }
 
 function renderRoster() {
@@ -404,7 +403,7 @@ function renderRoster() {
   const cards = featured.map((meta) => featuredCard(meta)).join("");
   const empty = any ? "" : `<div class="card empty"><p class="t-title3">Aún no hay datos</p><p class="t-subhead c-2">Importa la exportación JSON de cada cuenta para ver su progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
   return `<h1 class="large-title">Roster</h1>
-    <p class="large-sub">11 cuentas · ${esc(subImported())}</p>
+    <p class="large-sub">${esc(subImported())}</p>
     ${empty}
     <div class="section"><div class="section-header"><span>Principales</span></div><div class="stack">${cards}</div></div>
     ${groups.map((g) => `<div class="section"><div class="section-header"><span>${esc(g.title)}</span></div><ul class="list">${g.rows.map(rowAccount).join("")}</ul></div>`).join("")}
@@ -705,10 +704,23 @@ function renderDetalle(tag, catKey) {
   const blocks = ["Pendientes", "Sin desbloquear", "Al máximo", "Sin identificar"].map((title) => {
     const list = groups[title];
     if (!list || !list.length) return "";
-    const note = title === "Sin identificar" ? `<p class="section-footer">${list.length} ítems sin identificar no cuentan en el % salvo cuando el archivo de máximos les da un tope (laboratorio, defensas crafteadas y el guardián sin ficha).</p>` : "";
+    const outside = title === "Sin identificar" ? unidentifiedOutside(list) : 0;
+    const note = outside
+      ? `<p class="section-footer">${outside} ${outside === 1 ? "ítem" : "ítems"} sin identificar no ${outside === 1 ? "cuenta" : "cuentan"} en el % salvo cuando el archivo de máximos les da un tope (laboratorio, defensas crafteadas y el guardián sin ficha).</p>`
+      : "";
     return `<div class="section"><div class="section-header"><span>${title}</span></div><ul class="list">${list.map((it) => detailRow(it, catKey, a)).join("")}</ul>${note}</div>`;
   }).join("");
   return head + blocks + LEGAL;
+}
+
+function unidentifiedOutside(list) {
+  let n = 0;
+  for (const it of list) {
+    const meta = it.id ? state.index.items[it.id] : null;
+    if (meta && meta.categoria === "crafting_module") continue;
+    n += it.cnt > 0 ? it.cnt : 1;
+  }
+  return n;
 }
 
 function groupDetail(items) {
@@ -1264,7 +1276,7 @@ function validatingCard() {
 
 function importActions() {
   const ui = state.importUi;
-  const err = ui.saveError ? `<p class="msg msg-err" role="alert">No se pudo guardar en este iPhone. Vuelve a intentarlo.</p>` : "";
+  const err = ui.saveError ? msgLine("msg-err", "alert", "No se pudo guardar en este iPhone. Vuelve a intentarlo.") : "";
   if (ui.phase === "validating") return `<button type="button" class="btn btn--primary btn--block" disabled>Validando…</button>`;
   if (ui.phase === "confirm") return `${err}<button type="button" class="btn btn--primary btn--block" data-act="add-account">Añadir cuenta</button>`;
   if (ui.phase === "batch" && ui.focus == null) {
@@ -1325,6 +1337,10 @@ function previewSub(meta, exp, th) {
   return `<span class="tag">${esc(exp.tag)}</span> · TH${th}${arrow}`;
 }
 
+function msgLine(cls, role, html) {
+  return `<p class="msg ${cls}" role="${role}"><span>${html}</span></p>`;
+}
+
 function errorCard(it) {
   if (it.parseError) {
     const p = it.parseError;
@@ -1333,11 +1349,11 @@ function errorCard(it) {
       : esc(p.msg);
     return `<div class="card" data-import-focus tabindex="-1">
       <p class="t-headline">${esc(p.title)}</p>
-      <p class="msg msg-err" role="alert">${msg}</p>
+      ${msgLine("msg-err", "alert", msg)}
       <p class="t-footnote c-2">${esc(p.help || "")}</p>
     </div>`;
   }
-  const lines = (it.issues || []).map((m) => `<p class="msg msg-err" role="alert">${esc(m)}</p>`).join("");
+  const lines = (it.issues || []).map((m) => msgLine("msg-err", "alert", esc(m))).join("");
   return `<div class="card" data-import-focus tabindex="-1">
     <p class="t-headline">No es una exportación de Clash of Clans</p>
     ${lines}
@@ -1348,7 +1364,7 @@ function errorCard(it) {
 function singleBody(it) {
   if (!it) return entryBody();
   if (it.kind === "invalid") return `${segControl(state.importUi.mode !== "file")}<div class="section">${errorCard(it)}</div>`;
-  return `<div class="section">${previewBlock(it)}</div>`;
+  return `<div class="section">${previewBlock(it)}</div>${changesBlock(it)}`;
 }
 
 function previewBlock(it) {
@@ -1361,15 +1377,15 @@ function previewBlock(it) {
   const ch = it.changes;
   let extra = "";
   if (it.kind === "new") {
-    extra = `<p class="msg msg-warn" role="alert">${esc(foreignMsg(exp.tag))}</p><p class="t-footnote c-2">${esc(FOREIGN_HELP)}</p>`;
+    extra = `${msgLine("msg-warn", "alert", esc(foreignMsg(exp.tag)))}<p class="t-footnote c-2">${esc(FOREIGN_HELP)}</p>`;
   } else if (it.kind === "duplicate") {
-    extra = `<p class="msg msg-info" role="status">${esc(duplicateMsg(it.duplicateAt || exp.timestamp))}</p><p class="t-footnote c-2">${esc(DUPLICATE_HELP)}</p>`;
+    extra = `${msgLine("msg-info", "status", esc(duplicateMsg(it.duplicateAt || exp.timestamp)))}<p class="t-footnote c-2">${esc(DUPLICATE_HELP)}</p>`;
   } else if (it.kind === "older") {
-    extra = `<p class="msg msg-warn" role="alert">${esc(olderWarning(it.refTimestamp))}</p><p class="t-footnote c-2">${esc(olderHelp(it.refTimestamp))}</p>`;
+    extra = `${msgLine("msg-warn", "alert", esc(olderWarning(it.refTimestamp)))}<p class="t-footnote c-2">${esc(olderHelp(it.refTimestamp))}</p>`;
   }
   const kv = it.kind === "new" || it.kind === "duplicate" ? "" : kvHtml(it, ch);
   const notes = ch && it.kind !== "duplicate"
-    ? `${ch.unknownCount ? `<p class="msg msg-info" role="status">${esc(unknownMsg(ch.unknownCount))}</p>` : ""}${ch.overMaxCount ? `<p class="msg msg-info" role="status">${esc(overMaxMsg(ch.overMaxCount))}</p>` : ""}`
+    ? `${ch.unknownCount ? msgLine("msg-info", "status", esc(unknownMsg(ch.unknownCount))) : ""}${ch.overMaxCount ? msgLine("msg-info", "status", esc(overMaxMsg(ch.overMaxCount))) : ""}`
     : "";
   const foot = ch && ch.thUp && ch.mediaDown ? `<p class="t-footnote c-2">La media se compara ahora con los máximos de TH${ch.thTo}.</p>` : "";
   const card = `<div class="card" data-import-focus tabindex="-1">
@@ -1377,13 +1393,13 @@ function previewBlock(it) {
         ${thumb(1000001, { size: 96, th })}
         <div class="preview__main">
           <div class="account-card__title">${accountTitleHtml(meta, exp)}${roleChip(meta)}</div>
-          <p class="t-footnote c-2">${previewSub(meta, exp, th)}</p>
-          <p class="t-footnote c-2">Datos del ${esc(when)}</p>
+          <div class="t-footnote c-2">${previewSub(meta, exp, th)}</div>
+          <div class="t-footnote c-2">Datos del ${esc(when)}</div>
         </div>
       </div>
       ${kv}${notes}${foot}${extra}
     </div>${st ? `<p class="sr-only" role="status">${esc(st)}</p>` : ""}`;
-  return card + changesBlock(it);
+  return card;
 }
 
 function kvHtml(it, ch) {
@@ -1409,7 +1425,9 @@ function changesBlock(it) {
   const ch = it.changes;
   if (!ch || it.kind !== "ready") return "";
   if (ch.first) return `<p class="section-footer">${FIRST_FOOT}</p>`;
-  if (ch.noChanges) return `<p class="section-footer">${NO_CHANGE_FOOT}</p>`;
+  if (!ch.itemChanges) {
+    return `<p class="section-footer">${ch.noChanges ? NO_CHANGE_FOOT : EVOLUTION_FOOT}</p>`;
+  }
   const rows = ch.rows.map((row) => {
     const badge = row.unknown ? `&nbsp;<span class="badge badge-id">${esc(row.id)}</span>` : "";
     const title = row.unknown ? "Sin identificar" : esc(row.title);
@@ -1419,8 +1437,8 @@ function changesBlock(it) {
     </div></li>`;
   }).join("");
   const more = ch.more ? `<p class="section-footer">Y ${ch.more} ${ch.more === 1 ? "cambio" : "cambios"} más.</p>` : "";
-  return `<div class="section-header"><span>Cambios</span><span class="num">${ch.totalChanges}</span></div>
-    <ul class="list">${rows}</ul>${more}<p class="section-footer">${EVOLUTION_FOOT}</p>`;
+  return `<div class="section"><div class="section-header"><span>Cambios</span><span class="num">${ch.totalChanges}</span></div>
+    <ul class="list">${rows}</ul>${more}<p class="section-footer">${EVOLUTION_FOOT}</p></div>`;
 }
 
 function batchBody() {
@@ -1429,7 +1447,7 @@ function batchBody() {
   const ready = items.filter((i) => i.kind === "ready" || i.kind === "older");
   const neu = items.filter((i) => i.kind === "new");
   const omit = items.filter((i) => i.kind === "duplicate" || i.kind === "invalid");
-  const head = `<p class="t-subhead" style="margin:0 var(--margin-l) var(--sp-3) var(--margin-r)">${esc(batchSummary(state.importUi.items))}</p>`;
+  const head = `<p class="t-subhead" style="margin:0 var(--margin-r) var(--sp-3) var(--margin-l)">${esc(batchSummary(state.importUi.items))}</p>`;
   return head
     + batchGroup("Listos para importar", ready, "")
     + batchGroup(neu.length > 1 ? "Cuentas nuevas" : "Cuenta nueva", neu, `<p class="section-footer">${NEW_FOOT}</p>`)
@@ -1459,7 +1477,7 @@ function batchRow(it) {
   const trail = trailingLabel(it);
   const color = it.kind === "older" ? " trail-warn" : it.kind === "invalid" ? " trail-bad" : "";
   if (it.kind === "invalid" || !it.value) {
-    return `<li><div class="row"><span class="row__main"><span class="row__title">No válido</span><span class="row__sub">${esc(it.name || "")}</span></span><span class="row__trail trail-bad">${esc(trail)}</span></div></li>`;
+    return `<li><div class="row row--account"><span class="row__main"><span class="row__title">No válido</span><span class="row__sub">${esc(it.name || "")}</span></span></div></li>`;
   }
   const exp = it.value;
   const th = townHallLevel(exp);
@@ -1467,7 +1485,7 @@ function batchRow(it) {
   const sub = `TH${th} · datos del ${fmtWhen(exp.timestamp * 1000)}`;
   const aria = `${it.known ? it.known.nombre : exp.tag}, TH${th}, datos del ${fmtWhen(exp.timestamp * 1000)}, ${spokenTrail(trail)}`;
   const chev = it.kind === "new" ? CHEV : "";
-  return `<li><button type="button" class="row row--thumb44" data-im-row="${it._i}" aria-label="${esc(aria)}">
+  return `<li><button type="button" class="row row--account row--thumb44" data-im-row="${it._i}" aria-label="${esc(aria)}">
       ${thumb(1000001, { size: 44, th })}
       <span class="row__main"><span class="row__title">${title}</span><span class="row__sub">${esc(sub)}</span></span>
       <span class="row__trail${color}">${esc(trail)}</span>${chev}
@@ -1483,7 +1501,7 @@ function confirmNew(it) {
       ${thumb(1000001, { size: 96, th })}
       <div class="preview__main">
         <div class="account-card__title"><span class="tag">${esc(exp.tag)}</span></div>
-        <p class="t-footnote c-2">TH${th} · datos del ${esc(when)}</p>
+        <div class="t-footnote c-2">TH${th} · datos del ${esc(when)}</div>
       </div>
     </div></div>
     <div class="section"><div class="section-header"><span>Datos de la exportación</span></div>
@@ -1508,18 +1526,16 @@ function classifyCtx() {
   return { rows: state.rows, accounts: allAccounts(), index: state.index, now: state.now };
 }
 
+async function paintFrame() {
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
 async function validateTexts(entries) {
-  const started = Date.now();
-  let timer = setTimeout(() => {
-    state.importUi.phase = "validating";
-    render();
-  }, 150);
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  state.importUi.phase = "validating";
+  state.importUi.saveError = false;
+  render();
+  await paintFrame();
   const items = classifyEntries(entries, classifyCtx());
-  clearTimeout(timer);
-  if (Date.now() - started < 150) {
-    /* la pantalla Validando solo sale si tarda más de 150 ms */
-  }
   state.importUi.items = items;
   state.importUi.focus = null;
   state.importUi.fromBatch = false;
@@ -1947,13 +1963,12 @@ function bind(r) {
   if (files) files.onchange = async () => {
     const list = [...files.files];
     if (!list.length) return;
-    const timer = setTimeout(() => {
-      state.importUi.phase = "validating";
-      render();
-    }, 150);
+    state.importUi.mode = "file";
+    state.importUi.phase = "validating";
+    render();
+    await paintFrame();
     const entries = [];
     for (const file of list) entries.push({ name: file.name, text: await file.text(), source: "file" });
-    clearTimeout(timer);
     state.importUi.mode = "file";
     state.importUi.items = classifyEntries(entries, classifyCtx());
     state.importUi.focus = null;

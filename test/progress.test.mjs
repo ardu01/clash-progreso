@@ -536,6 +536,32 @@ test("validar una exportación: tag ajeno, más antigua y textos sin línea", ()
   assert.equal(again.kind, "ready");
   assert.equal(again.changes.noChanges, true);
   assert.equal(trailingLabel(again), "Sin cambios");
+  assert.equal(old.changes.mediaFrom, analyze(older, index).media);
+  assert.equal(old.changes.mediaTo, analyze(base, index).media);
+});
+
+test("si solo sube el ayuntamiento no hay lista de cambios", () => {
+  const base = exportsByTag.get("#R00C8CPQC");
+  const exp = structuredClone(base);
+  exp.timestamp = base.timestamp + 70;
+  const th = exp.buildings.find((b) => b.data === 1000001);
+  th.lvl += 1;
+  const item = classifyEntries([{ name: "th.json", text: JSON.stringify(exp) }], importCtx([...exportsByTag.values()]))[0];
+  assert.equal(item.kind, "ready");
+  assert.equal(item.changes.thUp, true);
+  assert.equal(item.changes.rows.length, 0);
+  assert.equal(item.changes.totalChanges, 0);
+  assert.equal(item.changes.itemChanges, false);
+  assert.equal(item.changes.noChanges, false);
+});
+
+test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
+  const base = exportsByTag.get("#R00C8CPQC");
+  const exp = structuredClone(base);
+  exp.timestamp = base.timestamp + 40;
+  const item = classifyEntries([{ name: "c2.json", text: JSON.stringify(exp) }], importCtx([...exportsByTag.values()]))[0];
+  assert.equal(item.kind, "ready");
+  assert.equal(item.changes.unknownCount, 4);
 });
 
 test("versión 1.1.1 y cachés cp-shell-v5 / cp-img-v4", () => {
