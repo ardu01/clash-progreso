@@ -5,7 +5,7 @@ import {
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
-import { catalog, fitOf, imageChoice, isHeavy } from "./images.js";
+import { catalog, imageChoice, isHeavy } from "./images.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
@@ -257,10 +257,6 @@ function thumbLevel(opts) {
   return null;
 }
 
-function cssNum(v) {
-  return String(Math.round(Number(v) * 1000) / 1000);
-}
-
 function thumb(id, opts = {}) {
   const size = opts.size || 40;
   const known = [40, 44, 52, 72, 96].includes(size);
@@ -284,23 +280,16 @@ function thumb(id, opts = {}) {
 }
 
 function imageThumb(cls, size, label, im, opts, choice) {
-  const fit = fitOf(im, size);
   const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
-  const fitted = fit ? " is-fit" : "";
-  const vars = [];
-  if (![40, 44, 52, 72, 96].includes(size)) vars.push(`--size:${size}px`);
-  if (fit) vars.push(`--dw:${cssNum(fit.dw)}`, `--dh:${cssNum(fit.dh)}`, `--tx:${cssNum(fit.tx)}`, `--ty:${cssNum(fit.ty)}`);
-  const style = vars.length ? ` style="${vars.join(";")}"` : "";
+  const style = [40, 44, 52, 72, 96].includes(size) ? "" : ` style="--size:${size}px"`;
   const loading = opts.eager ? "eager" : "lazy";
   const pri = opts.eager ? " fetchpriority=\"high\"" : "";
   let extra = "";
   const fb = choice && choice.fallback;
-  if (fb && fb.ruta && fb.ruta !== im.ruta) {
-    extra += ` data-fallback="./assets/${esc(fb.ruta)}"`;
-    const ff = fitOf(fb, size);
-    if (ff) extra += ` data-fb-dw="${cssNum(ff.dw)}" data-fb-dh="${cssNum(ff.dh)}" data-fb-tx="${cssNum(ff.tx)}" data-fb-ty="${cssNum(ff.ty)}"`;
-  }
-  return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+  if (fb && fb.ruta && fb.ruta !== im.ruta) extra += ` data-fallback="./assets/${esc(fb.ruta)}"`;
+  const w = Number(im.ancho) > 0 ? im.ancho : size;
+  const h = Number(im.alto) > 0 ? im.alto : size;
+  return `<span class="thumb ${cls}${tile}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${w}" height="${h}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
 }
 
 function emptyNamedThumb(label, size) {
@@ -325,13 +314,6 @@ function applyFallback(img, box) {
   if (!fb || box.dataset.usedFallback === "1") return false;
   if (img.getAttribute("src") === fb) return false;
   box.dataset.usedFallback = "1";
-  if (box.dataset.fbDw) {
-    box.style.setProperty("--dw", box.dataset.fbDw);
-    box.style.setProperty("--dh", box.dataset.fbDh);
-    box.style.setProperty("--tx", box.dataset.fbTx);
-    box.style.setProperty("--ty", box.dataset.fbTy);
-    box.classList.add("is-fit");
-  }
   clearLevelNote(box);
   box.classList.remove("thumb--offline");
   delete box.dataset.checked;

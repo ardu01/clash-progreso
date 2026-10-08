@@ -59,17 +59,9 @@ li + li > .row::before {
 .thumb > img {
   width: auto; height: auto;
   max-width: 100%; max-height: 100%;
-  object-fit: none; object-position: 50% 50%;
+  object-fit: contain; object-position: center;
   min-width: 0; min-height: 0;
   display: block;
-}
-/* escala = min(interior / max(caja.w, caja.h), 1/3): la caja cabe en esta miniatura y a @3x no se amplía */
-.thumb.is-fit > img {
-  width: calc(var(--dw) * 1px);
-  height: calc(var(--dh) * 1px);
-  max-width: none; max-height: none;
-  object-fit: none;
-  transform: translate(calc(var(--tx) * 1px), calc(var(--ty) * 1px));
 }
 .thumb--40 { --size: 40px; }
 .thumb--44 { --size: 44px; }

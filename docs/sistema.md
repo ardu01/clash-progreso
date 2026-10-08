@@ -503,7 +503,7 @@ Los PNG llegan **byte a byte del Fan Kit**: 130 archivos (~41 MB), de 80×119 a 
 
 El `overflow: hidden` de `.thumb` recorta lo ampliado solo en pantalla. Con la v1.2 real (184 imágenes) se aplica a 39. Por ejemplo, Muro sale a ×7,8, Choza de constructor a ×4,2 y Mortero a ×4,1, mientras que Bomba (lienzo de 131 px) se queda en ×1 por resolución. El Laboratorio ocupa el 73 % y no lo necesita. No se usa en `.thumb--tile`.
 
-Desde 2.1.1 el encuadre no usa `scale(var(--z))`. `fitOf(im, size)` da el tamaño en px CSS: `escala = min(interior / max(caja.w, caja.h), 1/3)`, con interior `--size × 0.84` (o `--size` si es tile). El `1/3` es el tope a DPR 3: ningún px de imagen ocupa más de un px físico. Si recortar el margen transparente exigiría pasar de ese tope, la caja se queda más pequeña y se ve más margen. No se estira.
+Desde 2.1.2 no hay encuadre. `caja_visible`, `fitOf` y `.thumb--encuadre` no se usan para pintar. El PNG entero entra en el interior con `object-fit: contain` y `object-position: center`. `width`/`height` son `auto` y `max-width`/`max-height` son `100 %`, así que no se escala por encima del tamaño natural ni se recorta el margen transparente. `containOf` (solo pruebas) es `min(1, interior / ancho, interior / alto)`.
 
 **Los cuatro estados del manifiesto** (más dos de carga). La app lee **siempre** `estado` del manifiesto: no hay listas fijas de IDs en el código. Pasar de v1 a v1.1 solo cambia el manifiesto.
 
@@ -2035,5 +2035,11 @@ Especificación de 1.1.5:
 `APP_VERSION` es `2.1.1`, `SHELL_CACHE` es `cp-shell-v13` e `IMAGE_CACHE` sigue en `cp-img-v5`: no cambia ningún PNG ni el manifiesto de imágenes.
 
 La escala de 2.1.0 pintaba la caja útil como si toda miniatura midiera 96 px CSS y permitía hasta 1 px de imagen por px CSS. En un iPhone @3x eso son 3 px físicos por px de imagen, y en las filas de 40 px la caja de 96 px se recortaba (zoom de más). `fitOf(im, size)` usa `min(interior / max(caja.w, caja.h), 1/3)`. El interior es `--size × 0.84` (el padding del 8 %); un tile, sin padding, usa el lado entero. Si llenar el interior pasaría de 1 px físico por px de imagen, se amplía menos y se ve más margen. No se estira. Los PNG por nivel son más pequeños que el PNG base en muchos edificios; se muestran igual, sin sustituirlos.
+
+## Nota de cambios (8 oct 2026, 2.1.2)
+
+`APP_VERSION` es `2.1.2`, `SHELL_CACHE` es `cp-shell-v14` e `IMAGE_CACHE` sigue en `cp-img-v5`: no cambia ningún PNG ni el manifiesto de imágenes.
+
+La 2.1.1 seguía recortando: agrandaba el lienzo para que `caja_visible` llenara la miniatura y `overflow: hidden` se quedaba con el centro. Desde 2.1.2 cada imagen se pinta entera, centrada, con `object-fit: contain`, y no se escala por encima de su tamaño natural. `caja_visible` no interviene.
 
 El aviso de la Fan Content Policy ya no va al pie de cada vista ni de cada hoja. Está una sola vez, completo y en cuerpo, en Copia → Acerca de, junto a la versión (§5.14).
