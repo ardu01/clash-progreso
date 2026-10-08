@@ -795,7 +795,7 @@ No lleva ilustraciones ni iconos: solo texto y acción.
 Los datos se leen de almacenamiento local y tardan muy poco. Es distinto del `.thumb--offline` rayado: el skeleton es liso y pulsa.
 
 **Regla de los 150 ms** (vale para este skeleton y para «Validando…» de Importar, §8.3):
-- Al empezar la carga se arranca un **temporizador de 150 ms**. Si el resultado llega antes, se pinta directamente el resultado y el skeleton **no llega a pintarse nunca**.
+- Al empezar la carga (con el texto ya disponible; nunca durante una espera del sistema, como el globo «Pegar» de iOS) se arranca un **temporizador de 150 ms**. Si el resultado llega antes, se pinta directamente el resultado y el skeleton **no llega a pintarse nunca**.
 - Solo si el temporizador vence sin resultado se pinta el skeleton, y se queda hasta que llega el resultado.
 - Está prohibido pintarlo siempre y quitarlo uno o dos frames después: eso es un destello (1.1.1 lo hacía en Importar, ~33 ms).
 - Si el trabajo es síncrono (p. ej. validar varias exportaciones), se cede el hilo entre trozos (`await` entre archivos) para que el temporizador pueda vencer.
@@ -1452,7 +1452,7 @@ guarda al verlas por primera vez. Recomendado con wifi.
 | 2 | **Vacío · en Safari** (no instalada) | Igual que 1, con la tarjeta «Estás en Safari» encima del seg. Condición: `navigator.standalone === false` (propiedad que solo existe en iOS) | **Pegar** | |
 | 3 | **Vacío · Archivos** | Seg. Tarjeta «Desde Archivos». La lista «Con un Atajo de iOS» queda **fuera** mientras el Atajo esté aplazado | **Elegir archivos…** | |
 | 4 | **Atajo** (pantalla dentro del sheet) · **APLAZADA** | **Aplazada el 7 oct 2026** hasta que Miguel pruebe el Atajo en su iPhone. No se implementa en este PR; el diseño se guarda aquí y en la maqueta (`#/atajo`, con la marca «Aplazada»). Lead `‹ Importar`, título «Atajo», acciones en orden y cómo lanzarlo (§8.7) | **Elegir archivos…** | |
-| 5 | **Validando** | **Solo si la validación no ha terminado 150 ms después** del toque en Pegar / Revisar, del pegado a mano o de elegir archivos (temporizador, regla de §5.11). Si termina antes, se pasa directo a la vista previa, al error o al lote **sin pintar Validando: nunca un destello**. Tarjeta con `.sk` (miniatura de 96 y 3 líneas), `aria-busy="true"` | **Validando…** (deshabilitado) | |
+| 5 | **Validando** | **Solo si la validación no ha terminado 150 ms después** de tener el texto: tras resolverse `readText()` (Pegar), al tocar Revisar con texto pegado a mano o al elegir archivos (temporizador, regla de §5.11). **Nunca mientras el sistema espera al usuario**: en iPhone, `readText()` no se resuelve hasta que se toca el globo «Pegar» de iOS, y durante esa espera la hoja sigue en su estado anterior. Si termina antes, se pasa directo a la vista previa, al error o al lote **sin pintar Validando: nunca un destello**. Tarjeta con `.sk` (miniatura de 96 y 3 líneas), `aria-busy="true"` | **Validando…** (deshabilitado) | |
 | 6 | **Vista previa** (1 cuenta, **solo desde Pegar**) | Tarjeta `.preview` + `dl.kv`; sección «Cambios» con la lista de §8.5 | **Importar** | Pegar otra |
 | 7 | **Lote** (desde Archivos, **uno o varios** archivos) | Resumen `12 archivos · 11 listos · 1 omitido` (con uno: `1 archivo · 1 listo`); grupos «Listos para importar» y «Se omiten» con filas `.row--thumb44` | **Importar 11 cuentas** (con uno: **Importar 1 cuenta**) | |
 | 8 | **Éxito** | Se cierra el sheet y vuelve a Roster con toast `.toast--ok`; la tarjeta o fila afectada lleva `.is-flash` 1,2 s | | |

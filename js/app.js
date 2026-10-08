@@ -1574,12 +1574,10 @@ async function validateTexts(entries, opts = {}) {
 }
 
 async function doPaste() {
-  armValidating();
   let text = "";
   try {
     text = await navigator.clipboard.readText();
   } catch {
-    disarmValidating();
     state.importUi.items = [{ name: "Pegado", kind: "invalid", parseError: PASTE_DENIED, value: null, skip: true }];
     state.importUi.phase = "single";
     state.importUi.focus = null;
@@ -1589,7 +1587,7 @@ async function doPaste() {
     return;
   }
   state.importUi.text = text || "";
-  await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }], { armed: true });
+  await validateTexts([{ name: "Pegado", text: state.importUi.text, source: "clipboard" }]);
 }
 
 function resetImport(mode) {
