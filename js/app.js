@@ -1,17 +1,22 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
   capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
-  itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, rosterByTag, townHallLevel, upgradesOf,
+  itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
-  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
-  sortBatch, statusText, successToast, trailingLabel, unknownMsg,
+  duplicateMsg, foreignMsg, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
+  planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
+import {
+  addAccount, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setPrincipal,
+} from "./roster.js";
+import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
+import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -47,9 +52,14 @@ const state = {
   cacheCount: 0,
   dl: { phase: "idle", doneBytes: 0, doneCount: 0, total: 0, errors: 0, note: "" },
   seg: {},
-  mejorasMode: localStorage.getItem("cp-mejoras") || "fin",
+  mejorasMode: localStorage.getItem("cp-mejoras") || "cuenta",
   evo: localStorage.getItem("cp-evo") || "roster",
+  sortMode: localStorage.getItem("cp-sort") || "th",
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
+  accounts: [],
+  editor: null,
+  progFilter: { cat: "todas", status: "todos", q: "" },
+  chartTag: localStorage.getItem("cp-chart") || "",
   ficha: null,
   focusReturn: "",
   sheetKey: "",
@@ -74,17 +84,21 @@ const $ = (sel, root = document) => root.querySelector(sel);
 function route() {
   const raw = (location.hash || "#/roster").replace(/^#\/?/, "");
   const parts = raw.split("/").filter(Boolean);
-  const name = parts[0] || "roster";
+  let name = parts[0] || "roster";
+  if (name === "cuentas") name = "roster";
   if (name === "progreso" && parts[1] && parts[2]) {
     return { name: "detalle", tag: "#" + parts[1], cat: parts[2] };
   }
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
+  if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
   return { name, tag: null, cat: null };
 }
 
 function baseTab(r) {
   if (r.name === "detalle" || r.name === "progreso") return "progreso";
-  if (r.name === "mejoras" || r.name === "evolucion" || r.name === "roster") return r.name;
+  if (r.name === "mejoras") return "mejoras";
+  if (r.name === "graficos" || r.name === "evolucion") return "graficos";
+  if (r.name === "copia") return "copia";
   return "roster";
 }
 
@@ -93,7 +107,7 @@ const ADDED_KEY = "cp-added";
 function freshImport() {
   return {
     active: false,
-    mode: "paste",
+    mode: "file",
     text: "",
     phase: "entry",
     items: [],
@@ -132,15 +146,63 @@ function accountFromAdded(a) {
   };
 }
 
+const ROSTER_KEY = "cp-roster";
+
+function readStoredRoster() {
+  try {
+    return JSON.parse(localStorage.getItem(ROSTER_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function persistRoster() {
+  localStorage.setItem(ROSTER_KEY, JSON.stringify({ version: 2, accounts: state.accounts }));
+}
+
+function viewSnapshot(tag) {
+  const exp = state.latest && state.latest.get(tag);
+  if (!exp || !state.index) return { th: -1, media: -1 };
+  const view = analyze(exp, state.index);
+  return { th: view.th == null ? -1 : view.th, media: view.media == null ? -1 : view.media };
+}
+
+function viewsMap() {
+  const views = {};
+  for (const a of state.accounts) views[a.tag] = viewSnapshot(a.tag);
+  return views;
+}
+
+function toMeta(a, featured) {
+  const nombre = (a.alias || "").trim() || a.tag;
+  return {
+    tag: a.tag,
+    nombre,
+    alias: (a.alias || "").trim(),
+    chip: a.chip || String(a.tag).slice(-3),
+    principal: !!a.principal,
+    role: a.principal ? "Principal" : "",
+    roleClass: a.principal ? "chip--main" : "",
+    objetivo: a.objetivo == null ? null : a.objetivo,
+    featured: featured === a.tag,
+    added: true,
+  };
+}
+
 function allAccounts() {
-  return ROSTER.concat(state.added.map(accountFromAdded));
+  const views = viewsMap();
+  const featured = featuredTag(state.accounts, views);
+  return orderAccounts(state.accounts, views, state.sortMode).map((a) => toMeta(a, featured));
 }
 
 function accountByTag(tag) {
-  const fixed = rosterByTag(tag);
-  if (fixed) return fixed;
-  const added = state.added.find((a) => a.tag === tag);
-  return added ? accountFromAdded(added) : null;
+  return allAccounts().find((a) => a.tag === tag) || null;
+}
+
+function rosterIndex(tag) {
+  const list = allAccounts();
+  const i = list.findIndex((a) => a.tag === tag);
+  return i < 0 ? 1000 : i;
 }
 
 function makeChip(tag, th) {
@@ -396,13 +458,12 @@ function stale(exp) {
 
 function navbar(r) {
   const tab = baseTab(r);
-  const titles = { roster: "Roster", progreso: "Progreso", mejoras: "Mejoras", evolucion: "Evolución", detalle: "Detalle" };
+  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle" };
   let lead = "";
   let trail = "";
-  let title = titles[tab] || "";
+  let title = titles[tab] || titles[r.name] || "";
   let collapsed = "false";
-  if (r.name === "roster") {
-    lead = `<button class="btn-text" data-go="#/ajustes">Ajustes</button>`;
+  if (r.name === "roster" || r.name === "importar") {
     trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
@@ -422,11 +483,12 @@ function navbar(r) {
 function tabbar(r) {
   const tab = baseTab(r);
   const item = (id, href, label, svg) => `<a href="${href}" ${tab === id ? 'aria-current="page"' : ""}>${svg}<span>${label}</span></a>`;
-  return `<nav class="tabbar material-bar" aria-label="Secciones">
-    ${item("roster", "#/roster", "Roster", `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="8" height="8" rx="2"/><rect x="16" y="5" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/></svg>`)}
+  return `<nav class="tabbar" aria-label="Secciones">
+    ${item("roster", "#/roster", "Cuentas", `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="8" height="8" rx="2"/><rect x="16" y="5" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/></svg>`)}
     ${item("progreso", "#/progreso", "Progreso", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 8h18M5 14h12M5 20h15"/></svg>`)}
     ${item("mejoras", "#/mejoras", "Mejoras", `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5"/><path d="M14 8.5V14l3.5 2.5"/></svg>`)}
-    ${item("evolucion", "#/evolucion", "Evolución", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`)}
+    ${item("graficos", "#/graficos", "Gráficos", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`)}
+    ${item("copia", "#/copia", "Copia", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M8 6h9l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M16 6v6h6"/></svg>`)}
   </nav>`;
 }
 
@@ -441,22 +503,64 @@ function subImported() {
 }
 
 function renderRoster() {
-  const any = ROSTER.some((r) => expOf(r.tag));
-  const featured = ROSTER.filter((r) => r.featured);
-  const groups = [
-    { title: "TH13 · 4 cuentas", rows: ROSTER.filter((r) => !r.featured && r.objetivo === 15 && r.chip.startsWith("13")) },
-    { title: "TH11 · 5 cuentas", rows: ROSTER.filter((r) => r.chip.startsWith("11")) },
-  ];
-  const cards = featured.map((meta) => featuredCard(meta)).join("");
-  const empty = any ? "" : `<div class="card empty"><p class="t-title3">Aún no hay datos</p><p class="t-subhead c-2">Importa la exportación JSON de cada cuenta para ver su progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
-  return `<h1 class="large-title">Roster</h1>
-    <p class="large-sub">${esc(subImported())}</p>
+  const list = allAccounts();
+  const sortLabel = state.sortMode === "nombre" ? "nombre" : state.sortMode === "pct" ? "%" : "TH";
+  const empty = list.length
+    ? ""
+    : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
+  const rows = list.map(rowCuenta).join("");
+  const seedNote = isSeedRoster(list)
+    ? `<p class="section-footer">Las ${list.length} son de prueba: añade, renombra o borra cuentas. % = media de las categorías desbloqueadas.</p>`
+    : `<p class="section-footer">% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.</p>`;
+  return `<h1 class="large-title">Cuentas</h1>
+    <p class="large-sub">${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`} · ordenadas por ${esc(sortLabel)}</p>
+    <label class="sort-label">Ordenar
+      <select data-sort aria-label="Ordenar cuentas">
+        <option value="th"${state.sortMode === "th" ? " selected" : ""}>TH</option>
+        <option value="nombre"${state.sortMode === "nombre" ? " selected" : ""}>Nombre</option>
+        <option value="pct"${state.sortMode === "pct" ? " selected" : ""}>Porcentaje</option>
+      </select>
+    </label>
     ${empty}
-    <div class="section"><div class="section-header"><span>Principales</span></div><div class="stack">${cards}</div></div>
-    ${groups.map((g) => `<div class="section"><div class="section-header"><span>${esc(g.title)}</span></div><ul class="list">${g.rows.map(rowAccount).join("")}</ul></div>`).join("")}
-    ${otrasCuentas()}
-    <div class="section" style="text-align:center"><button class="btn btn--plain" data-go="#/ajustes">Ajustes y aviso legal</button></div>
+    ${list.length ? `<div class="section"><ul class="list">${rows}</ul>${seedNote}</div>` : seedNote}
+    <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
     ${LEGAL}`;
+}
+
+function isSeedRoster(list) {
+  if (list.length !== ROSTER.length) return false;
+  const tags = new Set(list.map((a) => a.tag));
+  return ROSTER.every((r) => tags.has(r.tag));
+}
+
+function rowCuenta(meta) {
+  const exp = expOf(meta.tag);
+  const flash = isFlash(meta.tag) ? " is-flash" : "";
+  const mark = meta.principal
+    ? `<span class="chip chip--main">Principal</span>`
+    : meta.featured ? `<span class="chip chip--second">Destacada</span>` : "";
+  if (!exp) {
+    return `<li><div class="row row--account row--thumb44${flash}">
+      <a class="row__main" href="#/progreso/${meta.tag.slice(1)}">
+        <span class="row__title">${esc(meta.nombre)} ${mark}</span>
+        <span class="row__sub"><span class="chip chip--muted">Sin importar</span></span>
+      </a>
+      <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
+    </div></li>`;
+  }
+  const a = viewOf(meta.tag);
+  const when = fmtWhen(exp.timestamp * 1000);
+  const title = meta.nombre === meta.tag ? `<span class="tag">${esc(meta.tag)}</span>` : esc(meta.nombre);
+  const aria = `${meta.nombre}, TH${a.th}, media ${fmtPct(a.media)}${meta.principal ? ", Principal" : meta.featured ? ", destacada" : ""}`;
+  return `<li><div class="row row--account row--thumb44${flash}">
+    ${thumb(1000001, { size: 44, th: a.th })}
+    <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
+      <span class="row__title">${title} ${mark}</span>
+      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}</span>
+    </a>
+    <span class="row__trail"><span class="num row__pct">${fmtPct(a.media)}</span></span>
+    <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
+  </div></li>`;
 }
 
 function featuredCard(meta) {
@@ -535,33 +639,96 @@ function rowAdded(meta) {
 }
 
 function renderProgreso(tag) {
-  const meta = accountByTag(tag) || ROSTER[0];
+  const list = allAccounts();
+  const meta = accountByTag(tag) || list[0];
+  if (!meta) {
+    return `<h1 class="large-title">Progreso</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>${LEGAL}`;
+  }
   const exp = expOf(meta.tag);
-  const seg = state.seg[meta.tag] || localStorage.getItem("cp-seg-" + meta.tag) || "cats";
-  const options = allAccounts().map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
-  let body;
-  if (!exp) {
-    body = `<div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
-  } else if (seg === "eq") body = equipBlock(exp, meta);
-  else body = catsBlock(exp, meta);
+  const options = list.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
   const a = exp ? viewOf(meta.tag) : null;
-  const sub = !a ? "Sin importar" : meta.objetivo
-    ? `TH${a.th} · objetivo TH${meta.objetivo} · datos de ${fmtWhen(exp.timestamp * 1000)}`
-    : `TH${a.th} · sin objetivo · datos de ${fmtWhen(exp.timestamp * 1000)}`;
+  const sub = !a ? "Sin importar" : `${esc(meta.tag)} · media ${fmtPct(a.media)}`;
+  const filt = state.progFilter;
+  const rows = exp ? progressRows(exp, state.index) : [];
+  const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
+  const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
+  const body = !exp
+    ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`
+    : `${filterControls(counts, filt)}${narrowed ? filterList(exp, meta, a) : catsBlock(exp, meta)}`;
   return `<h1 class="large-title">Progreso</h1>
     <div class="section"><div class="list picker"><a class="row row--thumb44" href="#/progreso/${meta.tag.slice(1)}">
       ${exp ? thumb(1000001, { size: 44, th: a.th }) : `<span class="thumb thumb--44 thumb--empty">TH</span>`}
-      <span class="row__main"><span class="row__title">${meta.featured ? esc(meta.nombre) : `<span class="tag">${esc(meta.nombre)}</span>`}</span><span class="row__sub">${esc(sub)}</span></span>
+      <span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${sub}</span></span>
       <svg class="chevron" viewBox="0 0 9 14" aria-hidden="true"><path d="M2 1.5 6.5 7 2 12.5M5 1.5 9 7 5 12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${exp ? summaryCard(a, meta) : ""}
-    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Vista de progreso">
-      <button role="tab" data-seg="cats" aria-selected="${seg !== "eq"}">Categorías</button>
-      <button role="tab" data-seg="eq" aria-selected="${seg === "eq"}">Equipamiento</button>
-    </div></div>
     ${body}
-    ${exp && seg !== "eq" ? builderBaseSection(exp) : ""}
+    ${exp && !narrowed ? builderBaseSection(exp) : ""}
     ${LEGAL}`;
+}
+
+function filterControls(counts, filt) {
+  const short = { ejercito_edif: "Ejército" };
+  const chips = [{ key: "todas", label: "Todas" }].concat(CATEGORIES.map((c) => ({ key: c.key, label: short[c.key] || c.label })));
+  const buttons = chips.map((c) => {
+    const n = counts[c.key] || 0;
+    const on = filt.cat === c.key;
+    return `<button type="button" data-pcat="${c.key}" aria-pressed="${on}">${esc(c.label)} ${n}</button>`;
+  }).join("");
+  const status = (id, label) => `<button type="button" role="tab" data-pstatus="${id}" aria-selected="${filt.status === id}">${label}</button>`;
+  return `<label class="filter-search"><span class="sr-only">Buscar</span><input data-psearch type="search" enterkeyhint="search" placeholder="Buscar edificio, héroe, tropa…" value="${esc(filt.q)}" aria-label="Buscar edificio, héroe, tropa"></label>
+    <div class="chip-row" role="toolbar" aria-label="Categorías">${buttons}</div>
+    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Estado">
+      ${status("todos", "Todos")}${status("pendientes", "Pendientes")}${status("maximo", "Al máximo")}
+    </div></div>`;
+}
+
+function filterList(exp, meta, a) {
+  const filt = state.progFilter;
+  const visible = sortFilterRows(applyFilter(progressRows(exp, state.index), {
+    category: filt.cat,
+    status: filt.status,
+    query: filt.q,
+    index: state.index,
+  }));
+  if (!visible.length) {
+    return `<div class="section"><div class="card empty"><p class="t-title3">Nada con ese filtro</p><p class="t-subhead c-2">Prueba otra categoría o borra la búsqueda.</p></div></div>`;
+  }
+  if (filt.cat === "equipamiento") {
+    const cells = visible.map((p) => eqCell(p)).join("");
+    return `${categoryHead(filt.cat, visible.length, a)}<div class="section"><ul class="eq-grid">${cells}</ul></div>`;
+  }
+  const lis = visible.map((it) => {
+    if (it.categoryKey === "muros") {
+      const at = isWallMax(it);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">Muro</span><span class="row__sub num">Nv ${it.lvl}${it.max != null ? ` / ${it.max}` : ""} · ×${it.cnt}</span></span><span class="row__trail">${at ? "Al máximo" : "Pendiente"}</span></div></li>`;
+    }
+    return detailRow(it, it.categoryKey, a);
+  }).join("");
+  return `${categoryHead(filt.cat, visible.length, a)}<div class="section"><ul class="list">${lis}</ul></div>`;
+}
+
+/** Título de una categoría: la píldora va con el nombre y el % en su propia línea. Sin «·». */
+function catHead(label, count, pctText) {
+  const pct = pctText ? `<p class="cat-head__pct num">${esc(pctText)}</p>` : "";
+  return `<h2 class="cat-head__title"><span class="cat-head__name">${esc(label)}</span><span class="chip num">${count}</span></h2>${pct}`;
+}
+
+function categoryHead(catKey, count, a) {
+  if (!catKey || catKey === "todas" || !a) return "";
+  const cat = CATEGORIES.find((c) => c.key === catKey);
+  if (!cat) return "";
+  const row = a.cats[catKey];
+  const pctText = row && row.pct != null ? fmtPct(row.pct) : "";
+  const bar = row && row.pct != null
+    ? barHtml(catKey, a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { label: `${cat.label} ${fmtPct(row.pct)}` })
+    : "";
+  const foot = row && row.pct != null ? `<p class="cat-head__foot">${esc(catFoot(a, row))}</p>` : "";
+  return `<div class="section"><div class="card cat-head cat-${CAT_CLASS[catKey]}">${catHead(cat.label, count, pctText)}${bar}${foot}</div></div>`;
+}
+
+function isWallMax(it) {
+  return it.max != null && it.lvl >= it.max;
 }
 
 function summaryCard(a) {
@@ -725,10 +892,11 @@ function eqCell(p) {
   const aria = p.unknown
     ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}`
     : [name, level, p.overMax ? "máximo desactualizado" : "", deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
-  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : ""].filter(Boolean).join(" ");
+  const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : "", p.overMax ? "is-over" : ""].filter(Boolean).join(" ");
+  const over = p.overMax ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>` : "";
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
-    : (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
+    : over + (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52 });
@@ -950,7 +1118,7 @@ function mejorasPorFin(all) {
       }).join("")}</div>
     </div></div>` : "";
   const done = all.filter((u) => u.done);
-  const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end);
+  const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end || rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag));
   const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Terminadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
@@ -958,6 +1126,7 @@ function mejorasPorFin(all) {
     if (!byDay.has(key)) byDay.set(key, []);
     byDay.get(key).push(u);
   }
+  for (const list of byDay.values()) list.sort((a, b) => rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag) || a.end - b.end);
   const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><ul class="list">${list.map(upRow).join("")}</ul></div>`).join("");
   return freeCard + doneBlock + days + helpersBlock();
 }
@@ -971,28 +1140,44 @@ function mejorasPorCuenta() {
     const list = upgrades(exp);
     const labN = list.filter((u) => u.queue === "laboratorio" && !u.done).length;
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
-    const warn = b.over ? `<span class="chip chip--warn">Revisar constructores</span>` : "";
-    const foot = b.over ? `<p class="t-footnote c-2" style="margin:8px 0 0">Hay más mejoras que constructores conocidos</p>` : "";
+    const bob = list.filter((u) => u.extra && u.queue === "constructor").length;
     const slots = slotsHtml(b, labN, petN, a.th >= 14);
     return `<div class="section"><div class="card" style="display:flex;gap:8px;align-items:flex-start">
         ${thumb(1000001, { size: 40, th: a.th })}
-        <div style="flex:1"><div class="t-headline">${esc(meta.featured ? meta.nombre : meta.tag)} ${warn}</div>
-          ${slots}${foot}
+        <div style="flex:1"><div class="t-headline">${esc(meta.nombre)}</div>
+          ${builderHead(b, bob)}
+          ${slots}
           <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
         </div>
       </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
   }).join("");
 }
 
-function slotsHtml(b, labN, petN, pets) {
+/** Chozas y mejoras salen de builderStatus. La extra de constructor no se suma a ese exceso. */
+function builderCaption(status, bob) {
+  return {
+    chozas: status && status.known ? status.total : null,
+    occupied: status ? status.occupied : 0,
+    over: !!(status && status.over),
+    bob: bob || 0,
+  };
+}
+
+function builderHead(status, bob) {
+  const c = builderCaption(status, bob);
+  const bits = [];
+  if (c.chozas != null) bits.push(`<span class="num">${c.chozas === 1 ? "1 choza" : `${c.chozas} chozas`}</span>`);
+  bits.push(`<span class="num">${c.occupied === 1 ? "1 mejora de constructor" : `${c.occupied} mejoras de constructor`}</span>`);
+  if (c.over) bits.push(`<span class="chip chip--warn">Revisar constructores</span>`);
+  const bobLine = c.bob ? `<p class="builder-head__bob">${c.bob === 1 ? "1 de B.O.B" : `${c.bob} de B.O.B`}</p>` : "";
+  return `<p class="builder-head">${bits.join(" ")}</p>${bobLine}`;
+}
+
+function slotsHtml(_status, labN, petN, pets) {
   const dots = (n, on) => Array.from({ length: Math.max(n, on) }, (_, i) => `<i class="${i < on ? "on" : "free"}"></i>`).join("");
-  let ctor;
-  if (!b.known) ctor = `<div class="slots"><span class="slots__lbl">Constructores</span><span class="num">${b.occupied} ocupados</span></div>`;
-  else if (b.over) ctor = `<div class="slots" role="img" aria-label="Constructores: ${b.occupied} ocupados"><span class="slots__lbl">Constructores</span>${dots(b.occupied, b.occupied)}<span class="num">${b.occupied}</span></div>`;
-  else ctor = `<div class="slots" role="img" aria-label="Constructores: ${b.occupied} de ${b.total}"><span class="slots__lbl">Constructores</span>${dots(b.total, b.occupied)}<span class="num">${b.occupied}/${b.total}</span></div>`;
   const lab = `<div class="slots" role="img" aria-label="Laboratorio: ${labN}"><span class="slots__lbl">Laboratorio</span>${dots(labN, labN)}<span class="num">${labN}</span></div>`;
   const pet = pets ? `<div class="slots"><span class="slots__lbl">Mascotas</span>${petN ? `<i class="on"></i>` : `<i class="free"></i>`}<span class="num">${petN}</span></div>` : "";
-  return ctor + lab + pet;
+  return lab + pet;
 }
 
 function upRow(u) {
@@ -1306,7 +1491,7 @@ function renderImport() {
       <div class="sheet__grabber"></div>
       <div class="sheet__bar">${lead}<h2 id="im-title" tabindex="-1">${title}</h2><span></span></div>
       <div class="sheet__body">${importBody()}${LEGAL}</div>
-      <input class="file-input" data-files type="file" accept=".json,application/json" multiple tabindex="-1" aria-hidden="true">
+      <input class="file-input" data-files type="file" accept=".json,application/json,text/json,text/plain" multiple tabindex="-1" aria-hidden="true">
       <div class="sheet__actions">${importActions()}</div>
     </div>`;
 }
@@ -1382,13 +1567,13 @@ function importActions() {
   if (ui.phase === "validating") return `<button type="button" class="btn btn--primary btn--block" disabled>Validando…</button>`;
   if (ui.phase === "confirm") return `${err}<button type="button" class="btn btn--primary btn--block" data-act="add-account">Añadir cuenta</button>`;
   if (ui.phase === "batch" && ui.focus == null) {
-    const n = importCount(ui.items);
+    const n = planBatch(ui.items).count;
     if (!n) return `<button type="button" class="btn btn--primary btn--block" data-act="pick">Elegir otros archivos</button>`;
     const label = n === 1 ? "Importar 1 cuenta" : `Importar ${n} cuentas`;
     return `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">${label}</button>`;
   }
   if (ui.phase === "batch" && ui.focus != null) {
-    const n = importCount(ui.items);
+    const n = planBatch(ui.items).count;
     const label = n === 1 ? "Importar 1 cuenta" : `Importar ${n} cuentas`;
     return n
       ? `${err}<button type="button" class="btn btn--primary btn--block" data-act="commit">${label}</button>`
@@ -1560,10 +1745,15 @@ function changesBlock(it) {
 function batchBody() {
   const indexed = state.importUi.items.map((it, i) => Object.assign({}, it, { _i: i }));
   const items = sortBatch(indexed, allAccounts());
+  const plan = planBatch(state.importUi.items);
   const ready = items.filter((i) => i.kind === "ready" || i.kind === "older");
   const neu = items.filter((i) => i.kind === "new");
   const omit = items.filter((i) => i.kind === "duplicate" || i.kind === "invalid");
-  const head = `<p class="t-subhead" style="margin:0 var(--margin-r) var(--sp-3) var(--margin-l)">${esc(batchSummary(state.importUi.items))}</p>`;
+  const head = `<div class="section"><div class="card">
+      <p class="t-title3">${state.importUi.items.length} archivos .json</p>
+      <p class="t-footnote c-2">Detectadas ${plan.count} cuentas, ${plan.errors.length} errores. Puedes elegir varios a la vez.</p>
+    </div></div>
+    <p class="section-footer">${esc(batchSummary(state.importUi.items))}</p>`;
   return head
     + batchGroup("Listos para importar", ready, "")
     + batchGroup(neu.length > 1 ? "Cuentas nuevas" : "Cuenta nueva", neu, `<p class="section-footer">${NEW_FOOT}</p>`)
@@ -1598,7 +1788,8 @@ function batchRow(it) {
   const exp = it.value;
   const th = townHallLevel(exp);
   const title = it.known ? accountTitleHtml(it.known, exp) : `<span class="tag">${esc(exp.tag)}</span>`;
-  const sub = `TH${th} · datos del ${fmtWhen(exp.timestamp * 1000)}`;
+  const status = it.kind === "new" ? "Nueva" : it.kind === "older" ? "Más antigua" : it.kind === "duplicate" ? "Duplicada" : it.first ? "Nueva" : "Actualización";
+  const sub = `TH${th} · ${exp.tag} · ${fmtWhen(exp.timestamp * 1000)} · ${status}`;
   const aria = `${it.known ? it.known.nombre : exp.tag}, TH${th}, datos del ${fmtWhen(exp.timestamp * 1000)}, ${spokenTrail(trail)}`;
   const chev = it.kind === "new" ? CHEV : "";
   return `<li><button type="button" class="row row--account row--thumb44" data-im-row="${it._i}" aria-label="${esc(aria)}">
@@ -1727,19 +1918,32 @@ function goBackImport() {
 }
 
 async function commitImport() {
-  const items = state.importUi.items.filter((it) => it.kind === "ready" || it.kind === "older");
-  if (!items.length) return;
+  const plan = planBatch(state.importUi.items);
+  if (!plan.save.length) return;
   try {
-    for (const it of items) await putExport(it.value);
+    for (const it of plan.save) await putExport(it.value);
   } catch {
     state.importUi.saveError = true;
     render();
     return;
   }
+  for (const it of plan.save) {
+    if (it.kind !== "new") continue;
+    const th = townHallLevel(it.value);
+    state.accounts = addAccount(state.accounts, {
+      tag: it.value.tag,
+      alias: it.value.tag,
+      principal: false,
+      addedAt: Date.now(),
+      chip: makeChip(it.value.tag, th),
+    });
+  }
+  persistRoster();
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
-  armFlash(items.map((it) => it.value.tag));
-  showToast("ok", successToast(items));
+  armFlash(plan.tags);
+  const known = plan.save.filter((it) => it.kind !== "new");
+  showToast("ok", known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`));
   state.importUi = freshImport();
   location.hash = "#/roster";
 }
@@ -1759,6 +1963,14 @@ async function addNewAccount() {
   const chip = makeChip(exp.tag, townHallLevel(exp));
   state.added.push({ tag: exp.tag, alias, añadida: true, chip });
   saveAdded(state.added);
+  state.accounts = addAccount(state.accounts, {
+    tag: exp.tag,
+    alias: alias || exp.tag,
+    principal: false,
+    addedAt: Date.now(),
+    chip,
+  });
+  persistRoster();
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
   armFlash(exp.tag);
@@ -1771,14 +1983,69 @@ async function addNewAccount() {
 async function removeAdded(tag) {
   state.added = state.added.filter((a) => a.tag !== tag);
   saveAdded(state.added);
+  state.accounts = removeAccount(state.accounts, tag);
+  persistRoster();
   await deleteTag(tag);
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
   if (state.selected === tag) {
-    state.selected = ROSTER[0].tag;
+    state.selected = (state.accounts[0] && state.accounts[0].tag) || "";
     localStorage.setItem("cp-account", state.selected);
   }
-  showToast("ok", "Cuenta quitada");
+  showToast("ok", "Cuenta borrada");
+}
+
+async function exportBackup() {
+  const now = Date.now();
+  const payload = buildBackup({ accounts: state.accounts, exports: state.rows, now, version: APP_VERSION });
+  const name = backupFilename(now);
+  const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+  const file = new File([blob], name, { type: "application/json" });
+  if (typeof navigator !== "undefined" && navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      showToast("ok", "Copia guardada");
+      render();
+      return;
+    } catch (err) {
+      if (isShareCancel(err)) return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  showToast("ok", "Copia guardada");
+  render();
+}
+
+async function restoreBackupText(text) {
+  let data = null;
+  try { data = JSON.parse(text); } catch { data = null; }
+  if (!data || (typeof data !== "object")) {
+    showToast("err", "Esa copia no se puede leer");
+    return;
+  }
+  const merged = mergeBackup({ accounts: state.accounts, exports: state.rows }, data);
+  try {
+    for (const exp of merged.exports) {
+      if (state.rows.some((r) => r.tag === exp.tag && r.timestamp === exp.timestamp)) continue;
+      await putExport(exp);
+    }
+  } catch {
+    showToast("err", "No se pudo guardar la copia");
+    return;
+  }
+  state.accounts = merged.accounts;
+  persistRoster();
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  showToast("ok", "Copia restaurada");
+  render();
 }
 
 
@@ -1857,8 +2124,148 @@ function screenFor(r) {
   if (r.name === "progreso") return renderProgreso(r.tag || state.selected);
   if (r.name === "detalle") return renderDetalle(r.tag, r.cat);
   if (r.name === "mejoras") return renderMejoras();
-  if (r.name === "evolucion") return renderEvolucion();
+  if (r.name === "graficos" || r.name === "evolucion") return renderGraficos();
+  if (r.name === "copia") return renderCopia();
   return renderRoster();
+}
+
+function renderGraficos() {
+  const list = allAccounts().filter((m) => expOf(m.tag));
+  if (!list.length) {
+    return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>${LEGAL}`;
+  }
+  const tag = list.some((m) => m.tag === state.chartTag) ? state.chartTag : list[0].tag;
+  const meta = accountByTag(tag);
+  const view = viewOf(tag);
+  const opts = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
+  const cats = CATEGORIES.filter((c) => view.cats[c.key] && view.cats[c.key].pct != null);
+  const bars = cats.map((c) => {
+    const row = view.cats[c.key];
+    return `<div class="bar-row"><span>${esc(c.label)}</span>${barHtml(c.key, row.pct, null, { mini: true, label: `${c.label} ${fmtPct(row.pct)}` })}<span class="num">${fmtPct(row.pct)}</span></div>`;
+  }).join("");
+  const compare = list.map((m) => {
+    const v = viewOf(m.tag);
+    return `<div class="bar-row"><span>${esc(m.chip || m.nombre)}</span>${barHtml("defensas", v.media, null, { mini: true, plain: true, label: `${m.nombre} ${fmtPct(v.media)}` })}<span class="num">${fmtPct(v.media)}</span></div>`;
+  }).join("");
+  return `<h1 class="large-title">Gráficos</h1>
+    <p class="large-sub">% del máximo del TH de cada cuenta. La media no incluye categorías bloqueadas.</p>
+    <label class="sort-label">Cuenta
+      <select data-chart aria-label="Cuenta del gráfico">${opts}</select>
+    </label>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">${esc(meta.nombre)} · por categoría</h2>
+      <div class="chart-bars">${bars}</div>
+    </div></div>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">Comparativa de cuentas</h2>
+      <p class="t-footnote c-2">Media de las categorías desbloqueadas</p>
+      <div class="chart-bars">${compare}</div>
+    </div></div>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">Evolución ${esc(meta.nombre)}</h2>
+      ${evolutionChart(tag)}
+    </div></div>
+    ${LEGAL}`;
+}
+
+function evolutionPoints(tag) {
+  const rows = state.rows.filter((r) => r.tag === tag).slice().sort((a, b) => a.timestamp - b.timestamp);
+  return rows.map((exp) => {
+    const view = analyze(exp, state.index);
+    const day = madridDayKey(exp.timestamp * 1000);
+    return { day, v: view.media, label: `${chartDay(day)} · ${fmtPct(view.media)}`, when: fmtWhen(exp.timestamp * 1000) };
+  }).filter((p) => p.v != null);
+}
+
+function evolutionChart(tag) {
+  const pts = evolutionPoints(tag);
+  if (!pts.length) return `<p class="t-footnote c-2">Sin datos</p>`;
+  const last = pts[pts.length - 1];
+  const x0 = 40;
+  const x1 = 300;
+  const yOf = (v) => 156 - ((v || 0) / 100) * (156 - 12);
+  const xs = pts.map((p, i) => (pts.length === 1 ? 170 : x0 + ((x1 - x0) * i) / (pts.length - 1)));
+  const coords = pts.map((p, i) => `${xs[i]},${yOf(p.v)}`);
+  const circles = pts.map((p, i) => `<circle class="chart__pt" cx="${xs[i]}" cy="${yOf(p.v || 0)}" r="5"><title>${esc(p.label)}</title></circle>`).join("");
+  const line = pts.length > 1 ? `<polyline class="chart__line" points="${coords.join(" ")}"/>` : "";
+  const note = pts.length === 1
+    ? `<p class="t-footnote c-2">Un solo punto, el ${esc(pts[0].when)}. No hay más historial importado.</p>`
+    : `<p class="t-footnote c-2">${pts.length} importaciones. Cada punto es una exportación real.</p>`;
+  return `<svg class="chart" viewBox="0 0 343 180" role="img" aria-label="Evolución: ${esc(last.label)}">
+    <g class="chart__grid"><line x1="32" x2="335" y1="12" y2="12"/><line x1="32" x2="335" y1="84" y2="84"/><line x1="32" x2="335" y1="156" y2="156"/></g>
+    <g class="chart__y"><text x="26" y="16">100</text><text x="26" y="88">50</text><text x="26" y="160">0</text></g>
+    ${line}
+    ${circles}
+    <g class="chart__x"><text x="${xs[0]}" y="174">${esc(chartDay(pts[0].day))}</text>${pts.length > 1 ? `<text x="${xs[xs.length - 1]}" y="174">${esc(chartDay(last.day))}</text>` : ""}</g>
+  </svg>
+  ${note}
+  <table class="sr-only"><caption>Evolución</caption><tbody>${pts.map((p) => `<tr><td>${esc(chartDay(p.day))}</td><td>${esc(fmtPct(p.v))}</td></tr>`).join("")}</tbody></table>`;
+}
+
+function renderCopia() {
+  const accounts = state.accounts;
+  const n = accounts.length;
+  const hist = state.rows.length;
+  const byTh = new Map();
+  for (const meta of allAccounts()) {
+    const exp = expOf(meta.tag);
+    const th = exp ? townHallLevel(exp) : null;
+    const key = th == null ? "sin datos" : `TH${th}`;
+    byTh.set(key, (byTh.get(key) || 0) + 1);
+  }
+  const thLine = [...byTh.entries()].map(([k, c]) => `${c} × ${k}`).join(" · ") || "Sin cuentas";
+  const { totalN, count, p, done, status, btn, note } = offlineDlModel();
+  return `<h1 class="large-title">Copia</h1>
+    <p class="large-sub">Todo se queda en este iPhone.</p>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">Copia de seguridad</h2>
+      <p class="t-body">Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial.</p>
+      <p class="t-footnote c-2">${esc(thLine)}</p>
+      <p class="t-footnote c-2">Última importación: ${esc(lastImportLabel())}</p>
+      <p class="t-footnote c-2">Versión ${esc(APP_VERSION)}</p>
+      <button type="button" class="btn btn--primary btn--block" data-backup>Exportar JSON · ${n} cuentas</button>
+      <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar desde una copia</button>
+      <p class="t-footnote c-2">Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú.</p>
+    </div></div>
+    <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
+      <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
+      <div class="bar" style="--p:${Math.min(100, p)};--cat:var(--tint)" role="img" aria-label="${esc(status)}"><span class="bar__fill"></span></div>
+      <p class="offline-dl__status">${esc(status)}</p>
+      ${btn}
+      <p class="t-footnote c-2">${esc(note)}</p>
+    </div></div>
+    <div class="section"><ul class="list">
+      <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
+      <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos de prueba</span></span></button></li>
+      <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
+    </ul></div>
+    <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">
+    ${LEGAL}`;
+}
+
+function lastImportLabel() {
+  if (!state.rows.length) return "aún no hay";
+  const max = state.rows.reduce((m, r) => Math.max(m, r.timestamp || 0), 0);
+  return fmtWhen(max * 1000);
+}
+
+function renderEditor() {
+  const meta = accountByTag(state.editor);
+  if (!meta) return "";
+  return `<div class="sheet-backdrop" data-close-editor="1"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+      <div class="sheet__grabber"></div>
+      <div class="sheet__bar"><button type="button" class="btn-text" data-close-editor="1">Cerrar</button><h2 id="ed-title" tabindex="-1">Cuenta</h2><span></span></div>
+      <div class="sheet__body">
+        <label class="alias-field">Alias
+          <input data-alias-edit maxlength="24" autocapitalize="words" autocomplete="off" aria-label="Alias" value="${esc(meta.alias || meta.tag)}">
+        </label>
+        <div class="section"><button type="button" class="btn btn--secondary btn--block" data-principal="${esc(meta.tag)}">${meta.principal ? "Quitar Principal" : "Marcar como Principal"}</button></div>
+        <div class="section"><button type="button" class="btn btn--destructive btn--block" data-delete="${esc(meta.tag)}">Borrar cuenta</button></div>
+        <p class="section-footer">Puede haber varias cuentas Principal. Si no marcas ninguna, destaca la de TH más alto.</p>
+        ${LEGAL}
+      </div>
+    </div>`;
 }
 
 function markFocus(el) {
@@ -2017,6 +2424,11 @@ function focusImportTarget() {
 
 function onSheetEscape(ev) {
   if (!ev || ev.key !== "Escape" || state.alert) return false;
+  if (state.editor) {
+    state.editor = null;
+    render();
+    return true;
+  }
   if (state.ficha) {
     state.ficha = null;
     render();
@@ -2051,7 +2463,7 @@ function render() {
   const keep = rememberSheetFocus();
   const root = document.getElementById("app");
   root.dataset.sheetKeep = String(keep);
-  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
@@ -2099,6 +2511,54 @@ function bind(r) {
       render();
       return;
     }
+    const pcat = ev.target.closest("[data-pcat]");
+    if (pcat) {
+      state.progFilter = { ...state.progFilter, cat: pcat.dataset.pcat };
+      render();
+      return;
+    }
+    const pstatus = ev.target.closest("[data-pstatus]");
+    if (pstatus) {
+      state.progFilter = { ...state.progFilter, status: pstatus.dataset.pstatus };
+      render();
+      return;
+    }
+    const edit = ev.target.closest("[data-edit]");
+    if (edit) {
+      rememberOpener(edit, `[data-edit="${cssAttr(edit.dataset.edit)}"]`);
+      state.editor = edit.dataset.edit;
+      state.sheetKey = "";
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-close-editor]")) { state.editor = null; render(); return; }
+    const principal = ev.target.closest("[data-principal]");
+    if (principal) {
+      const tag = principal.dataset.principal;
+      const cur = state.accounts.find((a) => a.tag === tag);
+      state.accounts = setPrincipal(state.accounts, tag, !(cur && cur.principal));
+      persistRoster();
+      render();
+      return;
+    }
+    const del = ev.target.closest("[data-delete]");
+    if (del) {
+      const tag = del.dataset.delete;
+      const meta = accountByTag(tag);
+      rememberAlertOpener(del, `[data-delete="${cssAttr(tag)}"]`);
+      state.alert = {
+        title: `¿Borrar ${meta ? meta.nombre : tag}?`,
+        msg: "Se borrarán la cuenta y sus importaciones de este iPhone. Una copia ya guardada no se toca.",
+        buttons: [
+          { label: "Cancelar" },
+          { label: "Borrar", cls: "is-destructive", act: "quitar", payload: tag },
+        ],
+      };
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-backup]")) { await exportBackup(); return; }
+    if (ev.target.closest("[data-backup-pick]")) { document.querySelector("[data-backup-file]")?.click(); return; }
     const ficha = ev.target.closest("[data-ficha]");
     if (ficha) {
       const lvl = Number(ficha.dataset.lvl);
@@ -2153,11 +2613,15 @@ function bind(r) {
         state.latest = new Map();
         state.added = [];
         saveAdded([]);
+        state.accounts = [];
+        persistRoster();
         showToast("ok", "Datos borrados");
       }
       if (act === "restore") {
         state.rows = await restoreBundled(state.bundlePaths || []);
         state.latest = latestByTag(state.rows);
+        state.accounts = ensureTags(state.accounts, [...new Set(state.rows.map((r) => r.tag))]);
+        persistRoster();
         showToast("ok", "Datos incluidos restaurados");
       }
       if (act === "quitar") await removeAdded(payload);
@@ -2250,6 +2714,23 @@ function bind(r) {
   };
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => { location.hash = "#/progreso/" + sel.value.slice(1); };
+  const sort = document.querySelector("[data-sort]");
+  if (sort) sort.onchange = () => { state.sortMode = sort.value; localStorage.setItem("cp-sort", state.sortMode); render(); };
+  const chart = document.querySelector("[data-chart]");
+  if (chart) chart.onchange = () => { state.chartTag = chart.value; localStorage.setItem("cp-chart", state.chartTag); render(); };
+  const search = document.querySelector("[data-psearch]");
+  if (search) search.oninput = () => {
+    const pos = search.selectionStart;
+    state.progFilter = { ...state.progFilter, q: search.value };
+    render();
+    const again = document.querySelector("[data-psearch]");
+    if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch { /* tipo search */ } }
+  };
+  const aliasEdit = document.querySelector("[data-alias-edit]");
+  if (aliasEdit) aliasEdit.oninput = () => {
+    state.accounts = renameAccount(state.accounts, state.editor, aliasEdit.value);
+    persistRoster();
+  };
   const evo = document.querySelector("[data-evo]");
   if (evo) evo.onchange = () => { state.evo = evo.value; localStorage.setItem("cp-evo", state.evo); render(); };
   const paste = document.querySelector("[data-paste]");
@@ -2272,6 +2753,13 @@ function bind(r) {
   }
   const alias = document.querySelector("[data-alias]");
   if (alias) alias.oninput = () => { state.importUi.alias = alias.value; };
+  const backupFile = document.querySelector("[data-backup-file]");
+  if (backupFile) backupFile.onchange = async () => {
+    const file = backupFile.files && backupFile.files[0];
+    backupFile.value = "";
+    if (!file) return;
+    await restoreBackupText(await file.text());
+  };
   const files = document.querySelector("[data-files]");
   if (files) files.onchange = async () => {
     const list = [...files.files];
@@ -2304,7 +2792,7 @@ async function measureCache() {
   }
   state.cacheBytes = bytes;
   state.cacheCount = count;
-  if (route().name === "ajustes" && state.dl.phase !== "downloading") render();
+  if ((route().name === "ajustes" || route().name === "copia") && state.dl.phase !== "downloading") render();
 }
 
 async function downloadAll() {
@@ -2337,7 +2825,7 @@ async function downloadAll() {
       state.dl.doneBytes = bytes;
       state.dl.doneCount = count;
       if (count % 4 === 0) {
-        if (route().name === "ajustes") patchOfflineDl();
+        if (route().name === "ajustes" || route().name === "copia") patchOfflineDl();
         const q = dlQuarter(bytes);
         if (q > state.dl.quarter && q < 4) { state.dl.quarter = q; announce(`Imágenes sin conexión: ${q * 25} %`); }
       }
@@ -2409,6 +2897,14 @@ async function boot() {
   state.bundlePaths = bundle.exportaciones.map((p) => "./" + p);
   state.rows = await seedBundled(state.bundlePaths);
   state.latest = latestByTag(state.rows);
+  const migrated = migrateRoster({
+    stored: readStoredRoster(),
+    added: state.added,
+    exportTags: [...new Set(state.rows.map((r) => r.tag))],
+    seeded: localStorage.getItem("cp-seeded"),
+  });
+  state.accounts = migrated.accounts;
+  persistRoster();
   state.ready = true;
   render();
   if ("serviceWorker" in navigator) {
@@ -2423,7 +2919,7 @@ async function boot() {
 
 window.addEventListener("hashchange", () => {
   render();
-  if (route().name === "ajustes") measureCache();
+  if (route().name === "ajustes" || route().name === "copia") measureCache();
 });
 document.addEventListener("keydown", (ev) => { if (!onAlertKey(ev)) onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {
@@ -2435,10 +2931,10 @@ setInterval(() => {
 }, 60000);
 window.addEventListener("online", () => {
   retryOfflineThumbs();
-  if (route().name === "ajustes") render();
+  if (route().name === "ajustes" || route().name === "copia") render();
 });
 window.addEventListener("offline", () => {
-  if (route().name === "ajustes") render();
+  if (route().name === "ajustes" || route().name === "copia") render();
   else paintOfflineThumbs();
 });
 

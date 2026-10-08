@@ -1,6 +1,6 @@
 # Clash Progreso
 
-PWA estática para seguir el progreso de 11 cuentas de Clash of Clans. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio.
+PWA estática (2.0.0) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
 
 This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
 
@@ -22,7 +22,7 @@ Abre `http://127.0.0.1:8765/clash-progreso/#/roster`.
 
 1. Carga la app una vez con red (el service worker guarda la interfaz, los JSON, el manifiesto y solo los ayuntamientos y los héroes: 14 archivos, 9.624.126 bytes).
 2. En Chrome: Application → Service Workers → Offline, o corta la red.
-3. Recarga `#/roster`. El roster, el progreso, las mejoras y la evolución siguen disponibles.
+3. Recarga `#/roster`. Cuentas, Progreso, Mejoras, Gráficos y Copia siguen disponibles.
 4. Las demás imágenes se guardan al verlas. En Ajustes, el botón muestra lo que falta con `fmtBytes(total_bytes − ya guardados)`. El total sale de `assets/manifest.json` → `peso_imagenes.total_bytes` (60.458.372 bytes, 184 archivos, que se ve como 60,5 MB), no de una cifra escrita a mano. Las imágenes con `pesado: true` no entran en esa descarga.
 5. Importar: Ajustes o Roster → Importar. Pega un JSON o elige varios archivos. Tiene que traer `tag`, `timestamp` y el ayuntamiento `1000001`.
 

@@ -4,11 +4,15 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, upgradesOf, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
 import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT } from "../js/import.js";
+import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT, planBatch } from "../js/import.js";
+import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, featuredTag, orderAccounts, ROSTER_VERSION } from "../js/roster.js";
+import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
+import { buildBackup, mergeBackup, backupFilename, isShareCancel } from "../js/backup.js";
+import { averagePct } from "../js/progress.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -611,9 +615,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.6 y cachés cp-shell-v10 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.6");
-  assert.equal(SHELL_CACHE, "cp-shell-v10");
+test("versión 2.0.0 y cachés cp-shell-v11 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "2.0.0");
+  assert.equal(SHELL_CACHE, "cp-shell-v11");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -625,15 +629,17 @@ test("versión 1.1.6 y cachés cp-shell-v10 / cp-img-v4", () => {
   assert.equal(sw.includes("cp-shell-v7"), false);
   assert.equal(sw.includes("cp-shell-v8"), false);
   assert.equal(sw.includes("cp-shell-v9"), false);
+  assert.equal(sw.includes("cp-shell-v10"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v10/);
+  assert.match(caches, /cp-shell-v11/);
   assert.match(caches, /cp-img-v4/);
   assert.equal(caches.includes("cp-shell-v5"), false);
   assert.equal(caches.includes("cp-shell-v6"), false);
   assert.equal(caches.includes("cp-shell-v7"), false);
   assert.equal(caches.includes("cp-shell-v8"), false);
   assert.equal(caches.includes("cp-shell-v9"), false);
+  assert.equal(caches.includes("cp-shell-v10"), false);
   assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
@@ -957,7 +963,7 @@ test("1.1.4: la tabla oculta del gráfico usa la fecha visible, no ISO", () => {
 
 test("1.1.4: el input de archivos oculto no entra en el tabulador ni en VoiceOver", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(app, /<input class="file-input" data-files type="file" accept="\.json,application\/json" multiple tabindex="-1" aria-hidden="true">/);
+  assert.match(app, /<input class="file-input" data-files type="file" accept="\.json,application\/json,text\/json,text\/plain" multiple tabindex="-1" aria-hidden="true">/);
 });
 
 test("1.1.4: Esc cierra el sheet y el foco vuelve a quien lo abrió", () => {
@@ -1483,4 +1489,311 @@ test("1.1.5: «Descargar todas» actualiza solo la tarjeta y el sheet no se rean
   assert.doesNotMatch(src, /offline-dl__status" aria-live/);
   const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
   assert.match(css, /#app\[data-sheet-keep="true"\] \.sheet \{ animation: none; \}/);
+});
+
+test("1.1.6: con overMax la celda se marca a la vista con «máx. M» y sin el verde de is-max", () => {
+  const eqCell = fnFromApp("function eqCell(p)", "eqCell", {
+    nameOf: (id) => ({ 9: "Puño de fuego" })[id] || "", thumb: () => "<span></span>", esc: esc115,
+  });
+  const over = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "ok" } });
+  assert.match(over, /class="eq is-over"/);
+  assert.doesNotMatch(over, /is-max/);
+  assert.match(over, /<span class="eq__cap eq__cap--warn">máx\. 18<\/span>/);
+  assert.match(over, /aria-label="Puño de fuego, nivel 22, máximo desactualizado"/);
+  const ded = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "id_deducido" } });
+  assert.match(ded, /eq__cap--warn">máx\. 18<\/span><span class="eq__cap eq__cap--soft">ID deducido<\/span>/);
+  const at = eqCell({ id: 9, lvl: 18, max: 18, meta: { estado: "ok" } });
+  assert.match(at, /class="eq is-max"/);
+  for (const html of [at, eqCell({ id: 9, lvl: 12, max: 18 }), eqCell({ id: 9, lvl: 7 }), eqCell({ id: 90000077, lvl: 3, unknown: true })]) {
+    assert.doesNotMatch(html, /is-over|eq__cap--warn|máx\./);
+  }
+});
+
+test("1.1.6: la marca overMax usa los colores de .chip--warn, no el verde, y llega a 4,5:1", () => {
+  const css = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  const badge = css.match(/\.eq\.is-over \.eq__lvl \{([^}]*)\}/);
+  assert.ok(badge, "falta .eq.is-over .eq__lvl");
+  assert.match(badge[1], /background: color-mix\(in srgb, var\(--orange\) 16%, var\(--bg-2\)\)/);
+  assert.match(badge[1], /color: var\(--orange-text\)/);
+  assert.doesNotMatch(badge[1], /green|red/);
+  const cap = css.match(/\.eq__cap--warn \{([^}]*)\}/);
+  assert.ok(cap, "falta .eq__cap--warn");
+  assert.match(cap[1], /color: var\(--orange-text\)/);
+  assert.match(cap[1], /font-style: normal/);
+  const tokens = readFileSync(new URL("../css/tokens.css", import.meta.url), "utf8");
+  const dark = tokens.slice(tokens.indexOf("prefers-color-scheme: dark"));
+  const hex = (src, name) => {
+    const m = src.match(new RegExp(`--${name}:\\s*#([0-9A-Fa-f]{6})`));
+    return [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+  };
+  const lum = (c) => {
+    const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => { const x = lum(a); const y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const mix = (a, b, k) => a.map((v, i) => v * k + b[i] * (1 - k));
+  for (const src of [tokens, dark]) {
+    const bg2 = hex(src, "bg-2");
+    const text = hex(src, "orange-text");
+    assert.ok(ratio(text, mix(hex(src, "orange"), bg2, 0.16)) >= 4.5, "badge");
+    assert.ok(ratio(text, bg2) >= 4.5, "etiqueta");
+  }
+});
+
+test("1.1.6 (O1): el badge .eq.is-max es opaco, como pide §7b.2, porque pisa la miniatura", () => {
+  const css = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  const rule = css.match(/\.eq\.is-max \.eq__lvl \{([^}]*)\}/);
+  assert.ok(rule);
+  assert.match(rule[1], /background: color-mix\(in srgb, var\(--green\) 16%, var\(--bg-2\)\)/);
+  assert.doesNotMatch(rule[1], /--green-soft/);
+});
+
+test("2.0.0: frameOf y la miniatura conservan el tope de §5.4", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const body = app.slice(app.indexOf("function frameOf(im, size)"), app.indexOf("function thumb("));
+  assert.match(body, /const k = 1 \/ Math\.max\(ancho, alto\)/);
+  assert.match(body, /const lado = size \* 0\.84/);
+  assert.match(body, /const z = Math\.min\(0\.92 \/ Math\.max\(w \* k, h \* k\), Math\.max\(ancho, alto\) \/ \(lado \* 3\), 8\)/);
+  assert.match(body, /if \(!\(z >= 1\.15\)\) return null/);
+  assert.match(body, /im\.tipo_visual === "tile_fondo_opaco" \|\| !im\.caja_visible/);
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  const thumb = css.slice(css.indexOf(".thumb {"), css.indexOf(".thumb--40"));
+  assert.match(thumb, /padding: calc\(var\(--size\) \* 0\.08\)/);
+  assert.match(thumb, /grid-template: 100% \/ 100%/);
+  assert.match(thumb, /\.thumb > img \{\s*width: 100%; height: 100%;\s*object-fit: contain/);
+  assert.match(thumb, /scale\(var\(--z\)\)/);
+  const views = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  assert.equal(views.includes("object-fit"), false);
+  assert.equal((css.match(/object-fit:\s*contain/g) || []).length, 1);
+});
+
+test("2.0.0: la migración 1.x trae alias y Principal y no resucita una cuenta borrada", () => {
+  const exportTags = ["#28PLGP0G2", "#SOLOIDB01"];
+  const added = [
+    { tag: "#28PLGP0G2", alias: "Casa", añadida: true, chip: "C1" },
+    { tag: "#NUEVA0001", alias: "Taller", añadida: 1700000000000, chip: "001" },
+  ];
+  const before = exportTags.slice();
+  const first = migrateRoster({ stored: null, added, exportTags, seeded: "1" });
+  assert.deepEqual(exportTags, before);
+  assert.equal(first.version, ROSTER_VERSION);
+  assert.equal(first.accounts.length, ROSTER.length + 2);
+  const c1 = first.accounts.find((a) => a.tag === "#28PLGP0G2");
+  assert.equal(c1.principal, true);
+  assert.equal(c1.alias, "Casa");
+  assert.equal(first.accounts.filter((a) => a.principal).length, 1);
+  assert.equal(first.accounts.find((a) => a.tag === "#NUEVA0001").alias, "Taller");
+  assert.equal(first.accounts.find((a) => a.tag === "#SOLOIDB01").alias, "#SOLOIDB01");
+  const kept = removeAccount(first.accounts, "#R02YUVC0J");
+  const stored = { version: ROSTER_VERSION, accounts: kept };
+  const again = migrateRoster({ stored, added, exportTags: exportTags.concat("#R02YUVC0J"), seeded: "1" });
+  assert.equal(again.accounts.some((a) => a.tag === "#R02YUVC0J"), false);
+  assert.equal(again.accounts.length, kept.length);
+  assert.deepEqual(migrateRoster({ stored: again, added, exportTags, seeded: "1" }), again);
+});
+
+test("2.0.0: alta, alias, Principal y borrado no duplican tags", () => {
+  let accounts = [];
+  accounts = addAccount(accounts, { tag: "#AAA111", alias: "Uno" });
+  accounts = addAccount(accounts, { tag: "#AAA111", alias: "Otro" });
+  accounts = addAccount(accounts, { tag: "sin-almohadilla", alias: "No" });
+  assert.equal(accounts.length, 1);
+  accounts = renameAccount(accounts, "#AAA111", "  Dos  ");
+  assert.equal(accounts[0].alias, "Dos");
+  accounts = renameAccount(accounts, "#AAA111", "   ");
+  assert.equal(accounts[0].alias, "#AAA111");
+  accounts = setPrincipal(accounts, "#AAA111", true);
+  assert.equal(accounts[0].principal, true);
+  accounts = addAccount(accounts, { tag: "#BBB222", alias: "Beta", principal: true });
+  assert.equal(accounts.filter((a) => a.principal).length, 2);
+  accounts = removeAccount(accounts, "#AAA111");
+  assert.deepEqual(accounts.map((a) => a.tag), ["#BBB222"]);
+});
+
+test("2.0.0: sin Principal, la destacada es el TH más alto y el empate lo rompe el alias", () => {
+  const accounts = [
+    { tag: "#A", alias: "Zeta", principal: false },
+    { tag: "#C", alias: "Beta", principal: false },
+    { tag: "#B", alias: "Alfa", principal: false },
+  ];
+  const views = { "#A": { th: 11, media: 10 }, "#B": { th: 16, media: 40 }, "#C": { th: 16, media: 90 } };
+  assert.equal(featuredTag(accounts, views), "#B");
+  assert.deepEqual(orderAccounts(accounts, views, "th").map((a) => a.tag), ["#B", "#C", "#A"]);
+  assert.deepEqual(orderAccounts(accounts, views, "nombre").map((a) => a.tag), ["#B", "#C", "#A"]);
+  assert.deepEqual(orderAccounts(accounts, views, "pct").map((a) => a.tag), ["#C", "#B", "#A"]);
+  accounts[0].principal = true;
+  assert.equal(featuredTag(accounts, views), null);
+  assert.equal(featuredTag([], views), null);
+});
+
+test("2.0.0: los contadores de los chips son las mismas filas que pinta el filtro", () => {
+  for (const tag of ["#28PLGP0G2", "#GVPU80R80"]) {
+    const exp = exportsByTag.get(tag);
+    const view = analyze(exp, index);
+    const rows = progressRows(exp, index);
+    assert.ok(rows.some((r) => r.categoryKey === "muros" && r.cnt > 0), tag);
+    const unlocked = CATEGORIES.map((c) => view.cats[c.key].pct).filter((v) => v != null);
+    assert.equal(view.media, averagePct(unlocked), tag);
+    if (view.th < 14) assert.equal(view.cats.mascotas.pct, null, tag);
+    for (const status of ["todos", "pendientes", "maximo"]) {
+      for (const query of ["", "muro", "cañón"]) {
+        const opts = { status, query, index };
+        const counts = chipCounts(rows, opts);
+        assert.equal(counts.todas, applyFilter(rows, { ...opts, category: "todas" }).length, `${tag} ${status} ${query}`);
+        let sum = 0;
+        for (const cat of CATEGORIES) {
+          const n = applyFilter(rows, { ...opts, category: cat.key }).length;
+          assert.equal(counts[cat.key], n, `${tag} ${cat.key}`);
+          sum += n;
+        }
+        assert.equal(counts.todas, sum);
+      }
+    }
+  }
+  assert.equal(isAtMax({ lvl: 22, max: 18, overMax: true }), true);
+  assert.equal(isAtMax({ lvl: 17, max: 18 }), false);
+  assert.equal(isAtMax({ lvl: 3, max: null }), false);
+});
+
+test("2.0.0: importar varias mezcla nuevas, antiguas, duplicadas e inválidas y N es de tags", () => {
+  const c1 = exportsByTag.get("#28PLGP0G2");
+  const c2 = exportsByTag.get("#R00C8CPQC");
+  const rows = [...exportsByTag.values()];
+  const ready = structuredClone(c1);
+  ready.timestamp = c1.timestamp + 50;
+  const older = structuredClone(c2);
+  older.timestamp = c2.timestamp - 80;
+  const neu = structuredClone(c2);
+  neu.tag = "#QL0Y2P8CU";
+  neu.timestamp = c2.timestamp + 9;
+  const neuAgain = structuredClone(neu);
+  neuAgain.timestamp = neu.timestamp + 3;
+  const dup = structuredClone(c1);
+  const entries = [
+    { name: "lista.json", text: JSON.stringify(ready), source: "file" },
+    { name: "vieja.json", text: JSON.stringify(older), source: "file" },
+    { name: "nueva.json", text: JSON.stringify(neu), source: "file" },
+    { name: "nueva-2.json", text: JSON.stringify(neuAgain), source: "file" },
+    { name: "dup.json", text: JSON.stringify(dup), source: "file" },
+    { name: "rota.json", text: "{", source: "file" },
+  ];
+  const items = classifyEntries(entries, importCtx(rows));
+  assert.deepEqual(items.map((it) => it.kind), ["ready", "older", "new", "new", "duplicate", "invalid"]);
+  const plan = planBatch(items);
+  assert.equal(plan.count, 3);
+  assert.deepEqual(plan.tags.sort(), ["#28PLGP0G2", "#QL0Y2P8CU", "#R00C8CPQC"].sort());
+  assert.equal(plan.save.length, 4);
+  assert.equal(plan.errors.length, 1);
+  assert.equal(plan.duplicates.length, 1);
+  assert.equal(plan.save.some((it) => it.kind === "invalid" || it.kind === "duplicate"), false);
+});
+
+test("2.0.0: la copia fusiona por tag y fecha y no borra lo que solo está en el iPhone", () => {
+  const noon = Date.parse("2026-10-08T10:00:00Z");
+  const late = Date.parse("2026-10-08T22:30:00Z");
+  assert.equal(backupFilename(noon), "clash-progreso-copia-2026-10-08.json");
+  assert.equal(backupFilename(late), "clash-progreso-copia-2026-10-09.json");
+  const localAccounts = [
+    { tag: "#A", alias: "Mia", principal: false, addedAt: 5, chip: "A", objetivo: 18 },
+    { tag: "#C", alias: "Solo local", principal: true, addedAt: 1, chip: "C", objetivo: null },
+  ];
+  const localExports = [
+    { tag: "#A", timestamp: 10, buildings: [{ data: 1000001, lvl: 16 }] },
+    { tag: "#C", timestamp: 3, buildings: [{ data: 1000001, lvl: 11 }] },
+  ];
+  const file = buildBackup({
+    accounts: [
+      { tag: "#A", alias: "Otra", principal: true, addedAt: 1, chip: "X", objetivo: null },
+      { tag: "#B", alias: "Forastera", principal: false, addedAt: 2, chip: "B", objetivo: null },
+    ],
+    exports: [
+      { tag: "#A", timestamp: 10, buildings: [{ data: 1000001, lvl: 15 }] },
+      { tag: "#A", timestamp: 11, buildings: [{ data: 1000001, lvl: 16 }] },
+      { tag: "#B", timestamp: 4, buildings: [{ data: 1000001, lvl: 12 }] },
+    ],
+    now: noon,
+  });
+  assert.equal(file.app, "clash-progreso");
+  assert.equal(file.version, "2.0.0");
+  const merged = mergeBackup({ accounts: localAccounts, exports: localExports }, file);
+  const a = merged.accounts.find((x) => x.tag === "#A");
+  assert.equal(a.alias, "Mia");
+  assert.equal(a.principal, true);
+  assert.equal(a.objetivo, 18);
+  const c = merged.accounts.find((x) => x.tag === "#C");
+  assert.equal(c.alias, "Solo local");
+  assert.equal(c.principal, true);
+  assert.equal(merged.accounts.find((x) => x.tag === "#B").alias, "Forastera");
+  const keys = merged.exports.map((e) => e.tag + "@" + e.timestamp).sort();
+  assert.deepEqual(keys, ["#A@10", "#A@11", "#B@4", "#C@3"]);
+  assert.equal(merged.exports.find((e) => e.tag === "#A" && e.timestamp === 10).buildings[0].lvl, 16);
+  assert.equal(merged.addedExports, 2);
+  const round = mergeBackup({ accounts: [], exports: [] }, buildBackup({ accounts: merged.accounts, exports: merged.exports, now: noon }));
+  assert.equal(round.accounts.length, merged.accounts.length);
+  assert.equal(round.exports.length, merged.exports.length);
+  const again = mergeBackup(round, file);
+  assert.equal(again.exports.length, round.exports.length);
+  assert.equal(again.addedExports, 0);
+  const filled = mergeBackup(
+    { accounts: [{ tag: "#B", alias: "#B", principal: false, chip: "", objetivo: null }], exports: [] },
+    { accounts: [{ tag: "#B", alias: "Puesta", principal: true }], exports: [] },
+  );
+  assert.equal(filled.accounts[0].alias, "Puesta");
+  assert.equal(filled.accounts[0].principal, true);
+  assert.equal(isShareCancel({ name: "AbortError" }), true);
+  assert.equal(isShareCancel({ name: "NotAllowedError" }), false);
+  assert.equal(isShareCancel(null), false);
+});
+
+test("2.0.0: el selector de cuentas de la maqueta no entra en la app", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.equal(app.includes("Solo maqueta"), false);
+  assert.equal(app.includes("número de cuentas"), false);
+  assert.equal(html.includes("Solo maqueta"), false);
+});
+
+test("2.0.0: el título de categoría lleva la píldora junto al nombre y el % en su línea", () => {
+  const catHead = fnFromApp("function catHead(", "catHead", { esc: esc115 });
+  const html = catHead("Defensas", 45, "66,9 %");
+  assert.match(html, /<h2 class="cat-head__title"><span class="cat-head__name">Defensas<\/span><span class="chip num">45<\/span><\/h2>/);
+  assert.match(html, /<p class="cat-head__pct num">66,9 %<\/p>/);
+  assert.equal(html.includes("·"), false);
+  const css = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
+  assert.match(css, /\.cat-head__title \{[^}]*flex-wrap: nowrap/);
+  assert.match(css, /\.cat-head__pct \{[^}]*display: block/);
+});
+
+test("2.0.0: el toast de la copia queda encima de la tab bar y no recibe toques", () => {
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  const rule = css.match(/\.toast \{([^}]*)\}/);
+  assert.ok(rule);
+  assert.match(rule[1], /pointer-events: none/);
+  assert.match(rule[1], /bottom: calc\(var\(--tabbar-h\) \+ env\(safe-area-inset-bottom\) \+ 8px\)/);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const body = app.slice(app.indexOf("async function exportBackup()"), app.indexOf("async function restoreBackupText("));
+  const cancel = body.slice(body.indexOf("catch (err)"), body.indexOf("const url"));
+  assert.match(cancel, /isShareCancel\(err\)\) return/);
+  assert.equal(cancel.includes("Copia guardada"), false);
+  assert.match(body, /Copia guardada/);
+});
+
+test("2.0.0: C1 muestra 5 chozas, 6 mejoras de constructor y 1 de B.O.B por separado", () => {
+  const exp = exportsByTag.get("#28PLGP0G2");
+  const status = builderStatus(exp);
+  const bob = upgradesOf(exp).filter((u) => u.extra && u.queue === "constructor").length;
+  assert.equal(status.total, 5);
+  assert.equal(status.occupied, 6);
+  assert.equal(status.over, true);
+  assert.equal(bob, 1);
+  const builderCaption = fnFromApp("function builderCaption(", "builderCaption", {});
+  const builderHead = fnFromApp("function builderHead(", "builderHead", { builderCaption });
+  const cap = builderCaption(status, bob);
+  assert.deepEqual(cap, { chozas: 5, occupied: 6, over: true, bob: 1 });
+  const html = builderHead(status, bob);
+  assert.match(html, /5 chozas/);
+  assert.match(html, /6 mejoras de constructor/);
+  assert.match(html, /Revisar constructores/);
+  assert.match(html, /1 de B\.O\.B/);
+  assert.doesNotMatch(html, /5 \+ 1|1 extra|\(5/);
 });

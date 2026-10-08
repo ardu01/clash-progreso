@@ -444,6 +444,31 @@ export function importCount(items) {
   return items.filter((i) => i.kind === "ready" || i.kind === "older").length;
 }
 
+/**
+ * Lo que guarda el botón «Importar N cuentas»: listas, más antiguas y nuevas.
+ * N es el número de tags, no de archivos. Duplicados e inválidos no entran.
+ */
+export function planBatch(items) {
+  const seen = new Set();
+  const save = [];
+  for (const it of items || []) {
+    if (!it || !it.value) continue;
+    if (it.kind !== "ready" && it.kind !== "older" && it.kind !== "new") continue;
+    const key = it.value.tag + "\0" + it.value.timestamp;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    save.push(it);
+  }
+  const tags = [...new Set(save.map((it) => it.value.tag))];
+  return {
+    save,
+    tags,
+    count: tags.length,
+    errors: (items || []).filter((it) => it && it.kind === "invalid"),
+    duplicates: (items || []).filter((it) => it && it.kind === "duplicate"),
+  };
+}
+
 export function successToast(items) {
   const updates = items.filter((i) => i.kind === "ready");
   const older = items.filter((i) => i.kind === "older");
