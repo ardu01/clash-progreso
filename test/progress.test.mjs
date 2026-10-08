@@ -8,7 +8,7 @@ import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, b
 import { parseLoose } from "../js/parse.js";
 import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { DEVICE_SCALE, HEAVY_BYTES, SCALE_PX, THUMB_PAD, catalog, fitOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
+import { HEAVY_BYTES, THUMB_PAD, catalog, containOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
 import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT, planBatch } from "../js/import.js";
 import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, featuredTag, orderAccounts, ROSTER_VERSION } from "../js/roster.js";
 import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
@@ -603,9 +603,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 2.1.1 y cachés cp-shell-v13 / cp-img-v5", () => {
-  assert.equal(APP_VERSION, "2.1.1");
-  assert.equal(SHELL_CACHE, "cp-shell-v13");
+test("versión 2.1.2 y cachés cp-shell-v14 / cp-img-v5", () => {
+  assert.equal(APP_VERSION, "2.1.2");
+  assert.equal(SHELL_CACHE, "cp-shell-v14");
   assert.equal(IMAGE_CACHE, "cp-img-v5");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -622,12 +622,14 @@ test("versión 2.1.1 y cachés cp-shell-v13 / cp-img-v5", () => {
   assert.equal(sw.includes("cp-shell-v10"), false);
   assert.equal(sw.includes("cp-shell-v11"), false);
   assert.equal(sw.includes("cp-shell-v12"), false);
+  assert.equal(sw.includes("cp-shell-v13"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v13/);
+  assert.match(caches, /cp-shell-v14/);
   assert.match(caches, /cp-img-v5/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
+  assert.equal(caches.includes("cp-shell-v13"), false);
   assert.equal(caches.includes("cp-img-v4"), false);
   assert.match(app, /APP_VERSION/);
   assert.match(app, /imageChoice/);
@@ -718,14 +720,17 @@ test("107000008 se muestra como Logger con ID deducido y no entra en el aviso", 
   assert.equal(line("Duque Dragón"), "Nv 10 / 15");
 });
 
-test("el Logger se escala sin estirar y no tiene imagen de nivel", () => {
+test("el Logger se muestra entero, sin recortar la caja, y no tiene imagen de nivel", () => {
   const im = manifest.items["107000008"].imagen;
   assert.deepEqual(im.caja_visible, { x: 268, y: 335, w: 611, h: 555 });
   assert.equal(im.ocupacion, 0.3234);
-  const fit = fitOf(im);
-  const box = Math.max(im.caja_visible.w, im.caja_visible.h);
-  assert.equal(fit.escala, Math.min(thumbInterior(SCALE_PX, false) / box, 1 / DEVICE_SCALE));
-  assert.ok(fit.escala < 1 / DEVICE_SCALE);
+  const fit = containOf(im, 40);
+  const lado = thumbInterior(40, false);
+  assert.equal(fit.escala, Math.min(1, lado / im.ancho, lado / im.alto));
+  assert.ok(fit.dw <= im.ancho && fit.dh <= im.alto);
+  assert.ok(fit.dw <= lado && fit.dh <= lado);
+  const zoomed = containOf({ ...im, caja_visible: { x: 0, y: 0, w: 10, h: 10 } }, 40);
+  assert.deepEqual(zoomed, fit);
   assert.equal(manifest.items["107000008"].imagenes_por_nivel, undefined);
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
@@ -1537,23 +1542,27 @@ test("1.1.6 (O1): el badge .eq.is-max es opaco, como pide §7b.2, porque pisa la
   assert.doesNotMatch(rule[1], /--green-soft/);
 });
 
-test("2.1.1: la miniatura encaja la caja en su interior y no estira", () => {
+test("2.1.2: la miniatura muestra el PNG entero con contain y sin zoom", () => {
   const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
   const thumb = css.slice(css.indexOf(".thumb {"), css.indexOf(".thumb--40"));
   assert.match(thumb, /padding: calc\(var\(--size\) \* 0\.08\)/);
   assert.match(thumb, /grid-template: 100% \/ 100%/);
-  assert.match(thumb, /object-fit:\s*none/);
-  assert.equal(/\{\s*width:\s*100%/.test(thumb), false);
-  assert.match(thumb, /max-width: 100%/);
-  assert.match(thumb, /translate\(calc\(var\(--tx\) \* 1px\), calc\(var\(--ty\) \* 1px\)\)/);
+  assert.match(thumb, /place-items:\s*center/);
+  assert.match(thumb, /object-fit:\s*contain/);
+  assert.match(thumb, /object-position:\s*center/);
+  assert.match(thumb, /width:\s*auto;\s*height:\s*auto/);
+  assert.match(thumb, /max-width:\s*100%/);
+  assert.match(thumb, /max-height:\s*100%/);
   assert.equal(thumb.includes("scale(var(--z))"), false);
-  assert.match(thumb, /1\/3/);
-  const views = readFileSync(new URL("../css/views.css", import.meta.url), "utf8");
-  assert.equal(views.includes("object-fit"), false);
-  assert.equal((css.match(/object-fit:\s*contain/g) || []).length, 0);
-  assert.equal(SCALE_PX, 96);
+  assert.equal(thumb.includes("is-fit"), false);
+  assert.equal(thumb.includes("--dw"), false);
+  assert.equal(thumb.includes("thumb--encuadre"), false);
   assert.equal(THUMB_PAD, 0.08);
-  assert.equal(DEVICE_SCALE, 3);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.equal(app.includes("fitOf"), false);
+  assert.equal(app.includes("is-fit"), false);
+  assert.equal(app.includes("thumb--encuadre"), false);
+  assert.equal(app.includes("caja_visible"), false);
 });
 
 test("2.0.0: la migración 1.x trae alias y Principal y no resucita una cuenta borrada", () => {
@@ -1703,7 +1712,7 @@ test("2.0.0: la copia fusiona por tag y fecha y no borra lo que solo está en el
     now: noon,
   });
   assert.equal(file.app, "clash-progreso");
-  assert.equal(file.version, "2.1.1");
+  assert.equal(file.version, "2.1.2");
   const merged = mergeBackup({ accounts: localAccounts, exports: localExports }, file);
   const a = merged.accounts.find((x) => x.tag === "#A");
   assert.equal(a.alias, "Mia");
@@ -1879,45 +1888,40 @@ test("2.1.0: sin entrada de nivel se usa el PNG base; los guardianes no tienen i
   }
 });
 
-test("2.1.1: el factor de escala nunca supera 1 px físico por px de imagen a DPR 3", () => {
+test("2.1.2: ninguna miniatura recorta ni escala por encima del tamaño natural", () => {
   const sizes = [22, 28, 40, 44, 52, 72, 96];
-  let capped = 0;
+  let shrunk = 0;
   for (const item of Object.values(manifest.items)) {
     const images = [item.imagen, ...Object.values(item.imagenes_por_nivel || {})].filter(Boolean);
     for (const im of images) {
       for (const size of sizes) {
-        const fit = fitOf(im, size);
+        const fit = containOf(im, size);
         assert.ok(fit, im.ruta + " " + size);
-        const box = Math.max(im.caja_visible.w, im.caja_visible.h);
         const lado = thumbInterior(size, im.tipo_visual === "tile_fondo_opaco");
-        const limit = 1 / DEVICE_SCALE;
-        assert.ok(fit.escala <= limit + 1e-12, im.ruta);
-        assert.ok(fit.escala <= lado / box + 1e-9, im.ruta);
-        assert.equal(fit.escala, Math.min(lado / box, limit));
-        assert.ok(box * fit.escala * DEVICE_SCALE <= box + 1e-6, im.ruta);
-        assert.ok(im.ancho * fit.escala * DEVICE_SCALE <= im.ancho + 1e-6, im.ruta);
+        assert.equal(fit.escala, Math.min(1, lado / im.ancho, lado / im.alto));
+        assert.ok(fit.escala <= 1 + 1e-12, im.ruta);
+        assert.ok(fit.dw <= im.ancho + 1e-9 && fit.dh <= im.alto + 1e-9, im.ruta);
+        assert.ok(fit.dw <= lado + 1e-9 && fit.dh <= lado + 1e-9, im.ruta);
         assert.equal(fit.dw, im.ancho * fit.escala);
         assert.equal(fit.dh, im.alto * fit.escala);
         assert.ok(Math.abs(fit.dw / im.ancho - fit.dh / im.alto) < 1e-12, im.ruta);
-        if (lado / box > limit) {
-          assert.equal(fit.escala, limit);
-          assert.ok(box * fit.escala < lado, im.ruta);
-          capped += 1;
-        }
+        const cropped = containOf({ ...im, caja_visible: { x: 1, y: 1, w: 2, h: 2 } }, size);
+        assert.deepEqual(cropped, fit, im.ruta);
+        if (fit.escala < 1) shrunk += 1;
       }
     }
   }
-  assert.ok(capped > 0, "alguna caja pequeña tiene que quedarse por debajo del interior");
-  const wall = fitOf({ ancho: 80, alto: 90, caja_visible: { x: 2, y: 8, w: 75, h: 71 } }, 40);
-  assert.equal(wall.escala, 1 / DEVICE_SCALE);
-  assert.ok(75 * wall.escala < 40 * (1 - 2 * THUMB_PAD));
+  assert.ok(shrunk > 0);
+  const wall = containOf({ ancho: 80, alto: 90, caja_visible: { x: 2, y: 8, w: 75, h: 71 } }, 40);
+  const lado = 40 * (1 - 2 * THUMB_PAD);
+  assert.equal(wall.escala, lado / 90);
+  assert.ok(wall.escala < 1);
+  assert.ok(wall.dw < 80 && wall.dh <= lado + 1e-9);
   assert.ok(Math.abs(wall.dw / 80 - wall.dh / 90) < 1e-12);
-  const big = fitOf({ ancho: 600, alto: 600, caja_visible: { x: 0, y: 0, w: 400, h: 200 } }, 40);
-  assert.equal(big.escala, thumbInterior(40, false) / 400);
-  assert.ok(big.escala < 1 / DEVICE_SCALE);
-  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(app, /fitOf\(im, size\)/);
-  assert.match(app, /fitOf\(fb, size\)/);
+  const tiny = containOf({ ancho: 20, alto: 18 }, 96);
+  assert.equal(tiny.escala, 1);
+  assert.equal(tiny.dw, 20);
+  assert.equal(tiny.dh, 18);
 });
 
 test("2.1.1: el aviso de Supercell está solo en Copia, apartado Acerca de", () => {
