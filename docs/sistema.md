@@ -503,6 +503,8 @@ Los PNG llegan **byte a byte del Fan Kit**: 130 archivos (~41 MB), de 80×119 a 
 
 El `overflow: hidden` de `.thumb` recorta lo ampliado solo en pantalla. Con la v1.2 real (184 imágenes) se aplica a 39. Por ejemplo, Muro sale a ×7,8, Choza de constructor a ×4,2 y Mortero a ×4,1, mientras que Bomba (lienzo de 131 px) se queda en ×1 por resolución. El Laboratorio ocupa el 73 % y no lo necesita. No se usa en `.thumb--tile`.
 
+Desde 2.1.1 el encuadre no usa `scale(var(--z))`. `fitOf(im, size)` da el tamaño en px CSS: `escala = min(interior / max(caja.w, caja.h), 1/3)`, con interior `--size × 0.84` (o `--size` si es tile). El `1/3` es el tope a DPR 3: ningún px de imagen ocupa más de un px físico. Si recortar el margen transparente exigiría pasar de ese tope, la caja se queda más pequeña y se ve más margen. No se estira.
+
 **Los cuatro estados del manifiesto** (más dos de carga). La app lee **siempre** `estado` del manifiesto: no hay listas fijas de IDs en el código. Pasar de v1 a v1.1 solo cambia el manifiesto.
 
 | Estado | Miniatura | Badge (junto al nombre) | Nombre | ¿Cuenta en %? |
@@ -576,7 +578,7 @@ Reglas de imagen:
 - `onload` → `.is-loaded`. `onerror` → si `navigator.onLine === false` o el service worker responde 503 de "no en caché", la caja pasa a `.thumb--offline` y se reintenta en el evento `online`. Con conexión, se registra el error y la caja pasa a `.thumb--empty` con iniciales. **Nunca** se recurre a otra fuente (nada de `assets/wiki/`, emojis ni iconos genéricos).
 - **Resolución de la ruta**: `imagenes_por_nivel[String(lvl)]` y, si no existe, `imagen`. Nunca se escriben rutas a mano. Si las dos faltan (`imagen: null`), el ítem se pinta como `faltante` aunque su `estado` sea `ok`.
 - **Imágenes pesadas (v1.1)**: si la imagen resuelta trae `pesado: true` (o `bytes` > 3 000 000 si el campo aún no existe), en listas, rejillas, Roster y Mejoras se muestra el estado sin imagen (`.thumb--empty` con iniciales, solo texto) y la imagen real **solo en la ficha del ítem** (`.thumb--96`, `loading="lazy"`) al tocarlo. Tampoco entran en el precache ni en "Descargar todas" sin avisar de su peso. En la v1 no hay ninguna.
-- **Aldea del constructor (v1.2 y posteriores)**: sus ítems llegan en el manifiesto con su propia categoría y usan iconos `Icon_BB_*`, con otro estilo de render. Se muestran **siempre en una sección propia, "Aldea del constructor"** (`.section` con su `.section-header` y su propia `.list` o `.eq-grid`), nunca en la misma fila, lista o rejilla que los renders de la aldea principal. La sección va al final de la vista, antes del pie legal. La v1 no trae ítems de la aldea del constructor, así que no aparece.
+- **Aldea del constructor (v1.2 y posteriores)**: sus ítems llegan en el manifiesto con su propia categoría y usan iconos `Icon_BB_*`, con otro estilo de render. Se muestran **siempre en una sección propia, "Aldea del constructor"** (`.section` con su `.section-header` y su propia `.list` o `.eq-grid`), nunca en la misma fila, lista o rejilla que los renders de la aldea principal. La sección va al final de la vista. La v1 no trae ítems de la aldea del constructor, así que no aparece.
 - Iniciales: primera letra de las dos primeras palabras significativas del nombre visible, ignorando "de", "del", "la", "el" (Torre de bombas → TB, Air Sweeper → AS). Si es una sola palabra, sus dos primeras letras (Mortar → MO, Muro → MU).
 
 ### 5.5 Barra de progreso
@@ -904,32 +906,13 @@ El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se rese
 
 **Foco.** El foco va al `h2` del sheet (`tabindex="-1"`) solo al abrir; un redibujado lo conserva. Si un redibujado elimina el control con foco, el foco va a su equivalente o, si no existe, al `h2`. Mientras está abierto, `.navbar`, `#screen` y `.tabbar` llevan `inert`. Esc cierra igual que OK, el velo o Cancelar; en un subpaso de Importar, Esc equivale a «‹ Importar». Al cerrar, el foco vuelve al mismo control que lo abrió (la fila `[data-ficha]`, «Ajustes» o «Importar»; por posición si comparte selector).
 
-### 5.14 Pie legal (Fan Content Policy, obligatorio)
+### 5.14 Aviso de la Fan Content Policy (una sola vez)
 
-**Texto exacto** (literal de `FAN_CONTENT_POLICY.md`, página "Last updated: September 27, 2023"). Va **en inglés, sin cambios**, con la traducción al español debajo:
+**Texto exacto** (literal de `FAN_CONTENT_POLICY.md`, página "Last updated: September 27, 2023"). Va **en inglés, sin cambios**, con la traducción al español debajo, en cuerpo (`.t-body`, 17 px), no en el pie:
 
 > This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
 
-**Ubicación**: al final del contenido desplazable de **cada vista** (Roster, Progreso, detalle, Mejoras, Evolución) y de los sheets de Importar y Ajustes, siempre por encima de la tab bar. No es fijo, para no quitar altura útil, y nunca se oculta ni se trunca. En Ajustes → Acerca de va la versión completa (§7e).
-
-```html
-<footer class="legal">
-  <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
-  <p>Material no oficial, no respaldado por Supercell. Más información en la Política de contenido de fans de Supercell.</p>
-</footer>
-```
-
-```css
-.legal {
-  margin: var(--sp-8) var(--margin-r) 0 var(--margin-l);
-  padding: 0 var(--sp-4);
-  font-size: 0.706rem; line-height: 1.333;   /* Caption 1: 12 px, escala con Dynamic Type */
-  color: var(--label-2);                      /* AA; nunca --label-3 */
-  text-align: center; text-wrap: balance;
-}
-.legal p { margin: 0 0 var(--sp-1); }
-.legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-```
+**Ubicación (2.1.1)**: una sola vez, en la pestaña Copia, apartado **Acerca de**, junto a la fila Versión. Tarjeta `.card.about`, texto `--ink` sobre `--panel-2`, enlace a la política. No va al pie de las vistas ni dentro de las hojas (ficha, Importar, cuenta, Ajustes). El `manifest.webmanifest` sigue diciendo que el material no es oficial.
 
 ---
 
@@ -1066,7 +1049,7 @@ Inactivo `--label-2` (5,0:1 sobre la barra) y activo `--tint`. Volver a tocar la
 1. **Frecuencia**: la HIG reserva la tab bar para secciones de uso continuo. Ajustes se abre rara vez (una descarga de imágenes y poco más). La acción frecuente, importar, ya tiene acceso directo con "Importar" en Roster y en todos los estados vacíos.
 2. **Pulgar**: con 4 pestañas cada objetivo mide ≈ 98 px de ancho en un iPhone de 393. Con 5 bajaría a 78 y se apretarían las etiquetas ("Evolución" es la más larga).
 3. **Contexto**: un sheet modal deja claro que Ajustes es una tarea aparte y se cierra con "OK" o deslizando hacia abajo, como Ajustes en Salud, Fitness o la App Store.
-4. El precio es que el botón queda arriba, lejos del pulgar. Se acepta porque es una acción ocasional, y el pie de Roster repite un enlace de texto "Ajustes y aviso legal" (`.btn--plain`, 44 px) justo encima del aviso legal, al alcance del pulgar al final del scroll.
+4. El precio es que el botón queda arriba, lejos del pulgar. Se acepta porque es una acción ocasional. Desde 2.1.1 el aviso legal no se repite al pie de Roster: está en Copia → Acerca de (§5.14).
 
 ---
 
@@ -1091,7 +1074,7 @@ Referencia: iPhone 15/16, 393×852 pt, safe area superior de 59 e inferior de 34
 
 ### 7a. Roster (`#/roster`)
 
-**Jerarquía**: nav (Ajustes ← · → **Importar**) → Large Title "Roster" + subtítulo → **Principales** (C1 y C2 en tarjetas grandes) → **TH13 · 4 cuentas** (lista) → **TH11 · 5 cuentas** (lista) → **Otras cuentas · N** (lista, solo si hay cuentas añadidas, §8.4) → enlace "Ajustes y aviso legal" → pie legal.
+**Jerarquía**: nav (Ajustes ← · → **Importar**) → Large Title "Roster" + subtítulo → **Principales** (C1 y C2 en tarjetas grandes) → **TH13 · 4 cuentas** (lista) → **TH11 · 5 cuentas** (lista) → **Otras cuentas · N** (lista, solo si hay cuentas añadidas, §8.4). Desde 2.1.1 no hay pie legal (§5.14).
 
 **Sin hacer scroll** (≈ 614 px): subtítulo (20) + cabecera (26) + C1 (112) + 8 + C2 (112) + 32 + cabecera TH13 (26) + **4 filas** de 64. Las principales siempre a la vista y el grupo TH13 casi entero.
 
@@ -1134,7 +1117,7 @@ Referencia: iPhone 15/16, 393×852 pt, safe area superior de 59 e inferior de 34
 
 ### 7b. Progreso (`#/progreso`): detalle de cada cuenta
 
-**Jerarquía**: Large Title "Progreso" → selector de cuenta → resumen → segmented **Categorías | Equipamiento** → contenido → pie legal.
+**Jerarquía**: Large Title "Progreso" → selector de cuenta → resumen → segmented **Categorías | Equipamiento** → contenido. Desde 2.1.1 no hay pie legal (§5.14).
 
 1. **Selector de cuenta** (`.list` con una `.row.row--thumb44`): TH en `.thumb--44`, título `C2 Secundaria` / tag, subtítulo `TH16 · objetivo TH17 · datos de mié 07/10 21:23` y, a la derecha, un SVG de chevron doble (9×14). Encima va un `<select>` nativo transparente (`position:absolute; inset:0; opacity:0; font-size:16px`) que en iOS saca la rueda del sistema, cómoda con una mano. Las opciones siguen el orden fijo del roster.
 2. **Resumen** (`.card.summary`, grid de 2 columnas con divisor de 0,5 px `--separator`):
@@ -1287,7 +1270,7 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
 - Los flags `extra` y `helper_recurrent` no cambian nada visual en la v1.
 - Constructores (decisión del líder): **total** = suma de `cnt` de las cabañas de constructor (`buildings` con data `1000015`) de la exportación. Referencia: C1 5, C2 5 (4 + 1), R02YUVC0J 3, cada TH13 5 y los otros TH11 4. **Ocupados** = mejoras en curso en la cola Constructor (edificios, muros, trampas y héroes, confirmado por Clash). Las mejoras con `extra: true` en la cola Constructor **se descuentan siempre** de ocupados, sea cual sea el edificio (las hace el constructor de B.O.B, que no figura en `1000015`; decisión de Clash). Un `extra: true` en `units` es del laboratorio y nunca cuenta como constructor. `helper_recurrent: true` (p. ej. 1000079 en C1) **no** se descuenta mientras no se confirme, así que en C1 el aviso se mantiene. **Libres** = total − ocupados. Laboratorio, Casa de mascotas y ayudantes van en su propia línea y no cuentan como constructores. Si una cuenta no tiene `1000015` en la exportación, se muestra solo `N ocupados`, sin adivinar. Si ocupados > total (se escapa B.O.B o un constructor temporal), nunca se muestran libres negativos: se muestra `N ocupados` con `.chip--warn` `Revisar constructores` y, en la ficha, footnote c-2 `Hay más mejoras que constructores conocidos`.
 
-**Jerarquía**: Large Title "Mejoras" + subtítulo `69 en curso · 11 cuentas` → segmented **Por fin | Por cuenta** → contenido → pie legal.
+**Jerarquía**: Large Title "Mejoras" + subtítulo `69 en curso · 11 cuentas` → segmented **Por fin | Por cuenta** → contenido. Desde 2.1.1 no hay pie legal (§5.14).
 
 **Por fin** (por defecto):
 1. **Constructores libres** (`.card`, solo si alguna cuenta tiene libres conocidos): `3 cuentas con constructores libres` (t-headline) y `.chip--account` con miniatura de TH + `1 libre`. Es lo único accionable y por eso va primero.
@@ -1343,7 +1326,7 @@ Hay tres líneas: Constructores, Laboratorio y Mascotas (esta solo si TH ≥ 14)
 
 **Objetivo del roster: TH18 + TH17 + 9×TH15** (C1 → 18, C2 → 17, el resto → 15).
 
-**Jerarquía**: Large Title "Evolución" → tarjeta **Objetivo** → **Escalera de TH** → gráfico **Progreso medio** → gráfico **Subidas pendientes** → pie legal.
+**Jerarquía**: Large Title "Evolución" → tarjeta **Objetivo** → **Escalera de TH** → gráfico **Progreso medio** → gráfico **Subidas pendientes**. Desde 2.1.1 no hay pie legal (§5.14).
 
 1. **Tarjeta Objetivo** (`.card`):
    - Caption c-2: `Objetivo: TH18 + TH17 + 9×TH15`.
@@ -1470,12 +1453,7 @@ guarda al verlas por primera vez. Recomendado con wifi.
 
 **ACERCA DE**
 - `Versión` con `1.0.0 (abc1234)` a la derecha.
-- **Aviso de Supercell completo** (`.card`, t-footnote, texto `--label`):
-  - En inglés literal (`lang="en"`): *This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.*
-  - En español: "Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales."
-  - Enlace `.btn--plain`: `Leer la Fan Content Policy` → https://supercell.com/en/fan-content-policy/
-  - Footnote c-2: `Política consultada el 07/10/2026 (versión del 27/09/2023).`
-- El pie legal (§5.14) también va al final del sheet.
+- Desde 2.1.1 el aviso completo no va en esta hoja. Está en Copia → Acerca de, en `.t-body` (§5.14): el inglés literal, el español («Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.») y el enlace `Leer la Fan Content Policy`.
 
 ---
 
@@ -1499,7 +1477,7 @@ guarda al verlas por primera vez. Recomendado con wifi.
 - **Entradas**: «Importar» en la nav de Roster, **Importar JSON** en los estados vacíos y Ajustes → Importar JSON. Se abre el sheet de §5.13 con `Cancelar` · **Importar** · (vacío).
 - **Segmented** `Pegar | Archivos` (antes «Archivo»; va en plural porque admite varios). Sale en los estados de entrada y de error, y se oculta en Validando, Vista previa y Lote.
 - **Un solo botón primario**, abajo, y siempre es el siguiente paso. Si hace falta una salida alternativa, va debajo un `.btn--plain.btn--block`. La textarea ya no es el centro: el JSON en bruto no le dice nada a Miguel. «Pegar» lee el portapapeles y **valida en el acto**, sin paso «Revisar».
-- Pie legal (§5.14) al final de `.sheet__body` en todos los estados.
+- Desde 2.1.1 el sheet de Importar no lleva el pie de la Fan Content Policy (§5.14).
 
 ### 8.3 Pantallas y estados
 
@@ -1648,7 +1626,7 @@ objetivo TH18 + TH17 + 9×TH15 no cambia.
 - Desde entonces ese tag es conocido: sus próximas exportaciones siguen el flujo normal.
 
 **Dónde aparece la cuenta nueva**
-- **Roster**: sección `Otras cuentas` con el número a la derecha (`.section-header` + `.num`), **después de TH11** y antes del enlace «Ajustes y aviso legal». Una fila `.row.row--thumb44` por cuenta, como las TH13/TH11: TH en `.thumb--44`, título = alias o tag (`.tag`), subtítulo `TH16 · sin objetivo · 8 mejoras`, trailing `.bar--mini` **sin marca** (media frente a su TH) + `48,8 %` + chevron.
+- **Roster**: sección `Otras cuentas` con el número a la derecha (`.section-header` + `.num`), **después de TH11**. Una fila `.row.row--thumb44` por cuenta, como las TH13/TH11: TH en `.thumb--44`, título = alias o tag (`.tag`), subtítulo `TH16 · sin objetivo · 8 mejoras`, trailing `.bar--mini` **sin marca** (media frente a su TH) + `48,8 %` + chevron.
 - **Progreso**: al final del selector de cuenta. **Mejoras**: con su chip corto (`16·8CU`). **Evolución**: sus puntos se guardan, pero ni la tarjeta Objetivo ni la escalera la cuentan hasta que decida el líder.
 - **Ajustes → Datos**: fila `.row.row--destructive` `Quitar #QL0Y2P8CU` (o el alias), con alerta `¿Quitar #QL0Y2P8CU?` / `Se borrarán su alias y sus importaciones de este iPhone.` / `Cancelar` · **`Quitar`** (`.is-destructive`). Al quitarla: toast `.toast--ok` `Cuenta quitada` (1.1.1). Las 11 cuentas fijas no se pueden quitar.
 - Más antigua: `.msg-warn` `Es más antigua que la última guardada (vie 09/10 18:00).` + footnote `Se añadirá solo al histórico. Roster, Progreso y Mejoras seguirán con la del vie 09/10 18:00.`
@@ -1693,7 +1671,7 @@ objetivo TH18 + TH17 + 9×TH15 no cambia.
 
 ### 8.6 Componentes reutilizados
 
-Sheet (§5.13), segmented (§5.9), `.list` + `.row` / `.row--thumb40` / `.row--thumb44` (§5.3), `.thumb` y estados del manifiesto (§5.4), TH desde `imagenes_por_nivel` (§5.4), `.chip--main` / `.chip--second` (§5.7), `.btn--primary` / `.btn--plain` / `.btn--block` (§5.8), `.row--destructive` y alerta destructiva (§5.3, §5.12), `.sk` (§5.11), toast (§5.12), `.preview`, `.kv` y `.json-input` (este apartado), `.section-header` / `.section-footer` (§5.1) y el pie legal (§5.14). **No hay iconos**: los pasos van numerados en texto y los estados se dicen con palabras.
+Sheet (§5.13), segmented (§5.9), `.list` + `.row` / `.row--thumb40` / `.row--thumb44` (§5.3), `.thumb` y estados del manifiesto (§5.4), TH desde `imagenes_por_nivel` (§5.4), `.chip--main` / `.chip--second` (§5.7), `.btn--primary` / `.btn--plain` / `.btn--block` (§5.8), `.row--destructive` y alerta destructiva (§5.3, §5.12), `.sk` (§5.11), toast (§5.12), `.preview`, `.kv` y `.json-input` (este apartado), `.section-header` / `.section-footer` (§5.1). El aviso de Supercell no va en este sheet (§5.14). **No hay iconos**: los pasos van numerados en texto y los estados se dicen con palabras.
 
 CSS nuevo (los mensajes `.msg-*` adoptan los nombres que ya usa `css/views.css` del PR):
 
@@ -1944,7 +1922,7 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
     - fila «No válido» con `<archivo> · <primer motivo>` (o `Empieza por «muestra»`), sin punto final y con el `·` pegado al nombre; «Se omiten» sin el footer `No es una exportación válida.`;
     - muestra de más de 20 caracteres sin espacio antes de «…».
 16. [ ] Ajustes: descarga de imágenes con sus 6 estados, progreso en bytes reales y "~40 MB". Al instalar solo se precachean la app, los datos, el manifiesto, los TH y los héroes.
-17. [ ] Aviso de la Fan Content Policy **literal en inglés** al pie de cada vista y sheet (Caption 1, `--label-2`), con la versión completa en Ajustes → Acerca de.
+17. [ ] Aviso de la Fan Content Policy **literal en inglés**, completo y en cuerpo legible, **una sola vez** en Copia → Acerca de, junto a la versión (§5.14). No va al pie de las vistas ni de las hojas.
 18. [ ] Dynamic Type a 23 px (`html { font-size: 23px }` inyectado): ningún tag de cuenta recortado en Roster; ningún título de fila con «…» (detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes) y «ID deducido» y los ID de «Sin identificar» enteros; restante y hora de Mejoras bajo el título; select de Evolución bajo «Progreso medio» y sin cortar; sin desborde horizontal. En Importar a 28 px: vista previa y `.kv` en una columna (el `@container` va detrás de las reglas base, §8.6), filas del lote con el trailing en su propia línea y sin palabras partidas; un nombre de archivo largo sin espacios en una fila «No válido» baja de línea sin cortarse. A 17 px, nada se mueve respecto a la versión anterior salvo lo que se arregla.
 19. [ ] `prefers-reduced-motion`, objetivos de 44 px. Cada barra suelta lleva aria-label; dentro de una fila la barra es aria-hidden y la fila lleva el aria-label completo. Celdas y gráficos con etiqueta. Rutas relativas (GitHub Pages bajo `/clash-progreso/`) y ninguna petición a terceros.
 20. [ ] Separadores de 0,5 px en todas las listas, también con `li > .row` (`li + li > .row::before`, §5.3), con la sangría de `--row-inset`; ninguno encima de la primera fila.
@@ -2050,4 +2028,12 @@ Especificación de 1.1.5:
 
 ## Nota de cambios (8 oct 2026, 2.1.0)
 
-`APP_VERSION` es `2.1.0`, `SHELL_CACHE` es `cp-shell-v12` e `IMAGE_CACHE` es `cp-img-v5`. Cada edificio usa `imagenes_por_nivel[nivel]`. Si no hay entrada, o si esa ruta no está en caché sin conexión, se pinta `imagen` sin marca. La escala es `min(1, 96 / max(caja_visible.w, caja_visible.h))`: no se estira. La precarga son las 220 rutas con `precarga === true`. `pesado` sigue siendo más de 3 MB.
+`APP_VERSION` es `2.1.0`, `SHELL_CACHE` es `cp-shell-v12` e `IMAGE_CACHE` es `cp-img-v5`. Cada edificio usa `imagenes_por_nivel[nivel]`. Si no hay entrada, o si esa ruta no está en caché sin conexión, se pinta `imagen` sin marca. La escala de esta entrega era `min(1, 96 / max(caja_visible.w, caja_visible.h))`: no estira, pero en 2.1.1 se sustituye (nota siguiente). La precarga son las 220 rutas con `precarga === true`. `pesado` sigue siendo más de 3 MB.
+
+## Nota de cambios (8 oct 2026, 2.1.1)
+
+`APP_VERSION` es `2.1.1`, `SHELL_CACHE` es `cp-shell-v13` e `IMAGE_CACHE` sigue en `cp-img-v5`: no cambia ningún PNG ni el manifiesto de imágenes.
+
+La escala de 2.1.0 pintaba la caja útil como si toda miniatura midiera 96 px CSS y permitía hasta 1 px de imagen por px CSS. En un iPhone @3x eso son 3 px físicos por px de imagen, y en las filas de 40 px la caja de 96 px se recortaba (zoom de más). `fitOf(im, size)` usa `min(interior / max(caja.w, caja.h), 1/3)`. El interior es `--size × 0.84` (el padding del 8 %); un tile, sin padding, usa el lado entero. Si llenar el interior pasaría de 1 px físico por px de imagen, se amplía menos y se ve más margen. No se estira. Los PNG por nivel son más pequeños que el PNG base en muchos edificios; se muestran igual, sin sustituirlos.
+
+El aviso de la Fan Content Policy ya no va al pie de cada vista ni de cada hoja. Está una sola vez, completo y en cuerpo, en Copia → Acerca de, junto a la versión (§5.14).

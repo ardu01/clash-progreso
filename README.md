@@ -1,6 +1,6 @@
 # Clash Progreso
 
-PWA estática (2.1.0) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
+PWA estática (2.1.1) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
 
 This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
 
