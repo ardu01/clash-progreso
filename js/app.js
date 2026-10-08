@@ -8,7 +8,7 @@ import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
-  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, omitSubtitle, overMaxMsg,
+  duplicateMsg, foreignMsg, importCount, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
   sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
@@ -1476,7 +1476,7 @@ function batchGroup(title, rows, foot) {
 function omitFoot(items) {
   const bits = [];
   if (items.some((i) => i.kind === "duplicate")) bits.push(DUP_FOOT);
-  if (items.some((i) => i.kind === "invalid")) bits.push(BAD_FOOT);
+  if (items.some((i) => i.kind === "invalid" && !omitReason(i))) bits.push(BAD_FOOT);
   return bits.map((t) => `<p class="section-footer">${t}</p>`).join("");
 }
 

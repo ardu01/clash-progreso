@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "version_set_imagenes": "v1.3",
+  "version_set_imagenes": "v1.3.2",
   "versiones_congeladas": {
     "v1": "v1/ (130 archivos, 41.314.444 bytes)",
     "v1.1": "v1.1/ (148 archivos, 46.506.107 bytes)",
     "v1.2": "v1.2/ (184 archivos, 60.458.372 bytes)",
-    "v1.3": "v1.3/ (este set, congelado tras generarse)"
+    "v1.3": "v1.3/ (185 archivos, 60.950.695 bytes)",
+    "v1.3.1": "v1.3.1/ (185 archivos, 60.950.695 bytes; cambia solo caja_visible y ocupacion de 107000008)",
+    "v1.3.2": "v1.3.2/ (este set, congelado tras generarse; cambia solo esta cabecera)"
   },
-  "generado": "2026-10-08T06:44:18+02:00",
+  "generado": "2026-10-08T07:30:00+02:00",
   "descripcion": "Mapa ID de exportación de Clash of Clans -> imagen oficial del Supercell Fan Kit (PNG copiado byte a byte, sin modificar).",
   "exportaciones": [
     "c1_principal_2026-10-07.json",
