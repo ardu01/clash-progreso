@@ -269,7 +269,7 @@ const fmtFin = new Intl.DateTimeFormat('es-ES', {
   timeZone: 'Europe/Madrid', weekday: 'short', day: '2-digit',
   month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false
 });
-// fin de una mejora: fmtFin.format(new Date((exp.timestamp + item.timer) * 1000)).replace(',', '')  → "jue 08/10 12:48"
+// fin de una mejora: fmtFin.format(new Date((exp.timestamp + item.timer) * 1000)).replace(/,/g, "").replace(/ /g, "\u00a0")  → espacios de no separación, «jue 08/10 12:48» no se parte
 ```
 
 ---
@@ -389,6 +389,11 @@ li + li > .row::before {                   /* separador que arranca donde empiez
 .row--thumb40 { --row-inset: calc(var(--sp-4) + 40px + var(--sp-3)); min-height: 60px; }
 .row__main  { flex: 1; min-width: 0; display: flex; flex-direction: column; } /* título y subtítulo siempre en dos líneas, aunque sean <span> */
 .row__title { font-size: 1rem; line-height: 1.294; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Título con insignia o recuento (1.1.4): se recorta solo el nombre */
+.row__title--meta { display: flex; align-items: baseline; }
+.row__title--meta > .row__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row__title--meta > .num, .row__title--meta > .badge { flex: none; }
+.row__title--meta > .num { margin-left: 0.25em; }
 .row__sub   { font-size: 0.765rem; line-height: 1.385; color: var(--label-2); }
 .row--account .row__sub { overflow-wrap: break-word; }   /* lote: un nombre de archivo largo sin espacios baja de línea en vez de cortarse (1.1.3) */
 .row__trail { display: flex; align-items: center; gap: var(--sp-2); color: var(--label-2); font-variant-numeric: tabular-nums; text-align: right; }
@@ -399,13 +404,15 @@ button.row { width: 100%; border: 0; background: none; font: inherit; letter-spa
 .chevron    { width: 8px; height: 13px; flex: none; color: var(--label-3); }
 ```
 
-**Dynamic Type en filas.** La `.list` es contenedor (`container-type: inline-size`, como `.sheet__body` en §8.6). Con `19em` de ancho o menos (cuerpo de unos 19 px o más en 390 px: 358 px / 19 px = 18,8em) las filas con trailing ancho pasan a dos líneas: texto arriba y trailing debajo, alineado con el texto. Los títulos de **todas** las filas de lista (`.row__title`: detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes…) dejan de recortarse y bajan de línea con `overflow-wrap: break-word` (solo se parte una palabra si no cabe sola). Las insignias `.badge` y `.badge-id` son `inline-block` + `nowrap`: bajan enteras a la línea siguiente, así que «ID deducido» y el ID de los «Sin identificar» se ven siempre. La miniatura, la barra mini y el trailing siguen centrados en vertical (`align-items: center` de `.row`) y alineados a la derecha. A tamaño normal (17 px, 21,1em) no cambia nada. Clases que pone el JS: `.row--account` en las filas TH13/TH11 del Roster (§7a) y en todas las filas del lote de Importar (§8.4: el tag o alias no se recorta y el trailing `+3 niveles` / `Sin cambios` / `Duplicada`… baja a su propia línea, alineado con el texto; desde 1.1.1; su subtítulo lleva `overflow-wrap: break-word` a cualquier tamaño, para que un nombre de archivo largo sin espacios baje de línea en vez de cortarse, 1.1.3), y `.row--upgrade` en las filas de mejora y de ayudante (§7c).
+**Dynamic Type en filas.** La `.list` es contenedor (`container-type: inline-size`, como `.sheet__body` en §8.6). Con `19em` de ancho o menos (cuerpo de unos 19 px o más en 390 px: 358 px / 19 px = 18,8em) las filas con trailing ancho pasan a dos líneas: texto arriba y trailing debajo, alineado con el texto. Los títulos de **todas** las filas de lista (`.row__title`: detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes…) dejan de recortarse y bajan de línea con `overflow-wrap: break-word` (solo se parte una palabra si no cabe sola). Las insignias `.badge` y `.badge-id` son `inline-block` + `nowrap`: bajan enteras a la línea siguiente, así que «ID deducido» y el ID de los «Sin identificar» se ven siempre. La miniatura, la barra mini y el trailing siguen centrados en vertical (`align-items: center` de `.row`) y alineados a la derecha. A tamaño normal (17 px, 21,1em) no cambia nada. Clases que pone el JS: `.row--account` en las filas TH13/TH11 del Roster (§7a) y en todas las filas del lote de Importar (§8.4: el tag o alias no se recorta y el trailing `+3 niveles` / `Sin cambios` / `Duplicada`… baja a su propia línea, alineado con el texto; desde 1.1.1; su subtítulo lleva `overflow-wrap: break-word` a cualquier tamaño, para que un nombre de archivo largo sin espacios baje de línea en vez de cortarse, 1.1.3), y `.row--upgrade` en las filas de mejora y de ayudante (§7c). A tamaño normal, en las filas con insignia o `×N`, el título es `.row__title--meta`: el «…» recorta solo `.row__name`, y «ID deducido», el ID y `×N` se ven siempre (1.1.4).
 
 ```css
 .list { container-type: inline-size; }
 @container (max-width: 19em) {
   /* Todas las filas: el título baja de línea en vez de recortarse (va antes que .row--account, que conserva anywhere) */
   .row .row__title { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; }
+  .row .row__title--meta { display: block; }
+  .row .row__title--meta > .row__name { white-space: normal; overflow: visible; }
 
   /* Roster (§7a): el tag nunca se recorta; barra, % y chevron bajan a una segunda línea */
   .row--account { flex-wrap: wrap; row-gap: var(--sp-1); padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
@@ -720,7 +727,7 @@ Textos: `TH18` · `TH16 → 17` · `Objetivo TH18` (verde al alcanzarse) · `Pri
 ```css
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
-  min-height: 50px; padding: 0 var(--sp-5);
+  min-height: 50px; padding: var(--sp-2) var(--sp-5);
   border: 0; border-radius: var(--r-btn);
   font: 600 1rem/1.294 var(--font); letter-spacing: -0.024em;
   cursor: pointer; user-select: none; -webkit-user-select: none;
@@ -870,6 +877,8 @@ El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se rese
   @keyframes sheet-in { from { transform: translateY(100%); } }
 }
 ```
+
+**Foco.** El foco va al `h2` del sheet (`tabindex="-1"`) solo al abrir; un redibujado lo conserva. Si un redibujado elimina el control con foco, el foco va a su equivalente o, si no existe, al `h2`. Mientras está abierto, `.navbar`, `#screen` y `.tabbar` llevan `inert`. Esc cierra igual que OK, el velo o Cancelar; en un subpaso de Importar, Esc equivale a «‹ Importar». Al cerrar, el foco vuelve al mismo control que lo abrió (la fila `[data-ficha]`, «Ajustes» o «Importar»; por posición si comparte selector).
 
 ### 5.14 Pie legal (Fan Content Policy, obligatorio)
 
@@ -1101,9 +1110,13 @@ Referencia: iPhone 15/16, 393×852 pt, safe area superior de 59 e inferior de 34
    - `Ofensiva` → `pct_ofensiva` con el mismo formato.
    ```css
    .summary { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
-   .summary > div { min-width: 0; padding: var(--sp-3) var(--sp-4); }
-   .summary > div + div { border-left: 0.5px solid var(--separator); }
-   .summary__lbl { font-size: 0.765rem; line-height: 1.385; color: var(--label-2); }
+   .summary > div { min-width: 0; padding: var(--sp-2) var(--sp-1); }
+   .summary > div + div { box-shadow: inset 0.5px 0 var(--separator); padding-left: var(--sp-4); }
+   .section:has(> .summary) { container-type: inline-size; }
+   @container (max-width: 13em) {             /* SE y 390 px a 28 px: una columna */
+     .summary { grid-template-columns: 1fr; }
+     .summary > div + div { box-shadow: inset 0 0.5px var(--separator); padding-left: var(--sp-1); }
+   }
    ```
 3. **Segmented** `Categorías | Equipamiento` (§5.9), 32 px. El equipamiento es la prioridad de Miguel y queda **a un toque y por encima del pliegue**. La pestaña elegida se recuerda por cuenta en `localStorage`.
 
@@ -1258,7 +1271,7 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
 ```
 - Miniatura según §5.4 (las defensas sin asset van con iniciales).
 - Título `t-body` con el nombre visible. Subtítulo en footnote c-2 con niveles o `Nuevo`, chip de cuenta compacto y cola.
-- Trailing a la derecha en dos líneas (`.row__trail.row__trail--stack`): el restante en `t-subhead` 600 `.num` `--label` y debajo la hora de fin en footnote c-2 `.num`.
+- Trailing a la derecha en dos líneas (`.row__trail.row__trail--stack`): el restante en `t-subhead` 600 `.num` `--label` y debajo la hora de fin en footnote c-2 `.num`. La fecha y hora (`fmtFin`/`fmtWhen`, «mié 07/10 21:22») y los tamaños (`61,0 MB`) llevan espacios de no separación: nunca se parten. Los recuentos «N de M» en trailing llevan `nowrap`.
 - Si falta menos de 1 h, el restante va en `--tint` (es una buena noticia). Sin rojos.
 - **Dynamic Type** (contenedor `.list` ≤ 19em, cuerpo de 19 px o más, §5.3): el trailing deja de ser `flex: none` y baja a una línea propia bajo el título y el subtítulo, alineado a la izquierda con el texto. Lleva restante y hora en la misma línea (`en 1 h 7 min  jue 08/10 03:37`), que se parte si no cabe. El título baja de línea en vez de recortarse.
 - **Ayudantes** (sección «Ayudantes» de Por fin): usan exactamente la misma fila (`.row.row--thumb40.row--upgrade`). Llevan miniatura según §5.4 (hoy `faltante`, iniciales `BA`), subtítulo `Ayudante · [C2] · no suma constructor` y `.row__trail.row__trail--stack` con `.t-subhead.num` (`en 10 h 38 min` o `Disponible`) y `.t-footnote.c-2.num` (hora). No hay clase propia (`.trail-time` desaparece). A tamaño normal el restante pasa de `--label-2` a `--label` y de 17 a 15 px, como en el resto de mejoras.
@@ -1352,7 +1365,8 @@ Hay tres líneas: Constructores, Laboratorio y Mascotas (esta solo si TH ≥ 14)
   appearance: none; -webkit-appearance: none; border: 0; background: none; color: var(--tint);
   font: 400 0.882rem/1.333 var(--font); text-align: right;
   flex: 0 1 auto; min-width: 0; max-width: 55%;
-  padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;   /* red de seguridad: el arreglo real es el texto corto */
+  padding: 12px 0; margin: -12px 0;   /* 44 px de alto táctil sin mover nada */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;   /* red de seguridad: el arreglo real es el texto corto */
 }
 .card__top--chart { flex-wrap: wrap; row-gap: var(--sp-1); }
 .card__top--chart > :first-child { flex: none; white-space: nowrap; }        /* "Progreso medio" en una línea */
@@ -1831,8 +1845,9 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
   - `--green-text` 5,4 · `--orange-text` 5,3 · `--red-text` 5,4 en claro y 6,0 en oscuro.
   - Iniciales de `.thumb--empty` (`--label-2` sobre `--fill-3` + `--bg-2`) ≥ 4,5.
   - **`--label-3` no se usa nunca para texto informativo.**
+  - `.badge` neutra (`--fill-3`) solo sobre `--bg-2`. Sobre `--bg` (sheets) da 4,09:1, así que en sheets lleva fondo `--bg-2` (5,2:1).
 - **Objetivos táctiles ≥ 44×44 px**: filas (mínimo 44; cuentas 64), celdas de equipamiento (52), pestañas, `.btn-text`, segmented (área ampliada con `::after`) y botones de 50 px. Al menos 6 px entre objetivos.
-- **Nada solo por color**: cada barra lleva `%` en texto y un `aria-label` con las dos referencias. "Máx", "Terminada", "Nuevo", "sin identificar" e "ID deducido" van siempre en palabra. Los puntos de categoría siempre llevan el nombre al lado.
+- **Nada solo por color**: cada barra lleva `%` en texto. Cada barra suelta lleva aria-label; dentro de una fila la barra es aria-hidden y la fila lleva el aria-label completo. "Máx", "Terminada", "Nuevo", "sin identificar" e "ID deducido" van siempre en palabra. Los puntos de categoría siempre llevan el nombre al lado.
 - **Dynamic Type**: escala en `rem` sobre `-apple-system-body`. El layout aguanta hasta ~23 px de body (primer tamaño de accesibilidad) con contenedores (`@container`, nunca `@media` en `em`, que en Safari no sigue a `-apple-system-body`). `.list` (§5.3) y `.chart-wrap` (§7d) se reordenan a partir de 19 px aprox. Los títulos de fila pueden llevar `ellipsis` a tamaño normal; a partir de 19 px aprox. (`.list` ≤ 19em) **ningún título de fila se recorta**: baja de línea con `overflow-wrap: break-word`, y las insignias «ID deducido» y de ID bajan enteras (§5.3). **El tag de cuenta del Roster no se recorta nunca**. El trailing de Roster y Mejoras baja a su propia línea (el `flex: none` de `.row__trail--stack` solo vale a tamaño normal), el select del gráfico pasa debajo del título y las tarjetas no tienen alturas fijas. A 28 px no se recorta nada en Roster, Progreso, detalles de categoría, Mejoras («Por fin», «Por cuenta» y Ayudantes), Evolución, Muros ni Ajustes: el chip «Secundaria» de C2 baja bajo el nombre (§7a) y la etiqueta de `.slots` ocupa su propia línea con los puntos y el recuento debajo (§7c). El chrome (tab bar a 10 px, nav compacta a 17 px, segmented a 13 px y badge de nivel a 11 px) es fijo, como en iOS.
 - **`prefers-reduced-motion`**:
   ```css
@@ -1845,7 +1860,11 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
   ```
 - **Lectores de pantalla**:
   - Tab bar con `aria-current="page"`. El título compacto lleva `aria-hidden` para no duplicar el grande.
-  - Cada fila es un único `<a>`/`<button>` con un texto completo, p. ej. "C2 Secundaria, TH16, objetivo TH17, media 48,8 %".
+  - Cada fila es un único `<a>`/`<button>` con un texto completo, sin repeticiones:
+    - en el Roster, "C2 Secundaria, TH16, objetivo TH17, media 48,8 %";
+    - en el detalle, "Príncipe Esbirro, nivel 31 de 95" (+ ", ID deducido");
+    - en Categorías, "Defensas, 70,1 %, TH17 64,0 %, faltan 190 niveles".
+    La barra de dentro de una fila es decorativa (`aria-hidden="true"`); las barras sueltas siguen con `role="img"` y `aria-label`. Las tablas `.sr-only` usan fechas legibles (`07/10`), nunca ISO. El `input[type=file]` oculto lleva `tabindex="-1"` y `aria-hidden`.
   - Gráficos y escalera con `role="img"` y tabla `.sr-only`.
   - Toast con `role="status"`, errores de importación con `role="alert"` y progreso de descarga con `aria-live="polite"`.
 - **Foco visible** (teclado externo o iPad): `:focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; }`.
@@ -1881,8 +1900,12 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
 16. [ ] Ajustes: descarga de imágenes con sus 6 estados, progreso en bytes reales y "~40 MB". Al instalar solo se precachean la app, los datos, el manifiesto, los TH y los héroes.
 17. [ ] Aviso de la Fan Content Policy **literal en inglés** al pie de cada vista y sheet (Caption 1, `--label-2`), con la versión completa en Ajustes → Acerca de.
 18. [ ] Dynamic Type a 23 px (`html { font-size: 23px }` inyectado): ningún tag de cuenta recortado en Roster; ningún título de fila con «…» (detalle de categoría, Héroes, Mascotas, Laboratorio, Categorías, Ajustes) y «ID deducido» y los ID de «Sin identificar» enteros; restante y hora de Mejoras bajo el título; select de Evolución bajo «Progreso medio» y sin cortar; sin desborde horizontal. En Importar a 28 px: vista previa y `.kv` en una columna (el `@container` va detrás de las reglas base, §8.6), filas del lote con el trailing en su propia línea y sin palabras partidas; un nombre de archivo largo sin espacios en una fila «No válido» baja de línea sin cortarse. A 17 px, nada se mueve respecto a la versión anterior salvo lo que se arregla.
+19. [ ] `prefers-reduced-motion`, objetivos de 44 px. Cada barra suelta lleva aria-label; dentro de una fila la barra es aria-hidden y la fila lleva el aria-label completo. Celdas y gráficos con etiqueta. Rutas relativas (GitHub Pages bajo `/clash-progreso/`) y ninguna petición a terceros.
 20. [ ] Separadores de 0,5 px en todas las listas, también con `li > .row` (`li + li > .row::before`, §5.3), con la sangría de `--row-inset`; ninguno encima de la primera fila.
-19. [ ] `prefers-reduced-motion`, objetivos de 44 px, `aria-label` en barras, celdas y gráficos. Rutas relativas (GitHub Pages bajo `/clash-progreso/`) y ninguna petición a terceros.
+21. [ ] A 17 px, en 375 y 390 px, ninguna fila recorta «ID deducido», el ID ni `×N` (C1 Equipamiento: Corazón ardiente, Colmillos eléctricos; Defensas: Torre de arqueras múltiple ×3; Trampas en SE: Trampa de esqueletos ×4).
+22. [ ] Fecha y hora nunca en dos líneas (selector de Progreso a 17 px; Roster a 23 px; Mejoras › Por cuenta a 28 px). `MB` y «N de M» tampoco.
+23. [ ] Sheets con teclado: el foco entra al abrir, Tab no sale al fondo, Esc cierra y el foco vuelve al que lo abrió.
+24. [ ] Nombres accesibles sin duplicar (filas de detalle y de Categorías). El `.badge-id` de la Ficha pasa de 4,5:1 en claro. El select de Evolución mide ≥ 44 px de alto.
 
 ---
 
@@ -1933,3 +1956,7 @@ Revisado con `maqueta/` (datos reales del 07/10, imágenes v1 congeladas, captur
 - 1.1.2 está en main (`c5224d0`) con el arreglo de «Validando…» durante el globo «Pegar» de iOS; `docs/sistema.md` de `c5224d0` es la base de este cambio.
 - **Especificación de 1.1.3** (§8.12): fila «No válido» con solo el primer motivo y `Empieza por «muestra»` en lugar del texto entero, con el `·` pegado al nombre (§8.4); subtítulo de `.row--account` con `overflow-wrap: break-word` para nombres de archivo largos (§5.3, §8.8); `trimEnd` antes de «…» en la muestra (§8.4, §8.11.8); «Se omiten» sin el footer `No es una exportación válida.` (§8.4). Se quitan de §8.4 los restos de «subtítulo = nombre del archivo» y el «punto abierto en §8.11», ya resueltos en 1.1.2. Checklist §10.15 y §10.18 al día.
 - Para Imágenes: la lista de miniaturas cuyo `z` cambiaría más de un 5 % con cajas de alfa > 8 (§8.12). 1.1.3 lleva el manifiesto v1.3.2 (solo cambia la cabecera; mismos PNG, `cp-img-v4` igual).
+
+## Nota de cambios (8 oct 2026, auditoría de 1.1.3 y especificación de 1.1.4)
+
+8 oct 2026, auditoría de 1.1.3 (`1b898df`) y especificación de 1.1.4: título de fila con meta (§5.3), foco en sheets (§5.13), resumen apilado a 28 px (§7b), objetivo del select (§7d), NBSP en fechas y tamaños, `.btn` con padding vertical, contraste de `.badge` en sheets y nombres accesibles de filas (§9), y checklist 21–24 (§10). El manifiesto de imágenes es v1.4.1 (solo cajas y cabecera; `cp-img-v4` igual).

@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
-import { fmtPct } from "../js/format.js";
+import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
 import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT } from "../js/import.js";
 
@@ -392,10 +392,10 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
 
-test("manifest.json coincide con la v1.3.2", () => {
+test("manifest.json coincide con la v1.4.1", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "cec90f014ab914a11cb05a9c33c86a371c3ac11f10bbde376671763b0cd16c31");
-  assert.equal(manifest.version_set_imagenes, "v1.3.2");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "19e6a40d8621d690848bdac24829ec617d1941c851b9af541a24ad9c25b38b23");
+  assert.equal(manifest.version_set_imagenes, "v1.4.1");
 });
 
 /** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
@@ -609,9 +609,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.3 y cachés cp-shell-v7 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.3");
-  assert.equal(SHELL_CACHE, "cp-shell-v7");
+test("versión 1.1.4 y cachés cp-shell-v8 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.4");
+  assert.equal(SHELL_CACHE, "cp-shell-v8");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -621,12 +621,14 @@ test("versión 1.1.3 y cachés cp-shell-v7 / cp-img-v4", () => {
   assert.equal(sw.includes("cp-shell-v5"), false);
   assert.equal(sw.includes("cp-shell-v6"), false);
   assert.equal(sw.includes("cp-shell-v7"), false);
+  assert.equal(sw.includes("cp-shell-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v7/);
+  assert.match(caches, /cp-shell-v8/);
   assert.match(caches, /cp-img-v4/);
   assert.equal(caches.includes("cp-shell-v5"), false);
   assert.equal(caches.includes("cp-shell-v6"), false);
+  assert.equal(caches.includes("cp-shell-v7"), false);
   assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
@@ -840,4 +842,534 @@ test("ofensiva: media de laboratorio y héroes", () => {
   // El CSV de C2 (34,2) aún cuenta Ruin Witch y Angry Spell. Sin esos máximos el laboratorio
   // sube a 45,4 y la media con héroes (23,5) es 34,5.
   assert.equal(got("#R00C8CPQC"), 34.5);
+});
+
+test("1.1.4: fmtWhen deja la fecha y la hora con espacio de no separación", () => {
+  const fmtWhen = fnFromApp("function fmtWhen(ms)", "fmtWhen", { fmtFin });
+  const ms = Date.UTC(2026, 9, 7, 19, 22);
+  const text = fmtWhen(ms);
+  assert.equal(text.includes(" "), false);
+  assert.match(text, /07\/10\u00a021:22/);
+  assert.equal(fmtFin(ms), text);
+  assert.equal(fmtBytes(60950695), "61,0\u00a0MB");
+  assert.equal(fmtBytes(60950695).includes(" "), false);
+});
+
+test("1.1.4: la insignia y el ×N quedan fuera del nombre recortado", () => {
+  const escHtml = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const rowTitle = fnFromApp("function rowTitle(", "rowTitle", { esc: escHtml });
+  const badge = `<span class="badge badge--soft">ID deducido</span>`;
+  const deduced = rowTitle("Corazón ardiente", badge);
+  assert.match(deduced, /<span class="row__name">Corazón ardiente<\/span><span class="badge badge--soft">ID deducido<\/span>/);
+  assert.equal(deduced.includes(`<span class="row__name">Corazón ardiente${badge}`), false);
+  const counted = rowTitle("Torre de arqueras múltiple", `<span class="num">×3</span>`);
+  assert.match(counted, /<span class="row__name">Torre de arqueras múltiple<\/span><span class="num">×3<\/span>/);
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  assert.match(css, /\.row__title--meta > \.row__name \{ min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; \}/);
+  assert.match(css, /\.row__title--meta > \.num, \.row__title--meta > \.badge \{ flex: none; \}/);
+
+  const CAT_CLASS = { defensas: "defensas", heroes: "heroes" };
+  const barHtml = fnFromApp("function barHtml(", "barHtml", { CAT_CLASS, esc: escHtml });
+  const rowLevel = fnFromApp("function rowLevel(", "rowLevel", { levelLine, barHtml });
+  const detailAria = fnFromApp("function detailAria(", "detailAria", { levelLine });
+  const detailRow = fnFromApp("function detailRow(", "detailRow", {
+    rowLevel,
+    state: { index },
+    nameOf: (id) => itemName(index.items[id]) || "Ítem",
+    thumb: () => `<span class="thumb"></span>`,
+    esc: escHtml,
+    emptyNamedThumb: () => `<span class="thumb"></span>`,
+    rowTitle,
+    detailAria,
+  });
+  const exp = exportsByTag.get("#28PLGP0G2");
+  const a = analyze(exp, index);
+  const items = categoryItems(exp, index, "defensas", a.th);
+  const logger = items.find((it) => it.id === "107000008");
+  const multi = items.find((it) => it.cnt > 1 && it.max != null);
+  assert.ok(logger);
+  assert.ok(multi);
+  const loggerHtml = detailRow(logger, "defensas", a);
+  assert.match(loggerHtml, /<span class="row__name">Logger<\/span><span class="badge badge--soft">ID deducido<\/span>/);
+  assert.match(loggerHtml, /aria-label="Logger, nivel 1 de 5, ID deducido"/);
+  const multiHtml = detailRow(multi, "defensas", a);
+  const multiName = itemName(index.items[multi.id]);
+  assert.match(multiHtml, new RegExp(`<span class="row__name">${multiName}</span><span class="num">×${multi.cnt}</span>`));
+  assert.equal(multiHtml.includes(`<span class="row__name">${multiName}×`), false);
+  assert.match(multiHtml, new RegExp(`aria-label="${multiName}, ×${multi.cnt}, nivel `));
+});
+
+test("1.1.4: la fila lleva aria-label y la barra de dentro va aria-hidden", () => {
+  const escHtml = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const CAT_CLASS = {
+    defensas: "defensas", laboratorio: "laboratorio", ejercito_edif: "ejercito",
+    equipamiento: "equipamiento", mascotas: "mascotas", heroes: "heroes",
+    trampas: "trampas", recursos: "recursos", muros: "muros",
+  };
+  const barHtml = fnFromApp("function barHtml(", "barHtml", { CAT_CLASS, esc: escHtml });
+  const decorative = barHtml("heroes", 32, null, { mini: true, decorative: true, label: "no se lee" });
+  assert.match(decorative, /aria-hidden="true"/);
+  assert.equal(decorative.includes("role="), false);
+  assert.equal(decorative.includes("aria-label"), false);
+  const alone = barHtml("defensas", 70.1, 64, { label: "Defensas: 70,1 %" });
+  assert.match(alone, /role="img"/);
+  assert.match(alone, /aria-label="Defensas: 70,1 %"/);
+
+  const catAria = fnFromApp("function catAria(", "catAria", {});
+  const heroAria = fnFromApp("function heroAria(", "heroAria", {});
+  assert.equal(
+    catAria("Defensas", fmtPct(70.1), `TH17: ${fmtPct(64)} · faltan 190 niveles`),
+    `Defensas, ${fmtPct(70.1)}, TH17 ${fmtPct(64)}, faltan 190 niveles`,
+  );
+  assert.equal(heroAria("Príncipe Esbirro", { lvl: 31, max: 95 }, { bar: true, text: "Nv 31 / 95" }, false), "Príncipe Esbirro, nivel 31 de 95");
+  assert.equal(heroAria("Duque Dragón", { lvl: 10, max: 15 }, { bar: true, text: "Nv 10 / 15" }, true), "Duque Dragón, nivel 10 de 15, ID deducido");
+
+  const catRow = fnFromApp("function catRow(", "catRow", {
+    CAT_CLASS,
+    categoryUnlock: () => null,
+    categoryItems: () => [],
+    fmtPct,
+    catFoot,
+    barHtml,
+    CHEV: "",
+    esc: escHtml,
+    catAria,
+  });
+  const a = { th: 16, thSig: 17, cats: { defensas: { pct: 70.1, sigPct: 64, num: 10, den: 20, pend: 190, mark: 80 } } };
+  const html = catRow({}, { tag: "#R00C8CPQC" }, a, { key: "defensas", label: "Defensas" });
+  assert.match(html, /aria-label="Defensas, 70,1\u00a0%, TH17 64,0\u00a0%, faltan 190 niveles"/);
+  assert.match(html, /aria-hidden="true"/);
+  assert.equal(html.includes('role="img"'), false);
+});
+
+test("1.1.4: la tabla oculta del gráfico usa la fecha visible, no ISO", () => {
+  const chartDay = fnFromApp("function chartDay(", "chartDay", {});
+  assert.equal(chartDay("2026-10-07"), "07/10");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /<td>\$\{esc\(chartDay\(p\.day\)\)\}<\/td>/);
+  assert.equal(app.includes("<td>${esc(p.day)}</td>"), false);
+});
+
+test("1.1.4: el input de archivos oculto no entra en el tabulador ni en VoiceOver", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /<input class="file-input" data-files type="file" accept="\.json,application\/json" multiple tabindex="-1" aria-hidden="true">/);
+});
+
+test("1.1.4: Esc cierra el sheet y el foco vuelve a quien lo abrió", () => {
+  function matches(node, sel) {
+    if (sel.startsWith("#")) return node.id === sel.slice(1);
+    if (sel.startsWith(".")) return (node.className || "").split(/\s+/).includes(sel.slice(1));
+    const attr = sel.match(/^\[([^\]=]+)="([^"]*)"\]$/);
+    if (attr) return (node.attrs || {})[attr[1]] === attr[2];
+    return node.tag === sel;
+  }
+  function find(list, sel) {
+    for (const node of list) {
+      if (matches(node, sel)) return node;
+      const nested = find(node.children || [], sel);
+      if (nested) return nested;
+    }
+    return null;
+  }
+  function wire(node, doc) {
+    node.children = node.children || [];
+    node.attrs = node.attrs || {};
+    node.tabIndex = 0;
+    node.setAttribute = (k, v) => { node.attrs[k] = String(v); };
+    node.removeAttribute = (k) => { delete node.attrs[k]; };
+    node.focus = () => { doc.active = node; };
+    node.querySelector = (sel) => find(node.children, sel);
+    for (const child of node.children) wire(child, doc);
+  }
+  const h2 = { tag: "h2", id: "aj-title" };
+  const sheet = { tag: "div", className: "sheet", children: [h2] };
+  const opener = { tag: "button", attrs: { "data-go": "#/ajustes" } };
+  const navbar = { tag: "header", className: "navbar", children: [opener] };
+  const screen = { tag: "main", id: "screen" };
+  const tabbar = { tag: "nav", className: "tabbar" };
+  const roots = [navbar, screen, tabbar, sheet];
+  const doc = { active: null, querySelector: (sel) => find(roots, sel) };
+  for (const node of roots) wire(node, doc);
+  const state = { ficha: null, alert: null, focusReturn: '[data-go="#/ajustes"]', importUi: { needsFocus: false } };
+  const location = { hash: "#/ajustes" };
+  const where = { name: "ajustes" };
+  const route = () => where;
+  const render = () => {};
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", { document: doc, state, route });
+  const onEsc = fnFromApp("function onSheetEscape(", "onSheetEscape", { state, render, location, route });
+
+  settle();
+  assert.equal(doc.active, h2);
+  assert.equal(h2.tabIndex, -1);
+  assert.equal(navbar.attrs.inert, "");
+  assert.equal(screen.attrs.inert, "");
+  assert.equal(tabbar.attrs.inert, "");
+
+  state.alert = { title: "¿Borrar?" };
+  assert.equal(onEsc({ key: "Escape" }), false);
+  assert.equal(location.hash, "#/ajustes");
+  state.alert = null;
+
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(location.hash, "#/roster");
+  roots.pop();
+  where.name = "roster";
+  settle();
+  assert.equal(doc.active, opener);
+  assert.equal(navbar.attrs.inert, undefined);
+  assert.equal(screen.attrs.inert, undefined);
+  assert.equal(tabbar.attrs.inert, undefined);
+  assert.equal(state.focusReturn, "");
+
+  const fichaTitle = { tag: "h2", id: "ficha-title" };
+  const fichaSheet = { tag: "div", className: "sheet sheet--half", children: [fichaTitle] };
+  const row = { tag: "button", attrs: { "data-ficha": "28000006" } };
+  screen.children = [row];
+  wire(row, doc);
+  wire(fichaSheet, doc);
+  roots.push(screen.children.length ? fichaSheet : fichaSheet);
+  state.ficha = { id: "28000006" };
+  state.focusReturn = '[data-ficha="28000006"]';
+  where.name = "detalle";
+  settle();
+  assert.equal(doc.active, fichaTitle);
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(state.ficha, null);
+  roots.pop();
+  settle();
+  assert.equal(doc.active, row);
+
+  where.name = "importar";
+  location.hash = "#/importar";
+  state.ficha = null;
+  state.importUi = { phase: "entry", fromBatch: false, needsFocus: false };
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(location.hash, "#/roster");
+  assert.equal(onEsc({ key: "Tab" }), false);
+});
+
+function miniMatches(node, sel) {
+  if (sel.startsWith("#")) return node.id === sel.slice(1);
+  if (sel.startsWith(".")) return (node.className || "").split(/\s+/).includes(sel.slice(1));
+  const eq = sel.match(/^\[([^\]=]+)="([^"]*)"\]$/);
+  if (eq) return (node.attrs || {})[eq[1]] === eq[2];
+  const has = sel.match(/^\[([^\]=]+)\]$/);
+  if (has) return Object.prototype.hasOwnProperty.call(node.attrs || {}, has[1]);
+  return node.tag === sel;
+}
+
+function miniFind(list, sel) {
+  for (const node of list) {
+    if (miniMatches(node, sel)) return node;
+    const nested = miniFind(node.children || [], sel);
+    if (nested) return nested;
+  }
+  return null;
+}
+
+function miniFindAll(list, sel) {
+  const out = [];
+  for (const node of list) {
+    if (miniMatches(node, sel)) out.push(node);
+    out.push(...miniFindAll(node.children || [], sel));
+  }
+  return out;
+}
+
+function miniQuery(list, sel) {
+  const parts = sel.trim().split(/\s+/);
+  let nodes = list;
+  let hit = null;
+  for (const part of parts) {
+    hit = miniFind(nodes, part);
+    if (!hit) return null;
+    nodes = hit.children || [];
+  }
+  return hit;
+}
+
+function miniWire(node, doc, parent) {
+  node.children = node.children || [];
+  node.attrs = node.attrs || {};
+  node.dataset = Object.assign({}, node.dataset || {});
+  node.parentElement = parent || null;
+  node.tabIndex = 0;
+  node.setAttribute = (k, v) => { node.attrs[k] = String(v); };
+  node.removeAttribute = (k) => { delete node.attrs[k]; };
+  node.focus = () => { doc.active = node; };
+  node.contains = (other) => {
+    if (!other) return false;
+    if (other === node) return true;
+    for (const child of node.children || []) {
+      if (typeof child.contains === "function" ? child.contains(other) : child === other) return true;
+    }
+    return false;
+  };
+  node.querySelector = (sel) => miniQuery(node.children, sel);
+  for (const child of node.children) miniWire(child, doc, node);
+}
+
+function miniDocument(roots) {
+  const doc = {
+    active: null,
+    get activeElement() { return this.active; },
+    querySelector: (sel) => miniQuery(roots, sel),
+    querySelectorAll: (sel) => miniFindAll(roots, sel),
+  };
+  for (const node of roots) miniWire(node, doc, null);
+  return doc;
+}
+
+test("1.1.4: al cerrar, el foco vuelve a la fila agrupada que abrió el sheet", () => {
+  const low = { tag: "button", attrs: { "data-ficha": "4000008" }, dataset: { ficha: "4000008" } };
+  const high = { tag: "button", attrs: { "data-ficha": "4000008" }, dataset: { ficha: "4000008" } };
+  const screen = { tag: "main", id: "screen", children: [low, high] };
+  const h2 = { tag: "h2", id: "ficha-title" };
+  const sheet = { tag: "div", className: "sheet", children: [h2] };
+  const roots = [screen, sheet];
+  const doc = miniDocument(roots);
+  const state = {
+    ficha: { id: "4000008" },
+    alert: null,
+    focusReturn: "",
+    sheetKey: "",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where = { name: "detalle" };
+  const route = () => where;
+  const remember = fnFromApp("function rememberOpener(", "rememberOpener", { document: doc, state });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", { document: doc, state, route });
+
+  remember(high, '[data-ficha="4000008"]');
+  assert.deepEqual(state.focusReturn, { sel: '[data-ficha="4000008"]', idx: 1 });
+  settle();
+  assert.equal(doc.active, h2);
+
+  state.ficha = null;
+  roots.pop();
+  settle();
+  assert.equal(doc.active, high);
+
+  const navBtn = { tag: "button", attrs: { "data-go": "#/ajustes" } };
+  const legalBtn = { tag: "button", attrs: { "data-go": "#/ajustes" } };
+  const navbar = { tag: "header", className: "navbar", children: [navBtn] };
+  const roster = { tag: "main", id: "screen", children: [legalBtn] };
+  const aj = { tag: "h2", id: "aj-title" };
+  const ajSheet = { tag: "div", className: "sheet", children: [aj] };
+  const roots2 = [navbar, roster, ajSheet];
+  const doc2 = miniDocument(roots2);
+  const state2 = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "roster",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where2 = { name: "ajustes" };
+  const remember2 = fnFromApp("function rememberOpener(", "rememberOpener", { document: doc2, state: state2 });
+  const settle2 = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc2, state: state2, route: () => where2,
+  });
+  remember2(legalBtn, '[data-go="#/ajustes"]');
+  assert.equal(state2.focusReturn.idx, 1);
+  settle2();
+  assert.equal(doc2.active, aj);
+  roots2.pop();
+  where2.name = "roster";
+  settle2();
+  assert.equal(doc2.active, legalBtn);
+
+  state2.focusReturn = { sel: '[data-go="#/ajustes"]', idx: 9 };
+  state2.sheetKey = "ajustes";
+  settle2();
+  assert.equal(doc2.active, navBtn);
+});
+
+test("1.1.4: un redibujado con el sheet abierto no devuelve el foco al título", () => {
+  const h2 = { tag: "h2", id: "aj-title" };
+  const stop = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  const sheet = { tag: "div", className: "sheet", children: [h2, stop] };
+  const navbar = { tag: "header", className: "navbar" };
+  const screen = { tag: "main", id: "screen" };
+  const tabbar = { tag: "nav", className: "tabbar" };
+  const roots = [navbar, screen, tabbar, sheet];
+  const doc = miniDocument(roots);
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where = { name: "ajustes" };
+  const route = () => where;
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+
+  settle();
+  assert.equal(doc.active, h2);
+
+  doc.active = stop;
+  remember();
+  assert.deepEqual(state.sheetFocusMark, { dl: "stop" });
+  const stop2 = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  sheet.children = [h2, stop2];
+  miniWire(stop2, doc, sheet);
+  settle();
+  assert.equal(doc.active, stop2);
+
+  settle();
+  assert.equal(doc.active, stop2);
+});
+
+test("1.1.4: Esc en un subpaso de Importar no descarta el lote", () => {
+  const state = { ficha: null, alert: null, importUi: { phase: "confirm", fromBatch: false } };
+  const location = { hash: "#/importar" };
+  const where = { name: "importar" };
+  const route = () => where;
+  let backs = 0;
+  const goBackImport = () => { backs += 1; };
+  const onEsc = fnFromApp("function onSheetEscape(", "onSheetEscape", {
+    state, render: () => {}, location, route, goBackImport,
+  });
+
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 1);
+  assert.equal(location.hash, "#/importar");
+
+  state.importUi = { phase: "single", fromBatch: true };
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 2);
+  assert.equal(location.hash, "#/importar");
+
+  state.importUi = { phase: "batch", fromBatch: false };
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 2);
+  assert.equal(location.hash, "#/roster");
+});
+
+test("1.1.4: si al elegir archivos no hay tarjeta, el foco va al título", () => {
+  const h2 = { tag: "h2", id: "im-title" };
+  const sheet = { tag: "div", className: "sheet", children: [h2] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  const state = { importUi: { needsFocus: true } };
+  const focusImport = fnFromApp("function focusImportTarget()", "focusImportTarget", { document: doc, state });
+  focusImport();
+  assert.equal(doc.active, h2);
+  assert.equal(state.importUi.needsFocus, false);
+
+  const card = { tag: "div", attrs: { "data-import-focus": "" } };
+  sheet.children = [h2, card];
+  miniWire(card, doc, sheet);
+  state.importUi.needsFocus = true;
+  doc.active = null;
+  focusImport();
+  assert.equal(doc.active, card);
+});
+
+test("1.1.4: el título del sheet no muestra anillo al recibir el foco", () => {
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  assert.match(css, /\.sheet__bar h2:focus\s*\{\s*outline:\s*none;\s*\}/);
+});
+
+test("1.1.4: Descargar todas y Detener dejan el foco dentro del sheet", () => {
+  const h2 = { tag: "h2", id: "aj-title" };
+  const start = { tag: "button", attrs: { "data-dl": "start" }, dataset: { dl: "start" } };
+  const box = { tag: "div", className: "card offline-dl", children: [start] };
+  const sheet = { tag: "div", className: "sheet", children: [h2, box] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  doc.body = { tag: "body" };
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "ajustes",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const route = () => ({ name: "ajustes" });
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+  const redraw = (next) => {
+    remember();
+    box.children = [next];
+    miniWire(next, doc, box);
+    doc.active = doc.body;
+    settle();
+  };
+
+  doc.active = start;
+  const stop = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  redraw(stop);
+  assert.equal(doc.active, stop);
+  assert.equal(sheet.contains(doc.active), true);
+
+  const again = { tag: "button", attrs: { "data-dl": "start" }, dataset: { dl: "start" } };
+  redraw(again);
+  assert.equal(doc.active, again);
+  assert.equal(sheet.contains(doc.active), true);
+});
+
+test("1.1.4: Esc en un subpaso de Importar deja el foco dentro del sheet", () => {
+  const h2 = { tag: "h2", id: "im-title" };
+  const add = { tag: "button", attrs: { "data-act": "add-account" }, dataset: { act: "add-account" } };
+  const sheet = { tag: "div", className: "sheet", children: [h2, add] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  doc.body = { tag: "body" };
+  doc.active = add;
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "importar",
+    sheetFocusMark: null,
+    importUi: { phase: "confirm", fromBatch: true, needsFocus: false, saveError: false, focus: 0 },
+  };
+  const location = { hash: "#/importar" };
+  const route = () => ({ name: "importar" });
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+  const render = () => {
+    remember();
+    sheet.children = [h2];
+    doc.active = doc.body;
+    settle();
+  };
+  const goBack = fnFromApp("function goBackImport()", "goBackImport", { state, render });
+  const onEsc = fnFromApp("function onSheetEscape(", "onSheetEscape", {
+    state, render, location, route, goBackImport: goBack,
+  });
+
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(location.hash, "#/importar");
+  assert.equal(state.importUi.phase, "batch");
+  assert.equal(sheet.contains(doc.active), true);
+  assert.equal(doc.active, h2);
 });

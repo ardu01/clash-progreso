@@ -1,15 +1,17 @@
 {
   "schema_version": 1,
-  "version_set_imagenes": "v1.3.2",
+  "version_set_imagenes": "v1.4.1",
   "versiones_congeladas": {
     "v1": "v1/ (130 archivos, 41.314.444 bytes)",
     "v1.1": "v1.1/ (148 archivos, 46.506.107 bytes)",
     "v1.2": "v1.2/ (184 archivos, 60.458.372 bytes)",
     "v1.3": "v1.3/ (185 archivos, 60.950.695 bytes)",
     "v1.3.1": "v1.3.1/ (185 archivos, 60.950.695 bytes; cambia solo caja_visible y ocupacion de 107000008)",
-    "v1.3.2": "v1.3.2/ (este set, congelado tras generarse; cambia solo esta cabecera)"
+    "v1.3.2": "v1.3.2/ (185 archivos, 60.950.695 bytes; cambia solo la cabecera respecto a v1.3.1)",
+    "v1.4": "v1.4/ (185 archivos, 60.950.695 bytes; cambian solo caja_visible y ocupacion por el umbral alfa > 8)",
+    "v1.4.1": "v1.4.1/ (este set, congelado tras generarse; cambian solo caja_visible y ocupacion de 6 ítems por el filtro de manchas < 16 px)"
   },
-  "generado": "2026-10-08T07:30:00+02:00",
+  "generado": "2026-10-08T08:21:46+02:00",
   "descripcion": "Mapa ID de exportación de Clash of Clans -> imagen oficial del Supercell Fan Kit (PNG copiado byte a byte, sin modificar).",
   "exportaciones": [
     "c1_principal_2026-10-07.json",
@@ -497,12 +499,12 @@
           "porcentaje_pixeles_transparentes": 43.7,
           "sujeto_toca_esquinas": false,
           "caja_visible": {
-            "x": 34,
+            "x": 71,
             "y": 1,
-            "w": 977,
-            "h": 1058
+            "w": 906,
+            "h": 1031
           },
-          "ocupacion": 0.899,
+          "ocupacion": 0.8124,
           "tipo_visual": "recorte_sobre_transparente",
           "sha256_original": "769c4ef1719c39d355584e3e65ac8bdcc3a42fcefab83d695404d069c3e9ac07",
           "sha256_copia": "769c4ef1719c39d355584e3e65ac8bdcc3a42fcefab83d695404d069c3e9ac07",
@@ -535,11 +537,11 @@
           "sujeto_toca_esquinas": false,
           "caja_visible": {
             "x": 165,
-            "y": 75,
+            "y": 76,
             "w": 648,
-            "h": 856
+            "h": 855
           },
-          "ocupacion": 0.529,
+          "ocupacion": 0.5284,
           "tipo_visual": "recorte_sobre_transparente",
           "sha256_original": "72f9c3189e4d67f028453fd462b7495c5fa0f8549e7123669637912b2f0ac227",
           "sha256_copia": "72f9c3189e4d67f028453fd462b7495c5fa0f8549e7123669637912b2f0ac227",
@@ -645,12 +647,12 @@
           "porcentaje_pixeles_transparentes": 61.9,
           "sujeto_toca_esquinas": false,
           "caja_visible": {
-            "x": 92,
+            "x": 93,
             "y": 120,
-            "w": 839,
+            "w": 837,
             "h": 698
           },
-          "ocupacion": 0.5585,
+          "ocupacion": 0.5572,
           "tipo_visual": "recorte_sobre_transparente",
           "sha256_original": "b5e3fd4b0381a89f057c58ef0275d69ab41d51ec0df6f3087616dee1ed824473",
           "sha256_copia": "b5e3fd4b0381a89f057c58ef0275d69ab41d51ec0df6f3087616dee1ed824473",
@@ -757,11 +759,11 @@
           "sujeto_toca_esquinas": false,
           "caja_visible": {
             "x": 143,
-            "y": 109,
+            "y": 110,
             "w": 761,
-            "h": 778
+            "h": 776
           },
-          "ocupacion": 0.5646,
+          "ocupacion": 0.5632,
           "tipo_visual": "recorte_sobre_transparente",
           "sha256_original": "3ace08d9265d52047146f3b8dd1453ce0bb631c3d6c03de7e1e6be585265bf9a",
           "sha256_copia": "3ace08d9265d52047146f3b8dd1453ce0bb631c3d6c03de7e1e6be585265bf9a",
@@ -889,11 +891,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 2,
-          "y": 0,
+          "y": 1,
           "w": 164,
-          "h": 225
+          "h": 224
         },
-        "ocupacion": 0.988,
+        "ocupacion": 0.9836,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "ac915b88e9de7de63bb8f404cf514bfbc2ef90af73d0c3295c1475389a683a2c",
         "sha256_copia": "ac915b88e9de7de63bb8f404cf514bfbc2ef90af73d0c3295c1475389a683a2c",
@@ -1067,12 +1069,12 @@
         "porcentaje_pixeles_transparentes": 78.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 125,
+          "x": 126,
           "y": 22,
-          "w": 702,
+          "w": 701,
           "h": 893
         },
-        "ocupacion": 0.5978,
+        "ocupacion": 0.597,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "2f71a1d134196f08f2b81e66f5c88fbb76b67c30b8f34332b9f8e18c71453498",
         "sha256_copia": "2f71a1d134196f08f2b81e66f5c88fbb76b67c30b8f34332b9f8e18c71453498",
@@ -1125,11 +1127,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 10,
+          "y": 11,
           "w": 166,
-          "h": 215
+          "h": 214
         },
-        "ocupacion": 0.9556,
+        "ocupacion": 0.9511,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "1b71446745a17011a785cb30780540869c66ee7adbbc8a8b95b7c160bcb73621",
         "sha256_copia": "1b71446745a17011a785cb30780540869c66ee7adbbc8a8b95b7c160bcb73621",
@@ -1181,12 +1183,12 @@
         "porcentaje_pixeles_transparentes": 34.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 20,
-          "y": 0,
-          "w": 472,
-          "h": 512
+          "x": 29,
+          "y": 9,
+          "w": 454,
+          "h": 503
         },
-        "ocupacion": 0.9219,
+        "ocupacion": 0.8711,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "34bae0c1c4e43ed992702688a110155056091d2b6fcaadbea7765556657a28f7",
         "sha256_copia": "34bae0c1c4e43ed992702688a110155056091d2b6fcaadbea7765556657a28f7",
@@ -1240,12 +1242,12 @@
         "porcentaje_pixeles_transparentes": 38.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 10,
-          "y": 53,
-          "w": 499,
-          "h": 450
+          "x": 19,
+          "y": 61,
+          "w": 480,
+          "h": 433
         },
-        "ocupacion": 0.8566,
+        "ocupacion": 0.7928,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "5d247dafdb489ee535ecf8a39350598cc8f312d49a379bca930edd00f043afed",
         "sha256_copia": "5d247dafdb489ee535ecf8a39350598cc8f312d49a379bca930edd00f043afed",
@@ -1299,12 +1301,12 @@
         "porcentaje_pixeles_transparentes": 32.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 0,
-          "w": 492,
-          "h": 512
+          "x": 4,
+          "y": 3,
+          "w": 479,
+          "h": 509
         },
-        "ocupacion": 0.9609,
+        "ocupacion": 0.9301,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "1d75408da801575b2659c10f17e2b781f149774aa4eb4483522f8c58573943d5",
         "sha256_copia": "1d75408da801575b2659c10f17e2b781f149774aa4eb4483522f8c58573943d5",
@@ -1360,12 +1362,12 @@
         "porcentaje_pixeles_transparentes": 44.3,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 5,
-          "y": 67,
-          "w": 503,
-          "h": 438
+          "x": 7,
+          "y": 69,
+          "w": 498,
+          "h": 434
         },
-        "ocupacion": 0.8404,
+        "ocupacion": 0.8245,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "a58fd6b08de5a619de83d3b7830dae97efbf3f85edcda9c277667af932fce858",
         "sha256_copia": "a58fd6b08de5a619de83d3b7830dae97efbf3f85edcda9c277667af932fce858",
@@ -1421,12 +1423,12 @@
         "porcentaje_pixeles_transparentes": 40.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 9,
-          "y": 18,
-          "w": 497,
-          "h": 494
+          "x": 18,
+          "y": 27,
+          "w": 479,
+          "h": 476
         },
-        "ocupacion": 0.9366,
+        "ocupacion": 0.8698,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "faef8427b17416e12bfcb4c969f5dfc8426910621a1db10aaa60676db648116b",
         "sha256_copia": "faef8427b17416e12bfcb4c969f5dfc8426910621a1db10aaa60676db648116b",
@@ -1481,12 +1483,12 @@
         "porcentaje_pixeles_transparentes": 57.7,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 8,
+          "x": 11,
           "y": 0,
-          "w": 496,
-          "h": 500
+          "w": 490,
+          "h": 498
         },
-        "ocupacion": 0.946,
+        "ocupacion": 0.9309,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "69d71dfa6c0d6a8cd15ec1bb81a23f54ef0094929c92db22bf5494d1c3c6f722",
         "sha256_copia": "69d71dfa6c0d6a8cd15ec1bb81a23f54ef0094929c92db22bf5494d1c3c6f722",
@@ -1540,12 +1542,12 @@
         "porcentaje_pixeles_transparentes": 38.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 13,
-          "y": 49,
-          "w": 498,
-          "h": 447
+          "x": 22,
+          "y": 59,
+          "w": 480,
+          "h": 428
         },
-        "ocupacion": 0.8492,
+        "ocupacion": 0.7837,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "78c0751c1903f509236bba965404456f04a2aa770887d6365d7caf5c1c1706be",
         "sha256_copia": "78c0751c1903f509236bba965404456f04a2aa770887d6365d7caf5c1c1706be",
@@ -1599,12 +1601,12 @@
         "porcentaje_pixeles_transparentes": 59.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 37,
-          "y": 38,
-          "w": 433,
-          "h": 446
+          "x": 41,
+          "y": 42,
+          "w": 425,
+          "h": 437
         },
-        "ocupacion": 0.7367,
+        "ocupacion": 0.7085,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7ff1033b20bd17ef26d27820c17598d79562fd0e99de2522f9cee2777c793dfa",
         "sha256_copia": "7ff1033b20bd17ef26d27820c17598d79562fd0e99de2522f9cee2777c793dfa",
@@ -1665,12 +1667,12 @@
         "porcentaje_pixeles_transparentes": 39.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 27,
-          "y": 43,
-          "w": 485,
-          "h": 464
+          "x": 37,
+          "y": 53,
+          "w": 469,
+          "h": 445
         },
-        "ocupacion": 0.8585,
+        "ocupacion": 0.7961,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "76107d976d11a7003d62dc176d770a9f1bb565b26a0c54ee9a11a9fdf563bb99",
         "sha256_copia": "76107d976d11a7003d62dc176d770a9f1bb565b26a0c54ee9a11a9fdf563bb99",
@@ -1723,12 +1725,12 @@
         "porcentaje_pixeles_transparentes": 38.7,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 15,
-          "y": 0,
-          "w": 486,
-          "h": 512
+          "x": 24,
+          "y": 1,
+          "w": 468,
+          "h": 509
         },
-        "ocupacion": 0.9492,
+        "ocupacion": 0.9087,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "4b27144d2c01af293cb4fc7e0f4fa232af8c6ace86d1f8888c8af51ed49c3248",
         "sha256_copia": "4b27144d2c01af293cb4fc7e0f4fa232af8c6ace86d1f8888c8af51ed49c3248",
@@ -1787,12 +1789,12 @@
         "porcentaje_pixeles_transparentes": 48.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 22,
-          "y": 6,
-          "w": 463,
-          "h": 488
+          "x": 29,
+          "y": 13,
+          "w": 448,
+          "h": 474
         },
-        "ocupacion": 0.8619,
+        "ocupacion": 0.8101,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "277c8eb7945b08d259dc6e373c03600af187bf168ba0a9cec78c64652bca510a",
         "sha256_copia": "277c8eb7945b08d259dc6e373c03600af187bf168ba0a9cec78c64652bca510a",
@@ -1845,12 +1847,12 @@
         "porcentaje_pixeles_transparentes": 58.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 48,
-          "w": 511,
-          "h": 399
+          "x": 1,
+          "y": 56,
+          "w": 501,
+          "h": 383
         },
-        "ocupacion": 0.7778,
+        "ocupacion": 0.732,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "2990641fa10f71ead1bf093600dc708b1a7a54641864ea233bdcd68326e3da8e",
         "sha256_copia": "2990641fa10f71ead1bf093600dc708b1a7a54641864ea233bdcd68326e3da8e",
@@ -1903,12 +1905,12 @@
         "porcentaje_pixeles_transparentes": 45.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 20,
-          "y": 28,
-          "w": 481,
-          "h": 472
+          "x": 29,
+          "y": 37,
+          "w": 462,
+          "h": 454
         },
-        "ocupacion": 0.8661,
+        "ocupacion": 0.8001,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e0d839a3233874d6a441a87830f3124e393bf00a18e758b62036adbf8ec764bb",
         "sha256_copia": "e0d839a3233874d6a441a87830f3124e393bf00a18e758b62036adbf8ec764bb",
@@ -2025,12 +2027,12 @@
         "porcentaje_pixeles_transparentes": 60.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 72,
-          "y": 90,
-          "w": 372,
-          "h": 362
+          "x": 81,
+          "y": 100,
+          "w": 354,
+          "h": 343
         },
-        "ocupacion": 0.5137,
+        "ocupacion": 0.4632,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "eb13e030f8da5b28be4b122dd8c6e8f5c51bc35805a77491a4e44f19e2128446",
         "sha256_copia": "eb13e030f8da5b28be4b122dd8c6e8f5c51bc35805a77491a4e44f19e2128446",
@@ -2089,11 +2091,11 @@
         "sujeto_toca_esquinas": true,
         "caja_visible": {
           "x": 0,
-          "y": 41,
-          "w": 453,
-          "h": 471
+          "y": 49,
+          "w": 446,
+          "h": 463
         },
-        "ocupacion": 0.8139,
+        "ocupacion": 0.7877,
         "tipo_visual": "retrato_cortado_en_borde",
         "sha256_original": "5a9690de022f6fa39146f3a79cbd99bd6c38456bd94dcfefaa643bc86b551ca2",
         "sha256_copia": "5a9690de022f6fa39146f3a79cbd99bd6c38456bd94dcfefaa643bc86b551ca2",
@@ -2173,12 +2175,12 @@
         "porcentaje_pixeles_transparentes": 78.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 11,
-          "y": 21,
-          "w": 477,
-          "h": 477
+          "x": 16,
+          "y": 26,
+          "w": 467,
+          "h": 465
         },
-        "ocupacion": 0.868,
+        "ocupacion": 0.8284,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "8035ca90905ef4c55f436eca223b97e5d585a723220ac8fe055584a3d5dd6365",
         "sha256_copia": "8035ca90905ef4c55f436eca223b97e5d585a723220ac8fe055584a3d5dd6365",
@@ -2232,12 +2234,12 @@
         "porcentaje_pixeles_transparentes": 78.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 105,
-          "y": 75,
-          "w": 205,
-          "h": 432
+          "x": 113,
+          "y": 82,
+          "w": 189,
+          "h": 417
         },
-        "ocupacion": 0.3378,
+        "ocupacion": 0.3006,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "3a0fe53396fd22d1379071fedd4f03c840d47a46c4af59b5d9e49c524669be7e",
         "sha256_copia": "3a0fe53396fd22d1379071fedd4f03c840d47a46c4af59b5d9e49c524669be7e",
@@ -2291,12 +2293,12 @@
         "porcentaje_pixeles_transparentes": 28.7,
         "sujeto_toca_esquinas": true,
         "caja_visible": {
-          "x": 50,
+          "x": 58,
           "y": 0,
-          "w": 462,
+          "w": 454,
           "h": 512
         },
-        "ocupacion": 0.9023,
+        "ocupacion": 0.8867,
         "tipo_visual": "retrato_cortado_en_borde",
         "sha256_original": "f6c4a87c0004147dd5668c67c9b16ecdc4361adae1cdcb4177c13c6630cb4da3",
         "sha256_copia": "f6c4a87c0004147dd5668c67c9b16ecdc4361adae1cdcb4177c13c6630cb4da3",
@@ -2351,12 +2353,12 @@
         "porcentaje_pixeles_transparentes": 31.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 0,
-          "w": 512,
-          "h": 604
+          "x": 13,
+          "y": 6,
+          "w": 489,
+          "h": 587
         },
-        "ocupacion": 0.9695,
+        "ocupacion": 0.8999,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "de99055a3f85f6b43f56106171f887bfa96110fc3aaa6c97999f9ea86856ab5d",
         "sha256_copia": "de99055a3f85f6b43f56106171f887bfa96110fc3aaa6c97999f9ea86856ab5d",
@@ -2410,11 +2412,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 6,
-          "w": 493,
-          "h": 486
+          "y": 11,
+          "w": 489,
+          "h": 477
         },
-        "ocupacion": 0.914,
+        "ocupacion": 0.8898,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "f9a979099020c9caf587325452f247eba526df3ab6f76b243e86d4777ddc0558",
         "sha256_copia": "f9a979099020c9caf587325452f247eba526df3ab6f76b243e86d4777ddc0558",
@@ -2467,12 +2469,12 @@
         "porcentaje_pixeles_transparentes": 56.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 43,
-          "y": 36,
-          "w": 439,
-          "h": 449
+          "x": 45,
+          "y": 37,
+          "w": 435,
+          "h": 446
         },
-        "ocupacion": 0.7519,
+        "ocupacion": 0.7401,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "08c05d893b112131b2213be3b2936290877eae53e832e2c81d8f294182e7f457",
         "sha256_copia": "08c05d893b112131b2213be3b2936290877eae53e832e2c81d8f294182e7f457",
@@ -2526,12 +2528,12 @@
         "porcentaje_pixeles_transparentes": 41.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 9,
-          "y": 18,
-          "w": 497,
-          "h": 494
+          "x": 18,
+          "y": 27,
+          "w": 479,
+          "h": 476
         },
-        "ocupacion": 0.9366,
+        "ocupacion": 0.8698,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7ef1c5ca106b05c11c088f6d68fc7a3a3cc19f6f48306e89524d9426669aa5ef",
         "sha256_copia": "7ef1c5ca106b05c11c088f6d68fc7a3a3cc19f6f48306e89524d9426669aa5ef",
@@ -2585,12 +2587,12 @@
         "porcentaje_pixeles_transparentes": 56.8,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 24,
-          "y": 42,
-          "w": 295,
-          "h": 258
+          "x": 31,
+          "y": 48,
+          "w": 282,
+          "h": 245
         },
-        "ocupacion": 0.6905,
+        "ocupacion": 0.6268,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e03c742372a85cd23c0b19818fd8cea61df79aaad72d0ce382a07491f7299073",
         "sha256_copia": "e03c742372a85cd23c0b19818fd8cea61df79aaad72d0ce382a07491f7299073",
@@ -2644,12 +2646,12 @@
         "porcentaje_pixeles_transparentes": 47.4,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 60,
-          "y": 8,
-          "w": 381,
-          "h": 498
+          "x": 62,
+          "y": 10,
+          "w": 377,
+          "h": 495
         },
-        "ocupacion": 0.7238,
+        "ocupacion": 0.7119,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "35be5ab075e7e5d9e087a32ebdfb46f65c8cf098abdf500655bfcc02b6af5309",
         "sha256_copia": "35be5ab075e7e5d9e087a32ebdfb46f65c8cf098abdf500655bfcc02b6af5309",
@@ -2705,12 +2707,12 @@
         "porcentaje_pixeles_transparentes": 31.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 0,
-          "w": 332,
-          "h": 332
+          "x": 5,
+          "y": 7,
+          "w": 321,
+          "h": 318
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9261,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "114fa8f5ff38ed15cdb00ff3c275b3452980eb44bda348e4c8eb4930a6093ece",
         "sha256_copia": "114fa8f5ff38ed15cdb00ff3c275b3452980eb44bda348e4c8eb4930a6093ece",
@@ -2763,12 +2765,12 @@
         "porcentaje_pixeles_transparentes": 44.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 20,
-          "y": 1,
-          "w": 270,
-          "h": 327
+          "x": 21,
+          "y": 2,
+          "w": 267,
+          "h": 325
         },
-        "ocupacion": 0.801,
+        "ocupacion": 0.7873,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "5bc342cb71f42d105574f42ff5e62468e997b1ade6bff9d6d1747bfafc325c26",
         "sha256_copia": "5bc342cb71f42d105574f42ff5e62468e997b1ade6bff9d6d1747bfafc325c26",
@@ -2825,11 +2827,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 17,
-          "w": 478,
-          "h": 495
+          "y": 19,
+          "w": 477,
+          "h": 493
         },
-        "ocupacion": 0.9026,
+        "ocupacion": 0.8971,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "186e3c67b560baff0187f3028f8a62ea65c779e557f230aa9c624f6695503e84",
         "sha256_copia": "186e3c67b560baff0187f3028f8a62ea65c779e557f230aa9c624f6695503e84",
@@ -2884,12 +2886,12 @@
         "porcentaje_pixeles_transparentes": 49.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 44,
-          "y": 58,
-          "w": 415,
-          "h": 411
+          "x": 45,
+          "y": 59,
+          "w": 412,
+          "h": 408
         },
-        "ocupacion": 0.6507,
+        "ocupacion": 0.6412,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7243951fc185ca2db0349aa2b06f9f1b730bfd1256f02f2f6f34febc0a80f871",
         "sha256_copia": "7243951fc185ca2db0349aa2b06f9f1b730bfd1256f02f2f6f34febc0a80f871",
@@ -2942,12 +2944,12 @@
         "porcentaje_pixeles_transparentes": 53.3,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 26,
-          "y": 101,
-          "w": 451,
-          "h": 374
+          "x": 34,
+          "y": 110,
+          "w": 434,
+          "h": 356
         },
-        "ocupacion": 0.6434,
+        "ocupacion": 0.5894,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "c15b6d20a8c881d36f041f8033e4bbf78478e822255d9bb656ede1bb2d3bc174",
         "sha256_copia": "c15b6d20a8c881d36f041f8033e4bbf78478e822255d9bb656ede1bb2d3bc174",
@@ -3030,12 +3032,12 @@
         "porcentaje_pixeles_transparentes": 38.7,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 18,
-          "w": 499,
-          "h": 455
+          "x": 10,
+          "y": 29,
+          "w": 478,
+          "h": 443
         },
-        "ocupacion": 0.9375,
+        "ocupacion": 0.8744,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "82841bba2abec4dfec9638371ef6ee610bc1d2df6b0777d7986e6a0488709faa",
         "sha256_copia": "82841bba2abec4dfec9638371ef6ee610bc1d2df6b0777d7986e6a0488709faa",
@@ -3088,12 +3090,12 @@
         "porcentaje_pixeles_transparentes": 50.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 30,
-          "y": 25,
-          "w": 458,
-          "h": 460
+          "x": 33,
+          "y": 27,
+          "w": 452,
+          "h": 455
         },
-        "ocupacion": 0.8037,
+        "ocupacion": 0.7845,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "1d19ee5ec6a982ff7072c7f12b652a5a9b36206d36b48d514f19d1c7b8279ca4",
         "sha256_copia": "1d19ee5ec6a982ff7072c7f12b652a5a9b36206d36b48d514f19d1c7b8279ca4",
@@ -3146,12 +3148,12 @@
         "porcentaje_pixeles_transparentes": 79.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 18,
-          "y": 24,
-          "w": 296,
-          "h": 284
+          "x": 19,
+          "y": 25,
+          "w": 294,
+          "h": 282
         },
-        "ocupacion": 0.3207,
+        "ocupacion": 0.3163,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "814c2351c4c908a64b90d62469ab690f2e4ce2941fb0cdc83682c84d936ee98d",
         "sha256_copia": "814c2351c4c908a64b90d62469ab690f2e4ce2941fb0cdc83682c84d936ee98d",
@@ -3207,12 +3209,12 @@
         "porcentaje_pixeles_transparentes": 55.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 55,
-          "y": 27,
-          "w": 387,
-          "h": 457
+          "x": 57,
+          "y": 29,
+          "w": 383,
+          "h": 453
         },
-        "ocupacion": 0.6747,
+        "ocupacion": 0.6618,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "27f7d2a579d56804b951c7108d8a53881de9497ec6e0fe6cc47a17a4dffd1f41",
         "sha256_copia": "27f7d2a579d56804b951c7108d8a53881de9497ec6e0fe6cc47a17a4dffd1f41",
@@ -3267,12 +3269,12 @@
         "porcentaje_pixeles_transparentes": 59.7,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 47,
-          "y": 62,
-          "w": 399,
-          "h": 356
+          "x": 49,
+          "y": 64,
+          "w": 395,
+          "h": 352
         },
-        "ocupacion": 0.5419,
+        "ocupacion": 0.5304,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e456ab5365baa658d4627f03223e681381cd74df70761f3a96761b4c8d3b79b8",
         "sha256_copia": "e456ab5365baa658d4627f03223e681381cd74df70761f3a96761b4c8d3b79b8",
@@ -3327,12 +3329,12 @@
         "porcentaje_pixeles_transparentes": 61.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 92,
-          "y": 38,
-          "w": 348,
-          "h": 425
+          "x": 94,
+          "y": 40,
+          "w": 344,
+          "h": 421
         },
-        "ocupacion": 0.5642,
+        "ocupacion": 0.5525,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "11f2b7b5390552c435f8299b9e47b0b177aaee6bfa625b044c245b7092e0454f",
         "sha256_copia": "11f2b7b5390552c435f8299b9e47b0b177aaee6bfa625b044c245b7092e0454f",
@@ -3430,12 +3432,12 @@
         "porcentaje_pixeles_transparentes": 37.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 11,
+          "x": 12,
           "y": 3,
-          "w": 285,
+          "w": 282,
           "h": 316
         },
-        "ocupacion": 0.827,
+        "ocupacion": 0.8183,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "6d8ae009185eb6d93bc171ffd7fbe6a993ae407a6d0a4873331f9bfad464faa7",
         "sha256_copia": "6d8ae009185eb6d93bc171ffd7fbe6a993ae407a6d0a4873331f9bfad464faa7",
@@ -3663,11 +3665,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 2,
+          "y": 3,
           "w": 166,
-          "h": 164
+          "h": 163
         },
-        "ocupacion": 0.988,
+        "ocupacion": 0.9819,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "650954a22257de87d3a4c2b02d3cef9fcd2e03a74491e8bd8fb1f5abcd1d2b96",
         "sha256_copia": "650954a22257de87d3a4c2b02d3cef9fcd2e03a74491e8bd8fb1f5abcd1d2b96",
@@ -3905,11 +3907,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 1,
+          "y": 2,
           "w": 166,
-          "h": 165
+          "h": 164
         },
-        "ocupacion": 0.994,
+        "ocupacion": 0.988,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e78696138cf49077a17ec69b4dec6f1e674e82624b63ed5586b59c90f240d046",
         "sha256_copia": "e78696138cf49077a17ec69b4dec6f1e674e82624b63ed5586b59c90f240d046",
@@ -4026,10 +4028,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 154,
+          "w": 153,
           "h": 166
         },
-        "ocupacion": 0.9277,
+        "ocupacion": 0.9217,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "d60b089c9bf99cd53d39d1356bf39da60ceb8dc46862ddfa4a1bb125a78ef69c",
         "sha256_copia": "d60b089c9bf99cd53d39d1356bf39da60ceb8dc46862ddfa4a1bb125a78ef69c",
@@ -4628,11 +4630,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 126,
-          "y": 41,
+          "y": 51,
           "w": 750,
-          "h": 900
+          "h": 890
         },
-        "ocupacion": 0.675,
+        "ocupacion": 0.6675,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7b685df4414d78aea877959430608e9f81ad1e76cda33b38bd23167e1de7ac1d",
         "sha256_copia": "7b685df4414d78aea877959430608e9f81ad1e76cda33b38bd23167e1de7ac1d",
@@ -4751,10 +4753,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 163,
+          "w": 162,
           "h": 166
         },
-        "ocupacion": 0.9819,
+        "ocupacion": 0.9759,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "d1e74790d5d2f73e6344e5f565cc96047d9ab903d28f0e27f2ec475ab42e684b",
         "sha256_copia": "d1e74790d5d2f73e6344e5f565cc96047d9ab903d28f0e27f2ec475ab42e684b",
@@ -5166,11 +5168,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 16,
-          "y": 101,
+          "y": 102,
           "w": 778,
-          "h": 715
+          "h": 714
         },
-        "ocupacion": 0.7442,
+        "ocupacion": 0.7432,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "8f345583b737d49f6a867705c89e85348f3a1d76f6f5e70d0a5f5aa845f3968d",
         "sha256_copia": "8f345583b737d49f6a867705c89e85348f3a1d76f6f5e70d0a5f5aa845f3968d",
@@ -5280,9 +5282,9 @@
           "x": 74,
           "y": 87,
           "w": 847,
-          "h": 937
+          "h": 888
         },
-        "ocupacion": 0.7569,
+        "ocupacion": 0.7173,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "b51e93ab1347c6cf65e96531713d0e75097c1968c555d87be006289fac22f719",
         "sha256_copia": "b51e93ab1347c6cf65e96531713d0e75097c1968c555d87be006289fac22f719",
@@ -5334,11 +5336,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 149,
-          "y": 47,
-          "w": 722,
-          "h": 977
+          "y": 48,
+          "w": 721,
+          "h": 976
         },
-        "ocupacion": 0.6727,
+        "ocupacion": 0.6711,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e8c1d0a07a127477a70a629f7b09bb0d3592735b5966bf4d3a6035da374c9c9b",
         "sha256_copia": "e8c1d0a07a127477a70a629f7b09bb0d3592735b5966bf4d3a6035da374c9c9b",
@@ -5390,12 +5392,12 @@
         "porcentaje_pixeles_transparentes": 29.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 5,
+          "x": 7,
           "y": 0,
-          "w": 110,
+          "w": 106,
           "h": 120
         },
-        "ocupacion": 0.9167,
+        "ocupacion": 0.8833,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "4564ce011ad7b9d0f8983d8a2712aee78f449713c15252b71325d707ff9777ea",
         "sha256_copia": "4564ce011ad7b9d0f8983d8a2712aee78f449713c15252b71325d707ff9777ea",
@@ -5447,12 +5449,12 @@
         "porcentaje_pixeles_transparentes": 31.3,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 2,
+          "x": 4,
           "y": 0,
-          "w": 115,
+          "w": 111,
           "h": 120
         },
-        "ocupacion": 0.9583,
+        "ocupacion": 0.925,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "82303d9346b1126d766f4808b128d142e03e2d98d7f5a3302afdb3c87d417e4d",
         "sha256_copia": "82303d9346b1126d766f4808b128d142e03e2d98d7f5a3302afdb3c87d417e4d",
@@ -5503,12 +5505,12 @@
         "porcentaje_pixeles_transparentes": 74.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 113,
-          "y": 83,
-          "w": 274,
-          "h": 348
+          "x": 114,
+          "y": 84,
+          "w": 272,
+          "h": 347
         },
-        "ocupacion": 0.3637,
+        "ocupacion": 0.36,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "6cad3481e92201cfca3dda8d96a380eadf76a2ab7e147b568d4362b57d95e547",
         "sha256_copia": "6cad3481e92201cfca3dda8d96a380eadf76a2ab7e147b568d4362b57d95e547",
@@ -5561,11 +5563,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 107,
-          "y": 61,
+          "y": 62,
           "w": 810,
-          "h": 951
+          "h": 949
         },
-        "ocupacion": 0.7346,
+        "ocupacion": 0.7331,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "a1da44bac97ad120e462dea36926305107d370495a3e35f08f5644b9a125f76f",
         "sha256_copia": "a1da44bac97ad120e462dea36926305107d370495a3e35f08f5644b9a125f76f",
@@ -5674,12 +5676,12 @@
         "porcentaje_pixeles_transparentes": 45.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 13,
+          "x": 15,
           "y": 0,
-          "w": 94,
+          "w": 90,
           "h": 120
         },
-        "ocupacion": 0.7833,
+        "ocupacion": 0.75,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "958e6a2ba0cff4ac77e7332cf693856656f9bc80cfaf4f91b3372c8b58bba486",
         "sha256_copia": "958e6a2ba0cff4ac77e7332cf693856656f9bc80cfaf4f91b3372c8b58bba486",
@@ -5786,12 +5788,12 @@
         "porcentaje_pixeles_transparentes": 38.1,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 53,
-          "y": 8,
-          "w": 459,
-          "h": 587
+          "x": 54,
+          "y": 9,
+          "w": 457,
+          "h": 585
         },
-        "ocupacion": 0.7484,
+        "ocupacion": 0.7426,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "a735e77737545587ee333b99efea6161eb7aefe2850c13b24d9b053880446666",
         "sha256_copia": "a735e77737545587ee333b99efea6161eb7aefe2850c13b24d9b053880446666",
@@ -6388,11 +6390,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 38,
+          "y": 76,
           "w": 1024,
-          "h": 986
+          "h": 948
         },
-        "ocupacion": 0.9629,
+        "ocupacion": 0.9258,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "ecc986a06037c56e119295b3addfb7a155d53d89cdbde8c3bc164dbf60465a6e",
         "sha256_copia": "ecc986a06037c56e119295b3addfb7a155d53d89cdbde8c3bc164dbf60465a6e",
@@ -6528,11 +6530,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 0,
+          "y": 8,
           "w": 120,
-          "h": 120
+          "h": 112
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9333,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "d53e43deb066775f7fc23a431e9aaa3314bda3f1cb91cd30fa7f41140bbb03bd",
         "sha256_copia": "d53e43deb066775f7fc23a431e9aaa3314bda3f1cb91cd30fa7f41140bbb03bd",
@@ -6646,11 +6648,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 14,
+          "y": 16,
           "w": 166,
-          "h": 151
+          "h": 149
         },
-        "ocupacion": 0.9096,
+        "ocupacion": 0.8976,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "27acc1bd851dd5f9b3a969803907700832c5903093a0763ee5b0c8ed3f3f50c3",
         "sha256_copia": "27acc1bd851dd5f9b3a969803907700832c5903093a0763ee5b0c8ed3f3f50c3",
@@ -6872,12 +6874,12 @@
         "porcentaje_pixeles_transparentes": 27.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 1,
+          "x": 3,
           "y": 0,
-          "w": 118,
+          "w": 114,
           "h": 120
         },
-        "ocupacion": 0.9833,
+        "ocupacion": 0.95,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "c68ce28005918bad1cd42ecacf4adbbaa3dfbb5463f86bf4b69b69a2ff18c70d",
         "sha256_copia": "c68ce28005918bad1cd42ecacf4adbbaa3dfbb5463f86bf4b69b69a2ff18c70d",
@@ -6930,11 +6932,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 7,
+          "y": 9,
           "w": 120,
-          "h": 113
+          "h": 111
         },
-        "ocupacion": 0.9417,
+        "ocupacion": 0.925,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "84be7596811e4e7b2f8b734d9492f9c10e19deb9d00623878a907f32335b9ede",
         "sha256_copia": "84be7596811e4e7b2f8b734d9492f9c10e19deb9d00623878a907f32335b9ede",
@@ -7045,10 +7047,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 120,
+          "w": 117,
           "h": 120
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.975,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "fe9e2bb6a9ff9fb15b216066e80b6a171fef8d70557d7cc4e38bbc344abd5e6d",
         "sha256_copia": "fe9e2bb6a9ff9fb15b216066e80b6a171fef8d70557d7cc4e38bbc344abd5e6d",
@@ -7102,10 +7104,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 120,
+          "w": 119,
           "h": 120
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9917,
         "tipo_visual": "retrato_cortado_en_borde",
         "sha256_original": "c6e5f74d22b7f9e03e0410a9258eaec6ea995930419c55bc752186cb2da2102e",
         "sha256_copia": "c6e5f74d22b7f9e03e0410a9258eaec6ea995930419c55bc752186cb2da2102e",
@@ -7273,10 +7275,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 120,
+          "w": 119,
           "h": 120
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9917,
         "tipo_visual": "retrato_cortado_en_borde",
         "sha256_original": "482e25023b54ed363cde8cdceb8834047c6408c85931104a256459644613b9bb",
         "sha256_copia": "482e25023b54ed363cde8cdceb8834047c6408c85931104a256459644613b9bb",
@@ -7383,12 +7385,12 @@
         "porcentaje_pixeles_transparentes": 84.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 272,
-          "y": 294,
-          "w": 471,
-          "h": 591
+          "x": 273,
+          "y": 297,
+          "w": 469,
+          "h": 588
         },
-        "ocupacion": 0.2655,
+        "ocupacion": 0.263,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "5dde663d16251d049c0b6c77cc029aa74ce3192969cb58e3ef07dced29981d4f",
         "sha256_copia": "5dde663d16251d049c0b6c77cc029aa74ce3192969cb58e3ef07dced29981d4f",
@@ -7440,11 +7442,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 125,
-          "y": 31,
+          "y": 32,
           "w": 997,
-          "h": 893
+          "h": 892
         },
-        "ocupacion": 0.687,
+        "ocupacion": 0.6862,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "dde547d78ec68865f1cffd9084de99abeebdb68fcfe93fb9faac6f4001ef324f",
         "sha256_copia": "dde547d78ec68865f1cffd9084de99abeebdb68fcfe93fb9faac6f4001ef324f",
@@ -7506,12 +7508,12 @@
         "porcentaje_pixeles_transparentes": 76.4,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 27,
+          "x": 28,
           "y": 44,
-          "w": 146,
+          "w": 144,
           "h": 112
         },
-        "ocupacion": 0.4088,
+        "ocupacion": 0.4032,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "d857044c567858d66d2c53237627aaf2aca9b327f77a74b23e3eb54c8639e37e",
         "sha256_copia": "d857044c567858d66d2c53237627aaf2aca9b327f77a74b23e3eb54c8639e37e",
@@ -7583,12 +7585,12 @@
         "porcentaje_pixeles_transparentes": 46.3,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 15,
-          "y": 10,
-          "w": 168,
-          "h": 222
+          "x": 17,
+          "y": 12,
+          "w": 164,
+          "h": 218
         },
-        "ocupacion": 0.8012,
+        "ocupacion": 0.768,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "3ab208f8d3ac9b95aa13df95a7ee8aa54dce3c9092acb06e4eed123c28284913",
         "sha256_copia": "3ab208f8d3ac9b95aa13df95a7ee8aa54dce3c9092acb06e4eed123c28284913",
@@ -7786,12 +7788,12 @@
         "porcentaje_pixeles_transparentes": 97.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 808,
+          "x": 809,
           "y": 984,
-          "w": 436,
+          "w": 435,
           "h": 455
         },
-        "ocupacion": 0.0473,
+        "ocupacion": 0.0472,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "63f80a49426406f32c756ce22241f9d6948f192fbfa66bf309cc974ee066a291",
         "sha256_copia": "63f80a49426406f32c756ce22241f9d6948f192fbfa66bf309cc974ee066a291",
@@ -7861,12 +7863,12 @@
         "porcentaje_pixeles_transparentes": 45.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
-          "y": 0,
-          "w": 80,
-          "h": 119
+          "x": 2,
+          "y": 2,
+          "w": 76,
+          "h": 117
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.934,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "0da92a7b0326d7eac4f856d4a688c8db91702928a06c98ba2984740cda53f6bf",
         "sha256_copia": "0da92a7b0326d7eac4f856d4a688c8db91702928a06c98ba2984740cda53f6bf",
@@ -8118,12 +8120,12 @@
         "porcentaje_pixeles_transparentes": 44.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 1,
+          "x": 4,
           "y": 8,
-          "w": 189,
-          "h": 222
+          "w": 183,
+          "h": 221
         },
-        "ocupacion": 0.9601,
+        "ocupacion": 0.9255,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7f7b62535508d63027275ba4bc638b30cd7910924df33f75e4a6635f245ea88c",
         "sha256_copia": "7f7b62535508d63027275ba4bc638b30cd7910924df33f75e4a6635f245ea88c",
@@ -8316,12 +8318,12 @@
         "porcentaje_pixeles_transparentes": 51.8,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 4,
+          "x": 5,
           "y": 29,
-          "w": 392,
+          "w": 391,
           "h": 542
         },
-        "ocupacion": 0.8853,
+        "ocupacion": 0.883,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "bdd9d6968a8fff82a1eae4a2d230498ce5e63decdf75a7877a308bf23be9212b",
         "sha256_copia": "bdd9d6968a8fff82a1eae4a2d230498ce5e63decdf75a7877a308bf23be9212b",
@@ -8573,12 +8575,12 @@
         "porcentaje_pixeles_transparentes": 66.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 113,
-          "y": 37,
-          "w": 369,
-          "h": 541
+          "x": 121,
+          "y": 38,
+          "w": 350,
+          "h": 536
         },
-        "ocupacion": 0.5545,
+        "ocupacion": 0.5211,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "13fb14f4230e28b844d64db31e8af0e85419759c9a70ff24eaf2360034ca635a",
         "sha256_copia": "13fb14f4230e28b844d64db31e8af0e85419759c9a70ff24eaf2360034ca635a",
@@ -8631,12 +8633,12 @@
         "porcentaje_pixeles_transparentes": 46.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 14,
-          "y": 53,
-          "w": 581,
-          "h": 546
+          "x": 38,
+          "y": 56,
+          "w": 532,
+          "h": 526
         },
-        "ocupacion": 0.8812,
+        "ocupacion": 0.7773,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "48103b7d91b5579ff64e28e359c06cd14319b437e4f9c122d11ec8c3720b0c76",
         "sha256_copia": "48103b7d91b5579ff64e28e359c06cd14319b437e4f9c122d11ec8c3720b0c76",
@@ -8720,12 +8722,12 @@
         "porcentaje_pixeles_transparentes": 89.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 41,
-          "y": 32,
-          "w": 45,
-          "h": 48
+          "x": 43,
+          "y": 33,
+          "w": 43,
+          "h": 47
         },
-        "ocupacion": 0.1434,
+        "ocupacion": 0.1342,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "dd264d1980e790fc6f47d194204e485fbcafd1d3c065fcd9318a0c0bc7de1c65",
         "sha256_copia": "dd264d1980e790fc6f47d194204e485fbcafd1d3c065fcd9318a0c0bc7de1c65",
@@ -8845,12 +8847,12 @@
         "porcentaje_pixeles_transparentes": 25.5,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
+          "x": 7,
           "y": 0,
-          "w": 127,
-          "h": 102
+          "w": 110,
+          "h": 97
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.8237,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "56e679ccf26b348c5981c20f0b59e1866e0f80f83c8fb952c5b0698426239b07",
         "sha256_copia": "56e679ccf26b348c5981c20f0b59e1866e0f80f83c8fb952c5b0698426239b07",
@@ -8970,12 +8972,12 @@
         "porcentaje_pixeles_transparentes": 82.3,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 40,
+          "x": 69,
           "y": 44,
-          "w": 210,
-          "h": 201
+          "w": 138,
+          "h": 187
         },
-        "ocupacion": 0.5019,
+        "ocupacion": 0.3068,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "25a2fb0a9484354ae482d493fc20370fd63bdac251c99f50f314b599d1c07261",
         "sha256_copia": "25a2fb0a9484354ae482d493fc20370fd63bdac251c99f50f314b599d1c07261",
@@ -9034,10 +9036,10 @@
         "caja_visible": {
           "x": 66,
           "y": 52,
-          "w": 204,
-          "h": 186
+          "w": 150,
+          "h": 185
         },
-        "ocupacion": 0.4512,
+        "ocupacion": 0.33,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "6df986677719942fd2a1ae7dc55426de9023942334a4f84c89e590a67cddbbcd",
         "sha256_copia": "6df986677719942fd2a1ae7dc55426de9023942334a4f84c89e590a67cddbbcd",
@@ -9094,12 +9096,12 @@
         "porcentaje_pixeles_transparentes": 93.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 65,
+          "x": 68,
           "y": 72,
-          "w": 71,
-          "h": 56
+          "w": 66,
+          "h": 55
         },
-        "ocupacion": 0.0994,
+        "ocupacion": 0.0907,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "e7c4e586ca874ba221e793c3b4bf928a222aeca6e572a9759269b204504ac117",
         "sha256_copia": "e7c4e586ca874ba221e793c3b4bf928a222aeca6e572a9759269b204504ac117",
@@ -9157,9 +9159,9 @@
           "x": 28,
           "y": 46,
           "w": 942,
-          "h": 772
+          "h": 771
         },
-        "ocupacion": 0.8229,
+        "ocupacion": 0.8219,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "b3acdcd5ea16565de724601f67c2a4c6510f65ebb05d803dfd9e842bc8876b4b",
         "sha256_copia": "b3acdcd5ea16565de724601f67c2a4c6510f65ebb05d803dfd9e842bc8876b4b",
@@ -9364,12 +9366,12 @@
         "porcentaje_pixeles_transparentes": 38.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 6,
-          "y": 10,
-          "w": 161,
-          "h": 204
+          "x": 8,
+          "y": 11,
+          "w": 159,
+          "h": 200
         },
-        "ocupacion": 0.898,
+        "ocupacion": 0.8695,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "16bb6e2022e3fac6019276f519c2a0924da6128b8c36534df8cb6067cabeca3e",
         "sha256_copia": "16bb6e2022e3fac6019276f519c2a0924da6128b8c36534df8cb6067cabeca3e",
@@ -9506,10 +9508,10 @@
         "caja_visible": {
           "x": 0,
           "y": 0,
-          "w": 272,
-          "h": 239
+          "w": 249,
+          "h": 236
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.904,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "914901ebd165602af111a1590493081d4e99380fb5208be622ea791cafba354e",
         "sha256_copia": "914901ebd165602af111a1590493081d4e99380fb5208be622ea791cafba354e",
@@ -9638,12 +9640,12 @@
         "porcentaje_pixeles_transparentes": 51.9,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 97,
+          "x": 98,
           "y": 57,
-          "w": 851,
+          "w": 847,
           "h": 920
         },
-        "ocupacion": 0.7467,
+        "ocupacion": 0.7431,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "d2afe7616fa8ff2c1afd16f85cc6a965fa85d11be2ad9899d1f03e349a46aba4",
         "sha256_copia": "d2afe7616fa8ff2c1afd16f85cc6a965fa85d11be2ad9899d1f03e349a46aba4",
@@ -9703,12 +9705,12 @@
         "porcentaje_pixeles_transparentes": 50.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 24,
-          "y": 66,
-          "w": 546,
-          "h": 479
+          "x": 27,
+          "y": 67,
+          "w": 543,
+          "h": 474
         },
-        "ocupacion": 0.7265,
+        "ocupacion": 0.7149,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "5def39805c891c6f7d5dfc9547a0ee2b66084d181adb253dd9165915875b7e72",
         "sha256_copia": "5def39805c891c6f7d5dfc9547a0ee2b66084d181adb253dd9165915875b7e72",
@@ -9765,12 +9767,12 @@
         "porcentaje_pixeles_transparentes": 94.4,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 366,
+          "x": 367,
           "y": 381,
-          "w": 291,
+          "w": 290,
           "h": 362
         },
-        "ocupacion": 0.1005,
+        "ocupacion": 0.1001,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "c1c282271f3d6518c853a242cd2265d8dfdee42bc4b78243330aad6b4f4be09f",
         "sha256_copia": "c1c282271f3d6518c853a242cd2265d8dfdee42bc4b78243330aad6b4f4be09f",
@@ -9892,12 +9894,12 @@
         "porcentaje_pixeles_transparentes": 56.7,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 51,
+          "x": 54,
           "y": 167,
-          "w": 925,
-          "h": 720
+          "w": 919,
+          "h": 716
         },
-        "ocupacion": 0.6351,
+        "ocupacion": 0.6275,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "4f0613b27c719ebde937b4c20355636c1b431560fd9b553289710cc7a812ff2f",
         "sha256_copia": "4f0613b27c719ebde937b4c20355636c1b431560fd9b553289710cc7a812ff2f",
@@ -10155,11 +10157,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 36,
-          "y": 29,
+          "y": 34,
           "w": 501,
-          "h": 190
+          "h": 185
         },
-        "ocupacion": 0.63,
+        "ocupacion": 0.6134,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "dd20ae3d7734e992265ee9c2e1eb389254fc59e538f86d87838c4dc9b666eef3",
         "sha256_copia": "dd20ae3d7734e992265ee9c2e1eb389254fc59e538f86d87838c4dc9b666eef3",
@@ -10220,10 +10222,10 @@
         "caja_visible": {
           "x": 59,
           "y": 13,
-          "w": 294,
-          "h": 411
+          "w": 274,
+          "h": 401
         },
-        "ocupacion": 0.746,
+        "ocupacion": 0.6784,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "5e153ba64ce2baaa8a1538501c2d4fb9a4a73618015e33b3a95ff74883767ace",
         "sha256_copia": "5e153ba64ce2baaa8a1538501c2d4fb9a4a73618015e33b3a95ff74883767ace",
@@ -10278,12 +10280,12 @@
         "porcentaje_pixeles_transparentes": 37.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
+          "x": 3,
           "y": 0,
-          "w": 120,
-          "h": 151
+          "w": 116,
+          "h": 149
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9539,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "566d4e330a03c74305e829d6b4b79b6cd1cf34a75534a7345d4d0808cff107ef",
         "sha256_copia": "566d4e330a03c74305e829d6b4b79b6cd1cf34a75534a7345d4d0808cff107ef",
@@ -10473,12 +10475,12 @@
         "porcentaje_pixeles_transparentes": 43.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 0,
+          "x": 1,
           "y": 0,
-          "w": 360,
+          "w": 358,
           "h": 371
         },
-        "ocupacion": 1.0,
+        "ocupacion": 0.9944,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "a8352f4ffe6354f5a9fff4775a3d8b2e327823f10de39028679efa02f28da656",
         "sha256_copia": "a8352f4ffe6354f5a9fff4775a3d8b2e327823f10de39028679efa02f28da656",
@@ -10617,10 +10619,10 @@
         "caja_visible": {
           "x": 246,
           "y": 311,
-          "w": 778,
+          "w": 521,
           "h": 575
         },
-        "ocupacion": 0.4266,
+        "ocupacion": 0.2857,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "3bffc18d8c9f13a3b122f8bf9b27b67f095558ab7fa44dda1f26a39a2c015a27",
         "sha256_copia": "3bffc18d8c9f13a3b122f8bf9b27b67f095558ab7fa44dda1f26a39a2c015a27",
@@ -10739,10 +10741,10 @@
         "caja_visible": {
           "x": 320,
           "y": 320,
-          "w": 584,
-          "h": 531
+          "w": 536,
+          "h": 530
         },
-        "ocupacion": 0.2957,
+        "ocupacion": 0.2709,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "4bb3b11e43c8032cee8f3b7f204f44c5d927696612b6283f4553e367b94145a4",
         "sha256_copia": "4bb3b11e43c8032cee8f3b7f204f44c5d927696612b6283f4553e367b94145a4",
@@ -10820,12 +10822,12 @@
         "porcentaje_pixeles_transparentes": 76.2,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 92,
-          "y": 275,
-          "w": 725,
-          "h": 697
+          "x": 129,
+          "y": 276,
+          "w": 629,
+          "h": 676
         },
-        "ocupacion": 0.4819,
+        "ocupacion": 0.4055,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "34b424bed3f5ac3c1df1b3e7ad29be69867379efc80034504dc834e7f202fc08",
         "sha256_copia": "34b424bed3f5ac3c1df1b3e7ad29be69867379efc80034504dc834e7f202fc08",
@@ -10881,12 +10883,12 @@
         "porcentaje_pixeles_transparentes": 74.0,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 134,
+          "x": 135,
           "y": 67,
-          "w": 676,
-          "h": 914
+          "w": 675,
+          "h": 894
         },
-        "ocupacion": 0.5892,
+        "ocupacion": 0.5755,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "96bc886dab1224c0df3af3346a7151508ce8ce4f1b9ec5192d4858586ef23569",
         "sha256_copia": "96bc886dab1224c0df3af3346a7151508ce8ce4f1b9ec5192d4858586ef23569",
@@ -11416,11 +11418,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 7,
+          "y": 8,
           "w": 166,
-          "h": 159
+          "h": 158
         },
-        "ocupacion": 0.9578,
+        "ocupacion": 0.9518,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "7746b67af793e0153f426fa65f342a66c6b7be60f6bd69d3507ffac23e818a32",
         "sha256_copia": "7746b67af793e0153f426fa65f342a66c6b7be60f6bd69d3507ffac23e818a32",
@@ -11474,11 +11476,11 @@
         "sujeto_toca_esquinas": false,
         "caja_visible": {
           "x": 0,
-          "y": 9,
+          "y": 11,
           "w": 120,
-          "h": 111
+          "h": 109
         },
-        "ocupacion": 0.925,
+        "ocupacion": 0.9083,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "27ea7ce45d5982cdaf0d10a7fc6f326c6c1f27933cea0323fa36b7e419e3463d",
         "sha256_copia": "27ea7ce45d5982cdaf0d10a7fc6f326c6c1f27933cea0323fa36b7e419e3463d",

@@ -51,6 +51,9 @@ const state = {
   evo: localStorage.getItem("cp-evo") || "roster",
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
   ficha: null,
+  focusReturn: "",
+  sheetKey: "",
+  sheetFocusMark: null,
   toast: null,
   alert: null,
   flash: null,
@@ -308,7 +311,8 @@ function retryOfflineThumbs() {
   });
 }
 
-function barHtml(catKey, pctVal, mark, opts = {}) {
+function barHtml(catKey, pctVal, mark, opts) {
+  if (!opts) opts = {};
   const cls = ["bar"];
   if (!opts.plain) cls.push("cat-" + (CAT_CLASS[catKey] || "defensas"));
   if (opts.lg) cls.push("bar--lg");
@@ -319,7 +323,46 @@ function barHtml(catKey, pctVal, mark, opts = {}) {
   if (mark != null) style.push(`--m:${Math.max(0, Math.min(100, mark))}`);
   const empty = !p ? " data-empty" : "";
   const markEl = mark != null ? `<span class="bar__mark"></span>` : "";
-  return `<div class="${cls.join(" ")}" style="${style.join(";")}"${empty} role="img" aria-label="${esc(opts.label || "")}"><span class="bar__fill"></span>${markEl}</div>`;
+  const a11y = opts.decorative
+    ? ` aria-hidden="true"`
+    : ` role="img" aria-label="${esc(opts.label || "")}"`;
+  return `<div class="${cls.join(" ")}" style="${style.join(";")}"${empty}${a11y}><span class="bar__fill"></span>${markEl}</div>`;
+}
+
+function rowTitle(name, extras) {
+  return `<span class="row__title row__title--meta"><span class="row__name">${esc(name)}</span>${extras || ""}</span>`;
+}
+
+function catAria(label, pct, foot) {
+  const spoken = String(foot || "")
+    .replace(/TH(\d+):\s*/g, "TH$1 ")
+    .replace(/\s*·\s*/g, ", ")
+    .replace(/^Faltan\b/, "faltan");
+  return [label, pct, spoken].filter(Boolean).join(", ");
+}
+
+function detailAria(title, it, a, flags) {
+  if (!flags) flags = {};
+  const line = levelLine(it);
+  const lvl = it.lvl == null || Number.isNaN(it.lvl) ? 0 : it.lvl;
+  let level = line.bar && it.max != null ? `nivel ${lvl} de ${it.max}` : line.text;
+  if (line.bar && it.maxNext != null && a && a.thSig) level += `, TH${a.thSig} ${it.maxNext}`;
+  const bits = [title];
+  if (it.cnt > 1) bits.push(`×${it.cnt}`);
+  bits.push(level);
+  if (flags.deduced) bits.push("ID deducido");
+  if (flags.unknown && it.id) bits.push(`ID ${it.id}`);
+  return bits.join(", ");
+}
+
+function heroAria(name, h, line, deduced) {
+  const lvl = h.lvl == null ? 0 : h.lvl;
+  const level = line.bar && h.max ? `nivel ${lvl} de ${h.max}` : line.text;
+  return [name || "Héroe", level, deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
+}
+
+function cssAttr(value) {
+  return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function goalChip(th, objetivo) {
@@ -552,16 +595,17 @@ function catRow(exp, meta, a, c) {
   const mark = a.thSig ? row.mark : null;
   const foot = catFoot(a, row);
   const href = c.key === "equipamiento" ? null : `#/progreso/${meta.tag.slice(1)}/${c.key}`;
+  const aria = catAria(c.label, fmtPct(row.pct), foot);
   const inner = `<span class="row__main"><div class="prog ${cls}">
       <span class="row__title"><span class="dot"></span>${esc(c.label)}</span>
       <span class="prog__pct num${maxed ? " is-max" : ""}">${esc(label)}</span>
-      ${barHtml(c.key, fill, mark, { maxed, label: `${c.label}: ${fmtPct(row.pct)}` })}
+      ${barHtml(c.key, fill, mark, { maxed, decorative: true })}
       <span class="prog__foot">${esc(foot)}</span>
     </div></span>${href ? CHEV : ""}`;
   if (!href) {
-    return `<li><button class="row" data-seg="eq" style="padding-top:12px;padding-bottom:12px">${inner}</button></li>`;
+    return `<li><button class="row" data-seg="eq" style="padding-top:12px;padding-bottom:12px" aria-label="${esc(aria)}">${inner}</button></li>`;
   }
-  return `<li><a class="row" style="padding-top:12px;padding-bottom:12px" href="${href}">${inner}</a></li>`;
+  return `<li><a class="row" style="padding-top:12px;padding-bottom:12px" href="${href}" aria-label="${esc(aria)}">${inner}</a></li>`;
 }
 
 function wallParts(a) {
@@ -603,21 +647,25 @@ function wallsCard(a) {
 function heroesCard(a) {
   const rows = a.heroes.map((h) => {
     const item = state.index.items[h.id];
-    const badge = item.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
+    const deduced = item.estado === "id_deducido";
+    const badge = deduced ? `<span class="badge badge--soft">ID deducido</span>` : "";
     const line = levelLine(h);
     const lvl = h.lvl == null ? 0 : h.lvl;
+    const name = nameOf(h.id) || "Héroe";
+    const aria = heroAria(name, h, line, deduced);
+    const title = rowTitle(name, badge);
     if (!line.bar) {
-      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""}>
+      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
         ${thumb(h.id, { size: 40 })}
-        <span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "Héroe")}${badge}</span><span class="row__sub">${esc(line.text)}</span></span>
+        <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
       </button></li>`;
     }
     const p = h.max ? (lvl / h.max) * 100 : 0;
     const maxed = lvl >= h.max;
-    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""}>
+    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
       ${thumb(h.id, { size: 40 })}
-      <span class="row__main"><span class="row__title">${esc(nameOf(h.id) || "")}${badge}</span><span class="row__sub num">${esc(line.text)}</span></span>
-      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, label: line.text })}</span>
+      <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
+      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
     </button></li>`;
   }).join("");
   return `<div class="section"><div class="section-header"><span>Héroes</span></div><ul class="list">${rows}</ul></div>`;
@@ -752,7 +800,7 @@ function rowLevel(it, a, catKey) {
   if (line.bar && it.maxNext != null && a.thSig) text += ` · TH${a.thSig}: ${it.maxNext}`;
   const p = line.bar && it.max ? Math.min(100, (lvl / it.max) * 100) : 0;
   const bar = line.bar
-    ? barHtml(catKey, p, null, { mini: true, maxed: it.max != null && lvl >= it.max, label: text })
+    ? barHtml(catKey, p, null, { mini: true, maxed: it.max != null && lvl >= it.max, decorative: true })
     : "";
   return { text, bar, lvl };
 }
@@ -761,21 +809,25 @@ function detailRow(it, catKey, a) {
   const lv = rowLevel(it, a, catKey);
   if (it.capsOnly) {
     const title = it.capsName;
-    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""}>
+    const aria = detailAria(title, it, a, {});
+    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
       ${emptyNamedThumb(title, 40)}
-      <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub num">${esc(lv.text)}</span></span>
+      <span class="row__main">${rowTitle(title)}<span class="row__sub num">${esc(lv.text)}</span></span>
       ${lv.bar}
     </button></li>`;
   }
   const meta = state.index.items[it.id];
   const unknown = !meta || meta.estado === "sin_identificar";
+  const deduced = !!(meta && meta.estado === "id_deducido");
   const title = unknown ? "Sin identificar" : (nameOf(it.id) || "Ítem");
-  const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
+  const badge = deduced ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const idBadge = unknown ? `<span class="badge badge-id">${esc(it.id)}</span>` : "";
   const cnt = it.cnt > 1 ? `×${it.cnt}` : "";
-  return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""}>
+  const extras = `${cnt ? `<span class="num">${cnt}</span>` : ""}${badge}${idBadge}`;
+  const aria = detailAria(title, it, a, { deduced, unknown });
+  return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
     ${thumb(it.id, { size: 40 })}
-    <span class="row__main"><span class="row__title">${esc(title)}${cnt ? `&nbsp;<span class="num">${cnt}</span>` : ""}${badge}${idBadge}</span><span class="row__sub num">${esc(lv.text)}</span></span>
+    <span class="row__main">${rowTitle(title, extras)}<span class="row__sub num">${esc(lv.text)}</span></span>
     ${lv.bar}
   </button></li>`;
 }
@@ -837,7 +889,7 @@ function builderBaseSection(exp) {
     const lvl = it.lvl || 0;
     return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
       ${thumb(id, { size: 40 })}
-      <span class="row__main"><span class="row__title">${esc(title)}${badge}${idBadge}</span><span class="row__sub num">Nv ${lvl}</span></span>
+      <span class="row__main">${rowTitle(title, `${badge}${idBadge}`)}<span class="row__sub num">Nv ${lvl}</span></span>
     </button></li>`;
   }).join("");
   return `<div class="section"><div class="section-header"><span>Aldea del constructor</span></div><ul class="list">${lis}</ul></div>`;
@@ -947,7 +999,7 @@ function upRow(u) {
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
     ${thumb(u.id, { size: 40 })}
-    <span class="row__main"><span class="row__title">${esc(title)}${badge}</span>
+    <span class="row__main">${rowTitle(title, badge)}
       <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
     <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
   </div></li>`;
@@ -1089,6 +1141,10 @@ function evoOptions() {
   return opts.join("");
 }
 
+function chartDay(day) {
+  return `${String(day).slice(8)}/${String(day).slice(5, 7)}`;
+}
+
 function chartHtml() {
   const pts = seriesPoints();
   if (!pts.length) return `<p class="t-footnote c-2">Sin datos</p>`;
@@ -1105,9 +1161,9 @@ function chartHtml() {
     <path class="chart__area" d="${area}"/>
     <polyline class="chart__line" points="${coords.join(" ")}"/>
     ${circles}
-    <g class="chart__x"><text x="${xs[0]}" y="174">${esc(pts[0].day.slice(8))}/${esc(pts[0].day.slice(5, 7))}</text>${pts.length > 1 ? `<text x="${xs[xs.length - 1]}" y="174">${esc(last.day.slice(8))}/${esc(last.day.slice(5, 7))}</text>` : ""}</g>
+    <g class="chart__x"><text x="${xs[0]}" y="174">${esc(chartDay(pts[0].day))}</text>${pts.length > 1 ? `<text x="${xs[xs.length - 1]}" y="174">${esc(chartDay(last.day))}</text>` : ""}</g>
   </svg>
-  <table class="sr-only"><caption>Progreso medio</caption><tbody>${pts.map((p) => `<tr><td>${esc(p.day)}</td><td>${esc(fmtPct(p.v))}</td></tr>`).join("")}</tbody></table>`;
+  <table class="sr-only"><caption>Progreso medio</caption><tbody>${pts.map((p) => `<tr><td>${esc(chartDay(p.day))}</td><td>${esc(fmtPct(p.v))}</td></tr>`).join("")}</tbody></table>`;
 }
 
 function chartPending(pending) {
@@ -1157,7 +1213,7 @@ function renderAjustes() {
   return `<div class="sheet-backdrop" data-close="1"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="aj-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2 id="aj-title">Ajustes</h2><button class="btn-text btn-text--bold" data-go="#/roster">OK</button></div>
+      <div class="sheet__bar"><span></span><h2 id="aj-title" tabindex="-1">Ajustes</h2><button class="btn-text btn-text--bold" data-go="#/roster">OK</button></div>
       <div class="sheet__body">
         <div class="section-header"><span>Datos</span></div>
         <div class="section" style="margin-top:0"><ul class="list">
@@ -1171,7 +1227,7 @@ function renderAjustes() {
           <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos incluidos</span></span></button></li>
         </ul></div>
         <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
-          <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count} de ${totalN}</span></div>
+          <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
           <div class="bar" style="--p:${Math.min(100, p)};--cat:var(--tint)" role="img" aria-label="${esc(status)}"><span class="bar__fill"></span></div>
           <p class="offline-dl__meta offline-dl__status" aria-live="polite">${esc(status)}</p>
           ${btn}
@@ -1201,9 +1257,9 @@ function renderImport() {
   return `<div class="sheet-backdrop" data-close="1"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="im-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar">${lead}<h2 id="im-title">${title}</h2><span></span></div>
+      <div class="sheet__bar">${lead}<h2 id="im-title" tabindex="-1">${title}</h2><span></span></div>
       <div class="sheet__body">${importBody()}${LEGAL}</div>
-      <input class="file-input" data-files type="file" accept=".json,application/json" multiple>
+      <input class="file-input" data-files type="file" accept=".json,application/json" multiple tabindex="-1" aria-hidden="true">
       <div class="sheet__actions">${importActions()}</div>
     </div>`;
 }
@@ -1683,7 +1739,7 @@ function fichaFrame(inner) {
   return `<div class="sheet-backdrop" data-close-ficha="1"></div>
     <div class="sheet sheet--half" role="dialog" aria-modal="true" aria-labelledby="ficha-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2 id="ficha-title">Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
+      <div class="sheet__bar"><span></span><h2 id="ficha-title" tabindex="-1">Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
       <div class="sheet__body"><div class="ficha">${inner}</div>${LEGAL}</div>
     </div>`;
 }
@@ -1758,6 +1814,103 @@ function screenFor(r) {
   return renderRoster();
 }
 
+function markFocus(el) {
+  let node = el;
+  while (node && node !== document.body && node !== document.documentElement) {
+    const ds = node.dataset;
+    if (ds && ds.dl) return { dl: ds.dl };
+    if (ds && ds.act) return { act: ds.act };
+    if (node.id) return { id: node.id };
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function focusFromMark(mark) {
+  if (!mark) return null;
+  if (mark.dl) return document.querySelector(`[data-dl="${cssAttr(mark.dl)}"]`) || document.querySelector(".offline-dl [data-dl]");
+  if (mark.act) return document.querySelector(`[data-act="${cssAttr(mark.act)}"]`);
+  if (mark.id) return document.querySelector("#" + mark.id);
+  return null;
+}
+
+function rememberSheetFocus() {
+  const key = state.ficha ? "ficha" : route().name;
+  state.sheetFocusMark = key === state.sheetKey ? markFocus(document.activeElement) : null;
+}
+
+function rememberOpener(el, sel) {
+  state.focusReturn = { sel, idx: [...document.querySelectorAll(sel)].indexOf(el) };
+}
+
+function settleSheetFocus() {
+  const sheet = document.querySelector(".sheet");
+  for (const sel of [".navbar", "#screen", ".tabbar"]) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    if (sheet) el.setAttribute("inert", "");
+    else el.removeAttribute("inert");
+  }
+  const key = state.ficha ? "ficha" : route().name;
+  const opened = !!sheet && key !== state.sheetKey;
+  if (sheet) {
+    const h2 = sheet.querySelector("h2");
+    if (h2) h2.tabIndex = -1;
+    if (opened && h2 && !state.importUi.needsFocus) h2.focus({ preventScroll: true });
+    else if (!opened && !state.importUi.needsFocus) {
+      if (state.sheetFocusMark) {
+        const back = focusFromMark(state.sheetFocusMark);
+        if (back) back.focus({ preventScroll: true });
+      }
+      const cur = document.activeElement;
+      const inside = cur && cur !== document.body && cur !== document.documentElement && sheet.contains(cur);
+      if (h2 && !inside) h2.focus({ preventScroll: true });
+    }
+  } else if (state.focusReturn) {
+    const ret = state.focusReturn;
+    state.focusReturn = "";
+    let back = null;
+    if (typeof ret === "string") back = document.querySelector(ret);
+    else {
+      const list = document.querySelectorAll(ret.sel);
+      back = list[ret.idx] || document.querySelector(ret.sel);
+    }
+    if (back) back.focus({ preventScroll: true });
+  }
+  state.sheetKey = key;
+  state.sheetFocusMark = null;
+}
+
+function focusImportTarget() {
+  if (!state.importUi.needsFocus) return;
+  state.importUi.needsFocus = false;
+  const card = document.querySelector("[data-import-focus]");
+  if (card) card.focus();
+  else {
+    const h2 = document.querySelector(".sheet h2");
+    if (h2) h2.focus({ preventScroll: true });
+  }
+}
+
+function onSheetEscape(ev) {
+  if (!ev || ev.key !== "Escape" || state.alert) return false;
+  if (state.ficha) {
+    state.ficha = null;
+    render();
+    return true;
+  }
+  const name = route().name;
+  if (name === "ajustes" || name === "importar") {
+    if (name === "importar" && (state.importUi.phase === "confirm" || state.importUi.fromBatch)) {
+      goBackImport();
+      return true;
+    }
+    location.hash = "#/roster";
+    return true;
+  }
+  return false;
+}
+
 function render() {
   const r = route();
   if (r.name === "importar") {
@@ -1772,6 +1925,7 @@ function render() {
     state.selected = r.tag;
     localStorage.setItem("cp-account", r.tag);
   }
+  rememberSheetFocus();
   const root = document.getElementById("app");
   root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
@@ -1784,10 +1938,8 @@ function render() {
     io.observe(title);
   }
   paintOfflineThumbs();
-  if (state.importUi.needsFocus) {
-    state.importUi.needsFocus = false;
-    document.querySelector("[data-import-focus]")?.focus();
-  }
+  settleSheetFocus();
+  focusImportTarget();
   if (state.scrollAdded && r.name === "roster") {
     state.scrollAdded = false;
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
@@ -1799,6 +1951,7 @@ function bind(r) {
     const go = ev.target.closest("[data-go]");
     if (go) {
       const dest = go.dataset.go;
+      if (dest === "#/ajustes" || dest === "#/importar") rememberOpener(go, `[data-go="${dest}"]`);
       if (location.hash === dest) {
         if (dest === "#/ajustes") measureCache();
         return;
@@ -1826,6 +1979,9 @@ function bind(r) {
       const lvl = Number(ficha.dataset.lvl);
       const max = ficha.dataset.max ? Number(ficha.dataset.max) : null;
       const unlockTh = ficha.dataset.unlock ? Number(ficha.dataset.unlock) : null;
+      rememberOpener(ficha, ficha.dataset.capsName
+        ? `[data-ficha="caps"][data-caps-name="${cssAttr(ficha.dataset.capsName)}"]`
+        : `[data-ficha="${cssAttr(ficha.dataset.ficha)}"]`);
       state.ficha = ficha.dataset.capsName
         ? { capsOnly: true, name: ficha.dataset.capsName, lvl, max, unlockTh }
         : { id: ficha.dataset.ficha, lvl, max, unlockTh };
@@ -2131,6 +2287,7 @@ window.addEventListener("hashchange", () => {
   render();
   if (route().name === "ajustes") measureCache();
 });
+document.addEventListener("keydown", (ev) => { onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") { state.now = Date.now(); if (route().name === "mejoras") render(); }
 });
