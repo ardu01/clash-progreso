@@ -15,6 +15,7 @@ const APP = [
   "./js/app.js",
   "./js/progress.js",
   "./js/format.js",
+  "./js/parse.js",
   "./js/store.js",
   "./js/caches.js",
   "./assets/manifest.json",
