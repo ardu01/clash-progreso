@@ -390,6 +390,27 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
 
+test("manifest.json coincide con la v1.3.1", () => {
+  const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "b274e37d8ffaf19de6079a0057c65f3487c0cae8eec79aaf01ff3ccf9b22f882");
+});
+
+/** La función real de js/app.js, sin ejecutar el arranque del navegador. */
+function frameOfFromApp() {
+  const src = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const start = src.indexOf("function frameOf(im, size)");
+  assert.ok(start >= 0);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i += 1) {
+    if (src[i] === "{") depth += 1;
+    else if (src[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return new Function(`${src.slice(start, i + 1)}\nreturn frameOf;`)();
+    }
+  }
+  throw new Error("frameOf sin cierre");
+}
+
 const V110 = {
   "#28PLGP0G2": { media: 64, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [61.6, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
   "#R00C8CPQC": { media: 49, sigMedia: 46.1, cats: { defensas: [66.9, 61.3], laboratorio: [45.4, 41.7], ejercito_edif: [86.2, 80.6], equipamiento: [58.6, 58.6], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
@@ -672,6 +693,20 @@ test("107000008 se muestra como Logger con ID deducido y no entra en el aviso", 
   assert.equal(line("Luchadora real"), "Nv 11 / 45");
   assert.equal(line("Príncipe Esbirro"), "Nv 12 / 80");
   assert.equal(line("Duque Dragón"), "Nv 10 / 15");
+});
+
+test("el encuadre del Logger es --cx:.56 --cy:.598 --z:1.542", () => {
+  const im = manifest.items["107000008"].imagen;
+  assert.deepEqual(im.caja_visible, { x: 268, y: 335, w: 611, h: 555 });
+  assert.equal(im.ocupacion, 0.3234);
+  const frameOf = frameOfFromApp();
+  const css = (frame) => `--cx:${frame.cx.replace(/^0(?=\.)/, "")} --cy:${frame.cy.replace(/^0(?=\.)/, "")} --z:${frame.z}`;
+  for (const size of [40, 96]) {
+    const frame = frameOf(im, size);
+    assert.deepEqual(frame, { cx: "0.56", cy: "0.598", z: "1.542" }, String(size));
+    assert.equal(css(frame), "--cx:.56 --cy:.598 --z:1.542");
+  }
+  assert.equal(IMAGE_CACHE, "cp-img-v4");
 });
 
 test("la media sin cambio no repite el valor ni pone flecha", () => {

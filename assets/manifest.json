@@ -10940,12 +10940,12 @@
         "porcentaje_pixeles_transparentes": 75.6,
         "sujeto_toca_esquinas": false,
         "caja_visible": {
-          "x": 36,
+          "x": 268,
           "y": 335,
-          "w": 988,
-          "h": 689
+          "w": 611,
+          "h": 555
         },
-        "ocupacion": 0.6492,
+        "ocupacion": 0.3234,
         "tipo_visual": "recorte_sobre_transparente",
         "sha256_original": "2132d193cbb9b487ecce2786cef574404f47b17e408229e5a05d4b67bacae8cc",
         "sha256_copia": "2132d193cbb9b487ecce2786cef574404f47b17e408229e5a05d4b67bacae8cc",
