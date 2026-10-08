@@ -52,6 +52,8 @@ const state = {
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
   ficha: null,
   focusReturn: "",
+  sheetKey: "",
+  sheetFocusMark: null,
   toast: null,
   alert: null,
   flash: null,
@@ -1812,6 +1814,35 @@ function screenFor(r) {
   return renderRoster();
 }
 
+function markFocus(el) {
+  let node = el;
+  while (node && node !== document.body && node !== document.documentElement) {
+    const ds = node.dataset;
+    if (ds && ds.dl) return { dl: ds.dl };
+    if (ds && ds.act) return { act: ds.act };
+    if (node.id) return { id: node.id };
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function focusFromMark(mark) {
+  if (!mark) return null;
+  if (mark.dl) return document.querySelector(`[data-dl="${cssAttr(mark.dl)}"]`);
+  if (mark.act) return document.querySelector(`[data-act="${cssAttr(mark.act)}"]`);
+  if (mark.id) return document.querySelector("#" + mark.id);
+  return null;
+}
+
+function rememberSheetFocus() {
+  const key = state.ficha ? "ficha" : route().name;
+  state.sheetFocusMark = key === state.sheetKey ? markFocus(document.activeElement) : null;
+}
+
+function rememberOpener(el, sel) {
+  state.focusReturn = { sel, idx: [...document.querySelectorAll(sel)].indexOf(el) };
+}
+
 function settleSheetFocus() {
   const sheet = document.querySelector(".sheet");
   for (const sel of [".navbar", "#screen", ".tabbar"]) {
@@ -1820,17 +1851,39 @@ function settleSheetFocus() {
     if (sheet) el.setAttribute("inert", "");
     else el.removeAttribute("inert");
   }
+  const key = state.ficha ? "ficha" : route().name;
+  const opened = !!sheet && key !== state.sheetKey;
   if (sheet) {
     const h2 = sheet.querySelector("h2");
     if (h2) h2.tabIndex = -1;
-    if (h2 && !state.importUi.needsFocus) h2.focus({ preventScroll: true });
-    return;
-  }
-  if (state.focusReturn) {
-    const sel = state.focusReturn;
+    if (opened && h2 && !state.importUi.needsFocus) h2.focus({ preventScroll: true });
+    else if (!opened && state.sheetFocusMark && !state.importUi.needsFocus) {
+      const back = focusFromMark(state.sheetFocusMark);
+      if (back) back.focus({ preventScroll: true });
+    }
+  } else if (state.focusReturn) {
+    const ret = state.focusReturn;
     state.focusReturn = "";
-    const back = document.querySelector(sel);
+    let back = null;
+    if (typeof ret === "string") back = document.querySelector(ret);
+    else {
+      const list = document.querySelectorAll(ret.sel);
+      back = list[ret.idx] || document.querySelector(ret.sel);
+    }
     if (back) back.focus({ preventScroll: true });
+  }
+  state.sheetKey = key;
+  state.sheetFocusMark = null;
+}
+
+function focusImportTarget() {
+  if (!state.importUi.needsFocus) return;
+  state.importUi.needsFocus = false;
+  const card = document.querySelector("[data-import-focus]");
+  if (card) card.focus();
+  else {
+    const h2 = document.querySelector(".sheet h2");
+    if (h2) h2.focus({ preventScroll: true });
   }
 }
 
@@ -1843,6 +1896,10 @@ function onSheetEscape(ev) {
   }
   const name = route().name;
   if (name === "ajustes" || name === "importar") {
+    if (name === "importar" && (state.importUi.phase === "confirm" || state.importUi.fromBatch)) {
+      goBackImport();
+      return true;
+    }
     location.hash = "#/roster";
     return true;
   }
@@ -1863,6 +1920,7 @@ function render() {
     state.selected = r.tag;
     localStorage.setItem("cp-account", r.tag);
   }
+  rememberSheetFocus();
   const root = document.getElementById("app");
   root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
@@ -1876,10 +1934,7 @@ function render() {
   }
   paintOfflineThumbs();
   settleSheetFocus();
-  if (state.importUi.needsFocus) {
-    state.importUi.needsFocus = false;
-    document.querySelector("[data-import-focus]")?.focus();
-  }
+  focusImportTarget();
   if (state.scrollAdded && r.name === "roster") {
     state.scrollAdded = false;
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
@@ -1891,7 +1946,7 @@ function bind(r) {
     const go = ev.target.closest("[data-go]");
     if (go) {
       const dest = go.dataset.go;
-      if (dest === "#/ajustes" || dest === "#/importar") state.focusReturn = `[data-go="${dest}"]`;
+      if (dest === "#/ajustes" || dest === "#/importar") rememberOpener(go, `[data-go="${dest}"]`);
       if (location.hash === dest) {
         if (dest === "#/ajustes") measureCache();
         return;
@@ -1919,9 +1974,9 @@ function bind(r) {
       const lvl = Number(ficha.dataset.lvl);
       const max = ficha.dataset.max ? Number(ficha.dataset.max) : null;
       const unlockTh = ficha.dataset.unlock ? Number(ficha.dataset.unlock) : null;
-      state.focusReturn = ficha.dataset.capsName
+      rememberOpener(ficha, ficha.dataset.capsName
         ? `[data-ficha="caps"][data-caps-name="${cssAttr(ficha.dataset.capsName)}"]`
-        : `[data-ficha="${cssAttr(ficha.dataset.ficha)}"]`;
+        : `[data-ficha="${cssAttr(ficha.dataset.ficha)}"]`);
       state.ficha = ficha.dataset.capsName
         ? { capsOnly: true, name: ficha.dataset.capsName, lvl, max, unlockTh }
         : { id: ficha.dataset.ficha, lvl, max, unlockTh };

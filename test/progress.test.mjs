@@ -1042,7 +1042,235 @@ test("1.1.4: Esc cierra el sheet y el foco vuelve a quien lo abrió", () => {
   where.name = "importar";
   location.hash = "#/importar";
   state.ficha = null;
+  state.importUi = { phase: "entry", fromBatch: false, needsFocus: false };
   assert.equal(onEsc({ key: "Escape" }), true);
   assert.equal(location.hash, "#/roster");
   assert.equal(onEsc({ key: "Tab" }), false);
+});
+
+function miniMatches(node, sel) {
+  if (sel.startsWith("#")) return node.id === sel.slice(1);
+  if (sel.startsWith(".")) return (node.className || "").split(/\s+/).includes(sel.slice(1));
+  const eq = sel.match(/^\[([^\]=]+)="([^"]*)"\]$/);
+  if (eq) return (node.attrs || {})[eq[1]] === eq[2];
+  const has = sel.match(/^\[([^\]=]+)\]$/);
+  if (has) return Object.prototype.hasOwnProperty.call(node.attrs || {}, has[1]);
+  return node.tag === sel;
+}
+
+function miniFind(list, sel) {
+  for (const node of list) {
+    if (miniMatches(node, sel)) return node;
+    const nested = miniFind(node.children || [], sel);
+    if (nested) return nested;
+  }
+  return null;
+}
+
+function miniFindAll(list, sel) {
+  const out = [];
+  for (const node of list) {
+    if (miniMatches(node, sel)) out.push(node);
+    out.push(...miniFindAll(node.children || [], sel));
+  }
+  return out;
+}
+
+function miniQuery(list, sel) {
+  const parts = sel.trim().split(/\s+/);
+  let nodes = list;
+  let hit = null;
+  for (const part of parts) {
+    hit = miniFind(nodes, part);
+    if (!hit) return null;
+    nodes = hit.children || [];
+  }
+  return hit;
+}
+
+function miniWire(node, doc, parent) {
+  node.children = node.children || [];
+  node.attrs = node.attrs || {};
+  node.dataset = Object.assign({}, node.dataset || {});
+  node.parentElement = parent || null;
+  node.tabIndex = 0;
+  node.setAttribute = (k, v) => { node.attrs[k] = String(v); };
+  node.removeAttribute = (k) => { delete node.attrs[k]; };
+  node.focus = () => { doc.active = node; };
+  node.querySelector = (sel) => miniQuery(node.children, sel);
+  for (const child of node.children) miniWire(child, doc, node);
+}
+
+function miniDocument(roots) {
+  const doc = {
+    active: null,
+    get activeElement() { return this.active; },
+    querySelector: (sel) => miniQuery(roots, sel),
+    querySelectorAll: (sel) => miniFindAll(roots, sel),
+  };
+  for (const node of roots) miniWire(node, doc, null);
+  return doc;
+}
+
+test("1.1.4: al cerrar, el foco vuelve a la fila agrupada que abrió el sheet", () => {
+  const low = { tag: "button", attrs: { "data-ficha": "4000008" }, dataset: { ficha: "4000008" } };
+  const high = { tag: "button", attrs: { "data-ficha": "4000008" }, dataset: { ficha: "4000008" } };
+  const screen = { tag: "main", id: "screen", children: [low, high] };
+  const h2 = { tag: "h2", id: "ficha-title" };
+  const sheet = { tag: "div", className: "sheet", children: [h2] };
+  const roots = [screen, sheet];
+  const doc = miniDocument(roots);
+  const state = {
+    ficha: { id: "4000008" },
+    alert: null,
+    focusReturn: "",
+    sheetKey: "",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where = { name: "detalle" };
+  const route = () => where;
+  const remember = fnFromApp("function rememberOpener(", "rememberOpener", { document: doc, state });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", { document: doc, state, route });
+
+  remember(high, '[data-ficha="4000008"]');
+  assert.deepEqual(state.focusReturn, { sel: '[data-ficha="4000008"]', idx: 1 });
+  settle();
+  assert.equal(doc.active, h2);
+
+  state.ficha = null;
+  roots.pop();
+  settle();
+  assert.equal(doc.active, high);
+
+  const navBtn = { tag: "button", attrs: { "data-go": "#/ajustes" } };
+  const legalBtn = { tag: "button", attrs: { "data-go": "#/ajustes" } };
+  const navbar = { tag: "header", className: "navbar", children: [navBtn] };
+  const roster = { tag: "main", id: "screen", children: [legalBtn] };
+  const aj = { tag: "h2", id: "aj-title" };
+  const ajSheet = { tag: "div", className: "sheet", children: [aj] };
+  const roots2 = [navbar, roster, ajSheet];
+  const doc2 = miniDocument(roots2);
+  const state2 = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "roster",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where2 = { name: "ajustes" };
+  const remember2 = fnFromApp("function rememberOpener(", "rememberOpener", { document: doc2, state: state2 });
+  const settle2 = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc2, state: state2, route: () => where2,
+  });
+  remember2(legalBtn, '[data-go="#/ajustes"]');
+  assert.equal(state2.focusReturn.idx, 1);
+  settle2();
+  assert.equal(doc2.active, aj);
+  roots2.pop();
+  where2.name = "roster";
+  settle2();
+  assert.equal(doc2.active, legalBtn);
+
+  state2.focusReturn = { sel: '[data-go="#/ajustes"]', idx: 9 };
+  state2.sheetKey = "ajustes";
+  settle2();
+  assert.equal(doc2.active, navBtn);
+});
+
+test("1.1.4: un redibujado con el sheet abierto no devuelve el foco al título", () => {
+  const h2 = { tag: "h2", id: "aj-title" };
+  const stop = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  const sheet = { tag: "div", className: "sheet", children: [h2, stop] };
+  const navbar = { tag: "header", className: "navbar" };
+  const screen = { tag: "main", id: "screen" };
+  const tabbar = { tag: "nav", className: "tabbar" };
+  const roots = [navbar, screen, tabbar, sheet];
+  const doc = miniDocument(roots);
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const where = { name: "ajustes" };
+  const route = () => where;
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+
+  settle();
+  assert.equal(doc.active, h2);
+
+  doc.active = stop;
+  remember();
+  assert.deepEqual(state.sheetFocusMark, { dl: "stop" });
+  const stop2 = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  sheet.children = [h2, stop2];
+  miniWire(stop2, doc, sheet);
+  settle();
+  assert.equal(doc.active, stop2);
+
+  settle();
+  assert.equal(doc.active, stop2);
+});
+
+test("1.1.4: Esc en un subpaso de Importar no descarta el lote", () => {
+  const state = { ficha: null, alert: null, importUi: { phase: "confirm", fromBatch: false } };
+  const location = { hash: "#/importar" };
+  const where = { name: "importar" };
+  const route = () => where;
+  let backs = 0;
+  const goBackImport = () => { backs += 1; };
+  const onEsc = fnFromApp("function onSheetEscape(", "onSheetEscape", {
+    state, render: () => {}, location, route, goBackImport,
+  });
+
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 1);
+  assert.equal(location.hash, "#/importar");
+
+  state.importUi = { phase: "single", fromBatch: true };
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 2);
+  assert.equal(location.hash, "#/importar");
+
+  state.importUi = { phase: "batch", fromBatch: false };
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(backs, 2);
+  assert.equal(location.hash, "#/roster");
+});
+
+test("1.1.4: si al elegir archivos no hay tarjeta, el foco va al título", () => {
+  const h2 = { tag: "h2", id: "im-title" };
+  const sheet = { tag: "div", className: "sheet", children: [h2] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  const state = { importUi: { needsFocus: true } };
+  const focusImport = fnFromApp("function focusImportTarget()", "focusImportTarget", { document: doc, state });
+  focusImport();
+  assert.equal(doc.active, h2);
+  assert.equal(state.importUi.needsFocus, false);
+
+  const card = { tag: "div", attrs: { "data-import-focus": "" } };
+  sheet.children = [h2, card];
+  miniWire(card, doc, sheet);
+  state.importUi.needsFocus = true;
+  doc.active = null;
+  focusImport();
+  assert.equal(doc.active, card);
+});
+
+test("1.1.4: el título del sheet no muestra anillo al recibir el foco", () => {
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  assert.match(css, /\.sheet__bar h2:focus\s*\{\s*outline:\s*none;\s*\}/);
 });
