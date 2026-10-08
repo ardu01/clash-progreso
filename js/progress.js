@@ -1,3 +1,5 @@
+import { fmtPct } from "./format.js";
+
 /**
  * Progreso de la aldea principal.
  * Máximos: únicamente data/caps_clashrecord.json (ClashRecord).
@@ -276,6 +278,21 @@ export function levelLine(row) {
   if (row.max != null) return { text: `Nv ${lvl} / ${row.max}`, bar: true };
   if (row.unlockTh != null) return { text: `Disponible en TH${row.unlockTh}`, bar: false };
   return { text: `Nv ${lvl}`, bar: false };
+}
+
+/** Pie bajo la barra de una categoría. En TH18 no hay comparación con el siguiente. */
+export function catFoot(a, row) {
+  if (a.thSig && row.sigPct != null && row.pend != null) {
+    return `TH${a.thSig}: ${fmtPct(row.sigPct)} · faltan ${row.pend} niveles`;
+  }
+  if (row.pend != null) return `Faltan ${row.pend} niveles`;
+  if (a.thSig && row.sigPct != null) return `TH${a.thSig}: ${fmtPct(row.sigPct)}`;
+  return "";
+}
+
+/** Líneas de la ficha de Inferno Artillery: el mismo texto que la fila y las dos notas. */
+export function capsFichaLines(row) {
+  return [levelLine(row).text, "Sin imagen", "Nombre en español sin confirmar"];
 }
 
 export function categoryUnlock(rows) {

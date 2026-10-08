@@ -27,7 +27,7 @@ export function parseLoose(text, source = "clipboard") {
       };
   }
   if (!trimmed.startsWith("{")) {
-    const preview = Array.from(trimmed).slice(0, 20).join("");
+    const preview = Array.from(trimmed).slice(0, 20).join("").trimEnd();
     const where = file ? "El archivo" : "Lo que hay en el portapapeles";
     return {
       ok: false,

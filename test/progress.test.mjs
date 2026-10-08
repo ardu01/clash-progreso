@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -203,6 +203,11 @@ test("Inferno Artillery solo en el detalle, sin id inventado", () => {
   assert.equal(row.maxNext, 5);
   assert.equal(row.unlockTh, 17);
   assert.deepEqual(levelLine(row), { text: "Disponible en TH17", bar: false });
+  assert.deepEqual(capsFichaLines(row), [
+    "Disponible en TH17",
+    "Sin imagen",
+    "Nombre en español sin confirmar",
+  ]);
   const view = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(view.cats.defensas.pct, 66.9);
   assert.equal(view.cats.defensas.sigPct, 61.3);
@@ -275,6 +280,9 @@ test("parseLoose no menciona línea ni columna", () => {
   const cutFile = parseLoose('{"tag":"#28PLGP0G2"', "file");
   assert.equal(cutFile.msg, "El archivo está incompleto.");
   assert.equal(/línea|columna|position/i.test(cutFile.msg), false);
+  const spaced = parseLoose("abcdefghijklmnopqrs xyz");
+  assert.equal(spaced.preview, "abcdefghijklmnopqrs");
+  assert.equal(spaced.msg, "Lo que hay en el portapapeles no es una exportación. Empieza por «abcdefghijklmnopqrs».");
 });
 
 const CAT_KEYS = ["defensas", "laboratorio", "ejercito_edif", "equipamiento", "mascotas", "heroes", "trampas", "recursos"];
@@ -358,6 +366,7 @@ test("muros de C1 y de una cuenta TH11", () => {
   ]);
   const gap = c1.walls.hist.reduce((s, h) => s + (c1.walls.max - h.lvl) * h.cnt, 0);
   assert.equal(gap, 1884);
+  assert.equal(catFoot(c1, c1.cats.muros), "Faltan 1884 niveles");
   const r = analyze(exportsByTag.get("#R02YUVC0J"), index);
   assert.equal(r.walls.max, 12);
   assert.deepEqual(r.walls.hist, [
@@ -366,6 +375,7 @@ test("muros de C1 y de una cuenta TH11", () => {
     { lvl: 7, cnt: 39 },
   ]);
   assert.equal(r.walls.hist.reduce((s, h) => s + (r.walls.max - h.lvl) * h.cnt, 0), 2011);
+  assert.equal(catFoot(r, r.cats.muros), "TH12: 40,7\u00A0% · faltan 2011 niveles");
 });
 
 test("missing.json coincide con el archivo publicado", () => {
