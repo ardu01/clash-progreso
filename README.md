@@ -1,6 +1,6 @@
 # Clash Progreso
 
-PWA estática (2.0.0) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
+PWA estática (2.1.0) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
 
 This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
 
@@ -20,10 +20,10 @@ Abre `http://127.0.0.1:8765/clash-progreso/#/roster`.
 
 ## Probar sin conexión
 
-1. Carga la app una vez con red (el service worker guarda la interfaz, los JSON, el manifiesto y solo los ayuntamientos y los héroes: 14 archivos, 9.624.126 bytes).
+1. Carga la app una vez con red (el service worker guarda la interfaz y las 220 imágenes con `precarga: true`: 21.579.962 bytes). El resto se guarda al verlas.
 2. En Chrome: Application → Service Workers → Offline, o corta la red.
-3. Recarga `#/roster`. Cuentas, Progreso, Mejoras, Gráficos y Copia siguen disponibles.
-4. Las demás imágenes se guardan al verlas. En Ajustes, el botón muestra lo que falta con `fmtBytes(total_bytes − ya guardados)`. El total sale de `assets/manifest.json` → `peso_imagenes.total_bytes` (60.458.372 bytes, 184 archivos, que se ve como 60,5 MB), no de una cifra escrita a mano. Las imágenes con `pesado: true` no entran en esa descarga.
+3. Recarga `#/roster`. Cuentas, Progreso, Mejoras, Gráficos y Copia siguen disponibles. Si falta la imagen del nivel y no hay red, se muestra el PNG del edificio, sin la marca de nivel.
+4. En Copia, el botón muestra lo que falta con `fmtBytes(total_bytes − ya guardados)`. El total sale de `assets/manifest.json` → `peso_imagenes.total_bytes` (77.485.701 bytes, 399 archivos). `pesado` sigue siendo más de 3 MB; en esta versión no hay ninguna.
 5. Importar: Ajustes o Roster → Importar. Pega un JSON o elige varios archivos. Tiene que traer `tag`, `timestamp` y el ayuntamiento `1000001`.
 
 ## Datos

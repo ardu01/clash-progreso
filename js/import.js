@@ -147,6 +147,21 @@ function singleShift(prev, next) {
   return { from: a[diff], to: b[diff] };
 }
 
+function bagLevel(bag) {
+  if (!bag || !bag.parts || !bag.parts.length) return null;
+  let lvl = 0;
+  for (const p of bag.parts) if ((p.lvl || 0) > lvl) lvl = p.lvl || 0;
+  return lvl;
+}
+
+function imageLevel(prev, next) {
+  if (prev && next && prev.cnt === next.cnt) {
+    const one = singleShift(prev, next);
+    if (one) return one.to;
+  }
+  return bagLevel(next || prev);
+}
+
 function changeText(prev, next) {
   if (!next) return null;
   if (!prev) return "Nuevo";
@@ -231,6 +246,7 @@ export function diffExports(prev, next, index, now = Date.now()) {
         unknown: pres.unknown,
         mark: pres.mark,
         change: text,
+        lvl: imageLevel(pb, nb),
         category: CAT_LABEL[cat] || cat,
         categoryKey: cat,
         section: src.section,
@@ -245,6 +261,7 @@ export function diffExports(prev, next, index, now = Date.now()) {
         unknown: false,
         mark: null,
         change: wtext,
+        lvl: imageLevel(A.walls, B.walls),
         category: "Muros",
         categoryKey: "muros",
         section: "buildings",

@@ -4,7 +4,7 @@ export function backupFilename(now = Date.now()) {
   return `clash-progreso-copia-${madridDayKey(now)}.json`;
 }
 
-export function buildBackup({ accounts, exports, now = Date.now(), version = "2.0.0" }) {
+export function buildBackup({ accounts, exports, now = Date.now(), version = "2.1.0" }) {
   return {
     app: "clash-progreso",
     version,
