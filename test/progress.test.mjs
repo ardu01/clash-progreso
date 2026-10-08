@@ -4,10 +4,11 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, overMaxLabel, CATEGORIES } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
+import { fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { classifyEntries, acceptedExports, foreignMsg, trailingLabel } from "../js/import.js";
+import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle } from "../js/import.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -222,9 +223,9 @@ test("Inferno Artillery solo en el detalle, sin id inventado", () => {
   }
 });
 
-test("184 sha256 coinciden con el manifiesto", () => {
-  assert.equal(manifest.peso_imagenes.total_archivos, 184);
-  assert.equal(manifest.peso_imagenes.total_bytes, 60458372);
+test("185 sha256 coinciden con el manifiesto", () => {
+  assert.equal(manifest.peso_imagenes.total_archivos, 185);
+  assert.equal(manifest.peso_imagenes.total_bytes, 60950695);
   assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 14);
   assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 9624126);
   const want = new Map();
@@ -236,7 +237,7 @@ test("184 sha256 coinciden con el manifiesto", () => {
       if (im && im.ruta) want.set(im.ruta, im);
     }
   }
-  assert.equal(want.size, 184);
+  assert.equal(want.size, 185);
   const dir = join(root, "assets/images");
   const files = [];
   const walk = (rel) => {
@@ -247,7 +248,7 @@ test("184 sha256 coinciden con el manifiesto", () => {
     }
   };
   walk("");
-  assert.equal(files.length, 184);
+  assert.equal(files.length, 185);
   for (const rel of files) {
     const im = want.get(rel);
     assert.ok(im, rel);
@@ -264,8 +265,10 @@ test("parseLoose no menciona línea ni columna", () => {
   assert.equal(empty.msg, "El portapapeles está vacío.");
   const other = parseLoose("https://link.clashofclans.com/x");
   assert.equal(other.title, "No se pudo leer la exportación");
-  assert.equal(other.preview, "https://link.clashof");
-  assert.match(other.msg, /Empieza por «https:\/\/link\.clashof»/);
+  assert.equal(other.preview, "https://link.cla…");
+  assert.match(other.msg, /Empieza por «https:\/\/link\.cla…»/);
+  const exact = parseLoose("https://link.clashof");
+  assert.equal(exact.preview, "https://link.clashof");
   const cut = parseLoose('{"tag":"#28PLGP0G2"');
   assert.equal(cut.msg, "El texto está incompleto: parece cortado al copiar.");
   const ok = parseLoose('{"tag":"#28PLGP0G2","timestamp":1}');
@@ -277,14 +280,16 @@ test("parseLoose no menciona línea ni columna", () => {
   assert.equal(emptyFile.msg, "El archivo está vacío.");
   assert.equal(/portapapeles|Copiar|Pegar/i.test(emptyFile.msg + emptyFile.help + emptyFile.title), false);
   const otherFile = parseLoose("https://link.clashofclans.com/x", "file");
-  assert.equal(otherFile.msg, "El archivo no es una exportación. Empieza por «https://link.clashof».");
+  assert.equal(otherFile.msg, "El archivo no es una exportación. Empieza por «https://link.cla…».");
   assert.equal(/portapapeles/i.test(otherFile.msg + otherFile.help), false);
   const cutFile = parseLoose('{"tag":"#28PLGP0G2"', "file");
   assert.equal(cutFile.msg, "El archivo está incompleto.");
   assert.equal(/línea|columna|position/i.test(cutFile.msg), false);
   const spaced = parseLoose("abcdefghijklmnopqrs xyz");
-  assert.equal(spaced.preview, "abcdefghijklmnopqrs");
-  assert.equal(spaced.msg, "Lo que hay en el portapapeles no es una exportación. Empieza por «abcdefghijklmnopqrs».");
+  assert.equal(spaced.preview, "abcdefghijklmnop…");
+  assert.equal(spaced.msg, "Lo que hay en el portapapeles no es una exportación. Empieza por «abcdefghijklmnop…».");
+  const trimmed = parseLoose("abcdefghijklmnopqrs ");
+  assert.equal(trimmed.preview, "abcdefghijklmnopqrs");
 });
 
 const CAT_KEYS = ["defensas", "laboratorio", "ejercito_edif", "equipamiento", "mascotas", "heroes", "trampas", "recursos"];
@@ -382,8 +387,29 @@ test("muros de C1 y de una cuenta TH11", () => {
 
 test("missing.json coincide con el archivo publicado", () => {
   const buf = readFileSync(new URL("../assets/missing.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "53b293a3160900e693a3e950de291167ce7ec73e7ab14b5ec9535e61aa7e1fef");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
+
+test("manifest.json coincide con la v1.3.1", () => {
+  const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "b274e37d8ffaf19de6079a0057c65f3487c0cae8eec79aaf01ff3ccf9b22f882");
+});
+
+/** La función real de js/app.js, sin ejecutar el arranque del navegador. */
+function frameOfFromApp() {
+  const src = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const start = src.indexOf("function frameOf(im, size)");
+  assert.ok(start >= 0);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i += 1) {
+    if (src[i] === "{") depth += 1;
+    else if (src[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return new Function(`${src.slice(start, i + 1)}\nreturn frameOf;`)();
+    }
+  }
+  throw new Error("frameOf sin cierre");
+}
 
 const V110 = {
   "#28PLGP0G2": { media: 64, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [61.6, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
@@ -564,23 +590,149 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 1.1.1 y cachés cp-shell-v5 / cp-img-v4", () => {
-  assert.equal(APP_VERSION, "1.1.1");
-  assert.equal(SHELL_CACHE, "cp-shell-v5");
+test("versión 1.1.2 y cachés cp-shell-v6 / cp-img-v4", () => {
+  assert.equal(APP_VERSION, "1.1.2");
+  assert.equal(SHELL_CACHE, "cp-shell-v6");
   assert.equal(IMAGE_CACHE, "cp-img-v4");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
   assert.match(sw, /SHELL_CACHE/);
   assert.match(sw, /IMAGE_CACHE/);
-  assert.equal(sw.includes("cp-shell-v4"), false);
+  assert.equal(sw.includes("cp-shell-v5"), false);
+  assert.equal(sw.includes("cp-shell-v6"), false);
+  assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v5/);
+  assert.match(caches, /cp-shell-v6/);
   assert.match(caches, /cp-img-v4/);
-  assert.equal(caches.includes("cp-shell-v4"), false);
+  assert.equal(caches.includes("cp-shell-v5"), false);
+  assert.equal(caches.includes("cp-img-v5"), false);
   assert.match(app, /APP_VERSION/);
   assert.equal(app.includes("1.1.0"), false);
+  assert.equal(app.includes("salvo cuando"), false);
   assert.match(app, /js\/import\.js|from "\.\/import\.js"/);
+});
+
+function unidentifiedSplit(exp) {
+  const th = townHallLevel(exp);
+  const notices = {};
+  let noticeSum = 0;
+  let equipment = 0;
+  for (const cat of CATEGORIES) {
+    if (cat.key === "muros") continue;
+    const items = categoryItems(exp, index, cat.key, th);
+    let n = 0;
+    for (const it of items) {
+      if (!it.id || !outsidePct(index, it.id, th)) continue;
+      n += cat.key === "equipamiento" ? 1 : (it.cnt > 0 ? it.cnt : 1);
+    }
+    if (cat.key === "equipamiento") equipment = n;
+    else {
+      notices[cat.key] = n;
+      noticeSum += n;
+    }
+  }
+  return { noticeSum, equipment, total: noticeSum + equipment, notices };
+}
+
+test("sin identificar: C1 da 8 y las otras diez dan 4, el mismo número en los dos sitios", () => {
+  const rows = [...exportsByTag.values()];
+  for (const roster of ROSTER) {
+    const exp = exportsByTag.get(roster.tag);
+    const fresh = structuredClone(exp);
+    fresh.timestamp = exp.timestamp + 40;
+    const item = classifyEntries([{ name: "nueva.json", text: JSON.stringify(fresh) }], importCtx(rows))[0];
+    const split = unidentifiedSplit(exp);
+    const want = roster.tag === "#28PLGP0G2" ? 8 : 4;
+    assert.equal(item.changes.unknownCount, want, roster.tag);
+    assert.equal(split.total, want, roster.tag + " avisos");
+    assert.equal(split.notices.defensas || 0, 0, roster.tag + " defensas");
+    assert.equal(outsidePct(index, "107000008", townHallLevel(exp)), false, roster.tag);
+    if (roster.tag === "#28PLGP0G2") {
+      assert.equal(split.notices.laboratorio, 3);
+      assert.equal(split.equipment, 5);
+      assert.equal(unknownMsg(item.changes.unknownCount), "8 ítems sin identificar: se guardan igual.");
+    } else {
+      assert.equal(split.equipment, 4);
+      assert.equal(split.noticeSum, 0, roster.tag);
+      const ids = categoryItems(exp, index, "equipamiento", townHallLevel(exp))
+        .filter((it) => outsidePct(index, it.id, townHallLevel(exp)))
+        .map((it) => it.id)
+        .sort();
+      assert.deepEqual(ids, ["90000016", "90000057", "90000060", "90000061"]);
+    }
+  }
+  assert.equal(unknownMsg(1), "1 ítem sin identificar: se guarda igual.");
+  const helper = presentItem(index, "93000003");
+  assert.equal(helper.unknown, true);
+  assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 8);
+});
+
+test("107000008 se muestra como Logger con ID deducido y no entra en el aviso", () => {
+  const item = manifest.items["107000008"];
+  assert.equal(item.estado, "id_deducido");
+  assert.equal(item.nombre_pendiente, true);
+  assert.equal(item.nombre_en, "Logger");
+  assert.equal(itemName(item), "Logger");
+  const shown = presentItem(index, "107000008");
+  assert.equal(shown.unknown, false);
+  assert.equal(shown.title, "Logger");
+  assert.equal(shown.mark, null);
+  assert.equal(capsMaxFor(index, "107000008", 18), 5);
+  assert.equal(outsidePct(index, "107000008", 18), false);
+  const row = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "defensas", 18).find((r) => r.id === "107000008");
+  assert.ok(row);
+  assert.equal(levelLine(row).text, "Nv 1 / 5");
+  assert.equal(row.max, 5);
+  assert.equal(item.imagen.ruta, "images/guardians/logger.png");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /badge--soft">ID deducido/);
+  assert.match(app, /Nombre en español sin confirmar/);
+  const heroes = categoryItems(exportsByTag.get("#R00C8CPQC"), index, "heroes", 16);
+  const line = (name) => levelLine(heroes.find((h) => itemName(index.items[h.id]) === name)).text;
+  assert.equal(line("Luchadora real"), "Nv 11 / 45");
+  assert.equal(line("Príncipe Esbirro"), "Nv 12 / 80");
+  assert.equal(line("Duque Dragón"), "Nv 10 / 15");
+});
+
+test("el encuadre del Logger es --cx:.56 --cy:.598 --z:1.542", () => {
+  const im = manifest.items["107000008"].imagen;
+  assert.deepEqual(im.caja_visible, { x: 268, y: 335, w: 611, h: 555 });
+  assert.equal(im.ocupacion, 0.3234);
+  const frameOf = frameOfFromApp();
+  const css = (frame) => `--cx:${frame.cx.replace(/^0(?=\.)/, "")} --cy:${frame.cy.replace(/^0(?=\.)/, "")} --z:${frame.z}`;
+  for (const size of [40, 96]) {
+    const frame = frameOf(im, size);
+    assert.deepEqual(frame, { cx: "0.56", cy: "0.598", z: "1.542" }, String(size));
+    assert.equal(css(frame), "--cx:.56 --cy:.598 --z:1.542");
+  }
+  assert.equal(IMAGE_CACHE, "cp-img-v4");
+});
+
+test("la media sin cambio no repite el valor ni pone flecha", () => {
+  const base = exportsByTag.get("#R00C8CPQC");
+  const rows = [...exportsByTag.values()];
+  const same = structuredClone(base);
+  same.timestamp = base.timestamp + 40;
+  const flat = classifyEntries([{ name: "igual.json", text: JSON.stringify(same) }], importCtx(rows))[0];
+  assert.equal(flat.kind, "ready");
+  assert.equal(flat.changes.delta.dir, "flat");
+  assert.equal(flat.changes.mediaTo, 49);
+  assert.equal(mediaLine(flat.changes), fmtPct(49) + " · sin cambio");
+  assert.equal(mediaLine(flat.changes).includes("→"), false);
+  assert.equal(mediaLine(flat.changes).split(fmtPct(49)).length - 1, 1);
+  const moved = structuredClone(base);
+  moved.timestamp = base.timestamp + 80;
+  const wall = moved.buildings.find((b) => b.data === 1000010);
+  wall.lvl += 1;
+  const up = classifyEntries([{ name: "sube.json", text: JSON.stringify(moved) }], importCtx(rows))[0];
+  assert.equal(up.changes.delta.dir === "flat", false);
+  assert.match(mediaLine(up.changes), /→/);
+  assert.equal(mediaLine(up.changes).includes("sin cambio"), false);
+  const bad = classifyEntries([{ name: "c1.json", text: "{", source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(bad), "c1.json · El archivo está incompleto");
+  const url = classifyEntries([{ name: "nota.txt", text: "https://link.clashofclans.com/x", source: "file" }], importCtx(rows))[0];
+  assert.equal(omitSubtitle(url), "nota.txt · El archivo no es una exportación. Empieza por «https://link.cla…»");
 });
 
 test("ofensiva: media de laboratorio y héroes", () => {

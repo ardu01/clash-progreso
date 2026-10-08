@@ -1,6 +1,13 @@
 const HELP_COPY = "Vuelve a Clash of Clans y toca Copiar otra vez en Exportar datos.";
 const HELP_FILE = "Elige el JSON que exporta Clash of Clans.";
 
+/** Hasta 20 caracteres. Si el texto es más largo, la muestra acaba en «…». */
+function clipPreview(text) {
+  const chars = Array.from(text);
+  if (chars.length > 20) return chars.slice(0, 16).join("") + "…";
+  return chars.join("").trimEnd();
+}
+
 /**
  * Safari no informa la posición del error de JSON. El mensaje sale del texto:
  * vacío, si empieza por «{» y si termina en «}». Nunca «línea» ni «columna».
@@ -27,7 +34,7 @@ export function parseLoose(text, source = "clipboard") {
       };
   }
   if (!trimmed.startsWith("{")) {
-    const preview = Array.from(trimmed).slice(0, 20).join("").trimEnd();
+    const preview = clipPreview(trimmed);
     const where = file ? "El archivo" : "Lo que hay en el portapapeles";
     return {
       ok: false,
