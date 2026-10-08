@@ -139,17 +139,10 @@ img { max-width: 100%; }
   }
 }
 
-.legal {
-  margin: var(--sp-8) var(--margin-r) 0 var(--margin-l);
-  padding: 0 var(--sp-4) var(--sp-4);
-  font-size: 0.706rem; line-height: 1.333;
-  color: var(--on-dark-2);
-  text-align: center; text-wrap: balance;
-  overflow: visible;
-}
-.legal p { margin: 0 0 var(--sp-1); }
-.legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-.sheet .legal { color: var(--label-2); }
+.about { text-align: left; }
+.about p { margin: 0 0 var(--sp-3); overflow-wrap: anywhere; }
+.about p:last-child { margin-bottom: 0; }
+.about a { color: var(--tint); }
 .sheet .section-header, .sheet .section-footer { color: var(--label-2); }
 
 :focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; }

@@ -1,6 +1,10 @@
 /** Imagen oficial por nivel (v2.1). Sin DOM: la usan la app, el service worker y las pruebas. */
 
 export const SCALE_PX = 96;
+/** En un iPhone @3x, 1 px CSS son 3 px físicos. */
+export const DEVICE_SCALE = 3;
+/** Padding de `.thumb`: 8 % por lado. El interior es size × (1 − 2 × PAD). */
+export const THUMB_PAD = 0.08;
 export const HEAVY_BYTES = 3000000;
 
 export function isHeavy(im, item) {
@@ -32,14 +36,28 @@ export function imageChoice(item, lvl) {
   return { im: base, fallback: null, marca: null };
 }
 
-/** escala = min(1, 96 / max(caja.w, caja.h)). Nunca más de 1 px de imagen por px CSS. */
-export function fitOf(im) {
+/** Lado interior de la miniatura, en px CSS. Un tile no tiene padding. */
+export function thumbInterior(size, tile) {
+  const side = Number(size);
+  if (!(side > 0)) return 0;
+  return tile ? side : side * (1 - 2 * THUMB_PAD);
+}
+
+/**
+ * Escala uniforme para que la caja útil quepa en el interior de esta miniatura
+ * y, a DPR 3, no ocupe más px físicos que su resolución.
+ * Si llenar el interior exigiría ampliar por encima, se amplía menos y queda más margen.
+ * escala = min(interior / max(caja.w, caja.h), 1/3).
+ */
+export function fitOf(im, size = SCALE_PX) {
   if (!im || !im.caja_visible) return null;
   const ancho = Number(im.ancho);
   const alto = Number(im.alto);
   const { x, y, w, h } = im.caja_visible;
   if (!(ancho > 0) || !(alto > 0) || !(w > 0) || !(h > 0)) return null;
-  const escala = Math.min(1, SCALE_PX / Math.max(w, h));
+  const lado = thumbInterior(size, im.tipo_visual === "tile_fondo_opaco");
+  if (!(lado > 0)) return null;
+  const escala = Math.min(lado / Math.max(w, h), 1 / DEVICE_SCALE);
   const dw = ancho * escala;
   const dh = alto * escala;
   return {

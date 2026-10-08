@@ -81,8 +81,3 @@ export function fmtBytes(n) {
   const mb = n / 1000000;
   return new Intl.NumberFormat("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(mb) + "\u00a0MB";
 }
-
-export const LEGAL = `<footer class="legal">
-  <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
-  <p>Material no oficial, no respaldado por Supercell. Más información en la Política de contenido de fans de Supercell.</p>
-</footer>`;

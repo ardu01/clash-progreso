@@ -3,7 +3,7 @@ import {
   capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
   itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, townHallLevel, upgradesOf,
 } from "./progress.js";
-import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
+import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
 import { catalog, fitOf, imageChoice, isHeavy } from "./images.js";
 import {
@@ -284,7 +284,7 @@ function thumb(id, opts = {}) {
 }
 
 function imageThumb(cls, size, label, im, opts, choice) {
-  const fit = fitOf(im);
+  const fit = fitOf(im, size);
   const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
   const fitted = fit ? " is-fit" : "";
   const vars = [];
@@ -297,7 +297,7 @@ function imageThumb(cls, size, label, im, opts, choice) {
   const fb = choice && choice.fallback;
   if (fb && fb.ruta && fb.ruta !== im.ruta) {
     extra += ` data-fallback="./assets/${esc(fb.ruta)}"`;
-    const ff = fitOf(fb);
+    const ff = fitOf(fb, size);
     if (ff) extra += ` data-fb-dw="${cssNum(ff.dw)}" data-fb-dh="${cssNum(ff.dh)}" data-fb-tx="${cssNum(ff.tx)}" data-fb-ty="${cssNum(ff.ty)}"`;
   }
   return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
@@ -562,7 +562,7 @@ function renderRoster() {
     ${empty}
     ${list.length ? `<div class="section"><ul class="list">${rows}</ul>${seedNote}</div>` : seedNote}
     <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
-    ${LEGAL}`;
+`;
 }
 
 function isSeedRoster(list) {
@@ -680,7 +680,7 @@ function renderProgreso(tag) {
   const list = allAccounts();
   const meta = accountByTag(tag) || list[0];
   if (!meta) {
-    return `<h1 class="large-title">Progreso</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>${LEGAL}`;
+    return `<h1 class="large-title">Progreso</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
   }
   const exp = expOf(meta.tag);
   const options = list.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
@@ -702,7 +702,7 @@ function renderProgreso(tag) {
     ${exp ? summaryCard(a, meta) : ""}
     ${body}
     ${exp && !narrowed ? builderBaseSection(exp) : ""}
-    ${LEGAL}`;
+`;
 }
 
 function filterControls(counts, filt) {
@@ -946,7 +946,7 @@ function renderDetalle(tag, catKey) {
   const meta = accountByTag(tag);
   const exp = expOf(tag);
   const cat = CATEGORIES.find((c) => c.key === catKey);
-  if (!meta || !exp || !cat) return `<div class="section"><div class="card empty"><p class="t-title3">No hay datos</p></div></div>${LEGAL}`;
+  if (!meta || !exp || !cat) return `<div class="section"><div class="card empty"><p class="t-title3">No hay datos</p></div></div>`;
   const a = viewOf(tag);
   if (catKey === "muros") return renderMuros(a);
   const row = a.cats[catKey];
@@ -973,7 +973,7 @@ function renderDetalle(tag, catKey) {
       : "";
     return `<div class="section"><div class="section-header"><span>${title}</span></div><ul class="list">${list.map((it) => detailRow(it, catKey, a)).join("")}</ul>${note}</div>`;
   }).join("");
-  return head + blocks + LEGAL;
+  return head + blocks;
 }
 
 function unidentifiedOutside(list, th) {
@@ -1084,7 +1084,7 @@ function renderMuros(a) {
   <div class="section"><div class="section-header"><span>Por nivel</span><span class="num">${piezas}</span></div>
     <ul class="list wall-list">${rows}</ul>
   </div>
-  ${LEGAL}`;
+`;
 }
 
 function builderBaseSection(exp) {
@@ -1138,7 +1138,7 @@ function renderMejoras() {
       <button role="tab" data-mej="cuenta" aria-selected="${mode === "cuenta"}">Por cuenta</button>
     </div></div>
     ${body}
-    ${LEGAL}`;
+`;
 }
 
 function mejorasPorFin(all) {
@@ -1301,7 +1301,7 @@ function renderEvolucion() {
       ${chartPending(stats.pending)}
       ${seriesPoints().length < 2 ? `<p class="section-footer">Hace falta una segunda importación para ver la tendencia</p>` : ""}
     </div></div>
-    ${LEGAL}`;
+`;
 }
 
 function evoStats() {
@@ -1509,13 +1509,6 @@ function renderAjustes() {
         </div></div>
         <div class="section-header"><span>Acerca de</span></div>
         <div class="section" style="margin-top:0"><ul class="list"><li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li></ul></div>
-        <div class="section"><div class="card t-footnote">
-          <p lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.</p>
-          <p>Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
-          <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
-          <p class="t-footnote c-2">Política consultada el 07/10/2026 (versión del 27/09/2023). Máximos por ayuntamiento: caps_clashrecord.json (ClashRecord), incluido en el repositorio. Los nombres salen solo del manifiesto.</p>
-        </div></div>
-        ${LEGAL}
       </div>
     </div>`;
 }
@@ -1532,7 +1525,7 @@ function renderImport() {
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="im-title">
       <div class="sheet__grabber"></div>
       <div class="sheet__bar">${lead}<h2 id="im-title" tabindex="-1">${title}</h2><span></span></div>
-      <div class="sheet__body">${importBody()}${LEGAL}</div>
+      <div class="sheet__body">${importBody()}</div>
       <input class="file-input" data-files type="file" accept=".json,application/json,text/json,text/plain" multiple tabindex="-1" aria-hidden="true">
       <div class="sheet__actions">${importActions()}</div>
     </div>`;
@@ -2096,7 +2089,7 @@ function fichaFrame(inner) {
     <div class="sheet sheet--half" role="dialog" aria-modal="true" aria-labelledby="ficha-title">
       <div class="sheet__grabber"></div>
       <div class="sheet__bar"><span></span><h2 id="ficha-title" tabindex="-1">Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
-      <div class="sheet__body"><div class="ficha">${inner}</div>${LEGAL}</div>
+      <div class="sheet__body"><div class="ficha">${inner}</div></div>
     </div>`;
 }
 
@@ -2177,7 +2170,7 @@ function screenFor(r) {
 function renderGraficos() {
   const list = allAccounts().filter((m) => expOf(m.tag));
   if (!list.length) {
-    return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>${LEGAL}`;
+    return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
   }
   const tag = list.some((m) => m.tag === state.chartTag) ? state.chartTag : list[0].tag;
   const meta = accountByTag(tag);
@@ -2210,7 +2203,7 @@ function renderGraficos() {
       <h2 class="t-headline">Evolución ${esc(meta.nombre)}</h2>
       ${evolutionChart(tag)}
     </div></div>
-    ${LEGAL}`;
+`;
 }
 
 function evolutionPoints(tag) {
@@ -2267,7 +2260,6 @@ function renderCopia() {
       <p class="t-body">Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial.</p>
       <p class="t-footnote c-2">${esc(thLine)}</p>
       <p class="t-footnote c-2">Última importación: ${esc(lastImportLabel())}</p>
-      <p class="t-footnote c-2">Versión ${esc(APP_VERSION)}</p>
       <button type="button" class="btn btn--primary btn--block" data-backup>Exportar JSON · ${n} cuentas</button>
       <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar desde una copia</button>
       <p class="t-footnote c-2">Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú.</p>
@@ -2280,12 +2272,19 @@ function renderCopia() {
       <p class="t-footnote c-2">${esc(note)}</p>
     </div></div>
     <div class="section"><ul class="list">
-      <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
       <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos de prueba</span></span></button></li>
       <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
     </ul></div>
-    <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">
-    ${LEGAL}`;
+    <div class="section-header"><span>Acerca de</span></div>
+    <div class="section" style="margin-top:0"><ul class="list">
+      <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
+    </ul></div>
+    <div class="section"><div class="card about">
+      <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
+      <p class="t-body">Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
+      <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
+    </div></div>
+    <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
 }
 
 function lastImportLabel() {
@@ -2308,7 +2307,6 @@ function renderEditor() {
         <div class="section"><button type="button" class="btn btn--secondary btn--block" data-principal="${esc(meta.tag)}">${meta.principal ? "Quitar Principal" : "Marcar como Principal"}</button></div>
         <div class="section"><button type="button" class="btn btn--destructive btn--block" data-delete="${esc(meta.tag)}">Borrar cuenta</button></div>
         <p class="section-footer">Puede haber varias cuentas Principal. Si no marcas ninguna, destaca la de TH más alto.</p>
-        ${LEGAL}
       </div>
     </div>`;
 }
