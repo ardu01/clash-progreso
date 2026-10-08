@@ -613,7 +613,9 @@ export function helpersOf(exp) {
 
 /**
  * Inferno Artillery solo está en caps_clashrecord.json (sin ficha ni ID).
- * En el detalle de defensas sale como hueco de nivel 0 cuando ese TH la cuenta.
+ * Si este TH la cuenta, la fila es Nv 0 / máx con barra. Si la clave está solo
+ * en el TH siguiente, la fila dice «Disponible en THn» y el 0/máx entra en la
+ * comparación frente a ese TH, no en el porcentaje del TH de la cuenta.
  */
 function infernoDetail(index, th) {
   const next = th < 18 ? th + 1 : null;
@@ -637,7 +639,7 @@ function infernoDetail(index, th) {
     };
   }
   if (!cur && nxt && (nxt.count || 0) > 0) {
-    return { ...base, cnt: nxt.count || 1, max: nxt.max, maxNext: null, unlockTh: null };
+    return { ...base, cnt: nxt.count || 1, max: null, maxNext: nxt.max, unlockTh: next };
   }
   return null;
 }

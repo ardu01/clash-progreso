@@ -199,7 +199,13 @@ test("Inferno Artillery solo en el detalle, sin id inventado", () => {
   assert.equal(row.capsName, "Inferno Artillery");
   assert.equal(row.id, null);
   assert.equal(row.lvl, 0);
-  assert.equal(row.max, 5);
+  assert.equal(row.max, null);
+  assert.equal(row.maxNext, 5);
+  assert.equal(row.unlockTh, 17);
+  assert.deepEqual(levelLine(row), { text: "Disponible en TH17", bar: false });
+  const view = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  assert.equal(view.cats.defensas.pct, 66.9);
+  assert.equal(view.cats.defensas.sigPct, 61.3);
   const c1 = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "defensas", 18);
   assert.equal(c1.some((r) => r.capsOnly), false);
   const lab = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "laboratorio", 18);

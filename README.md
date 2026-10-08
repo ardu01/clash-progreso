@@ -46,7 +46,7 @@ La ofensiva es la media del % de laboratorio y del % de héroes, con el redondeo
 Desvíos que quedan frente a `snapshots.csv`:
 
 - `#R02YUVC0J` defensas 54,4 % (el CSV dice 55,6 %). En TH11 el archivo de máximos cuenta 5 torres de magos y esta cuenta tiene 4; la que falta entra como 0. La media queda 49,2 % (el CSV dice 49,4 %) y hacia TH12, 45,8 % y 41,7 % de media (el CSV dice 46,8 % y 41,9 %). La ofensiva sí coincide: 41,1 %.
-- C2, defensas hacia TH17: 61,3 % (el CSV dice 61,7 %). El % de TH16 sí es 66,9 %. La décima que falta es Inferno Artillery, sin ficha en el manifiesto, que entra como 0/5. En el detalle de defensas sale en «Sin desbloquear», con iniciales y el nombre del archivo de máximos.
+- C2, defensas hacia TH17: 61,3 % (el CSV dice 61,7 %). El % de TH16 sí es 66,9 %. La décima que falta es Inferno Artillery, sin ficha en el manifiesto, que entra como 0/5 solo en esa comparación. En el detalle de TH16 la fila dice «Disponible en TH17», sin barra, con iniciales y el nombre del archivo de máximos.
 - C2, laboratorio 45,4 % (el CSV dice 44,9 %) porque Ruin Witch y Angry Spell ya no cuentan. La ofensiva queda 34,5 % (el CSV dice 34,2 %). En C1 el laboratorio pasa de 62,3 % a 63,1 % y la ofensiva de 54,1 % a 54,5 %. `#GUQUV98JG` sigue en 43,2 %.
 - Equipamiento v1.2: Fire Heart, Rocket Backpack y Electro Fangs pasan a `id_deducido` y, con nivel mayor que 1, entran en el % con la misma fórmula (el CSV los tenía sin identificar). C1 queda en 61,6 % (el CSV dice 58,4 %) y la media en 64,0 % (el CSV dice 63,6 %). C2 queda en 58,6 % (el CSV dice 57,3 %); la media sube a 49,0 % (el CSV dice 48,8 %) y hacia TH17 a 46,1 % (el CSV dice 45,9 %).
 
