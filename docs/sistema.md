@@ -1018,7 +1018,11 @@ Las vistas *push* (detalle de categoría) llevan a la izquierda `.btn-text` con 
 
 ### 6.3 Tab bar inferior
 
-Hay cuatro pestañas: **Roster · Progreso · Mejoras · Evolución**. Los iconos son SVG de UI propios con trazo de 1,8 px (no son SF Symbols ni ítems del juego).
+Desde la 2.0 hay cinco pestañas: **Cuentas · Progreso · Mejoras · Gráficos · Copia**. Importar no es pestaña: es un botón en Cuentas y en los estados vacíos. `#/evolucion` abre Gráficos. Los iconos son SVG de UI propios. Las cinco etiquetas van en una línea, sin puntos suspensivos, también a 375 px con el texto a 28 px. El selector «Solo maqueta · número de cuentas» no forma parte de la app.
+
+### 6.3 (1.x) Tab bar de cuatro pestañas
+
+Hasta la 1.1.6 había cuatro pestañas: **Roster · Progreso · Mejoras · Evolución**. Los iconos son SVG de UI propios con trazo de 1,8 px (no son SF Symbols ni ítems del juego).
 
 ```html
 <nav class="tabbar material-bar" aria-label="Secciones">
@@ -1052,9 +1056,13 @@ Hay cuatro pestañas: **Roster · Progreso · Mejoras · Evolución**. Los icono
 
 Inactivo `--label-2` (5,0:1 sobre la barra) y activo `--tint`. Volver a tocar la pestaña activa hace scroll arriba (`behavior: 'smooth'`, o `'auto'` si se reduce el movimiento). Con un sheet abierto, la tab bar queda bajo el backdrop.
 
-### 6.4 Ajustes: botón en la nav bar, no quinta pestaña
+### 6.4 Copia, la quinta pestaña
 
-**Decisión**: "Ajustes" es un `.btn-text` a la **izquierda de la nav bar de Roster** (a la derecha está "Importar") y abre un sheet a pantalla completa (§7e). Motivos:
+**Copia** (`#/copia`) guarda un JSON con todas las cuentas y todo el historial (`clash-progreso-copia-AAAA-MM-DD.json`, fecha de Madrid) y restaura fusionando por tag y fecha de exportación, sin borrar lo que solo está en el iPhone. En la misma pestaña están las imágenes sin conexión, restaurar los datos de prueba y borrar los datos. El aviso «Copia guardada» va encima de la tab bar y lleva `pointer-events: none`, para no tapar «Borrar todos los datos». Cancelar la hoja de compartir no muestra aviso.
+
+`#/ajustes` sigue abriendo el sheet anterior para los enlaces ya guardados. En 1.x Ajustes no era pestaña:
+
+**Decisión de 1.x**: "Ajustes" es un `.btn-text` a la **izquierda de la nav bar de Roster** (a la derecha está "Importar") y abre un sheet a pantalla completa (§7e). Motivos:
 1. **Frecuencia**: la HIG reserva la tab bar para secciones de uso continuo. Ajustes se abre rara vez (una descarga de imágenes y poco más). La acción frecuente, importar, ya tiene acceso directo con "Importar" en Roster y en todos los estados vacíos.
 2. **Pulgar**: con 4 pestañas cada objetivo mide ≈ 98 px de ancho en un iPhone de 393. Con 5 bajaría a 78 y se apretarían las etiquetas ("Evolución" es la más larga).
 3. **Contexto**: un sheet modal deja claro que Ajustes es una tarea aparte y se cierra con "OK" o deslizando hacia abajo, como Ajustes en Salud, Fitness o la App Store.
@@ -2028,3 +2036,14 @@ Especificación de 1.1.5:
 1.1.5 está en main (`9b5cc61`). `docs/sistema.md` de `9b5cc61` es la base de este cambio.
 
 1.1.6 solo cambia el icono de la PWA (§6.1): castillo en un cartel de madera, aro verde y marco dorado, el que eligió Miguel (opción B). Se sustituyen los cuatro PNG de `icons/`. No hay cambio de lógica, de `assets/` ni de los PNG del Fan Kit. `APP_VERSION` es `1.1.6`, `SHELL_CACHE` es `cp-shell-v10` e `IMAGE_CACHE` sigue en `cp-img-v4`.
+
+## Nota de cambios (8 oct 2026, 2.0.0)
+
+`APP_VERSION` es `2.0.0`, `SHELL_CACHE` es `cp-shell-v11` e `IMAGE_CACHE` sigue en `cp-img-v4`. Los PNG de `assets/` no cambian. `frameOf()` y el tope de la miniatura (§5.4) tampoco.
+
+- El roster deja de ser fijo. Las 11 cuentas de `ROSTER` son solo la semilla. Se puede añadir, renombrar y borrar. Varias pueden ser Principal; si no hay ninguna, destaca la de TH más alto.
+- Progreso filtra por categoría, Todos / Pendientes / Al máximo y nombre. El contador de cada chip es el número de filas que pinta esa misma lista. En el título de una categoría el contador va en una píldora junto al nombre y el porcentaje en su propia línea, sin «·».
+- Importar varias sigue en un sheet, no en una pestaña. El botón dice «Importar N cuentas» y N cuenta tags, no archivos.
+- Gráficos sustituye a Evolución: barras de la cuenta, comparativa y la evolución de las importaciones reales. Un solo punto se muestra como tal.
+- Mejoras se queda. La hora de fin es la de la exportación más el temporizador, en Madrid. En la cabecera, chozas y mejoras de constructor salen de `builderStatus`. Si sobran, el aviso es «Revisar constructores». La mejora con `extra` va aparte, con la etiqueta «B.O.B»: en C1 son 5 chozas, 6 mejoras de constructor y 1 de B.O.B.
+- Incluye la marca overMax del PR #8 (clase `.eq.is-over`, «máx. M», aria «máximo desactualizado»). No hereda su versión ni su caché.

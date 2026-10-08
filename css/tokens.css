@@ -41,6 +41,15 @@
 
   --thumb-bg: #EFEFF4;
 
+  /* Escena y pergamino de la 2.0. --bg-2, --orange, --orange-text y --green no se mueven: los usa el badge overMax. */
+  --scene: #2D3E57;
+  --on-dark: #FFFFFF;
+  --on-dark-2: #D7DCE6;
+  --panel-2: #FFFDF5;
+  --ink: #24211C;
+  --go: #2F7F17; /* blanco encima ≥ 4,5:1, sin contar contorno */
+  --gold: #F6C744;
+
   --material-bar:         rgba(249, 249, 249, 0.80);
   --material-bar-solid:   #F9F9F9;
   --material-float:       rgba(255, 255, 255, 0.86);
@@ -65,7 +74,7 @@
   --r-pill: 999px;
 
   --row-min: 44px;
-  --tabbar-h: 49px;
+  --tabbar-h: 64px;
   --navbar-h: 44px;
 }
 
@@ -113,6 +122,14 @@
     --cat-muros:        #8E9AAB;
 
     --thumb-bg: #2C2C2E;
+
+    --scene: #141B27;
+    --on-dark: #FFFFFF;
+    --on-dark-2: #D7DCE6;
+    --panel-2: #353946;
+    --ink: #F3F1EA;
+    --go: #2F7F17;
+    --gold: #F6C744;
 
     --material-bar:         rgba(30, 30, 30, 0.80);
     --material-bar-solid:   #1E1E1E;
