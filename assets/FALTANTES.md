@@ -98,3 +98,15 @@ Regla del Líder (v1.2): nivel exacto máximo de las exportaciones o, si no est�
 - Equipamiento aún sin identificar: 90000016, 90000056, 90000057, 90000060 y 90000061. En `coc/assets/oficial/equipment/` quedan PNG oficiales sin ID asignado (Flame Blower, Stun Blast, Monolith Arrow). No se asignan sin verificar.
 - Los IDs 93000003 (ayudante), 4000109 (tropa), 4000188 (máquina de asedio) y 26000123 (hechizo) tampoco están en los datos estáticos.
 - v1.3: 107000008 ya no está en esta lista. Es el Logger (`estado: id_deducido`, `id_verificado: false`, `key: guardians/logger`), deducido por descarte (los caps de TH18 tienen exactamente 3 guardianes y C1 tiene 3 IDs de guardián, 2 verificados; `analyze.py` línea 12). Nombre en inglés «Logger» con `nombre_pendiente` (nombre en español sin confirmar). Imagen oficial: Fan Kit `Guardian_Logger_01` (con sombra, como Longshot y Smasher), rendición `?width=1024` del original 3072x3072 (3771109 bytes), por decisión del Líder y por coherencia con los otros dos guardianes.
+
+## v2.1: imágenes por nivel servidas como rendición del CDN (3)
+
+En la 2.1, tres imágenes por nivel nuevas pesan más de 3 MB en el original del Fan Kit. Se usa la rendición que sirve el propio CDN oficial con `?width=1024`, descargada tal cual y sin modificar. En el manifiesto llevan `origen_variante: "cdn width=1024, original >3 MB"` y la URL exacta en `origen.url_descargada`.
+
+| ID | Edificio | Nivel | Título del Fan Kit | Original | Servida |
+|---|---|---|---|---|---|
+| 1000006 | Cuartel | 17 | `Building_HV_Barracks_level_17` | 16.901.354 bytes | `images/buildings/barracks-17.png` (972.358 bytes, 1024×1024) |
+| 1000010 | Muro | 17 | `Building_HV_Wall_level_17` | 7.956.137 bytes | `images/buildings/wall-17.png` (396.835 bytes, 1024×1024) |
+| 1000032 | Torre bombardera | 11 | `Building_HV_Bomb_Tower_level_11` | 14.643.997 bytes | `images/defenses/bomb-tower-11.png` (880.137 bytes, 1024×1024) |
+
+Los faltantes no cambian en la 2.1. Siguen sin imagen y sin sustituto.

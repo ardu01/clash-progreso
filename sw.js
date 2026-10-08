@@ -1,4 +1,5 @@
 import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js";
+import { precacheUrls } from "./js/images.js";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -19,6 +20,7 @@ const APP = [
   "./js/import.js",
   "./js/store.js",
   "./js/caches.js",
+  "./js/images.js",
   "./js/roster.js",
   "./js/filters.js",
   "./js/backup.js",
@@ -41,17 +43,8 @@ self.addEventListener("install", (event) => {
     const manRes = await fetch("./assets/manifest.json");
     const man = await manRes.json();
     const imgCache = await caches.open(IMAGES);
-    const urls = [];
-    for (const item of Object.values(man.items)) {
-      if (item.categoria !== "townhall" && item.categoria !== "hero") continue;
-      const push = (im) => {
-        if (!im || !im.ruta || im.pesado === true || item.pesado === true) return;
-        urls.push("./assets/" + im.ruta);
-      };
-      push(item.imagen);
-      for (const im of Object.values(item.imagenes_por_nivel || {})) push(im);
-    }
-    await imgCache.addAll(urls);
+    const urls = precacheUrls(man);
+    if (urls.length) await imgCache.addAll(urls);
     await self.skipWaiting();
   })());
 });

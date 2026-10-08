@@ -5,6 +5,7 @@ import {
 } from "./progress.js";
 import { LEGAL, dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
+import { catalog, fitOf, imageChoice, isHeavy } from "./images.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
@@ -250,28 +251,14 @@ function nameOf(id) {
   return itemName(item);
 }
 
-function imageRecord(item, th) {
-  if (!item) return null;
-  if (String(item.id) === "1000001" && th && item.imagenes_por_nivel) {
-    return item.imagenes_por_nivel[String(th)] || null;
-  }
-  return item.imagen || null;
+function thumbLevel(opts) {
+  if (opts.lvl != null && opts.lvl !== "") return opts.lvl;
+  if (opts.th != null && opts.th !== "") return opts.th;
+  return null;
 }
 
-function frameOf(im, size) {
-  if (!im || im.tipo_visual === "tile_fondo_opaco" || !im.caja_visible) return null;
-  const ancho = Number(im.ancho);
-  const alto = Number(im.alto);
-  const { x, y, w, h } = im.caja_visible;
-  if (!ancho || !alto || !w || !h) return null;
-  const k = 1 / Math.max(ancho, alto);
-  const cx = (1 - ancho * k) / 2 + (x + w / 2) * k;
-  const cy = (1 - alto * k) / 2 + (y + h / 2) * k;
-  const lado = size * 0.84;
-  const z = Math.min(0.92 / Math.max(w * k, h * k), Math.max(ancho, alto) / (lado * 3), 8);
-  if (!(z >= 1.15)) return null;
-  const n = (v) => String(Math.round(v * 1000) / 1000);
-  return { cx: n(cx), cy: n(cy), z: n(z) };
+function cssNum(v) {
+  return String(Math.round(Number(v) * 1000) / 1000);
 }
 
 function thumb(id, opts = {}) {
@@ -284,28 +271,36 @@ function thumb(id, opts = {}) {
     return `<span class="thumb ${cls} thumb--unknown"${style} aria-hidden="true">?</span>`;
   }
   const label = nameOf(id) || "";
-  const im = imageRecord(item, opts.th);
-  if (item.estado === "faltante" || !im || im.pesado === true) {
+  const choice = imageChoice(item, thumbLevel(opts));
+  const im = choice.im;
+  if (item.estado === "faltante" || !im || (isHeavy(im, item) && !opts.ficha)) {
     const style = known ? "" : ` style="--size:${size}px"`;
-    if (opts.ficha && im && im.pesado === true) {
-      return imageThumb(cls, size, label, im, opts);
+    if (opts.ficha && im && isHeavy(im, item)) {
+      return imageThumb(cls, size, label, im, opts, choice);
     }
     return `<span class="thumb ${cls} thumb--empty"${style} aria-hidden="true">${esc(initials(label))}</span>`;
   }
-  return imageThumb(cls, size, label, im, opts);
+  return imageThumb(cls, size, label, im, opts, choice);
 }
 
-function imageThumb(cls, size, label, im, opts) {
-  const frame = frameOf(im, size);
+function imageThumb(cls, size, label, im, opts, choice) {
+  const fit = fitOf(im);
   const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
-  const enc = frame ? " thumb--encuadre" : "";
+  const fitted = fit ? " is-fit" : "";
   const vars = [];
   if (![40, 44, 52, 72, 96].includes(size)) vars.push(`--size:${size}px`);
-  if (frame) vars.push(`--cx:${frame.cx}`, `--cy:${frame.cy}`, `--z:${frame.z}`);
+  if (fit) vars.push(`--dw:${cssNum(fit.dw)}`, `--dh:${cssNum(fit.dh)}`, `--tx:${cssNum(fit.tx)}`, `--ty:${cssNum(fit.ty)}`);
   const style = vars.length ? ` style="${vars.join(";")}"` : "";
   const loading = opts.eager ? "eager" : "lazy";
   const pri = opts.eager ? " fetchpriority=\"high\"" : "";
-  return `<span class="thumb ${cls}${tile}${enc}"${style} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+  let extra = "";
+  const fb = choice && choice.fallback;
+  if (fb && fb.ruta && fb.ruta !== im.ruta) {
+    extra += ` data-fallback="./assets/${esc(fb.ruta)}"`;
+    const ff = fitOf(fb);
+    if (ff) extra += ` data-fb-dw="${cssNum(ff.dw)}" data-fb-dh="${cssNum(ff.dh)}" data-fb-tx="${cssNum(ff.tx)}" data-fb-ty="${cssNum(ff.ty)}"`;
+  }
+  return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${size}" height="${size}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
 }
 
 function emptyNamedThumb(label, size) {
@@ -315,6 +310,36 @@ function emptyNamedThumb(label, size) {
   return `<span class="thumb ${cls} thumb--empty"${style} aria-hidden="true">${esc(initials(label))}</span>`;
 }
 
+function absUrl(url) {
+  try { return new URL(url, location.href).href; } catch { return url; }
+}
+
+function clearLevelNote(box) {
+  const note = box.closest(".ficha")?.querySelector("[data-level-note]");
+  if (note) note.remove();
+}
+
+/** Sin la imagen del nivel: el PNG del edificio, sin la marca de nivel inferior. */
+function applyFallback(img, box) {
+  const fb = box && box.dataset.fallback;
+  if (!fb || box.dataset.usedFallback === "1") return false;
+  if (img.getAttribute("src") === fb) return false;
+  box.dataset.usedFallback = "1";
+  if (box.dataset.fbDw) {
+    box.style.setProperty("--dw", box.dataset.fbDw);
+    box.style.setProperty("--dh", box.dataset.fbDh);
+    box.style.setProperty("--tx", box.dataset.fbTx);
+    box.style.setProperty("--ty", box.dataset.fbTy);
+    box.classList.add("is-fit");
+  }
+  clearLevelNote(box);
+  box.classList.remove("thumb--offline");
+  delete box.dataset.checked;
+  img.classList.remove("is-loaded");
+  img.src = fb;
+  return true;
+}
+
 window.__imgOk = (img) => {
   img.classList.add("is-loaded");
   const box = img.closest(".thumb");
@@ -322,7 +347,9 @@ window.__imgOk = (img) => {
 };
 window.__imgErr = (img) => {
   const box = img.closest(".thumb");
-  if (!box || box.dataset.checked === "1") return;
+  if (!box) return;
+  if (applyFallback(img, box)) return;
+  if (box.dataset.checked === "1") return;
   box.dataset.checked = "1";
   resolveThumbFailure(img, box);
 };
@@ -360,7 +387,18 @@ async function paintOfflineThumbs() {
     let hit = null;
     try { hit = await caches.match(img.src); } catch { hit = null; }
     if (!box.isConnected || img.classList.contains("is-loaded")) return;
-    if (!hit) box.classList.add("thumb--offline");
+    if (hit) return;
+    const fb = box.dataset.fallback;
+    if (fb && box.dataset.usedFallback !== "1") {
+      let fbHit = null;
+      try { fbHit = await caches.match(absUrl(fb)); } catch { fbHit = null; }
+      if (!box.isConnected || img.classList.contains("is-loaded")) return;
+      if (fbHit) {
+        applyFallback(img, box);
+        return;
+      }
+    }
+    box.classList.add("thumb--offline");
   }));
 }
 
@@ -827,14 +865,14 @@ function heroesCard(a) {
     const title = rowTitle(name, badge);
     if (!line.bar) {
       return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
-        ${thumb(h.id, { size: 40 })}
+        ${thumb(h.id, { size: 40, lvl: h.lvl })}
         <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
       </button></li>`;
     }
     const p = h.max ? (lvl / h.max) * 100 : 0;
     const maxed = lvl >= h.max;
     return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
-      ${thumb(h.id, { size: 40 })}
+      ${thumb(h.id, { size: 40, lvl: h.lvl })}
       <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
       <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
     </button></li>`;
@@ -868,7 +906,8 @@ function equipBlock(exp, meta) {
     });
     const heroId = HERO_ORDER.find((id) => state.index.items[id].nombre_en === key);
     const title = heroId ? (nameOf(heroId) || key) : "Héroe sin identificar";
-    const head = heroId ? thumb(heroId, { size: 28 }) : "";
+    const heroRow = heroId ? a.heroes.find((h) => h.id === heroId) : null;
+    const head = heroId ? thumb(heroId, { size: 28, lvl: heroRow ? heroRow.lvl : null }) : "";
     const cells = list.map((p) => eqCell(p)).join("");
     cards.push(`<section class="card eq-group"><header class="eq-group__hdr">${head}<h3>${esc(title)}</h3><span class="num">${list.length} piezas</span></header><ul class="eq-grid">${cells}</ul></section>`);
   }
@@ -899,7 +938,7 @@ function eqCell(p) {
     : over + (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
-    : thumb(p.id, { size: 52 });
+    : thumb(p.id, { size: 52, lvl: p.lvl });
   return `<li><button class="eq ${cls}" data-ficha="${p.id}" data-lvl="${p.lvl}" data-max="${p.max || ""}"${p.unlockTh != null ? ` data-unlock="${p.unlockTh}"` : ""} aria-label="${esc(aria)}">${box}<span class="eq__lvl num">${p.lvl}</span>${cap}</button></li>`;
 }
 
@@ -1002,7 +1041,7 @@ function detailRow(it, catKey, a) {
   const extras = `${cnt ? `<span class="num">${cnt}</span>` : ""}${badge}${idBadge}`;
   const aria = detailAria(title, it, a, { deduced, unknown });
   return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
-    ${thumb(it.id, { size: 40 })}
+    ${thumb(it.id, { size: 40, lvl: lv.lvl })}
     <span class="row__main">${rowTitle(title, extras)}<span class="row__sub num">${esc(lv.text)}</span></span>
     ${lv.bar}
   </button></li>`;
@@ -1064,7 +1103,7 @@ function builderBaseSection(exp) {
     const idBadge = unknown ? `<span class="badge badge-id">${esc(id)}</span>` : "";
     const lvl = it.lvl || 0;
     return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
-      ${thumb(id, { size: 40 })}
+      ${thumb(id, { size: 40, lvl })}
       <span class="row__main">${rowTitle(title, `${badge}${idBadge}`)}<span class="row__sub num">Nv ${lvl}</span></span>
     </button></li>`;
   }).join("");
@@ -1191,7 +1230,7 @@ function upRow(u) {
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
-    ${thumb(u.id, { size: 40 })}
+    ${thumb(u.id, { size: 40, lvl: u.lvl })}
     <span class="row__main">${rowTitle(title, badge)}
       <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
     <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
@@ -1216,7 +1255,7 @@ function helpersBlock() {
     const soon = !done && h.end - state.now < 3600000;
     const remain = done ? "Disponible" : (fmtRemain(h.end, state.now) || "en < 1 min");
     return `<li><div class="row row--upgrade row--thumb40">
-      ${thumb(h.id, { size: 40 })}
+      ${thumb(h.id, { size: 40, lvl: h.lvl })}
       <span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">Ayudante · ${accountChip(h.meta)} · no suma constructor</span></span>
       <span class="row__trail row__trail--stack"><span class="t-subhead num${soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(h.end))}</span></span>
     </div></li>`;
@@ -1385,7 +1424,10 @@ function offlineDlModel() {
   const remainLabel = fmtBytes(remain);
   let status = `${fmtBytes(bytes)} de ${fmtBytes(total)} guardados`;
   let btn = `<button class="btn btn--primary btn--block" data-dl="start" ${!navigator.onLine ? "disabled" : ""}>Descargar todas (${remainLabel})</button>`;
-  let note = "Los ayuntamientos y los héroes ya están guardados. El resto de imágenes se guarda al verlas por primera vez. Recomendado con wifi.";
+  const preN = state.peso && state.peso.precache_instalacion_archivos;
+  let note = preN
+    ? `Al instalar se guardan ${preN} imágenes. El resto se guarda al verlas por primera vez. Recomendado con wifi.`
+    : "El resto de imágenes se guarda al verlas por primera vez. Recomendado con wifi.";
   if (state.dl.phase === "offline" || (!navigator.onLine && state.dl.phase !== "downloading")) {
     status = "Sin conexión. Conéctate para descargar.";
     btn = `<button class="btn btn--primary btn--block" disabled>Descargar todas (${remainLabel})</button>`;
@@ -1733,7 +1775,7 @@ function changesBlock(it) {
     const badge = row.unknown ? `&nbsp;<span class="badge badge-id">${esc(row.id)}</span>` : "";
     const title = row.unknown ? "Sin identificar" : esc(row.title);
     return `<li><div class="row row--thumb40${row.unknown ? " is-unknown" : ""}">
-      ${thumb(row.id, { size: 40 })}
+      ${thumb(row.id, { size: 40, lvl: row.lvl })}
       <span class="row__main"><span class="row__title">${title}${badge}</span><span class="row__sub">${esc(row.change)} · ${esc(row.category)}</span></span>
     </div></li>`;
   }).join("");
@@ -2088,8 +2130,11 @@ function fichaSheet() {
   const line = levelLine(f);
   const over = overMaxLabel(f.lvl, f.max);
   const overChip = over ? ` <span class="chip chip--warn">${esc(over)}</span>` : "";
+  const marca = item ? imageChoice(item, f.lvl).marca : null;
+  const marcaHtml = marca ? `<p class="t-footnote c-2 ficha-marca" data-level-note>${esc(marca)}</p>` : "";
   return fichaFrame(`
-        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true })}</div>
+        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true, lvl: f.lvl })}</div>
+        ${marcaHtml}
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">${esc(line.text)}${overChip}</p>
         <p class="badge badge-id">${esc(f.id)}</p>
@@ -2864,20 +2909,6 @@ async function purgeImages() {
   state.dl.phase = "idle";
   await measureCache();
   render();
-}
-
-function catalog(manifest) {
-  const list = [];
-  for (const item of Object.values(manifest.items)) {
-    const push = (im) => {
-      if (!im || !im.ruta) return;
-      if (im.pesado === true || item.pesado === true) return;
-      list.push({ url: "./assets/" + im.ruta, bytes: im.bytes || 0, precache: item.categoria === "townhall" || item.categoria === "hero" });
-    };
-    push(item.imagen);
-    for (const im of Object.values(item.imagenes_por_nivel || {})) push(im);
-  }
-  return list;
 }
 
 async function boot() {

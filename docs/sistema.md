@@ -2047,3 +2047,7 @@ Especificación de 1.1.5:
 - Gráficos sustituye a Evolución: barras de la cuenta, comparativa y la evolución de las importaciones reales. Un solo punto se muestra como tal.
 - Mejoras se queda. La hora de fin es la de la exportación más el temporizador, en Madrid. En la cabecera, chozas y mejoras de constructor salen de `builderStatus`. Si sobran, el aviso es «Revisar constructores». La mejora con `extra` va aparte, con la etiqueta «B.O.B»: en C1 son 5 chozas, 6 mejoras de constructor y 1 de B.O.B.
 - Incluye la marca overMax del PR #8 (clase `.eq.is-over`, «máx. M», aria «máximo desactualizado»). No hereda su versión ni su caché.
+
+## Nota de cambios (8 oct 2026, 2.1.0)
+
+`APP_VERSION` es `2.1.0`, `SHELL_CACHE` es `cp-shell-v12` e `IMAGE_CACHE` es `cp-img-v5`. Cada edificio usa `imagenes_por_nivel[nivel]`. Si no hay entrada, o si esa ruta no está en caché sin conexión, se pinta `imagen` sin marca. La escala es `min(1, 96 / max(caja_visible.w, caja_visible.h))`: no se estira. La precarga son las 220 rutas con `precarga === true`. `pesado` sigue siendo más de 3 MB.
