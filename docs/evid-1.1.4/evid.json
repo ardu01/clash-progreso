@@ -1,0 +1,161 @@
+{
+ "B-i14-equip-17": {
+  "antes": [
+   "Colmillos eléctricosID deducido -> ID deducido",
+   "Corazón ardienteID deducido -> ID deducido"
+  ],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-equip-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-defensas-17": {
+  "antes": [
+   "Torre de arqueras múltiple ×3 -> ×3"
+  ],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-defensas-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-trampas-17": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-trampas-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-mejoras-17": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-i14-mejoras-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-equip-17": {
+  "antes": [
+   "Colmillos eléctricosID deducido -> ID deducido",
+   "Corazón ardienteID deducido -> ID deducido",
+   "Mochila coheteID deducido -> ID deducido"
+  ],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-equip-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-defensas-17": {
+  "antes": [
+   "Torre de arqueras múltiple ×3 -> ×3"
+  ],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-defensas-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-trampas-17": {
+  "antes": [
+   "Conjunto de explosivos ×4 -> ×4",
+   "Conjunto de explosivos ×2 -> ×2",
+   "Conjunto de explosivos ×2 -> ×2",
+   "Trampa de esqueletos ×4 -> ×4"
+  ],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-trampas-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-mejoras-17": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "B-se-mejoras-28": {
+  "antes": [],
+  "fix": [],
+  "overflowX": 0
+ },
+ "A-open-active": "BODY.",
+ "A-tab1": [
+  "card card--tap account-card",
+  "C1 Principal Principal\n    TH18Objetivo ",
+  false
+ ],
+ "A-esc": [
+  "#/ajustes",
+  1
+ ],
+ "A-ficha-open-active": "BODY",
+ "A-ficha-esc-sheet": 1,
+ "A-ficha-close-active": "BODY",
+ "D": [
+  "107000000",
+  "rgb(108, 108, 112)",
+  "rgba(118, 118, 128, 0.12)",
+  "rgb(242, 242, 247)"
+ ],
+ "E": [
+  [
+   "SELECT",
+   108,
+   20,
+   "Media del rosterC1 PrincipalC2"
+  ]
+ ],
+ "E-fix": [
+  [
+   108,
+   44
+  ]
+ ],
+ "G-antes": [
+  [
+   155,
+   0
+  ],
+  [
+   167,
+   0
+  ]
+ ],
+ "G-fix": [
+  [
+   155,
+   0
+  ],
+  [
+   167,
+   0
+  ]
+ ],
+ "G-fix-17": [
+  [
+   156,
+   0
+  ],
+  [
+   156,
+   0
+  ]
+ ]
+}
