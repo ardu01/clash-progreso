@@ -1828,7 +1828,7 @@ function markFocus(el) {
 
 function focusFromMark(mark) {
   if (!mark) return null;
-  if (mark.dl) return document.querySelector(`[data-dl="${cssAttr(mark.dl)}"]`);
+  if (mark.dl) return document.querySelector(`[data-dl="${cssAttr(mark.dl)}"]`) || document.querySelector(".offline-dl [data-dl]");
   if (mark.act) return document.querySelector(`[data-act="${cssAttr(mark.act)}"]`);
   if (mark.id) return document.querySelector("#" + mark.id);
   return null;
@@ -1857,9 +1857,14 @@ function settleSheetFocus() {
     const h2 = sheet.querySelector("h2");
     if (h2) h2.tabIndex = -1;
     if (opened && h2 && !state.importUi.needsFocus) h2.focus({ preventScroll: true });
-    else if (!opened && state.sheetFocusMark && !state.importUi.needsFocus) {
-      const back = focusFromMark(state.sheetFocusMark);
-      if (back) back.focus({ preventScroll: true });
+    else if (!opened && !state.importUi.needsFocus) {
+      if (state.sheetFocusMark) {
+        const back = focusFromMark(state.sheetFocusMark);
+        if (back) back.focus({ preventScroll: true });
+      }
+      const cur = document.activeElement;
+      const inside = cur && cur !== document.body && cur !== document.documentElement && sheet.contains(cur);
+      if (h2 && !inside) h2.focus({ preventScroll: true });
     }
   } else if (state.focusReturn) {
     const ret = state.focusReturn;

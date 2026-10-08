@@ -1097,6 +1097,14 @@ function miniWire(node, doc, parent) {
   node.setAttribute = (k, v) => { node.attrs[k] = String(v); };
   node.removeAttribute = (k) => { delete node.attrs[k]; };
   node.focus = () => { doc.active = node; };
+  node.contains = (other) => {
+    if (!other) return false;
+    if (other === node) return true;
+    for (const child of node.children || []) {
+      if (typeof child.contains === "function" ? child.contains(other) : child === other) return true;
+    }
+    return false;
+  };
   node.querySelector = (sel) => miniQuery(node.children, sel);
   for (const child of node.children) miniWire(child, doc, node);
 }
@@ -1273,4 +1281,95 @@ test("1.1.4: si al elegir archivos no hay tarjeta, el foco va al título", () =>
 test("1.1.4: el título del sheet no muestra anillo al recibir el foco", () => {
   const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
   assert.match(css, /\.sheet__bar h2:focus\s*\{\s*outline:\s*none;\s*\}/);
+});
+
+test("1.1.4: Descargar todas y Detener dejan el foco dentro del sheet", () => {
+  const h2 = { tag: "h2", id: "aj-title" };
+  const start = { tag: "button", attrs: { "data-dl": "start" }, dataset: { dl: "start" } };
+  const box = { tag: "div", className: "card offline-dl", children: [start] };
+  const sheet = { tag: "div", className: "sheet", children: [h2, box] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  doc.body = { tag: "body" };
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "ajustes",
+    sheetFocusMark: null,
+    importUi: { needsFocus: false },
+  };
+  const route = () => ({ name: "ajustes" });
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+  const redraw = (next) => {
+    remember();
+    box.children = [next];
+    miniWire(next, doc, box);
+    doc.active = doc.body;
+    settle();
+  };
+
+  doc.active = start;
+  const stop = { tag: "button", attrs: { "data-dl": "stop" }, dataset: { dl: "stop" } };
+  redraw(stop);
+  assert.equal(doc.active, stop);
+  assert.equal(sheet.contains(doc.active), true);
+
+  const again = { tag: "button", attrs: { "data-dl": "start" }, dataset: { dl: "start" } };
+  redraw(again);
+  assert.equal(doc.active, again);
+  assert.equal(sheet.contains(doc.active), true);
+});
+
+test("1.1.4: Esc en un subpaso de Importar deja el foco dentro del sheet", () => {
+  const h2 = { tag: "h2", id: "im-title" };
+  const add = { tag: "button", attrs: { "data-act": "add-account" }, dataset: { act: "add-account" } };
+  const sheet = { tag: "div", className: "sheet", children: [h2, add] };
+  const roots = [sheet];
+  const doc = miniDocument(roots);
+  doc.body = { tag: "body" };
+  doc.active = add;
+  const state = {
+    ficha: null,
+    alert: null,
+    focusReturn: "",
+    sheetKey: "importar",
+    sheetFocusMark: null,
+    importUi: { phase: "confirm", fromBatch: true, needsFocus: false, saveError: false, focus: 0 },
+  };
+  const location = { hash: "#/importar" };
+  const route = () => ({ name: "importar" });
+  const cssAttr = (value) => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const mark = fnFromApp("function markFocus(", "markFocus", { document: doc });
+  const fromMark = fnFromApp("function focusFromMark(", "focusFromMark", { document: doc, cssAttr });
+  const remember = fnFromApp("function rememberSheetFocus()", "rememberSheetFocus", {
+    document: doc, state, route, markFocus: mark,
+  });
+  const settle = fnFromApp("function settleSheetFocus()", "settleSheetFocus", {
+    document: doc, state, route, focusFromMark: fromMark,
+  });
+  const render = () => {
+    remember();
+    sheet.children = [h2];
+    doc.active = doc.body;
+    settle();
+  };
+  const goBack = fnFromApp("function goBackImport()", "goBackImport", { state, render });
+  const onEsc = fnFromApp("function onSheetEscape(", "onSheetEscape", {
+    state, render, location, route, goBackImport: goBack,
+  });
+
+  assert.equal(onEsc({ key: "Escape" }), true);
+  assert.equal(location.hash, "#/importar");
+  assert.equal(state.importUi.phase, "batch");
+  assert.equal(sheet.contains(doc.active), true);
+  assert.equal(doc.active, h2);
 });

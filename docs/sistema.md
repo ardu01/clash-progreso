@@ -878,7 +878,7 @@ El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se rese
 }
 ```
 
-**Foco.** Al abrir un sheet, el foco va a su `h2` (`tabindex="-1"`). Mientras está abierto, `.navbar`, `#screen` y `.tabbar` llevan `inert`. Esc cierra igual que OK, el velo o Cancelar. Al cerrar, el foco vuelve al control que lo abrió (la fila `[data-ficha]`, «Ajustes» o «Importar»). El foco va al título solo al abrir; un redibujado lo conserva; al cerrar vuelve al mismo control que lo abrió (por posición si comparte selector); en un subpaso de Importar, Esc equivale a «‹ Importar».
+**Foco.** El foco va al `h2` del sheet (`tabindex="-1"`) solo al abrir; un redibujado lo conserva. Si un redibujado elimina el control con foco, el foco va a su equivalente o, si no existe, al `h2`. Mientras está abierto, `.navbar`, `#screen` y `.tabbar` llevan `inert`. Esc cierra igual que OK, el velo o Cancelar; en un subpaso de Importar, Esc equivale a «‹ Importar». Al cerrar, el foco vuelve al mismo control que lo abrió (la fila `[data-ficha]`, «Ajustes» o «Importar»; por posición si comparte selector).
 
 ### 5.14 Pie legal (Fan Content Policy, obligatorio)
 
