@@ -5,7 +5,7 @@ import {
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
-import { catalog, imageChoice, isHeavy } from "./images.js";
+import { ajusteOf, catalog, imageChoice, isHeavy } from "./images.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
@@ -279,17 +279,34 @@ function thumb(id, opts = {}) {
   return imageThumb(cls, size, label, im, opts, choice);
 }
 
+function cssNum(v) {
+  return String(Math.round(Number(v) * 1000) / 1000);
+}
+
+function ajusteStyle(im, size, pad) {
+  const aj = ajusteOf(im, size, pad == null ? {} : { pad });
+  if (!aj) return "";
+  return `--vw:${cssNum(aj.vw)};--vh:${cssNum(aj.vh)};--bx:${aj.x};--by:${aj.y};--bw:${aj.w};--bh:${aj.h}`;
+}
+
 function imageThumb(cls, size, label, im, opts, choice) {
   const tile = im.tipo_visual === "tile_fondo_opaco" ? " thumb--tile" : "";
-  const style = [40, 44, 52, 72, 96].includes(size) ? "" : ` style="--size:${size}px"`;
+  const vars = [];
+  if (![40, 44, 52, 72, 96].includes(size)) vars.push(`--size:${size}px`);
+  const fit = ajusteStyle(im, size, opts.pad);
+  if (fit) vars.push(fit);
+  const style = vars.length ? ` style="${vars.join(";")}"` : "";
   const loading = opts.eager ? "eager" : "lazy";
   const pri = opts.eager ? " fetchpriority=\"high\"" : "";
   let extra = "";
   const fb = choice && choice.fallback;
-  if (fb && fb.ruta && fb.ruta !== im.ruta) extra += ` data-fallback="./assets/${esc(fb.ruta)}"`;
+  if (fb && fb.ruta && fb.ruta !== im.ruta) {
+    extra += ` data-fallback="./assets/${esc(fb.ruta)}" data-fb-ajuste="${ajusteStyle(fb, size, opts.pad)}"`;
+  }
   const w = Number(im.ancho) > 0 ? im.ancho : size;
   const h = Number(im.alto) > 0 ? im.alto : size;
-  return `<span class="thumb ${cls}${tile}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${w}" height="${h}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+  const fitted = fit ? " is-ajuste" : "";
+  return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${w}" height="${h}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
 }
 
 function emptyNamedThumb(label, size) {
@@ -314,6 +331,18 @@ function applyFallback(img, box) {
   if (!fb || box.dataset.usedFallback === "1") return false;
   if (img.getAttribute("src") === fb) return false;
   box.dataset.usedFallback = "1";
+  if ("fbAjuste" in box.dataset) {
+    for (const key of ["--vw", "--vh", "--bx", "--by", "--bw", "--bh"]) box.style.removeProperty(key);
+    if (box.dataset.fbAjuste) {
+      box.classList.add("is-ajuste");
+      for (const part of box.dataset.fbAjuste.split(";")) {
+        const i = part.indexOf(":");
+        if (i > 0) box.style.setProperty(part.slice(0, i), part.slice(i + 1));
+      }
+    } else {
+      box.classList.remove("is-ajuste");
+    }
+  }
   clearLevelNote(box);
   box.classList.remove("thumb--offline");
   delete box.dataset.checked;
@@ -436,15 +465,14 @@ function detailAria(title, it, a, flags) {
   const bits = [title];
   if (it.cnt > 1) bits.push(`×${it.cnt}`);
   bits.push(level);
-  if (flags.deduced) bits.push("ID deducido");
   if (flags.unknown && it.id) bits.push(`ID ${it.id}`);
   return bits.join(", ");
 }
 
-function heroAria(name, h, line, deduced) {
+function heroAria(name, h, line) {
   const lvl = h.lvl == null ? 0 : h.lvl;
   const level = line.bar && h.max ? `nivel ${lvl} de ${h.max}` : line.text;
-  return [name || "Héroe", level, deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
+  return [name || "Héroe", level].filter(Boolean).join(", ");
 }
 
 function cssAttr(value) {
@@ -838,13 +866,11 @@ function wallsCard(a) {
 function heroesCard(a) {
   const rows = a.heroes.map((h) => {
     const item = state.index.items[h.id];
-    const deduced = item.estado === "id_deducido";
-    const badge = deduced ? `<span class="badge badge--soft">ID deducido</span>` : "";
     const line = levelLine(h);
     const lvl = h.lvl == null ? 0 : h.lvl;
     const name = nameOf(h.id) || "Héroe";
-    const aria = heroAria(name, h, line, deduced);
-    const title = rowTitle(name, badge);
+    const aria = heroAria(name, h, line);
+    const title = rowTitle(name);
     if (!line.bar) {
       return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
         ${thumb(h.id, { size: 40, lvl: h.lvl })}
@@ -908,16 +934,14 @@ function equipBlock(exp, meta) {
 
 function eqCell(p) {
   const name = p.unknown ? "Sin identificar" : (nameOf(p.id) || "Pieza");
-  const deduced = !!(p.meta && p.meta.estado === "id_deducido");
   const level = p.max != null && !p.overMax ? `nivel ${p.lvl} de ${p.max}` : `nivel ${p.lvl}`;
   const aria = p.unknown
     ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}`
-    : [name, level, p.overMax ? "máximo desactualizado" : "", deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
+    : [name, level, p.overMax ? "máximo desactualizado" : ""].filter(Boolean).join(", ");
   const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : "", p.overMax ? "is-over" : ""].filter(Boolean).join(" ");
-  const over = p.overMax ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>` : "";
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
-    : over + (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
+    : (p.overMax ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52, lvl: p.lvl });
@@ -1015,13 +1039,11 @@ function detailRow(it, catKey, a) {
   }
   const meta = state.index.items[it.id];
   const unknown = !meta || meta.estado === "sin_identificar";
-  const deduced = !!(meta && meta.estado === "id_deducido");
   const title = unknown ? "Sin identificar" : (nameOf(it.id) || "Ítem");
-  const badge = deduced ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const idBadge = unknown ? `<span class="badge badge-id">${esc(it.id)}</span>` : "";
   const cnt = it.cnt > 1 ? `×${it.cnt}` : "";
-  const extras = `${cnt ? `<span class="num">${cnt}</span>` : ""}${badge}${idBadge}`;
-  const aria = detailAria(title, it, a, { deduced, unknown });
+  const extras = `${cnt ? `<span class="num">${cnt}</span>` : ""}${idBadge}`;
+  const aria = detailAria(title, it, a, { unknown });
   return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
     ${thumb(it.id, { size: 40, lvl: lv.lvl })}
     <span class="row__main">${rowTitle(title, extras)}<span class="row__sub num">${esc(lv.text)}</span></span>
@@ -1081,12 +1103,11 @@ function builderBaseSection(exp) {
     const meta = state.index.items[id];
     const unknown = !meta || meta.estado === "sin_identificar";
     const title = unknown ? "Sin identificar" : (nameOf(id) || "Ítem");
-    const badge = meta && meta.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
     const idBadge = unknown ? `<span class="badge badge-id">${esc(id)}</span>` : "";
     const lvl = it.lvl || 0;
     return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
       ${thumb(id, { size: 40, lvl })}
-      <span class="row__main">${rowTitle(title, `${badge}${idBadge}`)}<span class="row__sub num">Nv ${lvl}</span></span>
+      <span class="row__main">${rowTitle(title, idBadge)}<span class="row__sub num">Nv ${lvl}</span></span>
     </button></li>`;
   }).join("");
   return `<div class="section"><div class="section-header"><span>Aldea del constructor</span></div><ul class="list">${lis}</ul></div>`;
@@ -1135,7 +1156,7 @@ function mejorasPorFin(all) {
       <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
-        return `<span class="chip chip--account">${thumb(1000001, { size: 22, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
+        return `<span class="chip chip--account">${thumb(1000001, { size: 22, pad: 1, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
       }).join("")}</div>
     </div></div>` : "";
   const done = all.filter((u) => u.done);
@@ -1206,14 +1227,13 @@ function upRow(u) {
   const item = state.index.items[u.id];
   const title = nameOf(u.id) || (item ? "Sin identificar" : "Ítem");
   const unknown = !item || item.estado === "sin_identificar";
-  const badge = item && item.estado === "id_deducido" ? `<span class="badge badge--soft">ID deducido</span>` : "";
   const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
   const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
     ${thumb(u.id, { size: 40, lvl: u.lvl })}
-    <span class="row__main">${rowTitle(title, badge)}
+    <span class="row__main">${rowTitle(title)}
       <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
     <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
   </div></li>`;
@@ -2090,7 +2110,6 @@ function fichaSheet() {
   const unknown = !item || item.estado === "sin_identificar";
   const title = unknown ? "Sin identificar" : (nameOf(f.id) || "Ítem");
   const badges = [];
-  if (item && item.estado === "id_deducido") badges.push(`<span class="badge badge--soft">ID deducido</span>`);
   if (unknown) badges.push(`<span class="badge">sin identificar</span>`);
   const notes = [];
   if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
@@ -2101,7 +2120,6 @@ function fichaSheet() {
     if (item.heroe) parts.push(heroLabel(item.heroe));
     notes.push(`<p class="t-footnote c-2">${esc(parts.join(" · "))}</p>`);
   }
-  if (item && item.estado === "id_deducido") notes.push(`<p class="t-footnote c-2">ID deducido por descarte</p>`);
   const line = levelLine(f);
   const over = overMaxLabel(f.lvl, f.max);
   const overChip = over ? ` <span class="chip chip--warn">${esc(over)}</span>` : "";

@@ -1,8 +1,18 @@
 /** Imagen oficial por nivel (v2.1). Sin DOM: la usan la app, el service worker y las pruebas. */
 
+import CAJAS_ALFA from "../assets/cajas-alfa.json" with { type: "json" };
+
 /** Padding de `.thumb`: 8 % por lado. El interior es size × (1 − 2 × PAD). */
 export const THUMB_PAD = 0.08;
+/** Por debajo de esto, el dibujo se acerca al 85 % del lado. */
+export const DRAW_MIN = 0.7;
+/** Objetivo dentro del 80–90 % del lado de la miniatura. */
+export const DRAW_TARGET = 0.85;
+/** 1 px CSS son 3 px físicos en un iPhone. No se pinta más de 1 px de bitmap por px físico. */
+export const DEVICE_SCALE = 3;
 export const HEAVY_BYTES = 3000000;
+
+export { CAJAS_ALFA };
 
 export function isHeavy(im, item) {
   if (item && item.pesado === true) return true;
@@ -45,15 +55,59 @@ export function thumbInterior(size, tile) {
  * pasar de 1 px CSS por px de imagen. escala = min(1, interior/ancho, interior/alto).
  * El CSS (object-fit: contain, max-width/height 100 %) hace lo mismo; esto lo comprueban las pruebas.
  */
-export function containOf(im, size) {
+export function containOf(im, size, opts = {}) {
   if (!im) return null;
   const ancho = Number(im.ancho);
   const alto = Number(im.alto);
   if (!(ancho > 0) || !(alto > 0)) return null;
-  const lado = thumbInterior(size, im.tipo_visual === "tile_fondo_opaco");
+  const lado = interiorOf(im, size, opts);
   if (!(lado > 0)) return null;
   const escala = Math.min(1, lado / ancho, lado / alto);
   return { escala, dw: ancho * escala, dh: alto * escala };
+}
+
+function interiorOf(im, size, opts) {
+  if (opts.interior != null) return Number(opts.interior);
+  if (opts.pad != null) return Math.max(0, Number(size) - 2 * Number(opts.pad));
+  return thumbInterior(size, im && im.tipo_visual === "tile_fondo_opaco");
+}
+
+/** Caja de píxeles con alfa > 0. Está en `assets/cajas-alfa.json`; `caja_visible` del manifiesto es el umbral antiguo (alfa > 8). */
+export function cajaAlfa(im) {
+  if (!im || !im.ruta) return null;
+  return CAJAS_ALFA[im.ruta] || null;
+}
+
+/**
+ * Si el dibujo (bbox de alfa) ocupa menos del 70 % del lado, recorta solo el
+ * margen transparente para acercarlo al 85 %. No agranda por encima de 1 px
+ * físico por px de bitmap, no encoge lo que ya se ve bien y no estira.
+ * `null` = se queda el `contain` de la imagen entera.
+ */
+export function ajusteOf(im, size, opts = {}) {
+  const box = opts.caja || cajaAlfa(im);
+  if (!im || !box) return null;
+  const ancho = Number(im.ancho);
+  const alto = Number(im.alto);
+  const x = Number(box.x);
+  const y = Number(box.y);
+  const w = Number(box.w);
+  const h = Number(box.h);
+  const lado = Number(size);
+  if (!(ancho > 0) || !(alto > 0) || !(w > 0) || !(h > 0) || !(lado > 0)) return null;
+  if (x < 0 || y < 0 || x + w > ancho || y + h > alto) return null;
+  const contain = containOf(im, lado, opts);
+  if (!contain) return null;
+  const dibujo = Math.max(w, h) * contain.escala;
+  if (dibujo / lado >= DRAW_MIN) return null;
+  const escala = Math.min((DRAW_TARGET * lado) / Math.max(w, h), 1 / DEVICE_SCALE);
+  if (!(escala > contain.escala)) return null;
+  return {
+    escala,
+    vw: w * escala,
+    vh: h * escala,
+    x, y, w, h,
+  };
 }
 
 function imageList(item) {

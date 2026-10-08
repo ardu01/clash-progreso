@@ -8,7 +8,7 @@ import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, b
 import { parseLoose } from "../js/parse.js";
 import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { HEAVY_BYTES, THUMB_PAD, catalog, containOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
+import { DEVICE_SCALE, DRAW_MIN, DRAW_TARGET, HEAVY_BYTES, THUMB_PAD, ajusteOf, cajaAlfa, catalog, containOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
 import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT, planBatch } from "../js/import.js";
 import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, featuredTag, orderAccounts, ROSTER_VERSION } from "../js/roster.js";
 import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
@@ -603,9 +603,9 @@ test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 4);
 });
 
-test("versión 2.1.2 y cachés cp-shell-v14 / cp-img-v5", () => {
-  assert.equal(APP_VERSION, "2.1.2");
-  assert.equal(SHELL_CACHE, "cp-shell-v14");
+test("versión 2.1.3 y cachés cp-shell-v15 / cp-img-v5", () => {
+  assert.equal(APP_VERSION, "2.1.3");
+  assert.equal(SHELL_CACHE, "cp-shell-v15");
   assert.equal(IMAGE_CACHE, "cp-img-v5");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -623,13 +623,16 @@ test("versión 2.1.2 y cachés cp-shell-v14 / cp-img-v5", () => {
   assert.equal(sw.includes("cp-shell-v11"), false);
   assert.equal(sw.includes("cp-shell-v12"), false);
   assert.equal(sw.includes("cp-shell-v13"), false);
+  assert.equal(sw.includes("cp-shell-v14"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
-  assert.match(caches, /cp-shell-v14/);
+  assert.match(sw, /cajas-alfa\.json/);
+  assert.match(caches, /cp-shell-v15/);
   assert.match(caches, /cp-img-v5/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
+  assert.equal(caches.includes("cp-shell-v14"), false);
   assert.equal(caches.includes("cp-img-v4"), false);
   assert.match(app, /APP_VERSION/);
   assert.match(app, /imageChoice/);
@@ -693,7 +696,7 @@ test("sin identificar: C1 da 8 y las otras diez dan 4, el mismo número en los d
   assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 8);
 });
 
-test("107000008 se muestra como Logger con ID deducido y no entra en el aviso", () => {
+test("107000008 se muestra como Logger, sin marca de ID deducido, y no entra en el aviso", () => {
   const item = manifest.items["107000008"];
   assert.equal(item.estado, "id_deducido");
   assert.equal(item.nombre_pendiente, true);
@@ -711,7 +714,7 @@ test("107000008 se muestra como Logger con ID deducido y no entra en el aviso", 
   assert.equal(row.max, 5);
   assert.equal(item.imagen.ruta, "images/guardians/logger.png");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(app, /badge--soft">ID deducido/);
+  assert.equal(app.includes("ID deducido"), false);
   assert.match(app, /Nombre en español sin confirmar/);
   const heroes = categoryItems(exportsByTag.get("#R00C8CPQC"), index, "heroes", 16);
   const line = (name) => levelLine(heroes.find((h) => itemName(index.items[h.id]) === name)).text;
@@ -895,8 +898,9 @@ test("1.1.4: la insignia y el ×N quedan fuera del nombre recortado", () => {
   assert.ok(logger);
   assert.ok(multi);
   const loggerHtml = detailRow(logger, "defensas", a);
-  assert.match(loggerHtml, /<span class="row__name">Logger<\/span><span class="badge badge--soft">ID deducido<\/span>/);
-  assert.match(loggerHtml, /aria-label="Logger, nivel 1 de 5, ID deducido"/);
+  assert.match(loggerHtml, /<span class="row__name">Logger<\/span>/);
+  assert.doesNotMatch(loggerHtml, /ID deducido|badge--soft/);
+  assert.match(loggerHtml, /aria-label="Logger, nivel 1 de 5"/);
   const multiHtml = detailRow(multi, "defensas", a);
   const multiName = itemName(index.items[multi.id]);
   assert.match(multiHtml, new RegExp(`<span class="row__name">${multiName}</span><span class="num">×${multi.cnt}</span>`));
@@ -927,7 +931,7 @@ test("1.1.4: la fila lleva aria-label y la barra de dentro va aria-hidden", () =
     `Defensas, ${fmtPct(70.1)}, TH17 ${fmtPct(64)}, faltan 190 niveles`,
   );
   assert.equal(heroAria("Príncipe Esbirro", { lvl: 31, max: 95 }, { bar: true, text: "Nv 31 / 95" }, false), "Príncipe Esbirro, nivel 31 de 95");
-  assert.equal(heroAria("Duque Dragón", { lvl: 10, max: 15 }, { bar: true, text: "Nv 10 / 15" }, true), "Duque Dragón, nivel 10 de 15, ID deducido");
+  assert.equal(heroAria("Duque Dragón", { lvl: 10, max: 15 }, { bar: true, text: "Nv 10 / 15" }, true), "Duque Dragón, nivel 10 de 15");
 
   const catRow = fnFromApp("function catRow(", "catRow", {
     CAT_CLASS,
@@ -1381,13 +1385,13 @@ test("1.1.4: Esc en un subpaso de Importar deja el foco dentro del sheet", () =>
 
 const esc115 = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-test("1.1.5: la celda de equipamiento dice «ID deducido» como las filas", () => {
+test("2.1.3: la celda de equipamiento no marca el ID deducido", () => {
   const eqCell = fnFromApp("function eqCell(p)", "eqCell", {
     nameOf: (id) => ({ 9: "Puño de fuego" })[id] || "", thumb: () => "<span></span>", esc: esc115,
   });
   const ded = eqCell({ id: 9, lvl: 12, max: 18, meta: { estado: "id_deducido" } });
-  assert.match(ded, /aria-label="Puño de fuego, nivel 12 de 18, ID deducido"/);
-  assert.match(ded, /eq__cap--soft">ID deducido</);
+  assert.match(ded, /aria-label="Puño de fuego, nivel 12 de 18"/);
+  assert.doesNotMatch(ded, /ID deducido|eq__cap--soft/);
   const ok = eqCell({ id: 9, lvl: 12, max: 18, meta: { estado: "ok" } });
   assert.match(ok, /aria-label="Puño de fuego, nivel 12 de 18"/);
   const unk = eqCell({ id: 90000077, lvl: 3, unknown: true, meta: { estado: "sin_identificar" } });
@@ -1402,11 +1406,13 @@ test("1.1.5: con overMax la celda dice «nivel N, máximo desactualizado»", () 
   assert.match(over, /nivel 22, máximo desactualizado/);
   assert.doesNotMatch(over, /de 18/);
   const ded = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "id_deducido" } });
-  assert.match(ded, /aria-label="Puño de fuego, nivel 22, máximo desactualizado, ID deducido"/);
+  assert.match(ded, /aria-label="Puño de fuego, nivel 22, máximo desactualizado"/);
+  assert.doesNotMatch(ded, /ID deducido/);
   const plain = eqCell({ id: 9, lvl: 7 });
   assert.match(plain, /aria-label="Puño de fuego, nivel 7"/);
   const plainDed = eqCell({ id: 9, lvl: 7, meta: { estado: "id_deducido" } });
-  assert.match(plainDed, /aria-label="Puño de fuego, nivel 7, ID deducido"/);
+  assert.match(plainDed, /aria-label="Puño de fuego, nivel 7"/);
+  assert.doesNotMatch(plainDed, /ID deducido/);
 });
 
 test("1.1.5: la alerta tiene nombre y descripción, y Cancelar es la acción segura", () => {
@@ -1495,7 +1501,8 @@ test("1.1.6: con overMax la celda se marca a la vista con «máx. M» y sin el v
   assert.match(over, /<span class="eq__cap eq__cap--warn">máx\. 18<\/span>/);
   assert.match(over, /aria-label="Puño de fuego, nivel 22, máximo desactualizado"/);
   const ded = eqCell({ id: 9, lvl: 22, max: 18, overMax: true, meta: { estado: "id_deducido" } });
-  assert.match(ded, /eq__cap--warn">máx\. 18<\/span><span class="eq__cap eq__cap--soft">ID deducido<\/span>/);
+  assert.match(ded, /eq__cap--warn">máx\. 18<\/span>/);
+  assert.doesNotMatch(ded, /ID deducido|eq__cap--soft/);
   const at = eqCell({ id: 9, lvl: 18, max: 18, meta: { estado: "ok" } });
   assert.match(at, /class="eq is-max"/);
   for (const html of [at, eqCell({ id: 9, lvl: 12, max: 18 }), eqCell({ id: 9, lvl: 7 }), eqCell({ id: 90000077, lvl: 3, unknown: true })]) {
@@ -1712,7 +1719,7 @@ test("2.0.0: la copia fusiona por tag y fecha y no borra lo que solo está en el
     now: noon,
   });
   assert.equal(file.app, "clash-progreso");
-  assert.equal(file.version, "2.1.2");
+  assert.equal(file.version, "2.1.3");
   const merged = mergeBackup({ accounts: localAccounts, exports: localExports }, file);
   const a = merged.accounts.find((x) => x.tag === "#A");
   assert.equal(a.alias, "Mia");
@@ -1922,6 +1929,70 @@ test("2.1.2: ninguna miniatura recorta ni escala por encima del tamaño natural"
   assert.equal(tiny.escala, 1);
   assert.equal(tiny.dw, 20);
   assert.equal(tiny.dh, 18);
+});
+
+test("2.1.3: el margen transparente solo se recorta si el dibujo no llega al 70 %", () => {
+  const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(css, /object-view-box:\s*xywh\(/);
+  assert.match(app, /ajusteOf\(im, size/);
+  assert.match(app, /is-ajuste/);
+  const tesla = manifest.items["1000019"].imagenes_por_nivel["10"];
+  const caja = cajaAlfa(tesla);
+  assert.deepEqual(caja, { x: 108, y: 90, w: 74, h: 111 });
+  const aj = ajusteOf(tesla, 40);
+  const contain = containOf(tesla, 40);
+  const largo = Math.max(caja.w, caja.h);
+  assert.ok(largo * contain.escala / 40 < DRAW_MIN);
+  const escala = Math.min((DRAW_TARGET * 40) / largo, 1 / DEVICE_SCALE);
+  assert.equal(aj.escala, escala);
+  assert.ok(aj.escala <= 1 / DEVICE_SCALE + 1e-12);
+  assert.ok(largo * aj.escala * DEVICE_SCALE <= largo + 1e-6);
+  assert.ok(Math.abs(aj.vw / caja.w - aj.vh / caja.h) < 1e-12);
+  assert.equal(aj.x, caja.x);
+  assert.equal(aj.y, caja.y);
+  assert.equal(aj.w, caja.w);
+  assert.equal(aj.h, caja.h);
+  assert.ok(aj.vw <= 40 && aj.vh <= 40);
+  assert.equal(ajusteOf(manifest.items["107000001"].imagen, 40), null, "Destructor");
+  assert.equal(ajusteOf(manifest.items["1000089"].imagen, 40), null, "Escupellamas base");
+  const escupella = manifest.items["1000089"];
+  const nv1 = escupella.imagenes_por_nivel && escupella.imagenes_por_nivel["1"];
+  if (nv1) assert.equal(ajusteOf(nv1, 40), null, "Escupellamas nv1");
+  assert.ok(ajusteOf(manifest.items["107000000"].imagen, 40), "Tiradora está bajo el 70 %");
+  assert.equal(ajusteOf(manifest.items["1000019"].imagen, 40), null, "Hidden Tesla base llena la caja");
+  const sizes = [22, 28, 40, 44, 52, 72, 96];
+  let changed = 0;
+  for (const item of Object.values(manifest.items)) {
+    const images = [item.imagen, ...Object.values(item.imagenes_por_nivel || {})].filter(Boolean);
+    for (const im of images) {
+      const box = cajaAlfa(im);
+      assert.ok(box, im.ruta);
+      assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.w <= im.ancho && box.y + box.h <= im.alto, im.ruta);
+      for (const size of sizes) {
+        const pad = size === 22 ? 1 : null;
+        const opts = pad == null ? {} : { pad };
+        const fit = ajusteOf(im, size, opts);
+        const base = containOf(im, size, opts);
+        const dibujo = Math.max(box.w, box.h) * base.escala;
+        if (!fit) {
+          assert.ok(dibujo / size >= DRAW_MIN - 1e-9 || Math.min((DRAW_TARGET * size) / Math.max(box.w, box.h), 1 / DEVICE_SCALE) <= base.escala + 1e-12, im.ruta);
+          continue;
+        }
+        changed += 1;
+        assert.ok(dibujo / size < DRAW_MIN, im.ruta);
+        assert.ok(fit.escala > base.escala, im.ruta);
+        assert.ok(fit.escala <= 1 / DEVICE_SCALE + 1e-12, im.ruta);
+        assert.ok(box.w * fit.escala * DEVICE_SCALE <= box.w + 1e-6, im.ruta);
+        assert.ok(box.h * fit.escala * DEVICE_SCALE <= box.h + 1e-6, im.ruta);
+        assert.ok(Math.max(fit.vw, fit.vh) <= DRAW_TARGET * size + 1e-6, im.ruta);
+        assert.ok(Math.abs(fit.vw / box.w - fit.vh / box.h) < 1e-12, im.ruta);
+        const mismo = ajusteOf(im, size, { ...opts, caja: { ...box } });
+        assert.deepEqual(mismo, fit);
+      }
+    }
+  }
+  assert.ok(changed > 0);
 });
 
 test("2.1.1: el aviso de Supercell está solo en Copia, apartado Acerca de", () => {

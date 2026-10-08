@@ -63,6 +63,16 @@ li + li > .row::before {
   min-width: 0; min-height: 0;
   display: block;
 }
+/* Solo si el dibujo queda bajo el 70 % del lado: object-view-box recorta el margen, no el dibujo. */
+@supports (object-view-box: xywh(0 0 1px 1px)) {
+  .thumb.is-ajuste > img {
+    width: calc(var(--vw) * 1px);
+    height: calc(var(--vh) * 1px);
+    max-width: none; max-height: none;
+    object-fit: contain; object-position: center;
+    object-view-box: xywh(calc(var(--bx) * 1px) calc(var(--by) * 1px) calc(var(--bw) * 1px) calc(var(--bh) * 1px));
+  }
+}
 .thumb--40 { --size: 40px; }
 .thumb--44 { --size: 44px; }
 .thumb--52 { --size: 52px; }

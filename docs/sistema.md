@@ -2042,4 +2042,12 @@ La escala de 2.1.0 pintaba la caja útil como si toda miniatura midiera 96 px CS
 
 La 2.1.1 seguía recortando: agrandaba el lienzo para que `caja_visible` llenara la miniatura y `overflow: hidden` se quedaba con el centro. Desde 2.1.2 cada imagen se pinta entera, centrada, con `object-fit: contain`, y no se escala por encima de su tamaño natural. `caja_visible` no interviene.
 
+## Nota de cambios (8 oct 2026, 2.1.3)
+
+`APP_VERSION` es `2.1.3`, `SHELL_CACHE` es `cp-shell-v15` e `IMAGE_CACHE` sigue en `cp-img-v5`: no cambia ningún PNG ni el manifiesto de imágenes.
+
+Si el dibujo (bbox de alfa > 0, en `assets/cajas-alfa.json`) ocupa menos del 70 % del lado de la miniatura, `object-view-box` recorta solo el margen transparente hasta acercarlo al 85 %. No pasa de 1 px físico por px de bitmap a escala 3; si no llega al 85 %, se queda en ese tope. Lo que ya ocupa el 70 % o más no cambia. No se estira ni se recorta el dibujo.
+
+La interfaz ya no muestra «ID deducido» (insignia, etiqueta de equipamiento, aria-label ni nota de ficha). El `estado` del manifiesto sigue siendo `id_deducido`.
+
 El aviso de la Fan Content Policy ya no va al pie de cada vista ni de cada hoja. Está una sola vez, completo y en cuerpo, en Copia → Acerca de, junto a la versión (§5.14).
