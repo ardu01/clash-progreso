@@ -840,18 +840,36 @@ Los datos se leen de almacenamiento local y tardan muy poco. Es distinto del `.t
 }
 
 .alert-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.4); display: grid; place-items: center; }
-.alert { width: 270px; border-radius: var(--r-sheet); overflow: hidden; text-align: center; }   /* + .material-float */
+.alert { width: min(calc(270rem / 17), calc(100vw - 2 * var(--margin))); max-height: calc(100dvh - 2 * var(--margin)); overflow: auto; border-radius: var(--r-sheet); text-align: center; }   /* + .material-float */
 .alert__body  { padding: 19px 16px; }
-.alert__title { margin: 0 0 2px; font: 600 17px/22px var(--font); }
-.alert__msg   { margin: 0; font: 400 13px/18px var(--font); }
+.alert__title { margin: 0 0 2px; font: 600 1rem/calc(22rem / 17) var(--font); }
+.alert__msg   { margin: 0; font: 400 calc(13rem / 17)/calc(18rem / 17) var(--font); }
 .alert__actions { display: grid; grid-auto-flow: column; border-top: 0.5px solid var(--separator); }
-.alert__actions button { min-height: 44px; border: 0; background: none; color: var(--tint); font: 400 17px/22px var(--font); }
+.alert__actions button { min-height: 44px; border: 0; background: none; color: var(--tint); font: 400 1rem/calc(22rem / 17) var(--font); }
 .alert__actions button + button { border-left: 0.5px solid var(--separator); }
 .alert__actions .is-default { font-weight: 600; }
 .alert__actions .is-destructive { color: var(--red-text); }
 ```
 
-El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se reservan para acciones destructivas: "Borrar todos los datos", "Borrar imágenes guardadas" y "Quitar cuenta" (§8.4). "Importar igualmente" ya no existe; un tag ajeno se ofrece como cuenta nueva (§8.10, decisión 1).
+La alerta escala con Dynamic Type: letra en `rem` (17/13 px a tamaño normal) y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`.
+
+El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se reservan para acciones que borran o sustituyen datos: "Borrar todos los datos", "Restaurar datos incluidos", "Borrar imágenes guardadas" y "Quitar cuenta" (§7e, §8.4). Son las cuatro de la app; no hay `confirm()` nativos. "Importar igualmente" ya no existe; un tag ajeno se ofrece como cuenta nueva (§8.10, decisión 1).
+
+```html
+<div class="alert-backdrop">
+  <div class="alert material-float" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-msg">
+    <div class="alert__body"><p class="alert__title" id="alert-title">¿Borrar todos los datos?</p><p class="alert__msg" id="alert-msg">Se eliminarán…</p></div>
+    <div class="alert__actions"><button data-alert="0" data-alert-cancel>Cancelar</button><button class="is-destructive" data-alert="1">Borrar</button></div>
+  </div>
+</div>
+```
+
+**Foco de la alerta** (WAI-ARIA `alertdialog`).
+- Al abrir, el foco va a Cancelar, la acción segura. Nunca va a la destructiva ni se queda en el sheet de detrás.
+- Mientras está abierta, todo `#app` salvo `.alert-backdrop` y `.toast` lleva `inert`, también el sheet. Tab y Mayús+Tab recorren solo los botones de la alerta, en ciclo.
+- Esc equivale a Cancelar: cierra solo la alerta, no el sheet.
+- Al cerrar con cualquier botón o con Esc, el foco vuelve al control que la abrió. Si ese control ya no existe, va a su equivalente (tras «Borrar imágenes guardadas», a «Descargar todas»), luego al control que ocupa su sitio en el cuerpo del sheet (tras «Quitar …», la fila siguiente) y, si no hay ninguno, al `h2` del sheet.
+- Un toque en el velo no la cierra, igual que en iOS.
 
 ### 5.13 Sheet (Ajustes, Importar, ficha de ítem)
 
@@ -876,7 +894,13 @@ El toast dura 3 s, lleva `role="status"` y no tiene botones. Las alertas se rese
   .sheet { animation: sheet-in 320ms cubic-bezier(.2, .9, .3, 1); }
   @keyframes sheet-in { from { transform: translateY(100%); } }
 }
+#app[data-sheet-keep="true"] .sheet { animation: none; }   /* redibujado del mismo sheet: no vuelve a subir */
 ```
+
+**Redibujado.** El sheet solo sube al abrirse.
+- Un redibujado con el mismo sheet abierto no repite `sheet-in`. Ocurre, por ejemplo, al cambiar de modo o de paso en Importar, al terminar una descarga o al quitar una cuenta. `render()` marca `#app[data-sheet-keep]` antes de sustituir el HTML.
+- El scroll de `.sheet__body` se conserva mientras la vista sea la misma. En Importar, la misma vista es el mismo modo, la misma fase y la misma fila del lote.
+- Si el control con foco queda tapado por el borde del cuerpo, el cuerpo se desplaza lo justo para que se vea entero, anillo de foco incluido.
 
 **Foco.** El foco va al `h2` del sheet (`tabindex="-1"`) solo al abrir; un redibujado lo conserva. Si un redibujado elimina el control con foco, el foco va a su equivalente o, si no existe, al `h2`. Mientras está abierto, `.navbar`, `#screen` y `.tabbar` llevan `inert`. Esc cierra igual que OK, el velo o Cancelar; en un subpaso de Importar, Esc equivale a «‹ Importar». Al cerrar, el foco vuelve al mismo control que lo abrió (la fila `[data-ficha]`, «Ajustes» o «Importar»; por posición si comparte selector).
 
@@ -1238,9 +1262,9 @@ Tocar un ítem abre la **ficha** (`.sheet.sheet--half`): `.thumb--96`, nombre, b
 - C1, con 43 piezas, ocupa unas 11 filas de rejilla más 6 cabeceras, ≈ 900 px: dos pantallas, con el contador siempre visible en la cabecera.
 - Cada celda es un `<button>` de 52×52 como mínimo (objetivo táctil ≥ 44) y al tocarla se abre la ficha (§7b.1) con nombre, nivel, máximo de TH, rareza traducida (`Common` → Común, `Epic` → Épica), héroe e ID.
 - Las piezas `sin_identificar` llevan la etiqueta visible "sin identificar" bajo la miniatura (2 líneas de 10 px, cursiva) y su nivel en el badge. **No se omite ninguna.**
-- Las piezas `id_deducido` (v1.1) llevan su nombre en el `aria-label`, su imagen o iniciales y la etiqueta `.eq__cap.eq__cap--soft` "ID deducido" bajo la miniatura.
+- Las piezas `id_deducido` (v1.1) llevan su nombre y «ID deducido» en el `aria-label`, como las filas (§9), además de su imagen o iniciales y la etiqueta `.eq__cap.eq__cap--soft` "ID deducido" bajo la miniatura.
 - Estados de la miniatura: los de §5.4. La única `faltante` de hoy (Noble Iron, 90000047) va con iniciales "NI".
-- `aria-label` de cada celda: "<nombre>, nivel N" o "Sin identificar, ID X, nivel N".
+- `aria-label` de cada celda: "<nombre>, nivel N de M; si el nivel supera el máximo, "nivel N, máximo desactualizado"" (+ ", ID deducido"). Sin máximo, "<nombre>, nivel N" (+ ", ID deducido"). O "Sin identificar, ID X, nivel N".
 
 **Estados**: sin cuentas importadas, `.empty` con **Importar JSON**. Si la cuenta elegida no está importada, `.empty` con "Esta cuenta aún no tiene datos" y el botón. Si la exportación no trae `equipment` (no pasa hoy), aparece "La exportación no incluye equipamiento".
 
@@ -1392,6 +1416,8 @@ Sheet a pantalla completa (§5.13) con el título "Ajustes" y **OK** (`.btn-text
 - Fila `Importar JSON` (chevron) → abre el sheet de importación (§8).
 - Fila informativa `Cuentas importadas`, con `11 de 11 · última mié 07/10 21:26` a la derecha.
 - Fila `Borrar todos los datos` en `--red-text`, que pide alerta: "¿Borrar todos los datos?" / "Se eliminarán las importaciones y el histórico de este iPhone." / Cancelar · **Borrar** (destructivo).
+- Fila `Restaurar datos incluidos`, que pide alerta: "¿Restaurar datos incluidos?" / "Se volverán a cargar las 11 exportaciones del 7 oct 2026. Las importaciones más nuevas se conservan." / Cancelar · Restaurar.
+- Las alertas siguen §5.12: el foco va a Cancelar, Esc cancela y el foco vuelve a la fila.
 
 **IMÁGENES SIN CONEXIÓN** (`.card.offline-dl`)
 
@@ -1416,7 +1442,7 @@ guarda al verlas por primera vez. Recomendado con wifi.
 | Estado | Barra | Texto | Botón |
 |---|---|---|---|
 | Parcial (tras instalar) | `--p` = MB guardados / total | `9,6 MB de ~41 MB guardados` | **Descargar todas (~40 MB)** (primario) |
-| Descargando | avanza (sin transición si se reduce el movimiento) | `Descargando 57 de 130 · 23,4 de ~41 MB` (`aria-live="polite"`, se anuncia cada 25 %) | **Detener** (secundario) |
+| Descargando | avanza (sin transición si se reduce el movimiento) | `Descargando 57 de 130 · 23,4 de ~41 MB` (texto visible sin `aria-live`; los anuncios van aparte, ver abajo) | **Detener** (secundario) |
 | Completa | verde, 100 % | `Las 130 imágenes están disponibles sin conexión` en `--green-text` | `Borrar imágenes guardadas` (`.btn--destructive`, con alerta) |
 | Con errores | se queda donde iba | `No se pudieron descargar 3 imágenes` | **Reintentar** (secundario) |
 | Sin conexión | sin cambio | `Sin conexión. Conéctate para descargar.` | deshabilitado |
@@ -1424,6 +1450,15 @@ guarda al verlas por primera vez. Recomendado con wifi.
 
 - Tamaño: los 130 PNG suman 41,3 MB. Precacheados al instalar: 8 ayuntamientos (8,6 MB) + 6 héroes (1,0 MB). El botón dice "~40 MB" (lo que decidió el líder) y el contador usa bytes reales. Los bytes salen del manifiesto (`bytes` de cada imagen y el bloque `peso_imagenes`: 41 314 444 bytes en total y 9 624 126 precacheados en la v1).
 - Si existe, se llama a `navigator.storage.persist()` antes de descargar.
+- **Durante la descarga no se redibuja el sheet.**
+  - Cada 4 imágenes, `patchOfflineDl()` cambia solo el recuento `N de M`, `--p` y el `aria-label` de la barra, y el texto de estado.
+  - El sheet no se reanima y no pierde el scroll. El foco sigue en «Detener», que se ve entero (SE a 28 px incluido).
+  - Solo hay `render()` al cambiar de fase: empezar, detener, terminar, error o sin espacio. En ese redibujado se aplica §5.13.
+- **Anuncios.**
+  - Una única región viva `#announcer` (`.sr-only`, `aria-live="polite"`) va fuera de `#app`, así que ningún `render()` la sustituye. Se crea al arrancar.
+  - Durante la descarga solo anuncia `Imágenes sin conexión: 25 %`, `50 %` y `75 %` (por bytes, una vez cada uno).
+  - Al acabar anuncia el estado final: `Las 130 imágenes están disponibles sin conexión`, `Descarga detenida. 9,6 MB de ~41 MB guardados`, `No se pudieron descargar 3 imágenes` o `No hay espacio suficiente en el iPhone`.
+  - VoiceOver no vuelve a leer la tarjeta en cada actualización.
 
 **ACERCA DE**
 - `Versión` con `1.0.0 (abc1234)` a la derecha.
@@ -1863,10 +1898,13 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
   - Cada fila es un único `<a>`/`<button>` con un texto completo, sin repeticiones:
     - en el Roster, "C2 Secundaria, TH16, objetivo TH17, media 48,8 %";
     - en el detalle, "Príncipe Esbirro, nivel 31 de 95" (+ ", ID deducido");
+    - en la rejilla de equipamiento, "<nombre>, nivel N de M" (+ ", ID deducido"); si el nivel supera el máximo, "nivel N, máximo desactualizado";
     - en Categorías, "Defensas, 70,1 %, TH17 64,0 %, faltan 190 niveles".
     La barra de dentro de una fila es decorativa (`aria-hidden="true"`); las barras sueltas siguen con `role="img"` y `aria-label`. Las tablas `.sr-only` usan fechas legibles (`07/10`), nunca ISO. El `input[type=file]` oculto lleva `tabindex="-1"` y `aria-hidden`.
   - Gráficos y escalera con `role="img"` y tabla `.sr-only`.
-  - Toast con `role="status"`, errores de importación con `role="alert"` y progreso de descarga con `aria-live="polite"`.
+  - Toast con `role="status"` y errores de importación con `role="alert"`.
+  - El progreso de descarga se anuncia por `#announcer` (`aria-live="polite"`, fuera de `#app`): 25, 50 y 75 % y el estado final (§7e).
+  - Las alertas llevan `role="alertdialog"`, `aria-labelledby` (título) y `aria-describedby` (mensaje), con el foco de §5.12.
 - **Foco visible** (teclado externo o iPad): `:focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; }`.
 
 ---
@@ -1906,6 +1944,18 @@ Pendiente de otros (Imágenes, no bloquea 1.1.3; 1.1.3 lleva el manifiesto v1.3.
 22. [ ] Fecha y hora nunca en dos líneas (selector de Progreso a 17 px; Roster a 23 px; Mejoras › Por cuenta a 28 px). `MB` y «N de M» tampoco.
 23. [ ] Sheets con teclado: el foco entra al abrir, Tab no sale al fondo, Esc cierra y el foco vuelve al que lo abrió.
 24. [ ] Nombres accesibles sin duplicar (filas de detalle y de Categorías). El `.badge-id` de la Ficha pasa de 4,5:1 en claro. El select de Evolución mide ≥ 44 px de alto.
+25. [ ] Alertas (Borrar todos los datos, Restaurar datos incluidos, Quitar …, Borrar imágenes guardadas):
+    - nombre y descripción accesibles;
+    - al abrir, el foco va a Cancelar;
+    - Tab y Mayús+Tab no salen de la alerta y el sheet de detrás está `inert`;
+    - Esc cancela sin cerrar el sheet;
+    - al cerrar, el foco vuelve al control que la abrió (o a su equivalente o al que ocupa su sitio).
+26. [ ] «Descargar todas»:
+    - mientras descarga, el `.sheet` no se sustituye ni se reanima (0 `animationstart` de `sheet-in`) y conserva el scroll;
+    - el foco sigue en «Detener», que se ve entero en SE a 28 px;
+    - VoiceOver solo oye 25/50/75 % y el estado final.
+    En Importar, cambiar de modo o de paso no vuelve a subir el sheet.
+27. [ ] Celdas de equipamiento: «nivel N de M»; si el nivel supera el máximo, «nivel N, máximo desactualizado»; las `id_deducido` llevan «, ID deducido» al final, como las filas.
 
 ---
 
@@ -1960,3 +2010,15 @@ Revisado con `maqueta/` (datos reales del 07/10, imágenes v1 congeladas, captur
 ## Nota de cambios (8 oct 2026, auditoría de 1.1.3 y especificación de 1.1.4)
 
 8 oct 2026, auditoría de 1.1.3 (`1b898df`) y especificación de 1.1.4: título de fila con meta (§5.3), foco en sheets (§5.13), resumen apilado a 28 px (§7b), objetivo del select (§7d), NBSP en fechas y tamaños, `.btn` con padding vertical, contraste de `.badge` en sheets y nombres accesibles de filas (§9), y checklist 21–24 (§10). El manifiesto de imágenes es v1.4.1 (solo cajas y cabecera; `cp-img-v4` igual).
+
+## Nota de cambios (8 oct 2026, 1.1.4 publicada y especificación de 1.1.5)
+
+1.1.4 está en main (`325ca27`). `docs/sistema.md` de `325ca27` es la base de este cambio.
+
+Especificación de 1.1.5:
+- **Sheet al redibujar** (§5.13): no se repite `sheet-in`, se conserva el scroll de `.sheet__body` en la misma vista y el control con foco se ve entero.
+- **«Descargar todas»** (§7e): actualización parcial de la tarjeta sin `render()`, con anuncios por `#announcer` al 25, 50 y 75 % y al final. Así se cumple el «se anuncia cada 25 %» que ya pedía §7e y que el `aria-live` sustituido en cada `render()` no daba.
+- **Alertas** (§5.12): `alertdialog` con nombre y descripción, foco a Cancelar, fondo `inert`, Tab en ciclo, Esc = Cancelar y foco de vuelta al control que la abrió. Se añade la alerta «Restaurar datos incluidos», que ya existía en el código.
+- **Celdas de equipamiento** (§7b.2, §9): «nivel N de M»; si el nivel supera el máximo, «nivel N, máximo desactualizado» (el mismo aviso que el chip de la ficha); «ID deducido» al final. Sin máximo, «nivel N».
+- **Alertas y Dynamic Type** (§5.12): letra en `rem` y ancho `min(270 px a 17 px, 100vw − 2 márgenes)`.
+- Checklist §10.25–27.

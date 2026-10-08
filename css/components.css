@@ -258,12 +258,12 @@ li + li > .row::before {
 }
 
 .alert-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.4); display: grid; place-items: center; }
-.alert { width: 270px; border-radius: var(--r-sheet); overflow: hidden; text-align: center; }
+.alert { width: min(calc(270rem / 17), calc(100vw - 2 * var(--margin))); max-height: calc(100dvh - 2 * var(--margin)); overflow: auto; border-radius: var(--r-sheet); text-align: center; }
 .alert__body  { padding: 19px 16px; }
-.alert__title { margin: 0 0 2px; font: 600 17px/22px var(--font); }
-.alert__msg   { margin: 0; font: 400 13px/18px var(--font); }
+.alert__title { margin: 0 0 2px; font: 600 1rem/calc(22rem / 17) var(--font); }
+.alert__msg   { margin: 0; font: 400 calc(13rem / 17)/calc(18rem / 17) var(--font); }
 .alert__actions { display: grid; grid-auto-flow: column; border-top: 0.5px solid var(--separator); }
-.alert__actions button { min-height: 44px; border: 0; background: none; color: var(--tint); font: 400 17px/22px var(--font); }
+.alert__actions button { min-height: 44px; border: 0; background: none; color: var(--tint); font: 400 1rem/calc(22rem / 17) var(--font); }
 .alert__actions button + button { border-left: 0.5px solid var(--separator); }
 .alert__actions .is-default { font-weight: 600; }
 .alert__actions .is-destructive { color: var(--red-text); }
@@ -320,6 +320,7 @@ li + li > .row::before {
   .sheet { animation: sheet-in 320ms cubic-bezier(.2, .9, .3, 1); }
   @keyframes sheet-in { from { transform: translateY(100%); } }
 }
+#app[data-sheet-keep="true"] .sheet { animation: none; }   /* 1.1.5: un redibujado del mismo sheet no vuelve a subirlo */
 
 .list { container-type: inline-size; }
 @container (max-width: 19em) {

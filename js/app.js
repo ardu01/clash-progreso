@@ -54,8 +54,12 @@ const state = {
   focusReturn: "",
   sheetKey: "",
   sheetFocusMark: null,
+  sheetView: "",
+  sheetScroll: null,
   toast: null,
   alert: null,
+  alertShown: false,
+  alertReturn: null,
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
@@ -716,11 +720,15 @@ function equipBlock(exp, meta) {
 
 function eqCell(p) {
   const name = p.unknown ? "Sin identificar" : (nameOf(p.id) || "Pieza");
-  const aria = p.unknown ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}` : `${name}, nivel ${p.lvl}`;
+  const deduced = !!(p.meta && p.meta.estado === "id_deducido");
+  const level = p.max != null && !p.overMax ? `nivel ${p.lvl} de ${p.max}` : `nivel ${p.lvl}`;
+  const aria = p.unknown
+    ? `Sin identificar, ID ${p.id}, nivel ${p.lvl}`
+    : [name, level, p.overMax ? "máximo desactualizado" : "", deduced ? "ID deducido" : ""].filter(Boolean).join(", ");
   const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : ""].filter(Boolean).join(" ");
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
-    : (p.meta && p.meta.estado === "id_deducido" ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
+    : (deduced ? `<span class="eq__cap eq__cap--soft">ID deducido</span>` : "");
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52 });
@@ -1181,8 +1189,7 @@ function imageTotalBytes() {
   return state.images.reduce((s, im) => s + (im.bytes || 0), 0);
 }
 
-function renderAjustes() {
-  const imported = ROSTER.filter((r) => expOf(r.tag)).length;
+function offlineDlModel() {
   const total = imageTotalBytes();
   const totalN = state.peso && state.peso.total_archivos != null ? state.peso.total_archivos : state.images.length;
   const bytes = state.dl.phase === "downloading" ? state.dl.doneBytes : state.cacheBytes;
@@ -1210,6 +1217,46 @@ function renderAjustes() {
     status = `Las ${totalN} imágenes están disponibles sin conexión`;
     btn = `<button class="btn btn--destructive btn--block" data-dl="purge">Borrar imágenes guardadas</button>`;
   }
+  return { total, totalN, bytes, count, p, done, status, btn, note };
+}
+
+/* 1.1.5: durante «Descargar todas» solo cambian el recuento, la barra y el estado. No se redibuja el sheet,
+   así que no se repite la animación, no se pierde el scroll y el foco sigue en «Detener». */
+function patchOfflineDl() {
+  const card = document.querySelector(".offline-dl");
+  if (!card) return;
+  const m = offlineDlModel();
+  const num = card.querySelector(".offline-dl__top .num");
+  if (num) num.textContent = `${m.count}\u00a0de\u00a0${m.totalN}`;
+  const bar = card.querySelector(".bar");
+  if (bar) { bar.style.setProperty("--p", String(Math.min(100, m.p))); bar.setAttribute("aria-label", m.status); }
+  const st = card.querySelector(".offline-dl__status");
+  if (st) st.textContent = m.status;
+  if (card.contains(document.activeElement)) keepVisible(document.activeElement);
+}
+
+/* Región viva fuera de #app: render() no la sustituye y VoiceOver la anuncia de forma fiable. */
+function announce(text) {
+  let el = document.getElementById("announcer");
+  if (!el) {
+    el = document.createElement("p");
+    el.id = "announcer";
+    el.className = "sr-only";
+    el.setAttribute("aria-live", "polite");
+    document.body.append(el);
+  }
+  el.textContent = "";
+  setTimeout(() => { el.textContent = text; }, 60);
+}
+
+function dlQuarter(bytes) {
+  const total = imageTotalBytes();
+  return total ? Math.floor((bytes / total) * 4) : 0;
+}
+
+function renderAjustes() {
+  const imported = ROSTER.filter((r) => expOf(r.tag)).length;
+  const { totalN, count, p, done, status, btn, note } = offlineDlModel();
   return `<div class="sheet-backdrop" data-close="1"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="aj-title">
       <div class="sheet__grabber"></div>
@@ -1229,7 +1276,7 @@ function renderAjustes() {
         <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
           <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
           <div class="bar" style="--p:${Math.min(100, p)};--cat:var(--tint)" role="img" aria-label="${esc(status)}"><span class="bar__fill"></span></div>
-          <p class="offline-dl__meta offline-dl__status" aria-live="polite">${esc(status)}</p>
+          <p class="offline-dl__meta offline-dl__status">${esc(status)}</p>
           ${btn}
           <p class="t-footnote c-2" style="margin:8px 0 0">${esc(note)}</p>
         </div></div>
@@ -1790,9 +1837,9 @@ function heroLabel(en) {
 function renderAlert() {
   const a = state.alert;
   if (!a) return "";
-  const buttons = a.buttons.map((b, i) => `<button class="${b.cls || ""}" data-alert="${i}">${esc(b.label)}</button>`).join("");
-  return `<div class="alert-backdrop"><div class="alert material-float" role="alertdialog" aria-modal="true">
-    <div class="alert__body"><p class="alert__title">${esc(a.title)}</p><p class="alert__msg">${esc(a.msg)}</p></div>
+  const buttons = a.buttons.map((b, i) => `<button class="${b.cls || ""}" data-alert="${i}"${b.act ? "" : " data-alert-cancel"}>${esc(b.label)}</button>`).join("");
+  return `<div class="alert-backdrop"><div class="alert material-float" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-msg">
+    <div class="alert__body"><p class="alert__title" id="alert-title">${esc(a.title)}</p><p class="alert__msg" id="alert-msg">${esc(a.msg)}</p></div>
     <div class="alert__actions">${buttons}</div>
   </div></div>`;
 }
@@ -1818,6 +1865,7 @@ function markFocus(el) {
   let node = el;
   while (node && node !== document.body && node !== document.documentElement) {
     const ds = node.dataset;
+    if (ds && ds.alert != null) return { alert: ds.alert };
     if (ds && ds.dl) return { dl: ds.dl };
     if (ds && ds.act) return { act: ds.act };
     if (node.id) return { id: node.id };
@@ -1828,15 +1876,86 @@ function markFocus(el) {
 
 function focusFromMark(mark) {
   if (!mark) return null;
+  if (mark.alert != null) return document.querySelector(`.alert [data-alert="${cssAttr(mark.alert)}"]`);
   if (mark.dl) return document.querySelector(`[data-dl="${cssAttr(mark.dl)}"]`) || document.querySelector(".offline-dl [data-dl]");
   if (mark.act) return document.querySelector(`[data-act="${cssAttr(mark.act)}"]`);
   if (mark.id) return document.querySelector("#" + mark.id);
   return null;
 }
 
+function sheetViewOf(key) {
+  if (key !== "importar") return key;
+  const u = state.importUi;
+  return `importar:${u.mode}:${u.phase}:${u.fromBatch ? u.focus : ""}`;
+}
+
 function rememberSheetFocus() {
   const key = state.ficha ? "ficha" : route().name;
-  state.sheetFocusMark = key === state.sheetKey ? markFocus(document.activeElement) : null;
+  const same = key === state.sheetKey;
+  state.sheetFocusMark = same ? markFocus(document.activeElement) : null;
+  const body = document.querySelector(".sheet .sheet__body");
+  state.sheetScroll = same && body && sheetViewOf(key) === state.sheetView ? body.scrollTop : null;
+  return same;
+}
+
+/* Si el control con foco queda tapado por el borde del cuerpo del sheet, se desplaza lo justo (anillo incluido). */
+function keepVisible(el) {
+  const body = el && el.closest && el.closest(".sheet__body");
+  if (!body) return;
+  const r = el.getBoundingClientRect();
+  const b = body.getBoundingClientRect();
+  const ring = 6;
+  if (r.bottom + ring > b.bottom) body.scrollTop += r.bottom + ring - b.bottom;
+  else if (r.top - ring < b.top) body.scrollTop -= b.top - (r.top - ring);
+}
+
+function rememberAlertOpener(el, sel) {
+  const rows = [...document.querySelectorAll(".sheet__body button")];
+  state.alertReturn = { sel, idx: [...document.querySelectorAll(sel)].indexOf(el), pos: rows.indexOf(el), dl: !!el.dataset.dl };
+}
+
+/* Alerta (role="alertdialog"): al abrir, foco en Cancelar; el resto de #app queda inert; Tab no sale;
+   Esc = Cancelar; al cerrar, el foco vuelve al control que la abrió (o al que ocupa su sitio, o al h2). */
+function settleAlert() {
+  const box = document.querySelector(".alert");
+  const app = document.getElementById("app");
+  if (box) {
+    for (const el of app.children) {
+      if (!el.classList.contains("alert-backdrop") && !el.classList.contains("toast")) el.setAttribute("inert", "");
+    }
+    const safe = box.querySelector("[data-alert-cancel]") || box.querySelector("[data-alert]");
+    if (!state.alertShown || !box.contains(document.activeElement)) safe?.focus({ preventScroll: true });
+  } else if (state.alertShown) {
+    const ret = state.alertReturn;
+    state.alertReturn = null;
+    let back = null;
+    if (ret) {
+      back = document.querySelectorAll(ret.sel)[ret.idx]
+        || (ret.dl ? document.querySelector(".offline-dl [data-dl]") : null)
+        || document.querySelectorAll(".sheet__body button")[ret.pos];
+    }
+    back = back || document.querySelector(".sheet h2");
+    if (back) { back.focus({ preventScroll: true }); keepVisible(back); }
+  }
+  state.alertShown = !!box;
+}
+
+function onAlertKey(ev) {
+  if (!state.alert || !ev) return false;
+  if (ev.key === "Escape") {
+    ev.preventDefault();
+    state.alert = null;
+    render();
+    return true;
+  }
+  if (ev.key !== "Tab") return false;
+  const btns = [...document.querySelectorAll(".alert [data-alert]")];
+  if (!btns.length) return false;
+  const i = btns.indexOf(document.activeElement);
+  const next = ev.shiftKey ? (i <= 0 ? btns.length - 1 : i - 1) : (i === btns.length - 1 ? 0 : i + 1);
+  ev.preventDefault();
+  btns[next].focus();
+  return true;
 }
 
 function rememberOpener(el, sel) {
@@ -1856,14 +1975,16 @@ function settleSheetFocus() {
   if (sheet) {
     const h2 = sheet.querySelector("h2");
     if (h2) h2.tabIndex = -1;
+    const body = sheet.querySelector(".sheet__body");
+    if (!opened && body && state.sheetScroll != null) body.scrollTop = state.sheetScroll;
     if (opened && h2 && !state.importUi.needsFocus) h2.focus({ preventScroll: true });
     else if (!opened && !state.importUi.needsFocus) {
       if (state.sheetFocusMark) {
         const back = focusFromMark(state.sheetFocusMark);
-        if (back) back.focus({ preventScroll: true });
+        if (back) { back.focus({ preventScroll: true }); keepVisible(back); }
       }
       const cur = document.activeElement;
-      const inside = cur && cur !== document.body && cur !== document.documentElement && sheet.contains(cur);
+      const inside = cur && cur !== document.body && cur !== document.documentElement && (sheet.contains(cur) || !!cur.closest(".alert"));
       if (h2 && !inside) h2.focus({ preventScroll: true });
     }
   } else if (state.focusReturn) {
@@ -1878,7 +1999,9 @@ function settleSheetFocus() {
     if (back) back.focus({ preventScroll: true });
   }
   state.sheetKey = key;
+  state.sheetView = sheetViewOf(key);
   state.sheetFocusMark = null;
+  state.sheetScroll = null;
 }
 
 function focusImportTarget() {
@@ -1925,8 +2048,9 @@ function render() {
     state.selected = r.tag;
     localStorage.setItem("cp-account", r.tag);
   }
-  rememberSheetFocus();
+  const keep = rememberSheetFocus();
   const root = document.getElementById("app");
+  root.dataset.sheetKeep = String(keep);
   root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
   const title = document.querySelector(".large-title");
@@ -1940,6 +2064,7 @@ function render() {
   paintOfflineThumbs();
   settleSheetFocus();
   focusImportTarget();
+  settleAlert();
   if (state.scrollAdded && r.name === "roster") {
     state.scrollAdded = false;
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
@@ -1991,6 +2116,7 @@ function bind(r) {
     if (ev.target.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
     if (ev.target.closest("[data-close]")) { location.hash = "#/roster"; return; }
     if (ev.target.closest("[data-restore]")) {
+      rememberAlertOpener(ev.target.closest("[data-restore]"), "[data-restore]");
       state.alert = {
         title: "¿Restaurar datos incluidos?",
         msg: "Se volverán a cargar las 11 exportaciones del 7 oct 2026. Las importaciones más nuevas se conservan.",
@@ -2003,6 +2129,7 @@ function bind(r) {
       return;
     }
     if (ev.target.closest("[data-wipe]")) {
+      rememberAlertOpener(ev.target.closest("[data-wipe]"), "[data-wipe]");
       state.alert = {
         title: "¿Borrar todos los datos?",
         msg: "Se eliminarán las importaciones y el histórico de este iPhone.",
@@ -2043,6 +2170,7 @@ function bind(r) {
       if (dl.dataset.dl === "start") downloadAll();
       if (dl.dataset.dl === "stop" && state.dlAbort) state.dlAbort.abort();
       if (dl.dataset.dl === "purge") {
+        rememberAlertOpener(dl, '[data-dl="purge"]');
         state.alert = {
           title: "¿Borrar imágenes guardadas?",
           msg: "Se quitarán las imágenes descargadas. Los ayuntamientos y los héroes se pueden volver a guardar.",
@@ -2057,6 +2185,7 @@ function bind(r) {
       const tag = quitar.dataset.quitar;
       const meta = accountByTag(tag);
       const label = meta ? meta.nombre : tag;
+      rememberAlertOpener(quitar, "[data-quitar]");
       state.alert = {
         title: `¿Quitar ${label}?`,
         msg: "Se borrarán su alias y sus importaciones de este iPhone.",
@@ -2195,6 +2324,7 @@ async function downloadAll() {
   }
   state.dl.doneBytes = bytes;
   state.dl.doneCount = count;
+  state.dl.quarter = dlQuarter(bytes);
   for (const img of state.images) {
     if (ctrl.signal.aborted) break;
     if (await caches.match(img.url)) continue;
@@ -2206,7 +2336,11 @@ async function downloadAll() {
       count += 1;
       state.dl.doneBytes = bytes;
       state.dl.doneCount = count;
-      if (count % 4 === 0) render();
+      if (count % 4 === 0) {
+        if (route().name === "ajustes") patchOfflineDl();
+        const q = dlQuarter(bytes);
+        if (q > state.dl.quarter && q < 4) { state.dl.quarter = q; announce(`Imágenes sin conexión: ${q * 25} %`); }
+      }
     } catch (err) {
       if (ctrl.signal.aborted) break;
       if (err && (err.name === "QuotaExceededError" || err.code === 22)) {
@@ -2214,6 +2348,7 @@ async function downloadAll() {
         state.cacheBytes = bytes;
         state.cacheCount = count;
         render();
+        announce(offlineDlModel().status);
         return;
       }
       errors += 1;
@@ -2225,6 +2360,8 @@ async function downloadAll() {
   state.dl.errors = errors;
   state.dlAbort = null;
   render();
+  const end = offlineDlModel().status;
+  announce(ctrl.signal.aborted ? `Descarga detenida. ${end}` : end);
 }
 
 async function purgeImages() {
@@ -2257,6 +2394,7 @@ function catalog(manifest) {
 
 async function boot() {
   state.added = loadAdded();
+  announce("");
   render();
   const [manifest, caps, bundle] = await Promise.all([
     fetch("./assets/manifest.json").then((r) => r.json()),
@@ -2287,7 +2425,7 @@ window.addEventListener("hashchange", () => {
   render();
   if (route().name === "ajustes") measureCache();
 });
-document.addEventListener("keydown", (ev) => { onSheetEscape(ev); });
+document.addEventListener("keydown", (ev) => { if (!onAlertKey(ev)) onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") { state.now = Date.now(); if (route().name === "mejoras") render(); }
 });
