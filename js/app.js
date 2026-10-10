@@ -286,7 +286,7 @@ function cssNum(v) {
 function ajusteStyle(im, size, pad) {
   const aj = ajusteOf(im, size, pad == null ? {} : { pad });
   if (!aj) return "";
-  return `--vw:${cssNum(aj.vw)};--vh:${cssNum(aj.vh)};--bx:${aj.x};--by:${aj.y};--bw:${aj.w};--bh:${aj.h}`;
+  return `--dw:${cssNum(aj.dw)};--dh:${cssNum(aj.dh)};--x:${cssNum(aj.left)};--y:${cssNum(aj.top)}`;
 }
 
 function imageThumb(cls, size, label, im, opts, choice) {
@@ -332,7 +332,7 @@ function applyFallback(img, box) {
   if (img.getAttribute("src") === fb) return false;
   box.dataset.usedFallback = "1";
   if ("fbAjuste" in box.dataset) {
-    for (const key of ["--vw", "--vh", "--bx", "--by", "--bw", "--bh"]) box.style.removeProperty(key);
+    for (const key of ["--dw", "--dh", "--x", "--y"]) box.style.removeProperty(key);
     if (box.dataset.fbAjuste) {
       box.classList.add("is-ajuste");
       for (const part of box.dataset.fbAjuste.split(";")) {
@@ -941,7 +941,9 @@ function eqCell(p) {
   const cls = [p.unknown ? "is-unknown" : "", p.lvl <= 1 ? "is-lvl1" : "", p.max && p.lvl >= p.max && !p.overMax ? "is-max" : "", p.overMax ? "is-over" : ""].filter(Boolean).join(" ");
   const cap = p.unknown
     ? `<span class="eq__cap">sin identificar</span>`
-    : (p.overMax ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>` : "");
+    : (p.overMax
+      ? `<span class="eq__cap eq__cap--warn">máx. ${p.max}</span>`
+      : (p.meta && p.meta.estado === "faltante" ? `<span class="eq__cap">${esc(name)}</span>` : ""));
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52, lvl: p.lvl });

@@ -4,12 +4,12 @@ import CAJAS_ALFA from "../assets/cajas-alfa.json" with { type: "json" };
 
 /** Padding de `.thumb`: 8 % por lado. El interior es size × (1 − 2 × PAD). */
 export const THUMB_PAD = 0.08;
-/** Por debajo de esto, el dibujo se acerca al 85 % del lado. */
-export const DRAW_MIN = 0.7;
-/** Objetivo dentro del 80–90 % del lado de la miniatura. */
+/** Objetivo: el lado largo del dibujo ocupa el 85 % del lado de la miniatura. */
 export const DRAW_TARGET = 0.85;
-/** 1 px CSS son 3 px físicos en un iPhone. No se pinta más de 1 px de bitmap por px físico. */
+/** 1 px CSS son 3 px físicos en un iPhone. */
 export const DEVICE_SCALE = 3;
+/** Si el PNG no llega al 85 % a 1 px físico por px de bitmap, se puede ampliar hasta 1,5×. */
+export const UPSCALE_MAX = 1.5;
 export const HEAVY_BYTES = 3000000;
 
 export { CAJAS_ALFA };
@@ -79,10 +79,11 @@ export function cajaAlfa(im) {
 }
 
 /**
- * Si el dibujo (bbox de alfa) ocupa menos del 70 % del lado, recorta solo el
- * margen transparente para acercarlo al 85 %. No agranda por encima de 1 px
- * físico por px de bitmap, no encoge lo que ya se ve bien y no estira.
- * `null` = se queda el `contain` de la imagen entera.
+ * Encuadra el dibujo (bbox de alfa > 0) al 85 % del lado, centrado.
+ * Safari iOS 16 no aplica `object-view-box`, así que el resultado es ancho,
+ * alto y posición del `<img>` dentro de un contenedor con `overflow: hidden`.
+ * La escala es uniforme. El tope es 1,5 px de bitmap por px físico
+ * (`UPSCALE_MAX / DEVICE_SCALE` px CSS por px de imagen). `null` si no hay caja.
  */
 export function ajusteOf(im, size, opts = {}) {
   const box = opts.caja || cajaAlfa(im);
@@ -96,16 +97,14 @@ export function ajusteOf(im, size, opts = {}) {
   const lado = Number(size);
   if (!(ancho > 0) || !(alto > 0) || !(w > 0) || !(h > 0) || !(lado > 0)) return null;
   if (x < 0 || y < 0 || x + w > ancho || y + h > alto) return null;
-  const contain = containOf(im, lado, opts);
-  if (!contain) return null;
-  const dibujo = Math.max(w, h) * contain.escala;
-  if (dibujo / lado >= DRAW_MIN) return null;
-  const escala = Math.min((DRAW_TARGET * lado) / Math.max(w, h), 1 / DEVICE_SCALE);
-  if (!(escala > contain.escala)) return null;
+  const escala = Math.min((DRAW_TARGET * lado) / Math.max(w, h), UPSCALE_MAX / DEVICE_SCALE);
+  if (!(escala > 0)) return null;
   return {
     escala,
-    vw: w * escala,
-    vh: h * escala,
+    dw: ancho * escala,
+    dh: alto * escala,
+    left: lado / 2 - (x + w / 2) * escala,
+    top: lado / 2 - (y + h / 2) * escala,
     x, y, w, h,
   };
 }
