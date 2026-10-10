@@ -8,7 +8,7 @@ import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, b
 import { parseLoose } from "../js/parse.js";
 import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
-import { DEVICE_SCALE, DRAW_MIN, DRAW_TARGET, HEAVY_BYTES, THUMB_PAD, ajusteOf, cajaAlfa, catalog, containOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
+import { DEVICE_SCALE, DRAW_TARGET, HEAVY_BYTES, THUMB_PAD, UPSCALE_MAX, ajusteOf, cajaAlfa, catalog, containOf, imageChoice, isHeavy, precacheUrls, thumbInterior } from "../js/images.js";
 import { classifyEntries, acceptedExports, foreignMsg, trailingLabel, mediaLine, unknownMsg, omitSubtitle, omitReason, BAD_FOOT, DUP_FOOT, planBatch } from "../js/import.js";
 import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, featuredTag, orderAccounts, ROSTER_VERSION } from "../js/roster.js";
 import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
@@ -184,7 +184,7 @@ test("nombres visibles salen de nombre o nombre_en", () => {
 test("las piezas id_deducido siguen en el recuento y salen de sin identificar", () => {
   const pieces = equipmentView(exportsByTag.get("#28PLGP0G2"), index, 18);
   assert.equal(pieces.length, 43);
-  for (const id of ["90000052", "90000053", "90000059"]) {
+  for (const id of ["90000052", "90000053"]) {
     const piece = pieces.find((p) => p.id === id);
     assert.ok(piece, id);
     assert.equal(piece.unknown, false, id);
@@ -192,12 +192,22 @@ test("las piezas id_deducido siguen en el recuento y salen de sin identificar", 
     assert.equal(piece.heroe, "Dragon Duke");
     assert.equal(piece.meta.nombre_pendiente, false);
   }
-  assert.equal(pieces.filter((p) => p.unknown).length, 5);
+  const fangs = pieces.find((p) => p.id === "90000016");
+  assert.equal(fangs.unknown, false);
+  assert.equal(fangs.meta.estado, "ok");
+  assert.equal(fangs.meta.nombre, "Colmillos eléctricos");
+  assert.equal(fangs.heroe, "Dragon Duke");
+  const arrow = pieces.find((p) => p.id === "90000059");
+  assert.equal(arrow.unknown, false);
+  assert.equal(arrow.meta.estado, "faltante");
+  assert.equal(arrow.heroe, "Archer Queen");
+  assert.equal(arrow.meta.nombre_en, "Monolith Arrow");
+  assert.equal(pieces.filter((p) => p.unknown).length, 1);
   const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
-  assert.equal(c1.cats.equipamiento.pct, 61.6);
+  assert.equal(c1.cats.equipamiento.pct, 62.3);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
-  assert.equal(c2.cats.equipamiento.pct, 58.6);
-  assert.equal(c2.cats.equipamiento.sigPct, 58.6);
+  assert.equal(c2.cats.equipamiento.pct, 60.2);
+  assert.equal(c2.cats.equipamiento.sigPct, 60.2);
 });
 
 test("Inferno Artillery solo en el detalle, sin id inventado", () => {
@@ -344,11 +354,11 @@ test("el máximo de cada fila sale de caps por nombre_en", () => {
   assert.deepEqual([hero("28000007").lvl, hero("28000007").max], [10, 15]);
   assert.equal(levelLine(hero("28000007")).text, "Nv 10 / 15");
   assert.equal(c2.cats.heroes.pct, 23.5);
-  assert.equal(c2.cats.equipamiento.pct, 58.6);
+  assert.equal(c2.cats.equipamiento.pct, 60.2);
   assert.equal(c2.offense, 34.5);
 
   const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
-  assert.equal(c1.cats.equipamiento.pct, 61.6);
+  assert.equal(c1.cats.equipamiento.pct, 62.3);
   assert.equal(c1.cats.heroes.pct, Number(byTag.get("#28PLGP0G2").pct_heroes));
 
   const th13 = analyze(exportsByTag.get("#GUQUV98JG"), index);
@@ -402,7 +412,7 @@ test("missing.json coincide con el archivo publicado", () => {
 
 test("manifest.json coincide con la v2.1", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "27625679143cf79b2d9068f25695757abdbb60b403ea96a621cdafd3b71beb5c");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "0d23a9216e2e1ecc2345a988ed474c92b247ae01ba4b02d33e0d2a6b293993da");
   assert.equal(manifest.version_set_imagenes, "v2.1");
 });
 
@@ -425,8 +435,8 @@ function fnFromApp(signature, name, deps = {}) {
 }
 
 const V110 = {
-  "#28PLGP0G2": { media: 64, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [61.6, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
-  "#R00C8CPQC": { media: 49, sigMedia: 46.1, cats: { defensas: [66.9, 61.3], laboratorio: [45.4, 41.7], ejercito_edif: [86.2, 80.6], equipamiento: [58.6, 58.6], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
+  "#28PLGP0G2": { media: 64.1, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [62.3, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
+  "#R00C8CPQC": { media: 49.2, sigMedia: 46.3, cats: { defensas: [66.9, 61.3], laboratorio: [45.4, 41.7], ejercito_edif: [86.2, 80.6], equipamiento: [60.2, 60.2], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
   "#GUQUV98JG": { media: 62.9, sigMedia: 49.3, cats: { defensas: [69.2, 62.6], laboratorio: [53.7, 47.9], ejercito_edif: [83.3, 75.8], equipamiento: [67.9, 57.3], mascotas: [null, 0], heroes: [32.7, 28.1], trampas: [48.9, 39.6], recursos: [72.3, 67.4], muros: [75.3, 64.9] } },
   "#GVG9GCYUV": { media: 60, sigMedia: 47.1, cats: { defensas: [68.6, 62], laboratorio: [45.6, 40.6], ejercito_edif: [81.7, 74.2], equipamiento: [80.8, 68.4], mascotas: [null, 0], heroes: [33.1, 28.4], trampas: [26.5, 21.5], recursos: [68.1, 63.4], muros: [75.4, 65] } },
   "#R02YVYLJ8": { media: 58.6, sigMedia: 45.8, cats: { defensas: [65.9, 59.6], laboratorio: [44.1, 39.3], ejercito_edif: [78.3, 71.2], equipamiento: [73.5, 62.2], mascotas: [null, 0], heroes: [30.9, 26.6], trampas: [38.8, 31.4], recursos: [61.1, 56.9], muros: [75.9, 65.4] } },
@@ -446,7 +456,7 @@ function importCtx(rows) {
   return { rows, accounts: ROSTER, index, now: Date.parse("2026-10-08T12:00:00Z") };
 }
 
-test("los porcentajes de las 11 cuentas no cambian respecto a la 1.1.0", () => {
+test("los porcentajes de las 11 cuentas: defensas como en 1.1.0; equipamiento de C1 y C2 sube al identificar piezas", () => {
   for (const roster of ROSTER) {
     const a = analyze(exportsByTag.get(roster.tag), index);
     const want = V110[roster.tag];
@@ -458,7 +468,7 @@ test("los porcentajes de las 11 cuentas no cambian respecto a la 1.1.0", () => {
       assert.equal(a.cats[c.key].sigPct, pair[1], roster.tag + " sig " + c.key);
     }
   }
-  assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 61.6);
+  assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 62.3);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(c2.cats.defensas.pct, 66.9);
   assert.equal(c2.cats.defensas.sigPct, 61.3);
@@ -594,18 +604,18 @@ test("si solo sube el ayuntamiento no hay lista de cambios", () => {
   assert.equal(item.changes.noChanges, false);
 });
 
-test("C2 cuenta 4 sin identificar fuera del porcentaje", () => {
+test("C2 cuenta 1 sin identificar fuera del porcentaje", () => {
   const base = exportsByTag.get("#R00C8CPQC");
   const exp = structuredClone(base);
   exp.timestamp = base.timestamp + 40;
   const item = classifyEntries([{ name: "c2.json", text: JSON.stringify(exp) }], importCtx([...exportsByTag.values()]))[0];
   assert.equal(item.kind, "ready");
-  assert.equal(item.changes.unknownCount, 4);
+  assert.equal(item.changes.unknownCount, 1);
 });
 
-test("versión 2.1.3 y cachés cp-shell-v15 / cp-img-v5", () => {
-  assert.equal(APP_VERSION, "2.1.3");
-  assert.equal(SHELL_CACHE, "cp-shell-v15");
+test("versión 2.1.4 y cachés cp-shell-v16 / cp-img-v5", () => {
+  assert.equal(APP_VERSION, "2.1.4");
+  assert.equal(SHELL_CACHE, "cp-shell-v16");
   assert.equal(IMAGE_CACHE, "cp-img-v5");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -624,15 +634,17 @@ test("versión 2.1.3 y cachés cp-shell-v15 / cp-img-v5", () => {
   assert.equal(sw.includes("cp-shell-v12"), false);
   assert.equal(sw.includes("cp-shell-v13"), false);
   assert.equal(sw.includes("cp-shell-v14"), false);
+  assert.equal(sw.includes("cp-shell-v15"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v15/);
+  assert.match(caches, /cp-shell-v16/);
   assert.match(caches, /cp-img-v5/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
   assert.equal(caches.includes("cp-shell-v14"), false);
+  assert.equal(caches.includes("cp-shell-v15"), false);
   assert.equal(caches.includes("cp-img-v4"), false);
   assert.match(app, /APP_VERSION/);
   assert.match(app, /imageChoice/);
@@ -663,7 +675,7 @@ function unidentifiedSplit(exp) {
   return { noticeSum, equipment, total: noticeSum + equipment, notices };
 }
 
-test("sin identificar: C1 da 8 y las otras diez dan 4, el mismo número en los dos sitios", () => {
+test("sin identificar: C1 da 4 y las otras diez dan 1, el mismo número en los dos sitios", () => {
   const rows = [...exportsByTag.values()];
   for (const roster of ROSTER) {
     const exp = exportsByTag.get(roster.tag);
@@ -671,29 +683,29 @@ test("sin identificar: C1 da 8 y las otras diez dan 4, el mismo número en los d
     fresh.timestamp = exp.timestamp + 40;
     const item = classifyEntries([{ name: "nueva.json", text: JSON.stringify(fresh) }], importCtx(rows))[0];
     const split = unidentifiedSplit(exp);
-    const want = roster.tag === "#28PLGP0G2" ? 8 : 4;
+    const want = roster.tag === "#28PLGP0G2" ? 4 : 1;
     assert.equal(item.changes.unknownCount, want, roster.tag);
     assert.equal(split.total, want, roster.tag + " avisos");
     assert.equal(split.notices.defensas || 0, 0, roster.tag + " defensas");
     assert.equal(outsidePct(index, "107000008", townHallLevel(exp)), false, roster.tag);
     if (roster.tag === "#28PLGP0G2") {
       assert.equal(split.notices.laboratorio, 3);
-      assert.equal(split.equipment, 5);
-      assert.equal(unknownMsg(item.changes.unknownCount), "8 ítems sin identificar: se guardan igual.");
+      assert.equal(split.equipment, 1);
+      assert.equal(unknownMsg(item.changes.unknownCount), "4 ítems sin identificar: se guardan igual.");
     } else {
-      assert.equal(split.equipment, 4);
+      assert.equal(split.equipment, 1);
       assert.equal(split.noticeSum, 0, roster.tag);
       const ids = categoryItems(exp, index, "equipamiento", townHallLevel(exp))
         .filter((it) => outsidePct(index, it.id, townHallLevel(exp)))
         .map((it) => it.id)
         .sort();
-      assert.deepEqual(ids, ["90000016", "90000057", "90000060", "90000061"]);
+      assert.deepEqual(ids, ["90000061"]);
     }
   }
   assert.equal(unknownMsg(1), "1 ítem sin identificar: se guarda igual.");
   const helper = presentItem(index, "93000003");
   assert.equal(helper.unknown, true);
-  assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 8);
+  assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 4);
 });
 
 test("107000008 se muestra como Logger, sin marca de ID deducido, y no entra en el aviso", () => {
@@ -723,7 +735,7 @@ test("107000008 se muestra como Logger, sin marca de ID deducido, y no entra en 
   assert.equal(line("Duque Dragón"), "Nv 10 / 15");
 });
 
-test("el Logger se muestra entero, sin recortar la caja, y no tiene imagen de nivel", () => {
+test("el Logger se muestra entero, sin recortar la caja; los niveles 2 a 5 usan el PNG del 1", () => {
   const im = manifest.items["107000008"].imagen;
   assert.deepEqual(im.caja_visible, { x: 268, y: 335, w: 611, h: 555 });
   assert.equal(im.ocupacion, 0.3234);
@@ -734,7 +746,9 @@ test("el Logger se muestra entero, sin recortar la caja, y no tiene imagen de ni
   assert.ok(fit.dw <= lado && fit.dh <= lado);
   const zoomed = containOf({ ...im, caja_visible: { x: 0, y: 0, w: 10, h: 10 } }, 40);
   assert.deepEqual(zoomed, fit);
-  assert.equal(manifest.items["107000008"].imagenes_por_nivel, undefined);
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["1"].ruta, im.ruta);
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["1"].es_inferior, false);
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
   assert.equal(IMAGE_CACHE, "cp-img-v5");
@@ -748,10 +762,10 @@ test("la media sin cambio no repite el valor ni pone flecha", () => {
   const flat = classifyEntries([{ name: "igual.json", text: JSON.stringify(same) }], importCtx(rows))[0];
   assert.equal(flat.kind, "ready");
   assert.equal(flat.changes.delta.dir, "flat");
-  assert.equal(flat.changes.mediaTo, 49);
-  assert.equal(mediaLine(flat.changes), fmtPct(49) + " · sin cambio");
+  assert.equal(flat.changes.mediaTo, 49.2);
+  assert.equal(mediaLine(flat.changes), fmtPct(49.2) + " · sin cambio");
   assert.equal(mediaLine(flat.changes).includes("→"), false);
-  assert.equal(mediaLine(flat.changes).split(fmtPct(49)).length - 1, 1);
+  assert.equal(mediaLine(flat.changes).split(fmtPct(49.2)).length - 1, 1);
   const moved = structuredClone(base);
   moved.timestamp = base.timestamp + 80;
   const wall = moved.buildings.find((b) => b.data === 1000010);
@@ -1719,7 +1733,7 @@ test("2.0.0: la copia fusiona por tag y fecha y no borra lo que solo está en el
     now: noon,
   });
   assert.equal(file.app, "clash-progreso");
-  assert.equal(file.version, "2.1.3");
+  assert.equal(file.version, "2.1.4");
   const merged = mergeBackup({ accounts: localAccounts, exports: localExports }, file);
   const a = merged.accounts.find((x) => x.tag === "#A");
   assert.equal(a.alias, "Mia");
@@ -1834,40 +1848,61 @@ test("2.1.0: la imagen es la del nivel y, si no hay, el PNG del edificio sin mar
   assert.equal(hall.marca, null);
 });
 
-test("2.1.0: los 8 niveles inferiores llevan la marca y el resto no", () => {
-  const found = [];
+test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más cercano", () => {
+  let borrowed = 0;
   for (const item of Object.values(manifest.items)) {
     for (const [lvl, im] of Object.entries(item.imagenes_por_nivel || {})) {
       if (!im.es_inferior) {
         assert.equal(im.marca, null, item.id + " " + lvl);
+        assert.equal(im.nivel_mostrado, Number(lvl), item.id + " " + lvl);
         assert.equal(imageChoice(item, lvl).marca, null);
         continue;
       }
+      borrowed += 1;
       const text = `Imagen del nivel ${im.nivel_mostrado} (no hay oficial del ${lvl})`;
-      assert.equal(im.marca, text);
+      assert.equal(im.marca, text, item.id + " " + lvl);
       assert.equal(imageChoice(item, lvl).marca, text);
       assert.equal(imageChoice(item, lvl).im.ruta, im.ruta);
-      found.push(item.id + ":" + lvl);
+      const own = item.imagenes_por_nivel[String(im.nivel_mostrado)];
+      assert.ok(own && own.es_inferior === false, item.id + " muestra " + im.nivel_mostrado);
+      assert.equal(own.ruta, im.ruta, item.id + " " + lvl);
     }
   }
-  assert.deepEqual(found.sort(), [
-    "1000020:8",
-    "1000021:12",
-    "1000026:13",
-    "1000029:8",
-    "1000067:6",
-    "1000070:10",
-    "1000072:4",
-    "1000077:5",
-  ]);
+  assert.equal(borrowed, 268);
+  assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].marca, "Imagen del nivel 11 (no hay oficial del 12)");
+  assert.equal(manifest.items["1000021"].imagenes_por_nivel["11"].es_inferior, false);
+  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].marca, "Imagen del nivel 7 (no hay oficial del 8)");
+  assert.equal(manifest.items["1000067"].imagenes_por_nivel["6"].marca, "Imagen del nivel 5 (no hay oficial del 6)");
+  assert.equal(manifest.items["1000077"].imagenes_por_nivel["5"].marca, "Imagen del nivel 4 (no hay oficial del 5)");
+  assert.equal(manifest.items["1000001"].imagenes_por_nivel["1"].marca, "Imagen del nivel 11 (no hay oficial del 1)");
+  assert.equal(manifest.items["1000001"].imagenes_por_nivel["18"].es_inferior, false);
+  assert.equal(manifest.items["1000010"].imagenes_por_nivel["19"].marca, "Imagen del nivel 18 (no hay oficial del 19)");
+  assert.equal(manifest.items["1000008"].imagenes_por_nivel["21"].es_inferior, false);
+  assert.equal(manifest.items["1000015"].imagenes_por_nivel["1"].marca, "Imagen del nivel 6 (no hay oficial del 1)");
+  for (const id of ["1000079", "1000102"]) {
+    const item = manifest.items[id];
+    assert.equal(item.imagen, null, id);
+    assert.equal(item.imagenes_por_nivel, undefined, id);
+    assert.equal(item.estado, "faltante", id);
+  }
+  assert.equal(manifest.items["1000086"].imagenes_por_nivel["2"].es_inferior, false);
+  assert.equal(manifest.items["1000086"].imagenes_por_nivel["1"].marca, "Imagen del nivel 2 (no hay oficial del 1)");
+  assert.equal(manifest.items["12000020"].imagenes_por_nivel["1"].es_inferior, false);
+  assert.equal(manifest.items["12000020"].imagenes_por_nivel["4"].marca, "Imagen del nivel 1 (no hay oficial del 4)");
+  assert.equal(manifest.items["107000001"].imagenes_por_nivel["1"].es_inferior, false);
+  assert.equal(manifest.items["107000001"].imagenes_por_nivel["3"].marca, "Imagen del nivel 1 (no hay oficial del 3)");
+  assert.equal(manifest.items["107000000"].imagenes_por_nivel, undefined);
+  assert.equal(manifest.items["102000033"].nombre, "Vela incandescente (Hitpoints)");
+  assert.equal(manifest.items["102000041"].nombre, "Catapulta explosiva (Explosion Damage)");
+  assert.equal(manifest.items["90000060"].nombre, "Mazo de la venganza");
+  assert.equal(manifest.items["90000061"].estado, "sin_identificar");
 });
 
-test("2.1.0: sin entrada de nivel se usa el PNG base; los guardianes no tienen imagen de nivel", () => {
+test("2.1.0: sin entrada de nivel se usa el PNG base; Tiradora no tiene niveles publicados", () => {
   const hut = manifest.items["1000015"];
-  assert.equal(hut.imagenes_por_nivel["1"], undefined);
   const choice = imageChoice(hut, 1);
-  assert.equal(choice.im.ruta, hut.imagen.ruta);
-  assert.equal(choice.marca, null);
+  assert.equal(choice.im.ruta, hut.imagenes_por_nivel["6"].ruta);
+  assert.equal(choice.marca, "Imagen del nivel 6 (no hay oficial del 1)");
   assert.equal(choice.fallback, null);
   const sample = {
     imagen: { ruta: "images/defenses/cannon.png", bytes: 10, pesado: false },
@@ -1883,7 +1918,7 @@ test("2.1.0: sin entrada de nivel se usa el PNG base; los guardianes no tienen i
   assert.equal(miss.im.ruta, "images/defenses/cannon.png");
   assert.equal(miss.fallback, null);
   assert.equal(miss.marca, null);
-  for (const id of ["107000000", "107000001", "107000008"]) {
+  for (const id of ["107000000"]) {
     const item = manifest.items[id];
     assert.equal(item.imagenes_por_nivel, undefined, id);
     assert.equal(item.imagen.precarga, false, id);
@@ -1931,38 +1966,33 @@ test("2.1.2: ninguna miniatura recorta ni escala por encima del tamaño natural"
   assert.equal(tiny.dh, 18);
 });
 
-test("2.1.3: el margen transparente solo se recorta si el dibujo no llega al 70 %", () => {
+test("2.1.4: el dibujo ocupa el 85 % del lado, con tope 1,5× y sin object-view-box", () => {
   const css = readFileSync(new URL("../css/components.css", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(css, /object-view-box:\s*xywh\(/);
-  assert.match(app, /ajusteOf\(im, size/);
-  assert.match(app, /is-ajuste/);
+  assert.equal(css.includes("object-view-box"), false);
+  assert.match(css, /\.thumb\.is-ajuste > img \{[^}]*position:\s*absolute/);
+  assert.match(css, /left:\s*calc\(var\(--x\)/);
+  assert.match(css, /top:\s*calc\(var\(--y\)/);
+  assert.match(app, /--dw:/);
+  assert.equal(app.includes("--vw:"), false);
+  assert.equal(app.includes("object-view-box"), false);
   const tesla = manifest.items["1000019"].imagenes_por_nivel["10"];
   const caja = cajaAlfa(tesla);
   assert.deepEqual(caja, { x: 108, y: 90, w: 74, h: 111 });
   const aj = ajusteOf(tesla, 40);
-  const contain = containOf(tesla, 40);
   const largo = Math.max(caja.w, caja.h);
-  assert.ok(largo * contain.escala / 40 < DRAW_MIN);
-  const escala = Math.min((DRAW_TARGET * 40) / largo, 1 / DEVICE_SCALE);
+  const escala = Math.min((DRAW_TARGET * 40) / largo, UPSCALE_MAX / DEVICE_SCALE);
   assert.equal(aj.escala, escala);
-  assert.ok(aj.escala <= 1 / DEVICE_SCALE + 1e-12);
-  assert.ok(largo * aj.escala * DEVICE_SCALE <= largo + 1e-6);
-  assert.ok(Math.abs(aj.vw / caja.w - aj.vh / caja.h) < 1e-12);
-  assert.equal(aj.x, caja.x);
-  assert.equal(aj.y, caja.y);
-  assert.equal(aj.w, caja.w);
-  assert.equal(aj.h, caja.h);
-  assert.ok(aj.vw <= 40 && aj.vh <= 40);
-  assert.equal(ajusteOf(manifest.items["107000001"].imagen, 40), null, "Destructor");
-  assert.equal(ajusteOf(manifest.items["1000089"].imagen, 40), null, "Escupellamas base");
-  const escupella = manifest.items["1000089"];
-  const nv1 = escupella.imagenes_por_nivel && escupella.imagenes_por_nivel["1"];
-  if (nv1) assert.equal(ajusteOf(nv1, 40), null, "Escupellamas nv1");
-  assert.ok(ajusteOf(manifest.items["107000000"].imagen, 40), "Tiradora está bajo el 70 %");
-  assert.equal(ajusteOf(manifest.items["1000019"].imagen, 40), null, "Hidden Tesla base llena la caja");
+  assert.ok(aj.escala <= UPSCALE_MAX / DEVICE_SCALE + 1e-12);
+  assert.ok(largo * aj.escala <= DRAW_TARGET * 40 + 1e-6);
+  assert.ok(tesla.ancho * aj.escala * DEVICE_SCALE <= tesla.ancho * UPSCALE_MAX + 1e-6);
+  assert.ok(Math.abs(aj.dw / tesla.ancho - aj.dh / tesla.alto) < 1e-12);
+  assert.ok(Math.abs(aj.left + (caja.x + caja.w / 2) * aj.escala - 20) < 1e-9);
+  assert.ok(Math.abs(aj.top + (caja.y + caja.h / 2) * aj.escala - 20) < 1e-9);
+  assert.ok(ajusteOf(manifest.items["107000001"].imagen, 40), "Destructor también se encuadra");
+  assert.ok(ajusteOf(manifest.items["1000089"].imagen, 40), "Escupellamas también se encuadra");
   const sizes = [22, 28, 40, 44, 52, 72, 96];
-  let changed = 0;
+  let seen = 0;
   for (const item of Object.values(manifest.items)) {
     const images = [item.imagen, ...Object.values(item.imagenes_por_nivel || {})].filter(Boolean);
     for (const im of images) {
@@ -1970,29 +2000,22 @@ test("2.1.3: el margen transparente solo se recorta si el dibujo no llega al 70 
       assert.ok(box, im.ruta);
       assert.ok(box.x >= 0 && box.y >= 0 && box.x + box.w <= im.ancho && box.y + box.h <= im.alto, im.ruta);
       for (const size of sizes) {
-        const pad = size === 22 ? 1 : null;
-        const opts = pad == null ? {} : { pad };
-        const fit = ajusteOf(im, size, opts);
-        const base = containOf(im, size, opts);
-        const dibujo = Math.max(box.w, box.h) * base.escala;
-        if (!fit) {
-          assert.ok(dibujo / size >= DRAW_MIN - 1e-9 || Math.min((DRAW_TARGET * size) / Math.max(box.w, box.h), 1 / DEVICE_SCALE) <= base.escala + 1e-12, im.ruta);
-          continue;
-        }
-        changed += 1;
-        assert.ok(dibujo / size < DRAW_MIN, im.ruta);
-        assert.ok(fit.escala > base.escala, im.ruta);
-        assert.ok(fit.escala <= 1 / DEVICE_SCALE + 1e-12, im.ruta);
-        assert.ok(box.w * fit.escala * DEVICE_SCALE <= box.w + 1e-6, im.ruta);
-        assert.ok(box.h * fit.escala * DEVICE_SCALE <= box.h + 1e-6, im.ruta);
-        assert.ok(Math.max(fit.vw, fit.vh) <= DRAW_TARGET * size + 1e-6, im.ruta);
-        assert.ok(Math.abs(fit.vw / box.w - fit.vh / box.h) < 1e-12, im.ruta);
-        const mismo = ajusteOf(im, size, { ...opts, caja: { ...box } });
-        assert.deepEqual(mismo, fit);
+        const fit = ajusteOf(im, size);
+        assert.ok(fit, im.ruta + " " + size);
+        seen += 1;
+        assert.ok(fit.escala <= UPSCALE_MAX / DEVICE_SCALE + 1e-12, im.ruta);
+        assert.ok(im.ancho * fit.escala * DEVICE_SCALE <= im.ancho * UPSCALE_MAX + 1e-6, im.ruta);
+        assert.ok(im.alto * fit.escala * DEVICE_SCALE <= im.alto * UPSCALE_MAX + 1e-6, im.ruta);
+        assert.ok(Math.abs(fit.dw / im.ancho - fit.dh / im.alto) < 1e-12, im.ruta);
+        const dibujo = Math.max(box.w, box.h) * fit.escala;
+        const objetivo = Math.min(DRAW_TARGET * size, Math.max(box.w, box.h) * (UPSCALE_MAX / DEVICE_SCALE));
+        assert.ok(Math.abs(dibujo - objetivo) < 1e-6, im.ruta + " " + size);
+        assert.ok(Math.abs(fit.left + (box.x + box.w / 2) * fit.escala - size / 2) < 1e-6, im.ruta);
+        assert.ok(Math.abs(fit.top + (box.y + box.h / 2) * fit.escala - size / 2) < 1e-6, im.ruta);
       }
     }
   }
-  assert.ok(changed > 0);
+  assert.ok(seen > 0);
 });
 
 test("2.1.1: el aviso de Supercell está solo en Copia, apartado Acerca de", () => {

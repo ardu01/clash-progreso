@@ -2051,3 +2051,11 @@ Si el dibujo (bbox de alfa > 0, en `assets/cajas-alfa.json`) ocupa menos del 70 
 La interfaz ya no muestra «ID deducido» (insignia, etiqueta de equipamiento, aria-label ni nota de ficha). El `estado` del manifiesto sigue siendo `id_deducido`.
 
 El aviso de la Fan Content Policy ya no va al pie de cada vista ni de cada hoja. Está una sola vez, completo y en cuerpo, en Copia → Acerca de, junto a la versión (§5.14).
+
+## Nota de cambios (10 oct 2026, 2.1.4)
+
+`APP_VERSION` es `2.1.4`, `SHELL_CACHE` es `cp-shell-v16` e `IMAGE_CACHE` sigue en `cp-img-v5`: no se añaden PNG.
+
+Safari iOS no aplica `object-view-box`, así que el encuadre pasa a un `<img>` absoluto dentro de `.thumb` (`overflow: hidden`). El lado largo del dibujo (alfa > 0) queda al 85 % del lado de la miniatura, centrado, sin estirar. El tope es 1,5 px de bitmap por px físico a escala 3 (`s ≤ 0,5`). Vale para todas las miniaturas, también las que ya pasaban del 70 %.
+
+Los módulos 102000033–102000041 quedan con nombre (vela incandescente, cazahéroes, catapulta explosiva) y siguen sin PNG oficial. Cada nivel de estructura que existe en el juego tiene entrada en `imagenes_por_nivel`: la oficial, o la del nivel más cercano con la marca «Imagen del nivel N (no hay oficial del M)». Destructor y Logger (niveles 1–5 en clash-of-clans-data 0.18.0) usan el PNG cuyo título del Fan Kit es `_01` en el nivel 1 y ese mismo archivo en los niveles 2–5. Tiradora no entra en ese relleno: `longshot.json` de ese paquete no se pudo leer y no se inventan sus niveles. Torre multiusos y Torre de supermagos siguen sin ningún PNG de aldea principal.

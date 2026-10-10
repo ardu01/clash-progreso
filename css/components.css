@@ -63,21 +63,22 @@ li + li > .row::before {
   min-width: 0; min-height: 0;
   display: block;
 }
-/* Solo si el dibujo queda bajo el 70 % del lado: object-view-box recorta el margen, no el dibujo. */
-@supports (object-view-box: xywh(0 0 1px 1px)) {
-  .thumb.is-ajuste > img {
-    width: calc(var(--vw) * 1px);
-    height: calc(var(--vh) * 1px);
-    max-width: none; max-height: none;
-    object-fit: contain; object-position: center;
-    object-view-box: xywh(calc(var(--bx) * 1px) calc(var(--by) * 1px) calc(var(--bw) * 1px) calc(var(--bh) * 1px));
-  }
-}
 .thumb--40 { --size: 40px; }
 .thumb--44 { --size: 44px; }
 .thumb--52 { --size: 52px; }
 .thumb--72 { --size: 72px; }
 .thumb--96 { --size: 96px; }
+/* Safari iOS 16+: el dibujo (bbox de alfa) queda al 85 % del lado. overflow del .thumb recorta solo margen. */
+.thumb.is-ajuste > img {
+  position: absolute;
+  width: calc(var(--dw) * 1px);
+  height: calc(var(--dh) * 1px);
+  max-width: none;
+  max-height: none;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  object-fit: fill;
+}
 .thumb--tile { background: transparent; padding: 0; overflow: hidden; }
 .ficha-marca { text-align: center; margin: 8px 0 0; }
 .thumb--empty {
