@@ -63,6 +63,10 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
 
+| Estrategias | Resultado | Estrategias en claro |
+| --- | --- | --- |
+| <img src="docs/capturas/411-estrategias-oscuro.png" width="200" alt="Explorar estrategias en oscuro, con horizonte y minutos al día"> | <img src="docs/capturas/411-resultado-oscuro.png" width="200" alt="Resultado en oscuro: plan actual y estrategias con fechas probable, mejor y peor"> | <img src="docs/capturas/411-estrategias-claro.png" width="200" alt="Explorar estrategias con el tema claro"> |
+
 | Motor de atención | Bandeja | Detector |
 | --- | --- | --- |
 | <img src="docs/capturas/410-motor-oscuro.png" width="200" alt="Inicio en oscuro: la tarjeta del motor de atención, con siete botones"> | <img src="docs/capturas/410-bandeja-oscuro.png" width="200" alt="Bandeja en oscuro: cuentas que piden intervención"> | <img src="docs/capturas/410-detector-oscuro.png" width="200" alt="Detector en oscuro: categorías por debajo del peso, sin los héroes de C1"> |
