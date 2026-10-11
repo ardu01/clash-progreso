@@ -41,6 +41,9 @@ import { docDe, docVacio, entradaDeImportacion, reducir, sumarDiario } from "./o
 import { avisoTrasImportar } from "./replan.js";
 import { SUEÑO_DEFECTO } from "./prioridades.js";
 import { htmlOperaciones } from "./ui-operaciones.js";
+import { htmlAtencion, htmlMotor } from "./ui-atencion.js";
+import { htmlEstrategias } from "./ui-evolucion.js";
+import { empaquetarCuentas, empezarExploracion, pararExploracion } from "./evolucion/control.js";
 import { cargarFuentes, costeSubirTh } from "./fuentes.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
@@ -83,6 +86,9 @@ const state = {
   seg: {},
   mejorasMode: ["plan", "costes", "equipo"].includes(localStorage.getItem("cp-mejoras")) ? localStorage.getItem("cp-mejoras") : "plan",
   evo: localStorage.getItem("cp-evo") || "roster",
+  estrategiasCfg: { horizonte: 90, presupuesto: 90 },
+  estrategiasEstado: "Sin buscar. Simulación.",
+  estrategiasResultado: null,
   sortMode: localStorage.getItem("cp-sort") || "th",
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
   accounts: [],
@@ -237,6 +243,11 @@ function route() {
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
   if (name === "perfil") return { name: "perfil", tag: parts[1] ? "#" + parts[1] : null, cat: null };
   if (name === "operaciones") return { name: "operaciones", tag: null, cat: null, sub: parts[1] || "hub" };
+  if ((name === "inicio" && (parts[1] === "bandeja" || parts[1] === "excepciones"))
+    || (name === "agenda" && (parts[1] === "presupuesto" || parts[1] === "ventanas"))
+    || (name === "roster" && (parts[1] === "hibernar" || parts[1] === "detector" || parts[1] === "rescate"))) {
+    return { name, tag: null, cat: null, sub: parts[1] };
+  }
   if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
@@ -1237,6 +1248,7 @@ function renderInicio() {
     <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
+    ${htmlMotor()}
     <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
     <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
     <div class="section">${sectionHead("Abrir hoy", abrirInfo)}${hoyBlock}</div>
@@ -2286,8 +2298,17 @@ function navbar(r) {
   let trail = "";
   let title = titles[r.name] || "";
   let collapsed = "false";
-  if (r.name === "inicio") {
+  if (r.name === "inicio" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
+    collapsed = "true";
+  } else if (r.name === "inicio") {
     trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
+  } else if (r.name === "agenda" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
+    collapsed = "true";
+  } else if (r.name === "roster" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    collapsed = "true";
   } else if (r.name === "copia" || r.name === "ahora" || r.name === "actualizar") {
     lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
@@ -4393,7 +4414,9 @@ function screenFor(r) {
   if (!state.ready) {
     return `<h1 class="large-title">Clash Progreso</h1><div class="section"><div class="card"><div class="sk sk--line"></div></div></div>`;
   }
+  if (r.name === "inicio" && r.sub) return renderAtencion(r);
   if (r.name === "inicio") return renderInicio();
+  if (r.name === "roster" && r.sub) return renderAtencion(r);
   if (r.name === "roster" || r.name === "ajustes" || r.name === "importar") return renderRoster();
   if (r.name === "progreso") return renderProgreso(r.tag || state.selected);
   if (r.name === "detalle") return renderDetalle(r.tag, r.cat);
@@ -4402,12 +4425,15 @@ function screenFor(r) {
   if (r.name === "copia") return renderCopia();
   if (r.name === "ahora") return renderAhora();
   if (r.name === "ranking") return renderRanking();
+  if (r.name === "agenda" && r.sub) return renderAtencion(r);
   if (r.name === "agenda") return renderAgenda();
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
   if (r.name === "actualizar") return renderActualizar();
+  if (r.name === "operaciones" && r.sub === "estrategias") return renderEstrategias();
+  if (r.name === "operaciones" && (r.sub === "prioridades" || r.sub === "rescate")) return renderAtencion(r);
   if (r.name === "operaciones") return renderOperaciones(r);
   return renderInicio();
 }
@@ -4917,6 +4943,32 @@ function bind(r) {
   try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const evoChip = origen.closest("[data-evo]");
+    if (evoChip) {
+      ev.preventDefault();
+      const clave = evoChip.dataset.evo;
+      state.estrategiasCfg = { ...state.estrategiasCfg, [clave]: Number(evoChip.dataset.arg) };
+      render();
+      return;
+    }
+    if (origen.closest("[data-evo-empezar]")) {
+      ev.preventDefault();
+      lanzarEstrategias();
+      return;
+    }
+    if (origen.closest("[data-evo-parar]")) {
+      ev.preventDefault();
+      pararExploracion();
+      state.estrategiasEstado = "Parada. Simulación.";
+      render();
+      return;
+    }
+    const adoptar = origen.closest("[data-evo-adoptar]");
+    if (adoptar) {
+      ev.preventDefault();
+      adoptarEstrategia(adoptar.dataset.evoAdoptar);
+      return;
+    }
     const op = origen.closest("[data-op]");
     if (op) {
       ev.preventDefault();
@@ -5713,6 +5765,89 @@ function fichasOperacion() {
   });
 }
 
+function renderEstrategias() {
+  return htmlEstrategias({
+    cfg: state.estrategiasCfg,
+    estado: state.estrategiasEstado,
+    resultado: state.estrategiasResultado,
+  });
+}
+
+function lanzarEstrategias() {
+  state.estrategiasEstado = "Buscando… Simulación.";
+  const nodo = document.querySelector("[data-evo-estado]");
+  if (nodo) nodo.textContent = state.estrategiasEstado;
+  const cfg = state.estrategiasCfg;
+  setTimeout(() => {
+    if (route().name !== "operaciones" || route().sub !== "estrategias") return;
+    const packs = empaquetarCuentas(allAccounts().map((meta) => ({
+      exp: expOf(meta.tag),
+      tag: meta.tag,
+      plan: state.planes[meta.tag] || null,
+      provisionals: state.provisionales,
+    })), state.index, state.now);
+    state.estrategiasCuentas = allAccounts().map((meta) => meta.tag);
+    empezarExploracion({
+      packs,
+      ahora: state.now,
+      horizonte: cfg.horizonte,
+      presupuesto: cfg.presupuesto,
+      semilla: 41011,
+      topeEval: 20000,
+      maxMs: 120000,
+    }, (msg) => {
+      if (route().name !== "operaciones" || route().sub !== "estrategias") return;
+      if (msg.tipo === "progreso") {
+        const vivo = document.querySelector("[data-evo-estado]");
+        if (vivo) vivo.textContent = `Generación ${msg.generacion}. Simulación.`;
+        return;
+      }
+      if (msg.tipo === "fin") {
+        state.estrategiasResultado = msg.resultado;
+        state.estrategiasEstado = "Lista. Simulación.";
+        render();
+        return;
+      }
+      if (msg.tipo === "error") {
+        state.estrategiasEstado = "No se pudo buscar.";
+        render();
+      }
+    });
+  }, 0);
+}
+
+function adoptarEstrategia(id) {
+  const res = state.estrategiasResultado;
+  const est = res && (res.estrategias || []).find((item) => item.id === id);
+  const tags = state.estrategiasCuentas || [];
+  if (!est) return;
+  for (let k = 0; k < est.orden.length; k += 1) {
+    const idx = est.orden[k];
+    const tag = tags[idx];
+    if (!tag) continue;
+    const pesos = est.pesos[idx] || [];
+    setAccountPlan(tag, {
+      modo: "maxear",
+      heroes: tag === HEROES_FUERA ? false : pesos[2] >= 0.5,
+      ataque: pesos[0] >= 0.5 || pesos[1] >= 0.5,
+      defensa: pesos[3] >= 0.5 || pesos[4] >= 0.5,
+      muros: pesos[6] >= 0.5,
+    });
+  }
+  showToast("ok", "El plan recoge la estrategia.");
+  render();
+}
+
+function renderAtencion(r) {
+  return htmlAtencion({
+    sub: r.sub,
+    now: state.now,
+    sueno: state.sleep,
+    cuentas: fichasOperacion(),
+    doc: docOp(),
+  });
+}
+
 function renderOperaciones(r) {
   return htmlOperaciones({
     sub: r.sub || "hub",
@@ -5727,6 +5862,11 @@ function aplicarOperacion(op, arg) {
   if (op === "nota") {
     const campo = document.querySelector("[data-op-nota]");
     valor = campo ? campo.value : "";
+  }
+  if (op === "hibernar" && String(arg).startsWith("custom|")) {
+    const campo = document.querySelector("[data-op-dias]");
+    const n = Math.round(Number(campo && campo.value));
+    valor = (n > 0 && n <= 365 ? String(n) : "0") + arg.slice("custom".length);
   }
   const cuentas = fichasOperacion();
   const foco = cuentas.find((cuenta) => cuenta.tag === docOp().tagFoco) || cuentas[0];

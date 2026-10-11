@@ -165,7 +165,8 @@ test("4.0: el diario no afirma la hora y reducir no escribe la exportación", ()
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.equal(app.includes("cuello de botella"), false);
   const store = readFileSync(new URL("../js/store.js", import.meta.url), "utf8");
-  assert.match(store, /indexedDB\.open\(DB, 3\)/);
+  assert.match(store, /indexedDB\.open\(DB, 4\)/);
+  assert.match(store, /evolucion/);
   assert.match(store, /documentos/);
   assert.match(store, /recuperacion/);
   assert.equal(store.includes("deleteDatabase"), false);

@@ -720,7 +720,8 @@ function bagOf(steps) {
   return total;
 }
 
-export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }) {
+/** Pasos del plan, ya filtrados y ordenados, y las colas antes de colocarlos. */
+export function compilarPasos({ exp, index, tag, plan, provisionals, now }) {
   const chosen = effectivePlan(plan);
   const nowMs = now || Date.now();
   const { steps, goal, current, filas, sugerencias } = collectSteps(exp, index, chosen, tag);
@@ -749,48 +750,66 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
       if (lane.cola === "constructor" && lane.libreYa && lane.clase === "real") lane.clase = "ajuste";
     }
   }
+  return {
+    tag,
+    chosen,
+    nowMs,
+    steps,
+    pasos: filtered.kept,
+    sinTiempo: filtered.sinTiempo,
+    goal,
+    current,
+    filas,
+    sugerencias,
+    lanes,
+    avisoHora,
+    conocidos,
+    info,
+    heroesFuera: tag === HEROES_FUERA,
+  };
+}
+
+export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }) {
+  const c = compilarPasos({ exp, index, tag, plan, provisionals, now });
   let rush = null;
-  if (chosen.modo === "rushear") {
-    const resumen = programar(steps.slice().sort(byRank), lanes.map((lane) => ({ ...lane })), sleep, nowMs);
+  if (c.chosen.modo === "rushear") {
+    const resumen = programar(c.steps.slice().sort(byRank), c.lanes.map((lane) => ({ ...lane })), sleep, c.nowMs);
     rush = {
-      modo: chosen.rush,
-      filas: filas || [],
-      sugerencias: sugerencias || [],
+      modo: c.chosen.rush,
+      filas: c.filas || [],
+      sugerencias: c.sugerencias || [],
       coste: resumen.coste,
       trabajoSeg: resumen.trabajoSeg,
       calendarioSeg: resumen.calendarioSeg,
       fin: resumen.fin,
-      nota: chosen.rush === "estrategico" ? ESTRATEGICO_NOTA : ESENCIAL_NOTA,
+      nota: c.chosen.rush === "estrategico" ? ESTRATEGICO_NOTA : ESENCIAL_NOTA,
     };
   }
-  const cursor = new Map();
-  const orden = filtered.kept.map((step) => placeStep(step, lanes, sleep, nowMs, cursor));
-  const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
-  const tiempos = tiemposConstructor(orden);
+  const placed = programar(c.pasos, c.lanes, sleep, c.nowMs);
   return {
     tag,
-    plan: chosen,
+    plan: c.chosen,
     configured: planIsConfigured(plan),
-    currentTh: current,
-    targetTh: goal.target,
-    capTh: goal.capTh,
-    lanes,
-    orden,
-    sinTiempo: filtered.sinTiempo,
-    coste: bagOf(orden),
-    avisoHora,
-    conocidos: info ? info.origen === "json" : conocidos,
-    constructores: info,
-    trabajoSeg: tiempos.trabajoSeg,
-    calendarioSeg: tiempos.calendarioSeg,
-    heroesFuera: tag === HEROES_FUERA,
-    fin: lastFin || null,
-    now: nowMs,
+    currentTh: c.current,
+    targetTh: c.goal.target,
+    capTh: c.goal.capTh,
+    lanes: c.lanes,
+    orden: placed.orden,
+    sinTiempo: c.sinTiempo,
+    coste: placed.coste,
+    avisoHora: c.avisoHora,
+    conocidos: c.info ? c.info.origen === "json" : c.conocidos,
+    constructores: c.info,
+    trabajoSeg: placed.trabajoSeg,
+    calendarioSeg: placed.calendarioSeg,
+    heroesFuera: c.heroesFuera,
+    fin: placed.fin,
+    now: c.nowMs,
     rush,
   };
 }
 
-function programar(steps, lanes, sleep, now) {
+export function programar(steps, lanes, sleep, now) {
   const cursor = new Map();
   const orden = steps.map((step) => placeStep(step, lanes, sleep, now, cursor));
   const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
