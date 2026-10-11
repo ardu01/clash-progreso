@@ -1,3 +1,32 @@
+# Huecos del Fan Kit (4.1.4, 11 oct 2026)
+
+Búsqueda en el Fan Kit de Clash of Clans, tablero Game assets, el 11 oct 2026. Solo se publica un PNG cuyo título es ese nivel de la aldea principal. Si no está, el nivel sigue con la imagen de otro nivel y queda en esta lista.
+
+## Niveles que siguen con la imagen de otro nivel
+
+| ID | Nombre | Nivel | Imagen que se muestra | Qué se buscó |
+|---|---|---|---|---|
+| 1000070 | Herrería | 10 | nivel 9, `Building_HV_Blacksmith_level_9` | No hay `Building_HV_Blacksmith_level_10`. `Building_HV_Blacksmith_1`, `_2` y `_3` no llevan número de nivel. |
+| 12000000 | Bomba | 12 | nivel 11, `Building_HV_Bomb_level_11` | No hay un archivo del 12. El Fan Kit tiene pares y el 11, y luego `13&14`. |
+| 12000005 | Bomba aérea | 12 | nivel 11, `Building_HV_Air_Bomb_level_11` | No hay un archivo del 12. Hay pares y el 11. |
+| 107000001 | Destructor | 5 | nivel 1, `guardian_smasher_01` | Hay `guardian_smasher_02`, `_03` y `_04`. No hay `_05`. |
+
+Los otros 31 niveles que usaban la imagen de otro nivel pasan en la 4.1.4 a su PNG del Fan Kit. La mina de rastreo aéreo 5 y 6 comparten `Building_HV_Seeking_Air_Mine_level_5&6`, que es el archivo oficial de esos dos niveles.
+
+## Sin PNG de aldea principal en el Fan Kit
+
+| ID | Nombre | Qué se buscó |
+|---|---|---|
+| 1000079 | Torre multiusos | `Multi-Gear`, `Multi_Gear` y «multi gear». Solo aparecen `CAT_cannon_multi_gear_lvl3` y `CAT_archer_multi_gear_lvl3`, que son otros edificios. |
+| 1000097 | Defensa artesanal | `Crafting` y `Crafting Station`. Cero resultados. |
+| 90000061 | Portal portátil | `Portal Pendant` y `Portal_Pendant`. Cero resultados. |
+
+Siguen en estado faltante. No se añade arte de fuera del Fan Kit.
+
+## Inventario del 7 y 8 oct 2026
+
+El texto que sigue es el inventario de esas fechas. No describe el manifiesto de la 4.1.4.
+
 # Ítems sin imagen oficial
 
 Generado por `tools/build.py` (2026-10-07) y actualizado por `tools/build_v1.3.py` (set v1.3, 2026-10-08) a partir de las 11 exportaciones `/workspace/coc/*_2026-10-07.json`. Total: **25** ítems: **4 faltantes** (ítem identificado sin imagen oficial) y **21 sin identificar** (ID sin nombre verificable).

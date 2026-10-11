@@ -172,10 +172,13 @@ test("4.0: el diario no afirma la hora y reducir no escribe la exportación", ()
   assert.equal(store.includes("deleteDatabase"), false);
 });
 
-test("4.0: sin los módulos de la 3.1.17 no se inventan recursos ni el coste del ayuntamiento", async () => {
+test("4.1.3: el coste del ayuntamiento sale del módulo y no se inventa el oro", async () => {
   await cargarFuentes();
   assert.equal(hayRecursosManuales(), false);
-  assert.equal(hayCosteTh(), false);
   assert.equal(recursosDe("#A"), null);
-  assert.equal(costeSubirTh(15), null);
+  assert.equal(hayCosteTh(), true);
+  const coste = costeSubirTh(15);
+  assert.equal(coste.oro, 13000000);
+  assert.equal(coste.segundos, 691200);
+  assert.equal(costeSubirTh(1), null);
 });

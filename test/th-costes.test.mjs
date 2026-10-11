@@ -1,0 +1,31 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+import { TH_FUENTE, TH_URL, costeTh, costeThRango } from "../js/th-costes.js";
+
+test("el coste del ayuntamiento cita clash-of-clans-data y suma TH2 a TH18", () => {
+  assert.match(TH_FUENTE, /clash-of-clans-data 0\.18\.0/);
+  assert.match(TH_FUENTE, /town-hall\.json/);
+  assert.match(TH_URL, /clash-of-clans-data/);
+  assert.equal(costeTh(1), null);
+  assert.equal(costeTh(19), null);
+  assert.equal(costeTh("17"), null);
+  const th2 = costeTh(2);
+  assert.equal(th2.oro, 1000);
+  assert.equal(th2.segundos, 10);
+  assert.equal(th2.elixir, 0);
+  const th17 = costeTh(17);
+  assert.equal(th17.oro, 16000000);
+  assert.equal(th17.segundos, 864000);
+  const th18 = costeTh(18);
+  assert.equal(th18.oro, 25000000);
+  assert.equal(th18.segundos, 1036800);
+  const rango = costeThRango(16, 18);
+  assert.equal(rango.oro, 16000000 + 25000000);
+  assert.equal(rango.segundos, 864000 + 1036800);
+  assert.deepEqual(costeThRango(18, 18), { oro: 0, elixir: 0, oscuro: 0, brillante: 0, glowy: 0, starry: 0, segundos: 0 });
+  assert.equal(costeThRango(18, 16), null);
+  const modulos = readFileSync(new URL("../js/th-costes.js", import.meta.url), "utf8");
+  assert.match(modulos, /chiefpansancolt\/clash-of-clans-data/);
+  assert.match(modulos, /v0\.18\.0\/data\/home\/town-hall\/town-hall\.json/);
+});
