@@ -98,7 +98,15 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 
 La barra tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no está en la barra. Está dentro de Agenda, y **Explorar estrategias** también: se abre desde esa misma entrada.
 
+El motor de atención multicuenta decide qué cuenta necesita intervención y cuándo. Vive en Inicio, Agenda y Cuentas: no añade una pestaña. Separa lo confirmado en la exportación, lo anotado a mano y lo estimado. No da por acabada una mejora porque un temporizador viejo haya llegado a cero, y no mueve los temporizadores.
+
 La entrada de Operaciones abre la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras, el diario, las plantillas, las prioridades y Explorar estrategias. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
+
+Cada pestaña sigue con un solo trabajo. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo, y desde ahí se abre Operaciones. Copia y el tema siguen en el engranaje de Inicio.
+
+En pantalla quedan títulos, cifras e iconos. Las explicaciones largas están en un ⓘ que se abre al tocar. Las tarjetas, las cabeceras, los filtros, las barras y las filas usan el mismo espaciado en toda la app, con el estilo Clash.
+
+Nada se ha quitado: lo que antes estaba mezclado sigue a un toque, en su pestaña. Rushear esencial y estratégico siguen en el plan de cada cuenta.
 
 Treinta y un niveles que mostraban el dibujo de otro nivel pasan al dibujo de ese nivel, sacado del Fan Kit. La herrería 10, la bomba 12, la bomba aérea 12 y el Destructor 5 siguen con el dibujo de otro nivel: el Fan Kit no tiene el suyo. La Torre multiusos, la Defensa artesanal y el Portal portátil tampoco tienen dibujo oficial de la aldea principal.
 
