@@ -18,7 +18,7 @@ import {
 } from "./roster.js";
 import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
-import { compareAccounts, fleetSnapshot, rankAccounts, whatNow } from "./fleet.js";
+import { compareAccounts, fleetSnapshot, rankAccounts } from "./fleet.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, equipmentPieces, piecesOf, remainingCost, usesResource } from "./costs.js";
@@ -165,9 +165,9 @@ function loadCompare() {
 }
 
 function route() {
-  const raw = (location.hash || "#/roster").replace(/^#\/?/, "");
+  const raw = (location.hash || "#/inicio").replace(/^#\/?/, "");
   const parts = raw.split("/").filter(Boolean);
-  let name = parts[0] || "roster";
+  let name = parts[0] || "inicio";
   if (name === "cuentas") name = "roster";
   if (name === "progreso" && parts[1] && parts[2] === "equipamiento") {
     return { name: "equipo", tag: "#" + parts[1], cat: null };
@@ -185,13 +185,25 @@ function route() {
 }
 
 function baseTab(r) {
-  if (r.name === "detalle" || r.name === "progreso" || r.name === "plan" || r.name === "historial" || r.name === "equipo") return "progreso";
-  if (r.name === "agenda") return "roster";
+  if (r.name === "inicio" || r.name === "ahora" || r.name === "copia") return "inicio";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
   if (r.name === "mejoras") return "mejoras";
-  if (r.name === "graficos" || r.name === "evolucion") return "graficos";
-  if (r.name === "copia") return "copia";
-  return "roster";
+  if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
+  if (r.name === "agenda" || r.name === "plan") return "agenda";
+  return "inicio";
 }
+
+const ICON = {
+  inicio: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 13 14 5l10 8"/><path d="M7 11v12h14V11"/><path d="M12 23v-6h4v6"/></svg>`,
+  cuentas: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="8" height="8" rx="2"/><rect x="16" y="5" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/></svg>`,
+  mejoras: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5"/><path d="M14 8.5V14l3.5 2.5"/></svg>`,
+  analisis: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`,
+  agenda: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="6" width="20" height="18" rx="3"/><path d="M4 11h20M9 3v5M19 3v5"/></svg>`,
+  ajustes: `<svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="14" cy="14" r="4"/><path d="M14 3v4M14 21v4M3 14h4M21 14h4M6.2 6.2l2.8 2.8M19 19l2.8 2.8M6.2 21.8 9 19M19 9l2.8-2.8"/></svg>`,
+  choza: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 14 14 5l11 9"/><path d="M6 12v11h16V12"/><path d="M11 23v-5h6v5"/></svg>`,
+  objetivo: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5.5"/><circle cx="14" cy="14" r="1.5"/></svg>`,
+};
+const BACK = `<svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 const ADDED_KEY = "cp-added";
 
@@ -534,6 +546,11 @@ function barHtml(catKey, pctVal, mark, opts) {
     ? ` aria-hidden="true"`
     : ` role="img" aria-label="${esc(opts.label || "")}"`;
   return `<div class="${cls.join(" ")}" style="${style.join(";")}"${empty}${a11y}><span class="bar__fill"></span>${markEl}</div>`;
+}
+
+function meterHtml(pct, label) {
+  if (pct == null) return "";
+  return `<span class="meter">${barHtml("defensas", pct, null, { plain: true, label })}<b class="meter__val num" aria-hidden="true">${fmtPct(pct)}</b></span>`;
 }
 
 function rowTitle(name, extras) {
@@ -913,6 +930,201 @@ function pasoAhora(paso) {
   return `${paso.titulo} libre · ${paso.title} ${nv}${when}${mark}`;
 }
 
+function prioridadDe(meta) {
+  const road = accountRoadmap(meta);
+  const vacio = { meta, road, when: null, exact: false, lane: null, step: null, tier: 3, sortWhen: Infinity, libreYa: false };
+  if (!road) return vacio;
+  let best = null;
+  for (const lane of road.lanes || []) {
+    if (lane.cola !== "constructor" && lane.cola !== "laboratorio" && lane.cola !== "mascotas") continue;
+    const step = (road.orden || []).find((s) => s.laneId === lane.id);
+    if (!step) continue;
+    const sinHora = !!lane.blocked || !!step.sinHora;
+    const when = lane.libreYa ? road.now : (sinHora ? null : lane.freeAt);
+    const tier = when == null ? 1 : 0;
+    const cand = { meta, road, when, exact: when != null, lane, step, tier, sortWhen: when == null ? Infinity : when, libreYa: !!lane.libreYa };
+    if (!best || cand.tier < best.tier || (cand.tier === best.tier && cand.sortWhen < best.sortWhen)) best = cand;
+  }
+  return best || vacio;
+}
+
+function comparePrioridad(a, b) {
+  if (a.tier !== b.tier) return a.tier - b.tier;
+  if (a.sortWhen !== b.sortWhen) return a.sortWhen - b.sortWhen;
+  if (!!a.meta.principal !== !!b.meta.principal) return a.meta.principal ? -1 : 1;
+  return String(a.meta.nombre).localeCompare(String(b.meta.nombre), "es");
+}
+
+function textoCola(item) {
+  const lane = item.lane;
+  const step = item.step;
+  let cuando = `${lane.titulo} sin hora exacta`;
+  if (item.libreYa) cuando = `${lane.titulo} libre ahora`;
+  else if (item.exact && item.when != null) cuando = `${lane.titulo} libre ${fmtFin(item.when)}`;
+  let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl}`;
+  if (step.provisional) paso += " · provisional";
+  if (step.sinHora || step.sinDuracion || step.fin == null) paso += " · sin hora de fin";
+  else paso += ` · acaba ${fmtFin(step.fin)}`;
+  return `${cuando} · ${paso}`;
+}
+
+function roadmapHacia(meta, objetivo) {
+  const exp = expOf(meta.tag);
+  if (!exp || !state.index || objetivo == null) return null;
+  const stored = state.planes[meta.tag];
+  const cur = stored ? effectivePlan(stored) : null;
+  const guardado = !!(cur && cur.th != null && cur.th >= objetivo);
+  const plan = guardado ? cur : { ...defaultPlan(), th: objetivo };
+  return buildRoadmap({
+    exp,
+    index: state.index,
+    tag: meta.tag,
+    plan,
+    provisionals: state.provisionales,
+    sleep: activeSleep(),
+    now: state.now,
+  });
+}
+
+function objetivosFlota(list) {
+  const groups = new Map();
+  for (const meta of list) {
+    if (meta.objetivo == null) continue;
+    if (!groups.has(meta.objetivo)) groups.set(meta.objetivo, []);
+    groups.get(meta.objetivo).push(meta);
+  }
+  const cards = [];
+  for (const [obj, cuentas] of [...groups.entries()].sort((a, b) => b[0] - a[0])) {
+    let ya = 0;
+    const thCount = new Map();
+    const fins = [];
+    let sinFecha = 0;
+    let pendientes = 0;
+    let estimado = false;
+    for (const meta of cuentas) {
+      const exp = expOf(meta.tag);
+      const th = exp ? viewOf(meta.tag).th : null;
+      if (th == null) continue;
+      if (th >= obj) {
+        ya += 1;
+        continue;
+      }
+      pendientes += 1;
+      thCount.set(th, (thCount.get(th) || 0) + 1);
+      const stored = state.planes[meta.tag];
+      const cur = stored ? effectivePlan(stored) : null;
+      if (!(cur && cur.th != null && cur.th >= obj)) estimado = true;
+      const road = roadmapHacia(meta, obj);
+      if (road && road.fin) fins.push(road.fin);
+      else sinFecha += 1;
+    }
+    const froms = [...thCount.keys()].sort((a, b) => b - a);
+    let titulo = `Hacia TH${obj}`;
+    if (pendientes && froms.length === 1) {
+      const n = thCount.get(froms[0]);
+      titulo = n > 1 ? `Todas las TH${froms[0]} a TH${obj}` : `TH${froms[0]} a TH${obj}`;
+    } else if (pendientes && froms.length > 1) {
+      titulo = `${froms.map((th) => `TH${th}`).join(" y ")} a TH${obj}`;
+    }
+    const comp = [...thCount.entries()].sort((a, b) => b[0] - a[0]).map(([th, n]) => (n === 1 ? `1 en TH${th}` : `${n} en TH${th}`)).join(" · ");
+    const cap = obj > 1 ? obj - 1 : obj;
+    let fecha = "Sin fecha: el plan no tiene una hora exacta.";
+    if (!pendientes) fecha = "Objetivo cumplido.";
+    else if (fins.length) {
+      fecha = `Fin estimado ${fechaFlota(Math.max(...fins))}. Es el plan hasta el máximo de TH${cap}, no el día de subir el ayuntamiento.`;
+      if (sinFecha) fecha += " Falta la hora en alguna cuenta, así que la fecha no está completa.";
+      if (estimado) fecha += " Donde no hay un plan guardado con este TH, el criterio es Maxear.";
+    }
+    const pct = cuentas.length ? (ya / cuentas.length) * 100 : 0;
+    cards.push({ titulo, ya, total: cuentas.length, pct, comp, fecha });
+  }
+  return cards;
+}
+
+function fechaFlota(ms) {
+  return new Intl.DateTimeFormat("es-ES", {
+    timeZone: "Europe/Madrid",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(ms));
+}
+
+function analisisNav(activo) {
+  const a = (id, href, label) => `<a href="${href}" role="tab" aria-selected="${activo === id}">${label}</a>`;
+  return `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Análisis">${a("ranking", "#/ranking", "Ranking y comparar")}${a("graficos", "#/graficos", "Gráficos")}</nav></div>`;
+}
+
+function renderInicio() {
+  const list = allAccounts();
+  const withData = list.filter((m) => expOf(m.tag));
+  const rows = fleetRows(list);
+  const snap = fleetSnapshot(rows);
+  const principal = list.find((m) => m.principal) || null;
+  const pv = principal && expOf(principal.tag) ? viewOf(principal.tag) : null;
+  const objs = new Map();
+  for (const m of list) if (m.objetivo != null) objs.set(m.objetivo, (objs.get(m.objetivo) || 0) + 1);
+  const objTxt = [...objs.entries()].sort((a, b) => b[0] - a[0]).map(([th, n]) => (n === 1 ? `TH${th}` : `${n}×TH${th}`)).join(" + ") || "—";
+  const thOf = (m) => (expOf(m.tag) ? viewOf(m.tag).th : null);
+  const enObjetivo = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) >= m.objetivo).length;
+  const conObj = list.filter((m) => m.objetivo != null).length;
+  const tiles = `<div class="section"><div class="stat-tiles">
+      <div><b class="num">${withData.length}</b><span>${withData.length === list.length ? "cuentas" : `de ${list.length} cuentas con datos`}</span></div>
+      <div><b class="num">${pv ? `TH${pv.th}` : "—"}</b><span>${principal ? esc(principal.nombre) : "Sin principal"}</span></div>
+      <div><b class="num obj">${esc(objTxt)}</b><span>Objetivo · ${enObjetivo} de ${conObj} ya</span></div>
+    </div></div>`;
+  const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
+  const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
+  const hoyKey = madridDayKey(state.now);
+  const deHoyN = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
+  const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
+  const deHoy = ordenadas.filter((p) => p.tier === 0 && p.when != null && madridDayKey(p.when) === hoyKey);
+  let ctorLibres = 0;
+  for (const p of ordenadas) {
+    for (const lane of (p.road && p.road.lanes) || []) {
+      if (lane.cola === "constructor" && lane.libreYa) ctorLibres += 1;
+    }
+  }
+  const accion = (href, icon, cls, title, sub) => `<li><a class="row row--tile row--accion" href="${href}"><span class="accion__ico ${cls}" aria-hidden="true">${icon}</span><span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
+  const acciones = [
+    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores libres", `${ctorLibres} ${ctorLibres === 1 ? "constructor libre" : "constructores libres"} ahora · ${deHoy.length} ${deHoy.length === 1 ? "cuenta" : "cuentas"} para abrir hoy`),
+    objMas
+      ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
+      : accion("#/roster", ICON.objetivo, "is-gold", "Objetivos cumplidos", `${enObjetivo} de ${conObj} cuentas en su objetivo`),
+    accion("#/agenda", ICON.agenda, "is-blue", "Organizar las mejoras de hoy", `${deHoyN} ${deHoyN === 1 ? "termina" : "terminan"} hoy${snap.proxima ? ` · próxima ${fmtFin(snap.proxima.fin)}` : ""}`),
+  ].join("");
+  const sinHora = ordenadas.filter((p) => p.tier === 1);
+  const hoyRows = deHoy.map((p, i) => `<li><a class="row row--tile" href="#/progreso/${p.meta.tag.slice(1)}/plan"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(p.meta.nombre)}</span><span class="row__sub">${esc(textoCola(p))}</span></span>${CHEV}</a></li>`).join("");
+  const hoyBlock = deHoy.length
+    ? `<ul class="list list--tiles orden-list">${hoyRows}</ul>`
+    : `<div class="card empty"><p class="t-title3">Hoy no queda libre ninguna cola con hora</p><p class="t-subhead c-2">Cuando un constructor, el laboratorio o la casa de mascotas tengan hora, el orden sale aquí.</p></div>`;
+  const sinHoraNote = sinHora.length
+    ? `<p class="section-footer">${sinHora.length === 1 ? "1 cuenta tiene" : `${sinHora.length} cuentas tienen`} una cola del plan sin hora exacta. No entra en este orden.</p>`
+    : "";
+  const flota = objetivosFlota(list).map((g) => `<li><div class="row row--tile"><span class="row__main"><span class="row__title">${esc(g.titulo)}</span><span class="row__sub">${g.ya} de ${g.total} ya${g.comp ? ` · ${esc(g.comp)}` : ""}</span>${meterHtml(g.pct, `${g.ya} de ${g.total}`)}<span class="row__sub">${esc(g.fecha)}</span></span></div></li>`).join("");
+  const fila = (p) => {
+    const m = p.meta;
+    const v = expOf(m.tag) ? viewOf(m.tag) : null;
+    const sub = p.lane ? textoCola(p) : (v ? "Sin paso pendiente en el plan" : "Sin importar");
+    return `<li><a class="row row--tile row--inicio" href="#/progreso/${m.tag.slice(1)}" aria-label="${esc(m.nombre)}, TH${v ? v.th : "—"}${m.objetivo != null ? `, objetivo TH${m.objetivo}` : ""}${v ? `, media ${fmtPct(v.media)}` : ""}">
+      <span class="th-tile">${v ? thumb(1000001, { size: 44, th: v.th }) : `<span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>`}<span class="th-tile__n num">TH${v ? v.th : "—"}</span></span>
+      <span class="row__main"><span class="row__title">${esc(m.nombre)}</span>
+        <span class="row__sub">${!v ? `<span class="chip chip--muted">Sin importar</span>` : m.objetivo == null ? `<span class="chip">TH${v.th}</span>` : goalChip(v.th, m.objetivo)}</span>
+        <span class="row__sub">${esc(sub)}</span>
+        ${v ? meterHtml(v.media, `Media ${fmtPct(v.media)}`) : ""}</span>${CHEV}</a></li>`;
+  };
+  return `<h1 class="large-title">Inicio</h1>
+    <p class="large-sub">Centro de mando · ${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`}</p>
+    ${tiles}
+    <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
+    <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
+      <p class="t-footnote c-2">Orden según el plan de cada cuenta y la cola que queda libre antes. Si el temporizador no es un número, no se inventa la hora.</p>
+      ${hoyBlock}${sinHoraNote}</div>
+    <div class="section"><div class="section-header"><span>Objetivos de flota</span></div><ul class="list list--tiles">${flota || `<li><div class="card empty"><p class="t-title3">Sin objetivos</p></div></li>`}</ul></div>
+    <h2 class="group-label inicio-h2">Tus cuentas <span>· por cuándo queda libre una cola del plan</span></h2>
+    <div class="section"><ul class="list list--tiles">${ordenadas.map(fila).join("")}</ul></div>`;
+}
+
 function renderAhora() {
   const accounts = allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
   const items = [];
@@ -927,13 +1139,15 @@ function renderAhora() {
     items.push({ meta, road, pasos, terminadas });
   }
   const list = items.length
-    ? `<ul class="list">${items.map((row) => {
+    ? `<ul class="list list--tiles">${items.map((row) => {
       const lines = row.pasos.map((p) => pasoAhora(p));
       if (row.terminadas.length) {
         lines.push(row.terminadas.length === 1 ? "1 mejora de la exportación ya ha terminado" : `${row.terminadas.length} mejoras de la exportación ya han terminado`);
       }
       const label = planLabel(row.road.plan, row.road.currentTh);
-      return `<li><a class="row" href="#/progreso/${row.meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">${esc(row.meta.nombre)}</span><span class="row__sub">${esc(label)} · TH${row.road.currentTh == null ? "—" : row.road.currentTh}</span><span class="row__sub">${esc(lines.join(" · "))}</span></span>${CHEV}</a></li>`;
+      const th = row.road.currentTh;
+      const media = viewOf(row.meta.tag).media;
+      return `<li><a class="row row--tile" href="#/progreso/${row.meta.tag.slice(1)}/plan">${th == null ? "" : thumb(1000001, { size: 44, th }) }<span class="row__main"><span class="row__title">${esc(row.meta.nombre)}</span><span class="row__sub">${esc(label)} · TH${th == null ? "—" : th}</span><span class="row__sub">${esc(lines.join(" · "))}</span>${meterHtml(media, `Media ${fmtPct(media)}`)}</span>${CHEV}</a></li>`;
     }).join("")}</ul>`
     : `<div class="card empty"><p class="t-title3">Nada que hacer ahora</p><p class="t-subhead c-2">Ninguna cuenta tiene un constructor, el laboratorio o la casa de mascotas libres con un paso pendiente en su plan.</p></div>`;
   const on = state.notifyOn;
@@ -956,7 +1170,7 @@ function renderRanking() {
   const list = ranked.map((row) => {
     const on = state.compareTags.includes(row.tag);
     const libres = row.builders && row.builders.free != null ? `${row.builders.free} libres` : "constructores ?";
-    return `<li><div class="row row--account"><span class="row__main"><span class="row__title">${row.puesto}. ${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${fmtPct(row.media)} · ${esc(libres)}</span></span><button type="button" class="btn-text" data-compare="${esc(row.tag)}" aria-pressed="${on ? "true" : "false"}">${on ? "Quitar" : "Comparar"}</button></div></li>`;
+    return `<li><div class="row row--tile"><span class="hex hex--sm${row.puesto <= 3 ? " hex--gold" : ""}" aria-hidden="true"><b>${row.puesto}</b></span>${row.th == null ? "" : thumb(1000001, { size: 44, th: row.th })}<span class="row__main"><span class="row__title"><span class="sr-only">${row.puesto}. </span>${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${esc(libres)}</span>${meterHtml(row.media, `Media ${fmtPct(row.media)}`)}</span><button type="button" class="btn-text" data-compare="${esc(row.tag)}" aria-pressed="${on ? "true" : "false"}">${on ? "Quitar" : "Comparar"}</button></div></li>`;
   }).join("");
   const picked = compareAccounts(rows, state.compareTags);
   const cols = picked.map((row) => {
@@ -966,11 +1180,11 @@ function renderRanking() {
   const compare = picked.length >= 2
     ? `<div class="section"><h2 class="section-header"><span>Comparación</span></h2><div class="compare-grid">${cols}</div><p class="section-footer">Cada barra es el % de esa categoría. No suma recursos.</p></div>`
     : `<p class="section-footer">Elige de 2 a 3 cuentas para verlas juntas.</p>`;
-  return `<h1 class="large-title">Ranking</h1>
+  return `<h1 class="large-title">Ranking</h1>${analisisNav("ranking")}
     <p class="large-sub">${ranked.length === 1 ? "1 cuenta" : `${ranked.length} cuentas`} con datos.</p>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="chip-row" role="toolbar" aria-label="Orden del ranking">${chips}</div>
-    <div class="section"><ul class="list">${list || `<li><div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div></li>`}</ul></div>
+    <div class="section"><ul class="list list--tiles">${list || `<li><div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div></li>`}</ul></div>
     ${compare}`;
 }
 
@@ -1060,11 +1274,19 @@ function renderPlan(tag) {
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2><p class="t-body">${esc(PLAN_TIMELINE)}</p>${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${fuera}${hora}${desconocido}</div></div>
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}</div></div>
     ${sleepCard()}
     ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
     ${costCard(exp, view.th, true)}`;
+}
+
+function criterioHtml(texto, fuera) {
+  const frases = String(texto).split(/(?<=\.)\s+(?=[A-ZÁÉÍÓÚÑ#])/).filter(Boolean);
+  const notas = frases.filter((f) => /^Los héroes de /.test(f));
+  const puntos = frases.filter((f) => !notas.includes(f));
+  const nota = fuera || notas.map((f) => `<p class="t-footnote c-2">${esc(f)}</p>`).join("");
+  return `<ul class="criterio">${puntos.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>${nota}`;
 }
 
 function activeSleep() {
@@ -1366,21 +1588,21 @@ function stackedHtml(rows, cats) {
 
 function heatHtml(rows, cats) {
   const grid = heatmap(rows, cats);
-  const colorOf = new Map((rows || []).map((row) => [row.tag, row.color || ""]));
+  const byTag = new Map((rows || []).map((row) => [row.tag, row]));
+  const nivel = (v) => (v >= 100 ? "max" : v >= 80 ? "hi" : v >= 50 ? "mid" : "lo");
   const head = `<div class="heat__row" style="--cols:${cats.length}"><span></span>${cats.map((c) => `<span class="heat__lab" title="${esc(c.label)}">${esc(c.label.slice(0, 3))}</span>`).join("")}</div>`;
   const body = grid.map((row) => {
-    const color = colorOf.get(row.tag) || "";
+    const snap = byTag.get(row.tag);
+    const corto = snap ? (snap.chip || legendLabel(snap)) : row.nombre;
     const cells = row.cells.map((cell) => {
       if (cell.value == null) return `<span class="heat__cell is-na" title="${esc(cell.label)}: bloqueada"></span>`;
-      const k = Math.max(0.18, cell.value / 100).toFixed(3);
-      const style = color ? `--k:${k};--acct:${color}` : `--k:${k}`;
-      const cls = color ? "heat__cell has-acct" : "heat__cell";
-      return `<span class="${cls}" style="${style}" title="${esc(row.nombre)} · ${esc(cell.label)} ${esc(fmtPct(cell.value))}"></span>`;
+      return `<span class="heat__cell heat--${nivel(cell.value)}" title="${esc(row.nombre)} · ${esc(cell.label)} ${esc(fmtPct(cell.value))}"><b>${Math.floor(cell.value)}</b></span>`;
     }).join("");
-    return `<div class="heat__row" style="--cols:${cats.length}"><span class="heat__name">${esc(row.chip || row.nombre)}</span>${cells}</div>`;
+    return `<div class="heat__row" style="--cols:${cats.length}"><span class="heat__name">${esc(corto)}</span>${cells}</div>`;
   }).join("");
-  const legend = (rows || []).filter((row) => row.color).map((row) => `<span class="legend"><i style="background:${row.color}"></i>${esc(legendLabel(row))}</span>`).join("");
-  return `<div class="heat" role="img" aria-label="Mapa de cuentas por categoría">${head}${body}</div><div class="legend-row legend-row--cuentas">${legend}</div><p class="t-footnote c-2">Cada celda es el % de esa categoría, teñida con el color de la cuenta.</p>`;
+  const legend = `<div class="heat-legend" aria-hidden="true"><span class="heat--lo">&lt; 50 %</span><span class="heat--mid">50–79 %</span><span class="heat--hi">80–99 %</span><span class="heat--max">100 %</span><span class="is-na">Bloqueada</span></div>`;
+  const aria = grid.map((row) => `${row.nombre}: ${row.cells.map((c) => `${c.label} ${c.value == null ? "bloqueada" : fmtPct(c.value)}`).join(", ")}`).join(". ");
+  return `<div class="heat" role="img" aria-label="${esc(aria)}">${head}${body}</div>${legend}<p class="t-footnote c-2">Cada celda es el % de esa categoría en la última exportación del periodo.</p>`;
 }
 
 function groupedCategoryHtml(snaps, cats) {
@@ -1583,25 +1805,28 @@ async function toggleNotify() {
 }
 
 function navbar(r) {
-  const tab = baseTab(r);
-  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle", ahora: "Ahora", ranking: "Ranking", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento" };
+  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento" };
   let lead = "";
   let trail = "";
-  let title = titles[tab] || titles[r.name] || "";
+  let title = titles[r.name] || titles[tab] || "";
   let collapsed = "false";
-  if (r.name === "roster" || r.name === "importar") {
-    trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
-  } else if (r.name === "plan" || r.name === "historial") {
-    title = r.name === "plan" ? "Plan" : "Historial";
-    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Progreso</button>`;
+  if (r.name === "inicio") {
+    trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
+  } else if (r.name === "copia" || r.name === "ahora") {
+    lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
-  } else if (r.name === "ahora" || r.name === "ranking" || r.name === "agenda") {
-    lead = `<button class="btn-text" data-go="#/roster"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cuentas</button>`;
+  } else if (r.name === "roster" || r.name === "importar") {
+    trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
+  } else if (r.name === "plan" || r.name === "historial" || r.name === "equipo") {
+    title = r.name === "plan" ? "Plan" : r.name === "historial" ? "Historial" : "Equipamiento";
+    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
+    collapsed = "true";
+  } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
     title = cat ? cat.label : "Detalle";
-    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Progreso</button>`;
+    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
     collapsed = "true";
   }
   return `<header class="navbar" data-collapsed="${collapsed}">
@@ -1617,11 +1842,11 @@ function tabbar(r) {
   const tab = baseTab(r);
   const item = (id, href, label, svg) => `<a href="${href}" ${tab === id ? 'aria-current="page"' : ""}>${svg}<span>${label}</span></a>`;
   return `<nav class="tabbar" aria-label="Secciones">
-    ${item("roster", "#/roster", "Cuentas", `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="8" height="8" rx="2"/><rect x="16" y="5" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/></svg>`)}
-    ${item("progreso", "#/progreso", "Progreso", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 8h18M5 14h12M5 20h15"/></svg>`)}
-    ${item("mejoras", "#/mejoras", "Mejoras", `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5"/><path d="M14 8.5V14l3.5 2.5"/></svg>`)}
-    ${item("graficos", "#/graficos", "Gráficos", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`)}
-    ${item("copia", "#/copia", "Copia", `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M8 6h9l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M16 6v6h6"/></svg>`)}
+    ${item("inicio", "#/inicio", "Inicio", ICON.inicio)}
+    ${item("roster", "#/roster", "Cuentas", ICON.cuentas)}
+    ${item("mejoras", "#/mejoras", "Mejoras", ICON.mejoras)}
+    ${item("analisis", "#/ranking", "Análisis", ICON.analisis)}
+    ${item("agenda", "#/agenda", "Agenda", ICON.agenda)}
   </nav>`;
 }
 
@@ -1661,7 +1886,7 @@ function renderRoster() {
       </select>
     </label>
     ${empty}
-    ${list.length ? `<div class="section"><ul class="list">${rows}</ul>${seedNote}</div>` : seedNote}
+    ${list.length ? `<div class="section"><ul class="list list--tiles">${rows}</ul>${seedNote}</div>` : seedNote}
     <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
 `;
 }
@@ -1691,7 +1916,7 @@ function rowCuenta(meta) {
     ? `<span class="chip chip--main">Principal</span>`
     : meta.featured ? `<span class="chip chip--second">Destacada</span>` : "";
   if (!exp) {
-    return `<li><div class="row row--account row--thumb44${flash}">
+    return `<li><div class="row row--tile row--account${flash}">
       <a class="row__main" href="#/progreso/${meta.tag.slice(1)}">
         <span class="row__title">${esc(meta.nombre)} ${mark}</span>
         <span class="row__sub"><span class="chip chip--muted">Sin importar</span></span>
@@ -1703,14 +1928,14 @@ function rowCuenta(meta) {
   const when = fmtWhen(exp.timestamp * 1000);
   const title = meta.nombre === meta.tag ? `<span class="tag">${esc(meta.tag)}</span>` : esc(meta.nombre);
   const aria = `${meta.nombre}, TH${a.th}, media ${fmtPct(a.media)}${meta.principal ? ", Principal" : meta.featured ? ", destacada" : ""}`;
-  return `<li><div class="row row--account row--thumb44${flash}">
+  return `<li><div class="row row--tile row--account${flash}">
     ${thumb(1000001, { size: 44, th: a.th })}
     <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
       <span class="row__title">${title} ${mark}</span>
       <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? " · sin actualizar" : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
       ${goalBar(meta, a)}
+      ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
-    <span class="row__trail"><span class="num row__pct">${fmtPct(a.media)}</span></span>
     <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
   </div></li>`;
 }
@@ -1807,7 +2032,6 @@ function renderProgreso(tag) {
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
   const links = exp ? `<div class="section"><ul class="list">
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Línea de tiempo hasta el TH objetivo</span></span>${CHEV}</a></li>
-      <li><a class="row" href="#/equipo/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Equipamiento</span><span class="row__sub">Niveles y menas, aparte de la aldea</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
     </ul></div>` : "";
   const body = !exp
@@ -1827,8 +2051,29 @@ function renderProgreso(tag) {
     ${exp && inFleet ? costCard(exp, a.th, false) : ""}
     ${links}
     ${body}
+    ${exp && inFleet ? equipoSection(exp, meta) : ""}
     ${exp && inFleet && !narrowed ? builderBaseSection(exp) : ""}
 `;
+}
+
+function equipoSection(exp, meta) {
+  const view = viewOf(meta.tag);
+  const pieces = equipmentPieces(exp, state.index, view.th);
+  const bag = remainingCost(pieces).total;
+  const ores = [
+    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
+    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
+    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
+  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
+  const row = view.cats.equipamiento;
+  const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
+  return `<div class="section"><div class="section-header"><span>Equipamiento</span></div>
+    <ul class="list list--tiles"><li><a class="row row--tile" href="#/equipo/${meta.tag.slice(1)}">
+      <span class="row__main"><span class="row__title">Piezas de héroe</span>
+        <span class="row__sub">${pieces.length} piezas · ${esc(pct)} · aparte de la aldea</span>
+        <span class="row__sub">${esc(ores)}</span>
+      </span>${CHEV}</a></li></ul>
+    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea.</p></div>`;
 }
 
 function rushCard(meta) {
@@ -2264,20 +2509,37 @@ function renderMejoras() {
     for (const u of upgrades(exp)) all.push({ ...u, meta, exp });
   }
   const active = all.filter((u) => !u.done);
-  const mode = state.mejorasMode;
+  const mode = state.mejorasMode === "costes" || state.mejorasMode === "cuenta" ? state.mejorasMode : "fin";
+  const vacio = `<div class="card empty"><p class="t-title3">No hay datos</p><p class="t-subhead c-2">Importa la exportación JSON de cada cuenta.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
+  const libres = `<div class="card empty"><p class="t-title3">No hay mejoras en curso</p><p class="t-subhead c-2">Todas las colas están libres según la última importación.</p></div>`;
   const body = !all.length
-    ? `<div class="card empty"><p class="t-title3">No hay datos</p><p class="t-subhead c-2">Importa la exportación JSON de cada cuenta.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`
-    : active.length === 0 && all.every((u) => u.done)
-      ? `<div class="card empty"><p class="t-title3">No hay mejoras en curso</p><p class="t-subhead c-2">Todas las colas están libres según la última importación.</p></div>`
-      : mode === "cuenta" ? mejorasPorCuenta() : mejorasPorFin(all);
+    ? vacio
+    : mode === "costes" ? mejorasCostes()
+      : mode === "cuenta" ? mejorasPorCuenta()
+        : active.length === 0 && all.every((u) => u.done) ? libres : mejorasPorFin(all);
   return `<h1 class="large-title">Mejoras</h1>
     <p class="large-sub">${active.length} en curso · ${allAccounts().filter((r) => expOf(r.tag)).length} cuentas</p>
     <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Orden de mejoras">
-      <button role="tab" data-mej="fin" aria-selected="${mode !== "cuenta"}">Por fin</button>
+      <button role="tab" data-mej="fin" aria-selected="${mode === "fin"}">Por fin</button>
       <button role="tab" data-mej="cuenta" aria-selected="${mode === "cuenta"}">Por cuenta</button>
+      <button role="tab" data-mej="costes" aria-selected="${mode === "costes"}">Costes</button>
     </div></div>
     ${body}
 `;
+}
+
+function mejorasCostes() {
+  return allAccounts().map((meta) => {
+    const exp = expOf(meta.tag);
+    if (!exp) return "";
+    const a = viewOf(meta.tag);
+    return `<div class="section"><div class="card acct-tile">
+        ${thumb(1000001, { size: 52, th: a.th })}
+        <div class="acct-tile__main"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>
+          <p class="t-footnote c-2">Hasta el máximo de TH${a.th}. No es el coste de subir el ayuntamiento.</p>
+        </div>
+      </div>${costCard(exp, a.th, true)}</div>`;
+  }).join("");
 }
 
 function mejorasPorFin(all) {
@@ -2320,9 +2582,10 @@ function mejorasPorCuenta() {
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
     const bob = list.filter((u) => u.extra && u.queue === "constructor").length;
     const slots = slotsHtml(b, labN, petN, a.th >= 14);
-    return `<div class="section"><div class="card" style="display:flex;gap:8px;align-items:flex-start">
-        ${thumb(1000001, { size: 40, th: a.th })}
-        <div style="flex:1"><div class="t-headline">${esc(meta.nombre)}</div>
+    return `<div class="section"><div class="card acct-tile">
+        ${thumb(1000001, { size: 52, th: a.th })}
+        <div class="acct-tile__main"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>
+          ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
           ${builderHead(b, bob)}
           ${slots}
           <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
@@ -3410,6 +3673,7 @@ function screenFor(r) {
   if (!state.ready) {
     return `<h1 class="large-title">Clash Progreso</h1><div class="section"><div class="card"><div class="sk sk--line"></div></div></div>`;
   }
+  if (r.name === "inicio") return renderInicio();
   if (r.name === "roster" || r.name === "ajustes" || r.name === "importar") return renderRoster();
   if (r.name === "progreso") return renderProgreso(r.tag || state.selected);
   if (r.name === "detalle") return renderDetalle(r.tag, r.cat);
@@ -3422,13 +3686,13 @@ function screenFor(r) {
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
-  return renderRoster();
+  return renderInicio();
 }
 
 function renderGraficos() {
   const list = chartAccounts();
   if (!allAccounts().some((m) => expOf(m.tag))) {
-    return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
+    return `<h1 class="large-title">Gráficos</h1>${analisisNav("graficos")}<div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
   }
   const kinds = [["lineas", "Líneas"], ["barras", "Barras"], ["apiladas", "Apiladas"], ["radar", "Radar"], ["calor", "Calor"], ["ritmo", "Ritmo"], ["niveles", "Niveles"]];
   const kindChips = kinds.map(([id, label]) => filterChip("data-chart-kind", id, label, state.chartKind === id)).join("");
@@ -3460,7 +3724,7 @@ function renderGraficos() {
   const picker = needsAccount && list.length
     ? `<label class="sort-label">Cuenta <select data-chart aria-label="Cuenta del gráfico">${opts}</select></label>`
     : "";
-  return `<h1 class="large-title">Gráficos</h1>
+  return `<h1 class="large-title">Gráficos</h1>${analisisNav("graficos")}
     <p class="large-sub">% del máximo del TH de cada cuenta. La media no incluye categorías bloqueadas.</p>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     <div class="chip-row" role="toolbar" aria-label="Tipo de gráfico">${kindChips}</div>

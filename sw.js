@@ -13,6 +13,7 @@ const APP = [
   "./css/base.css",
   "./css/components.css",
   "./css/views.css",
+  "./css/estilo-3.1.css",
   "./js/app.js",
   "./js/progress.js",
   "./js/format.js",

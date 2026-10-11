@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.1</strong><br>
+  <strong>Versión 3.1.2</strong><br>
   Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -28,7 +28,31 @@ iPhone (393×852, escala 3), con las exportaciones del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/31-copia.png" width="220" alt="Copia, tema y aviso de la Fan Content Policy"> | <img src="docs/capturas/31-oscuro.png" width="220" alt="La misma lista de cuentas en tema oscuro"> |
 
+3.1.2, iPhone de 375 px de ancho, en claro y en oscuro.
+
+| Inicio | Cuentas | Análisis |
+| --- | --- | --- |
+| <img src="docs/capturas/312-inicio-claro.png" width="180" alt="Inicio en claro: resumen, qué hacer ahora, orden del día y objetivos de flota"> | <img src="docs/capturas/312-cuentas-claro.png" width="180" alt="Cuentas en losetas con la miniatura del ayuntamiento"> | <img src="docs/capturas/312-analisis-claro.png" width="180" alt="Ranking con el puesto en hexágono"> |
+
+| Mejoras | Calor | Plan |
+| --- | --- | --- |
+| <img src="docs/capturas/312-mejoras-claro.png" width="180" alt="Mejoras, apartado Costes"> | <img src="docs/capturas/312-calor-claro.png" width="180" alt="Mapa de calor con la escala 50, 80 y 100"> | <img src="docs/capturas/312-plan-claro.png" width="180" alt="Criterio del plan en viñetas"> |
+
+| Inicio oscuro | Cuentas oscuro |
+| --- | --- |
+| <img src="docs/capturas/312-inicio-oscuro.png" width="180" alt="Inicio en tema oscuro"> | <img src="docs/capturas/312-cuentas-oscuro.png" width="180" alt="Cuentas en tema oscuro"> |
+
 ## Funciones
+
+La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
+
+### Inicio
+
+- Resumen: número de cuentas, TH de la principal y el objetivo del roster (por ejemplo TH18 + TH17 + 9×TH15), con cuántas cuentas ya lo han alcanzado.
+- Qué hacer ahora: constructores libres, el objetivo que más cuentas tienen por debajo y las mejoras que acaban hoy.
+- **Abrir hoy**: en qué orden abrir las cuentas, según el plan y la hora en que queda libre un constructor, el laboratorio o la casa de mascotas. Si el temporizador no es un número, esa cuenta no entra en el orden y no se inventa la hora.
+- **Objetivos de flota**: las cuentas que comparten objetivo (por ejemplo todas las TH13 y las TH11 hacia TH15), cuántas ya están y la fecha estimada. Esa fecha es el fin del plan hasta el máximo del TH anterior, no el día de subir el ayuntamiento. Si la cuenta no tiene un plan guardado con ese TH, el criterio es Maxear.
+- Tus cuentas, con la miniatura del ayuntamiento, ordenadas por esa misma prioridad.
 
 ### Cuentas
 
@@ -39,7 +63,7 @@ iPhone (393×852, escala 3), con las exportaciones del 7 de octubre de 2026.
 - Meta opcional de una categoría o de la media, con una barra de progreso.
 - Resumen de la flota: media, constructores ocupados y libres, laboratorios y casas de mascotas libres, y la próxima mejora con hora.
 - Lista de cuentas sin actualización reciente. El plazo se cambia en Copia; el valor inicial es más de 7 días.
-- Accesos a Qué hacer ahora, Ranking y Agenda.
+- El equipamiento de cada cuenta va en una sección propia, debajo de las categorías de la aldea, y abre el apartado de piezas y menas.
 
 ### Progreso y filtros
 
@@ -54,7 +78,7 @@ Todas las cuentas visibles van en el mismo gráfico, con un color fijo y una ley
 - Líneas superpuestas del porcentaje medio.
 - Barras agrupadas por categoría.
 - Barras apiladas (cada color es el % de una categoría, no una suma de recursos).
-- Mapa de calor de cuentas × categorías.
+- Mapa de calor de cuentas × categorías, con escala de menos de 50 %, 50–79 %, 80–99 % y 100 %.
 - Radar y ritmo semanal, de una cuenta.
 - Niveles: evolución del TH, héroes frente a su máximo, media de niveles por categoría, distribución de muros, laboratorio, mascotas, cara a cara, cuentas del mismo TH y niveles por semana.
 
@@ -62,7 +86,7 @@ Cada punto es una exportación real. Con un solo día importado, la línea es un
 
 ### Plan, ahora y agenda
 
-- El plan es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige Maxear o Rushear y el TH objetivo (el actual o uno superior). Se pueden combinar prioridad de ataque, de defensa, muros, héroes, categoría, recurso y duración.
+- El plan es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige Maxear o Rushear y el TH objetivo (el actual o uno superior). Se pueden combinar prioridad de ataque, de defensa, muros, héroes, categoría, recurso y duración. El criterio se lee en viñetas.
 - Para un TH objetivo superior, el nivel pedido es el máximo del TH anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados. No hay una lista oficial de requisitos de ayuntamiento en los datos, y la pantalla lo dice.
 - Cada paso lleva coste, tiempo y fecha estimada de Madrid, con los constructores de esa cuenta. En la línea se marcan las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña, en cada cuenta, el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Si la cuenta no tiene plan guardado, el criterio es Maxear TH actual.
@@ -115,12 +139,13 @@ Para traer varias aldeas seguidas desde el juego, el atajo está en `docs/atajo.
 
 Las cuentas, el historial, los grupos, las metas, los planes, las marcas provisionales, los filtros, el tema y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
-Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v19` y la de imágenes `cp-img-v7`.
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v20` y la de imágenes `cp-img-v7`.
 
 ## Historial de versiones
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.2 | Inicio con el resumen, qué hacer ahora, el orden para abrir las cuentas hoy y los objetivos de flota. Cinco pestañas: Inicio, Cuentas, Mejoras, Análisis y Agenda. Ranking en hexágono, mapa de calor por escala y el criterio del plan en viñetas. |
 | 3.1.1 | Imagen oficial de 189 niveles que estaban prestados, más el Cuervo avaricioso. Catapulta, Caseta de animales, Torre Tesla y Arrojatroncos. La Artillería infernal se ve en español y sigue sin ID. |
 | 3.1.0 | Qué hacer ahora sale del plan de cada cuenta. Línea de tiempo con TH objetivo y marcas. Equipamiento aparte de la media. Niveles, meta, tema oscuro, búsqueda, copia automática y atajo para varias aldeas. |
 | 3.0.0 | Varias cuentas en los mismos gráficos, pegado directo, flota, filtros, plan con agenda, coste hasta el máximo, ranking, historial con rachas y avisos con la app abierta. |

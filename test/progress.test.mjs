@@ -638,9 +638,9 @@ test("C2 no cuenta sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 0);
 });
 
-test("versión 3.1.1 y cachés cp-shell-v19 / cp-img-v7", () => {
-  assert.equal(APP_VERSION, "3.1.1");
-  assert.equal(SHELL_CACHE, "cp-shell-v19");
+test("versión 3.1.2 y cachés cp-shell-v20 / cp-img-v7", () => {
+  assert.equal(APP_VERSION, "3.1.2");
+  assert.equal(SHELL_CACHE, "cp-shell-v20");
   assert.equal(IMAGE_CACHE, "cp-img-v7");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -663,11 +663,13 @@ test("versión 3.1.1 y cachés cp-shell-v19 / cp-img-v7", () => {
   assert.equal(sw.includes("cp-shell-v16"), false);
   assert.equal(sw.includes("cp-shell-v17"), false);
   assert.equal(sw.includes("cp-shell-v18"), false);
+  assert.equal(sw.includes("cp-shell-v19"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v19/);
+  assert.match(caches, /cp-shell-v20/);
+  assert.match(sw, /estilo-3\.1\.css/);
   assert.match(caches, /cp-img-v7/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
