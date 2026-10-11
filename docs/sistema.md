@@ -2160,6 +2160,18 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 4.1.4)
+
+`APP_VERSION` es `4.1.4`, `SHELL_CACHE` es `cp-shell-v41` e `IMAGE_CACHE` es `cp-img-v10`. `ROSTER_VERSION` sigue en 2. La precarga de instalación sigue en 220 archivos. Operaciones, el motor de atención y explorar estrategias no se tocan. Las skins no se tocan. La 4.1.2 y `cp-shell-v39` quedan para otro cambio.
+
+El Fan Kit (Game assets, búsqueda del 11 oct 2026) tiene PNG propio para 31 de los 35 niveles que usaban la imagen de otro. Esos 31 pasan a ese archivo, con `es_inferior` en falso. La mina de rastreo aéreo 5 y 6 comparten `Building_HV_Seeking_Air_Mine_level_5&6`. Siguen prestados, y quedan en `assets/FALTANTES.md`: herrería 10, bomba 12, bomba aérea 12 y Destructor 5. Torre multiusos, Defensa artesanal y Portal portátil no tienen PNG de aldea principal en el Fan Kit; siguen faltantes y no se les añade arte de otra fuente. Los guardianes nuevos salen de la rendición `?width=1024` porque el original pasa de 3 MB.
+
+Los nombres que el diario de la 3.1.1 dejaba en inglés (Escolta títere, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Orbe oscuro) ya están en español, con fuente en el `ES.json` de ClashKingAssets `b8f42a7`. Yeti se llama igual en el blog en español. Los nueve módulos de la defensa artesanal siguen con el paréntesis en inglés (`Hitpoints`, `Damage`, `Seconds Active`, `Poison Level`, `Explosion Damage`): el blog en español nombra las tres defensas y no los módulos, y ese `ES.json` no trae las claves `TID_SEASONAL_DEFENSE_*_MODULE_*`. No se inventa la traducción.
+
+Web Push en una PWA instalada en iOS 16.4 o posterior exige la app en la pantalla de inicio, un service worker, el permiso de la persona y un servicio que guarde la suscripción y envíe el aviso. Sin ese servicio el aviso no sale con la app cerrada. Esta app no tiene servidor, y no hay avisos del iPhone con la app cerrada. `js/calendario.js` arma un `.ics` con el fin real de cada mejora de la exportación (hora UTC, cinco minutos de bloque para que el Calendario lo muestre, sin alarma). En Agenda, **Añadir al calendario** lo guarda. No se guarda solo y no enciende `cp-notify`.
+
+`docs/atajo.md` describe cómo crear en Atajos «Copiar aldea» e «Importar a Clash» para dejar la exportación en el portapapeles y abrir el icono, junto a Actualizar todas. No hay enlace de iCloud: hace falta una cuenta de Apple para firmarlo. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 4.1.3)
 
 Main ya era `4.1.1`. `APP_VERSION` es `4.1.3`, `SHELL_CACHE` es `cp-shell-v40` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit. Operaciones, el motor de atención y explorar estrategias no se tocan.

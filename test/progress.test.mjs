@@ -269,10 +269,10 @@ test("Artillería infernal solo en el detalle, sin id inventado", () => {
   }
 });
 
-test("642 sha256 coinciden con el manifiesto v3.1.7", () => {
-  assert.equal(manifest.version_set_imagenes, "v3.1.7");
-  assert.equal(manifest.peso_imagenes.total_archivos, 642);
-  assert.equal(manifest.peso_imagenes.total_bytes, 104167680);
+test("672 sha256 coinciden con el manifiesto v3.1.18", () => {
+  assert.equal(manifest.version_set_imagenes, "v3.1.18");
+  assert.equal(manifest.peso_imagenes.total_archivos, 672);
+  assert.equal(manifest.peso_imagenes.total_bytes, 107868055);
   assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 220);
   assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 21579962);
   assert.equal(manifest.peso_imagenes.umbral_pesado_bytes, 3000000);
@@ -286,7 +286,7 @@ test("642 sha256 coinciden con el manifiesto v3.1.7", () => {
       if (im && im.ruta) want.set(im.ruta, im);
     }
   }
-  assert.equal(want.size, 642);
+  assert.equal(want.size, 672);
   const dir = join(root, "assets/images");
   const files = [];
   const walk = (rel) => {
@@ -297,7 +297,7 @@ test("642 sha256 coinciden con el manifiesto v3.1.7", () => {
     }
   };
   walk("");
-  assert.equal(files.length, 642);
+  assert.equal(files.length, 672);
   for (const rel of files) {
     const im = want.get(rel);
     assert.ok(im, rel);
@@ -445,10 +445,10 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "73e51a606ac3e4d966968d2616be0fa5b3c471c84866a2e3b60a6c6d61e9f124");
 });
 
-test("manifest.json coincide con la v3.1.7", () => {
+test("manifest.json coincide con la v3.1.18", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "1c4c52694b756ec61aeb5233e1ef46dc17403cc5d03b1117fca6f8a8cf799b07");
-  assert.equal(manifest.version_set_imagenes, "v3.1.7");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "04aea283569232829681c6fc8aaf990206bb91667b60846cdff036dc8701119f");
+  assert.equal(manifest.version_set_imagenes, "v3.1.18");
 });
 
 /** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
@@ -954,10 +954,10 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.1.3 y cachés cp-shell-v40 / cp-img-v9", () => {
-  assert.equal(APP_VERSION, "4.1.3");
-  assert.equal(SHELL_CACHE, "cp-shell-v40");
-  assert.equal(IMAGE_CACHE, "cp-img-v9");
+test("versión 4.1.4 y cachés cp-shell-v41 / cp-img-v10", () => {
+  assert.equal(APP_VERSION, "4.1.4");
+  assert.equal(SHELL_CACHE, "cp-shell-v41");
+  assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
@@ -1000,13 +1000,16 @@ test("versión 4.1.3 y cachés cp-shell-v40 / cp-img-v9", () => {
   assert.equal(sw.includes("cp-shell-v37"), false);
   assert.equal(sw.includes("cp-shell-v38"), false);
   assert.equal(sw.includes("cp-shell-v39"), false);
+  assert.equal(sw.includes("cp-shell-v40"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
+  assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v40/);
+  assert.match(caches, /cp-shell-v41/);
+  assert.equal(caches.includes("cp-shell-v40"), false);
   assert.equal(caches.includes("cp-shell-v39"), false);
   assert.equal(caches.includes("cp-shell-v38"), false);
   assert.equal(caches.includes("cp-shell-v37"), false);
@@ -1031,9 +1034,10 @@ test("versión 4.1.3 y cachés cp-shell-v40 / cp-img-v9", () => {
   assert.match(sw, /js\/perfil\.js/);
   assert.match(sw, /js\/actualizar\.js/);
   assert.match(sw, /js\/nav\.js/);
-  assert.match(caches, /cp-img-v9/);
+  assert.match(caches, /cp-img-v10/);
   assert.equal(caches.includes("cp-img-v7"), false);
   assert.equal(caches.includes("cp-img-v8"), false);
+  assert.equal(caches.includes("cp-img-v9"), false);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
@@ -1125,7 +1129,7 @@ test("107000008 se muestra como Arrojatroncos, sin marca de ID deducido, y no en
   assert.equal(line("Duque Dragón"), "Nv 10 / 15");
 });
 
-test("el Logger se muestra entero, sin recortar la caja; los niveles 2 a 5 usan el PNG del 1", () => {
+test("el Logger se muestra entero, sin recortar la caja; el nivel 5 tiene su PNG del Fan Kit", () => {
   const im = manifest.items["107000008"].imagen;
   assert.deepEqual(im.caja_visible, { x: 268, y: 335, w: 611, h: 555 });
   assert.equal(im.ocupacion, 0.3234);
@@ -1138,10 +1142,12 @@ test("el Logger se muestra entero, sin recortar la caja; los niveles 2 a 5 usan 
   assert.deepEqual(zoomed, fit);
   assert.equal(manifest.items["107000008"].imagenes_por_nivel["1"].ruta, im.ruta);
   assert.equal(manifest.items["107000008"].imagenes_por_nivel["1"].es_inferior, false);
-  assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].marca, null);
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].es_inferior, false);
+  assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].ruta, "images/guardians/logger_5.png");
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
-  assert.equal(IMAGE_CACHE, "cp-img-v9");
+  assert.equal(IMAGE_CACHE, "cp-img-v10");
 });
 
 test("la media sin cambio no repite el valor ni pone flecha", () => {
@@ -2263,7 +2269,7 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
       assert.equal(own.ruta, im.ruta, item.id + " " + lvl);
     }
   }
-  assert.equal(borrowed, 35);
+  assert.equal(borrowed, 4);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].marca, null);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].es_inferior, false);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].ruta, "images/levels/x-bow_12.png");
@@ -2285,7 +2291,8 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["1000008"].imagenes_por_nivel["21"].es_inferior, false);
   assert.equal(manifest.items["1000015"].imagenes_por_nivel["1"].es_inferior, false);
   assert.equal(manifest.items["1000015"].imagenes_por_nivel["1"].nivel_mostrado, 1);
-  assert.equal(manifest.items["1000000"].imagenes_por_nivel["1"].marca, "Imagen del nivel 7 (no hay oficial del 1)");
+  assert.equal(manifest.items["1000000"].imagenes_por_nivel["1"].marca, null);
+  assert.equal(manifest.items["1000000"].imagenes_por_nivel["1"].ruta, "images/levels/army-camp_1.png");
   {
     const item = manifest.items["1000079"];
     assert.equal(item.estado, "faltante");
@@ -2323,7 +2330,9 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["12000006"].imagenes_por_nivel["4"].es_inferior, false);
   assert.equal(manifest.items["12000008"].imagenes_por_nivel["3"].es_inferior, false);
   assert.equal(manifest.items["107000001"].imagenes_por_nivel["1"].es_inferior, false);
-  assert.equal(manifest.items["107000001"].imagenes_por_nivel["3"].marca, "Imagen del nivel 1 (no hay oficial del 3)");
+  assert.equal(manifest.items["107000001"].imagenes_por_nivel["3"].marca, null);
+  assert.equal(manifest.items["107000001"].imagenes_por_nivel["3"].ruta, "images/guardians/smasher_3.png");
+  assert.equal(manifest.items["107000001"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
   assert.equal(manifest.items["107000000"].imagenes_por_nivel, undefined);
   assert.equal(manifest.items["102000033"].nombre, "Vela incandescente (Hitpoints)");
   assert.equal(manifest.items["102000041"].nombre, "Catapulta explosiva (Explosion Damage)");
@@ -2424,10 +2433,10 @@ test("2.1.0: sin entrada de nivel se usa el PNG base; Tiradora no tiene niveles 
   assert.equal(choice.marca, null);
   assert.equal(choice.fallback.ruta, hut.imagen.ruta);
   const camp = manifest.items["1000000"];
-  const borrowed = imageChoice(camp, 1);
-  assert.equal(borrowed.im.ruta, camp.imagenes_por_nivel["7"].ruta);
-  assert.equal(borrowed.marca, "Imagen del nivel 7 (no hay oficial del 1)");
-  assert.equal(borrowed.fallback.ruta, "images/buildings/army-camp.png");
+  const propio = imageChoice(camp, 1);
+  assert.equal(propio.im.ruta, "images/levels/army-camp_1.png");
+  assert.equal(propio.marca, null);
+  assert.equal(propio.fallback.ruta, "images/buildings/army-camp.png");
   const sample = {
     imagen: { ruta: "images/defenses/cannon.png", bytes: 10, pesado: false },
     imagenes_por_nivel: {
@@ -2572,8 +2581,8 @@ test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", 
   assert.equal(new Set(urls).size, 220);
   assert.equal(urls.length, manifest.peso_imagenes.precache_instalacion_archivos);
   const list = catalog(manifest);
-  assert.equal(list.length, 642);
-  assert.equal(new Set(list.map((im) => im.url)).size, 642);
+  assert.equal(list.length, 672);
+  assert.equal(new Set(list.map((im) => im.url)).size, 672);
   assert.equal(list.reduce((s, im) => s + im.bytes, 0), manifest.peso_imagenes.total_bytes);
   assert.equal(list.filter((im) => im.precache).length, 220);
   for (const id of ["107000000", "107000001", "107000008"]) {

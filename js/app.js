@@ -29,6 +29,7 @@ import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, rada
 import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
+import { textoIcs } from "./calendario.js";
 import {
   DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -1325,7 +1326,7 @@ function renderAhora() {
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="section">${list}</div>
     <div class="section"><div class="card">
-      <div class="section-head"><h2 class="t-headline">Aviso al terminar</h2>${infoBtn("Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada haría falta un servidor, y esta app no tiene servidor.")}</div>
+      <div class="section-head"><h2 class="t-headline">Aviso al terminar</h2>${infoBtn("Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada no hay aviso: Web Push en el iPhone necesita un servidor que envíe el mensaje, y esta app no tiene servidor. En Agenda se puede guardar un calendario con esos fines. No se guarda solo.")}</div>
       <button type="button" class="btn ${on ? "btn--secondary" : "btn--primary"} btn--block" data-notify aria-pressed="${on ? "true" : "false"}">${on ? "Avisos activados" : "Activar avisos"}</button>
     </div></div>`;
 }
@@ -1726,6 +1727,10 @@ function renderAgenda() {
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     ${nav}
     ${sleepCard()}
+    <div class="section"><div class="card">
+      <div class="section-head"><h2 class="t-headline">Calendario</h2>${infoBtn("Web Push, con la app cerrada, necesita un servicio que guarde la suscripción y envíe el aviso. Esta app no tiene servidor, así que no hay aviso al cerrarla. El archivo lleva al Calendario del iPhone el fin de cada mejora que la exportación ya trae, en hora UTC. No se crea solo, no pide permiso de avisos y no añade una alarma.")}</div>
+      <button type="button" class="btn btn--secondary btn--block" data-calendario>Añadir al calendario</button>
+    </div></div>
     ${cuerpoVista}`;
 }
 
@@ -4099,6 +4104,56 @@ async function removeAdded(tag) {
   showToast("ok", "Cuenta borrada");
 }
 
+function finesDeCalendario() {
+  const eventos = [];
+  for (const meta of allAccounts()) {
+    const exp = expOf(meta.tag);
+    if (!exp) continue;
+    for (const u of upgrades(exp)) {
+      if (u.extra || u.done || !Number.isFinite(u.end)) continue;
+      const nombre = itemName(state.index.items[u.id]) || "Mejora";
+      eventos.push({
+        uid: `cp-${meta.tag.replace("#", "")}-${u.id}-${u.lvl}-${u.end}@clash-progreso`,
+        titulo: `${meta.nombre}: ${nombre}`,
+        fin: u.end,
+      });
+    }
+  }
+  return eventos;
+}
+
+async function exportarCalendario() {
+  const eventos = finesDeCalendario();
+  if (!eventos.length) {
+    showToast("err", "No hay un fin por anotar.");
+    render();
+    return;
+  }
+  const name = "clash-progreso.ics";
+  const blob = new Blob([textoIcs(eventos, { ahora: state.now })], { type: "text/calendar" });
+  const file = new File([blob], name, { type: "text/calendar" });
+  if (typeof navigator !== "undefined" && navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      showToast("ok", "Calendario listo");
+      render();
+      return;
+    } catch (err) {
+      if (isShareCancel(err)) return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  showToast("ok", "Calendario listo");
+  render();
+}
+
 async function exportBackup() {
   const now = Date.now();
   const payload = buildBackup(camposCopia({ now }));
@@ -5301,6 +5356,7 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-notify]")) { await toggleNotify(); return; }
+    if (origen.closest("[data-calendario]")) { await exportarCalendario(); return; }
     if (origen.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
     if (origen.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
     const tiempo = origen.closest("[data-tiempo]");

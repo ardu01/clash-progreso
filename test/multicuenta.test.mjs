@@ -8,8 +8,8 @@ import {
   accountTimeline, finalesEn, finDe, fleetAgenda, fraseFranja, franjasDe, inSleep, nextAwake, scheduleNext, segundosDe, sleepFromClocks,
 } from "../js/schedule.js";
 
-test("la caché de imágenes está en cp-img-v9", () => {
-  assert.equal(IMAGE_CACHE, "cp-img-v9");
+test("la caché de imágenes está en cp-img-v10", () => {
+  assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   assert.match(sw, /\.\/js\/schedule\.js/);
   assert.match(sw, /\.\/js\/charts\.js/);

@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.3</strong><br>
+  <strong>Versión 4.1.4</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -45,6 +45,10 @@ Datos de prueba del 7 de octubre de 2026.
 | Recursos | Plan |
 | --- | --- |
 | <img src="docs/capturas/317-recursos-oscuro.png" width="200" alt="Detalle de cuenta en oscuro: oro, elixir, oscuro y menas escritos a mano, con la marca Manual"> | <img src="docs/capturas/317-plan-oscuro.png" width="200" alt="Plan en oscuro: cuánto falta para la siguiente mejora y el oro para subir el ayuntamiento"> |
+
+| Agenda, calendario | Aviso al guardar |
+| --- | --- |
+| <img src="docs/capturas/318-agenda-oscuro.png" width="200" alt="Agenda en oscuro: la tarjeta Calendario y el botón Añadir al calendario"> | <img src="docs/capturas/318-calendario-oscuro.png" width="200" alt="Agenda en oscuro, tras pulsar Añadir al calendario: el aviso Calendario listo"> |
 
 | Plan, rushear | Requisitos para subir |
 | --- | --- |
@@ -88,7 +92,9 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-Cada cuenta puede anotar oro, elixir, oscuro y menas a mano. El plan dice si alcanzan para la siguiente mejora y para subir el ayuntamiento. El oro y el tiempo de esa subida salen de los datos del edificio. Sin esas cifras, el plan no cambia.
+Treinta y un niveles que mostraban el dibujo de otro nivel pasan al dibujo de ese nivel, sacado del Fan Kit. La herrería 10, la bomba 12, la bomba aérea 12 y el Destructor 5 siguen con el dibujo de otro nivel: el Fan Kit no tiene el suyo. La Torre multiusos, la Defensa artesanal y el Portal portátil tampoco tienen dibujo oficial de la aldea principal.
+
+En Agenda, **Añadir al calendario** guarda los fines de las mejoras de la exportación en el Calendario del iPhone. No se hace solo y no pide avisos. Con la app cerrada no hay notificación: en el iPhone eso necesita un servidor, y esta app no tiene.
 
 ## Funciones
 
@@ -153,7 +159,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - Porcentajes por categoría. La media es la de las categorías de la aldea. El equipamiento va aparte y no entra en esa media.
 - Filtros de periodo (7 días, 30 días, 3 meses, todo o un rango), recurso, ayuntamiento y grupo. Valen en el progreso y en los gráficos.
 - Historial de lo que subió entre importaciones, ritmo en niveles por semana y rachas: semanas seguidas mejorando, una categoría al máximo o el ayuntamiento completado.
-- Aviso cuando termina una mejora, solo con la app abierta y si el iPhone permite notificaciones de la app instalada. Con la app cerrada no hay aviso: eso exigiría un servidor, y esta app no tiene.
+- Aviso cuando termina una mejora, solo con la app abierta y si el iPhone permite notificaciones de la app instalada. Con la app cerrada no hay aviso: en el iPhone haría falta un servidor que envíe el mensaje. En Agenda se puede guardar un calendario con los fines de la exportación. No se guarda solo.
 
 ### Atención multicuenta
 
@@ -226,7 +232,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v40` y la de imágenes `cp-img-v9`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v41` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -234,6 +240,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.4 | 31 niveles usan el dibujo de su nivel en el Fan Kit. Agenda puede guardar un calendario con los fines de las mejoras. No hay avisos con la app cerrada. |
 | 4.1.3 | Recursos manuales por cuenta, con fecha. El plan y el coste hasta el máximo incluyen subir el ayuntamiento y, si hay cifras, dicen si alcanzan. |
 | 4.1.1 | Explorar estrategias: varias cuentas a la vez, con sesiones (por defecto 19:00–21:00) y sin usar el sueño como límite. El resultado es simulación. Pasarla al plan es un paso aparte. A 180 y 365 días solo se compara. |
 | 4.1.0 | Motor de atención multicuenta, sin pestaña nueva: bandeja, excepciones, presupuesto semanal, ventanas, hibernación, detector y prioridades. Rescatar flota despierta sin tocar temporizadores. |

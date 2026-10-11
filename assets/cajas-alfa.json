@@ -3850,5 +3850,185 @@
   "y": 3,
   "w": 58,
   "h": 55
+ },
+ "images/levels/army-camp_1.png": {
+  "x": 0,
+  "y": 119,
+  "w": 245,
+  "h": 217
+ },
+ "images/levels/army-camp_6.png": {
+  "x": 15,
+  "y": 13,
+  "w": 68,
+  "h": 60
+ },
+ "images/levels/gold-mine_13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 125,
+  "h": 109
+ },
+ "images/levels/gold-mine_14.png": {
+  "x": 2,
+  "y": 1,
+  "w": 184,
+  "h": 161
+ },
+ "images/levels/laboratory_11.png": {
+  "x": 0,
+  "y": 15,
+  "w": 99,
+  "h": 85
+ },
+ "images/levels/laboratory_12.png": {
+  "x": 1,
+  "y": 18,
+  "w": 98,
+  "h": 82
+ },
+ "images/levels/cannon_17.png": {
+  "x": 8,
+  "y": 5,
+  "w": 82,
+  "h": 73
+ },
+ "images/levels/cannon_18.png": {
+  "x": 1,
+  "y": 0,
+  "w": 140,
+  "h": 110
+ },
+ "images/levels/cannon_19.png": {
+  "x": 0,
+  "y": 1,
+  "w": 139,
+  "h": 110
+ },
+ "images/levels/cannon_20.png": {
+  "x": 6,
+  "y": 3,
+  "w": 88,
+  "h": 77
+ },
+ "images/levels/clan-castle_9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 157,
+  "h": 168
+ },
+ "images/levels/clan-castle_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 116
+ },
+ "images/levels/x-bow_9.png": {
+  "x": 2,
+  "y": 3,
+  "w": 95,
+  "h": 94
+ },
+ "images/levels/x-bow_10.png": {
+  "x": 2,
+  "y": 3,
+  "w": 95,
+  "h": 94
+ },
+ "images/levels/dark-elixir-storage_8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 140,
+  "h": 140
+ },
+ "images/levels/dark-elixir-storage_9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 136,
+  "h": 141
+ },
+ "images/levels/eagle-artillery_4.png": {
+  "x": 0,
+  "y": 6,
+  "w": 138,
+  "h": 163
+ },
+ "images/levels/eagle-artillery_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 149,
+  "h": 180
+ },
+ "images/levels/bomb-tower_7.png": {
+  "x": 0,
+  "y": 1,
+  "w": 100,
+  "h": 126
+ },
+ "images/levels/bomb-tower_8.png": {
+  "x": 0,
+  "y": 2,
+  "w": 100,
+  "h": 123
+ },
+ "images/levels/scattershot_1.png": {
+  "x": 0,
+  "y": 7,
+  "w": 120,
+  "h": 113
+ },
+ "images/levels/ricochet-cannon_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 126,
+  "h": 134
+ },
+ "images/levels/seeking-air-mine_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 87,
+  "h": 119
+ },
+ "images/guardians/smasher_2.png": {
+  "x": 114,
+  "y": 259,
+  "w": 822,
+  "h": 727
+ },
+ "images/guardians/smasher_3.png": {
+  "x": 115,
+  "y": 263,
+  "w": 815,
+  "h": 705
+ },
+ "images/guardians/smasher_4.png": {
+  "x": 157,
+  "y": 61,
+  "w": 689,
+  "h": 934
+ },
+ "images/guardians/logger_2.png": {
+  "x": 0,
+  "y": 119,
+  "w": 784,
+  "h": 871
+ },
+ "images/guardians/logger_3.png": {
+  "x": 230,
+  "y": 149,
+  "w": 653,
+  "h": 734
+ },
+ "images/guardians/logger_4.png": {
+  "x": 0,
+  "y": 53,
+  "w": 1024,
+  "h": 971
+ },
+ "images/guardians/logger_5.png": {
+  "x": 0,
+  "y": 71,
+  "w": 1024,
+  "h": 953
  }
 }
