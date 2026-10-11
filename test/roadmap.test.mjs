@@ -7,9 +7,10 @@ import { analyze, builderStatus, indexCaps } from "../js/progress.js";
 import { HEROES_FUERA } from "../js/plan.js";
 import { reconcileMessage, reconcileProvisionals, toggleProvisional } from "../js/provisional.js";
 import {
-  ahoraDe, buildRoadmap, capTownHall, constructoresParaPlan, effectivePlan, planIsConfigured, planLabel,
-  requisitosAyuntamiento, rushGaps,
+  ahoraDe, buildRoadmap, capTownHall, constructoresParaPlan, effectivePlan, marcarCabida, ordenarParaPlan, planIsConfigured, planLabel,
+  prepararSubida, programar, requisitosAyuntamiento, rushGaps,
 } from "../js/roadmap.js";
+import { semanaPlan } from "../js/schedule.js";
 
 const caps = JSON.parse(readFileSync(new URL("../data/caps_clashrecord.json", import.meta.url)));
 const manifest = JSON.parse(readFileSync(new URL("../assets/manifest.json", import.meta.url)));
@@ -154,7 +155,9 @@ test("rushear usa las chozas del JSON y suma B.O.B; si no vienen, el ajuste es 4
   const conBob = constructoresParaPlan(c1, null);
   assert.equal(conBob.origen, "json");
   assert.equal(conBob.bob, true);
-  assert.equal(conBob.total, builderStatus(c1).total + 1);
+  assert.equal(conBob.total, builderStatus(c1).total);
+  assert.equal(conBob.chozas, 5);
+  assert.equal(conBob.total, 6);
   const vacia = sinChozas(c2);
   assert.equal(constructoresParaPlan(vacia, 6).origen, "ajuste");
   assert.equal(constructoresParaPlan(vacia, 6).total, 6);
@@ -373,4 +376,87 @@ test("rush esencial solo programa los requisitos y rush estratégico suma sugere
   assert.match(app, /recursosDeCuenta/);
   assert.equal(app.includes("cuello de botella"), false);
   assert.equal(app.includes("ID deducido"), false);
+});
+
+test("4.1.6: desde TH17 la subida pide las fusiones al máximo y los requisitos del ayuntamiento", () => {
+  const th17 = structuredClone(c2);
+  const hall = th17.buildings.find((b) => b.data === 1000001);
+  hall.lvl = 17;
+  hall.weapon = 1;
+  const subida = requisitosAyuntamiento(th17, index, 18);
+  const filas = subida.pasos.find((p) => p.desde === 17).filas;
+  const fusion = (id) => filas.find((f) => f.id === id && f.fusion);
+  assert.equal(fusion("1000008").requerido, 21);
+  assert.equal(fusion("1000009").requerido, 21);
+  assert.equal(fusion("1000011").requerido, 17);
+  assert.equal(fusion("1000031").requerido, 7);
+  assert.equal(fusion("1000008").provisional, true);
+  assert.ok(filas.some((f) => f.id === "inferno-artillery"));
+  assert.ok(filas.some((f) => f.id === "1000010"));
+  const previo = requisitosAyuntamiento(c2, index, 17).pasos[0].filas;
+  assert.equal(previo.some((f) => f.fusion), false);
+  assert.equal(caps["18"].Wall.max, 19);
+  assert.equal(caps["18"].Wall.count, 325);
+});
+
+test("4.1.6: el plan prioriza desbloqueos, almacenes, oro y elixir, y aparta muros y artesanales", () => {
+  const pasos = [
+    { id: "1000010", queue: "constructor", seconds: 60, instance: "m", fromLvl: 1, toLvl: 2, title: "Muro", categoryKey: "muros" },
+    { id: "1000097", queue: "constructor", seconds: 60, instance: "d", fromLvl: 1, toLvl: 2, title: "Defensa artesanal", categoryKey: "defensas" },
+    { id: "1000008", queue: "constructor", seconds: 60, instance: "c", fromLvl: 1, toLvl: 2, title: "Cañón", categoryKey: "defensas" },
+    { id: "1000000", queue: "constructor", seconds: 60, instance: "e", fromLvl: 1, toLvl: 2, title: "Campamento", categoryKey: "ejercito_edif" },
+    { id: "1000071", queue: "constructor", seconds: 60, instance: "h", fromLvl: 1, toLvl: 2, title: "Consejo heroico", categoryKey: "ejercito_edif" },
+    { id: "1000070", queue: "constructor", seconds: 60, instance: "b", fromLvl: 1, toLvl: 2, title: "Herrería", categoryKey: "ejercito_edif" },
+    { id: "1000068", queue: "constructor", seconds: 60, instance: "p", fromLvl: 1, toLvl: 2, title: "Caseta de animales", categoryKey: "ejercito_edif" },
+    { id: "1000059", queue: "constructor", seconds: 60, instance: "t", fromLvl: 1, toLvl: 2, title: "Taller", categoryKey: "ejercito_edif" },
+    { id: "1000005", queue: "constructor", seconds: 60, instance: "g", fromLvl: 1, toLvl: 2, title: "Almacén de oro", categoryKey: "recursos" },
+  ];
+  const caro = { id: "1000008", queue: "constructor", seconds: 60, instance: "caro", fromLvl: 11, toLvl: 12, title: "Cañón caro", categoryKey: "defensas" };
+  const exp = { buildings: [{ data: 1000005, lvl: 1, cnt: 1 }] };
+  marcarCabida([caro, pasos[8]], exp);
+  assert.equal(caro.noCabe, true);
+  assert.equal(pasos[8].antesDeNoCabe, true);
+  const orden = ordenarParaPlan([...pasos, caro]);
+  const ids = orden.map((s) => s.instance);
+  assert.deepEqual(new Set(ids.slice(0, 4)), new Set(["h", "b", "p", "t"]));
+  assert.ok(ids.indexOf("g") < ids.indexOf("caro"));
+  assert.ok(ids.indexOf("caro") < ids.indexOf("m"));
+  assert.equal(ids.at(-1), "d");
+  const medio = orden.filter((s) => s.instance === "c" || s.instance === "e");
+  assert.deepEqual(medio.map((s) => s.instance), ["c", "e"]);
+  const subida = [];
+  for (let i = 0; i < 10; i += 1) {
+    subida.push({ id: "1000008", queue: "constructor", seconds: 3600, instance: "n" + i, rushClase: "sugerencia" });
+  }
+  subida.push({ id: "1000071", queue: "constructor", seconds: 100, instance: "req", rushClase: "requisito" });
+  subida.push({ id: "town-hall", queue: "constructor", seconds: 4 * 3600, instance: "town-hall", rushClase: "requisito" });
+  const listo = prepararSubida(subida);
+  assert.equal(listo[0].instance, "req");
+  const thAt = listo.findIndex((s) => s.id === "town-hall");
+  const antes = listo.slice(1, thAt);
+  assert.equal(antes.reduce((n, s) => n + s.seconds, 0), 6 * 3600);
+  assert.equal(listo.length - thAt - 1, 4);
+  const th11 = JSON.parse(readFileSync(new URL("../data/2026-10-07/th11_R02YUVC0J_2026-10-07_a45e.json", import.meta.url)));
+  const plan11 = road(th11, { modo: "maxear" }, []);
+  const fija = plan11.lanes.find((l) => l.reservaHeroe);
+  assert.ok(fija);
+  const heroes = plan11.orden.filter((s) => s.categoryKey === "heroes" && s.laneId);
+  assert.ok(heroes.length > 0);
+  assert.equal(heroes.every((s) => s.laneId === fija.id), true);
+  const deC1 = road(c1, { modo: "maxear" }, []);
+  assert.equal(deC1.orden.some((s) => s.categoryKey === "heroes"), false);
+  assert.equal(deC1.lanes.some((l) => l.reservaHeroe), false);
+  assert.equal(deC1.lanes.filter((l) => l.cola === "constructor").length, 6);
+  const dia = [0, 1, 2, 3, 4, 5, 6].map(() => [{ inicio: 0, minutos: 1440 }]);
+  const sueno = { desde: 23 * 60, hasta: 7 * 60 };
+  const base = [{ id: "1000008", queue: "constructor", seconds: 3600, instance: "z", fromLvl: 1, toLvl: 2, title: "Cañón", categoryKey: "defensas" }];
+  const lanes = [{ id: "c0", cola: "constructor", freeAt: now, th: 16, libreYa: true, blocked: false }];
+  const conSueno = programar(base.map((s) => ({ ...s })), lanes.map((l) => ({ ...l })), sueno, now);
+  const conSesion = programar(base.map((s) => ({ ...s })), lanes.map((l) => ({ ...l })), semanaPlan(), now);
+  const conDia = programar(base.map((s) => ({ ...s })), lanes.map((l) => ({ ...l })), dia, now);
+  assert.equal(conSueno.orden[0].inicio, conSesion.orden[0].inicio);
+  assert.equal(conSesion.orden[0].inicio, Date.parse("2026-10-11T17:00:00Z"));
+  assert.equal(conDia.orden[0].inicio, now);
+  const noche = programar(base.map((s) => ({ ...s })), lanes.map((l) => ({ ...l })), semanaPlan(), Date.parse("2026-10-11T22:30:00Z"));
+  assert.equal(noche.orden[0].inicio, Date.parse("2026-10-12T17:00:00Z"));
 });

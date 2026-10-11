@@ -14,7 +14,7 @@ export function pararExploracion() {
 }
 
 export function empaquetarCuentas(cuentas, index, ahora) {
-  const hipotesis = { botinPorAtaque: 400000, minutosPorAtaque: 3 };
+  const hipotesis = { minutosPorAtaque: 3 };
   return (cuentas || []).filter((cuenta) => cuenta && cuenta.exp).map((cuenta) => empaquetar(compilarPasos({
     exp: cuenta.exp,
     index,

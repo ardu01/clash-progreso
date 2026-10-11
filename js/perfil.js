@@ -135,7 +135,7 @@ export function exportFacts(exp) {
     casaConstructor: casaConstructorOf(exp),
     constructores: {
       known: status.known,
-      total: status.known ? status.total : null,
+      total: status.known ? status.chozas : null,
       grupos: gruposChoza(exp),
     },
     bob: bobOf(exp),

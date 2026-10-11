@@ -10,7 +10,7 @@ import { alinear, crearGuerra, textoNumero } from "../js/guerra.js";
 import { docVacio, reducir } from "../js/operaciones.js";
 import { aplicarPlantilla } from "../js/plantillas.js";
 import { enHorizonte, metaFlota, predecirNiveles } from "../js/prediccion.js";
-import { C1, C2, estrategiaPorDefecto, ordenarCuentas, planMantenimiento } from "../js/prioridades.js";
+import { C1, C2, estrategiaPorDefecto, ordenarCuentas, planMantenimiento, tareasDe } from "../js/prioridades.js";
 import { crearSesion, eficiencia, marcarPaso, siguientePaso } from "../js/sesion.js";
 import { simular } from "../js/simulacion.js";
 
@@ -23,6 +23,9 @@ function cuenta(parcial) {
     principal: !!parcial.principal,
     libreAccion: parcial.libreAccion || 0,
     labLibre: !!parcial.labLibre,
+    mascotasLibres: !!parcial.mascotasLibres,
+    ayudanteLibre: !!parcial.ayudanteLibre,
+    herreriaLibre: !!parcial.herreriaLibre,
     desactualizada: !!parcial.desactualizada,
     cats: parcial.cats || { laboratorio: 40, heroes: 10, ejercito_edif: 50, defensas: 80, trampas: 70 },
     heroesConTimer: !!parcial.heroesConTimer,
@@ -181,4 +184,28 @@ test("4.1.3: el coste del ayuntamiento sale del módulo y no se inventa el oro",
   assert.equal(coste.oro, 13000000);
   assert.equal(coste.segundos, 691200);
   assert.equal(costeSubirTh(1), null);
+});
+
+test("4.1.6: la sesión también anota mascotas, ayudantes y herrería", () => {
+  const cuentaLibre = cuenta({
+    tag: "#Z",
+    nombre: "Zeta",
+    libreAccion: 0,
+    labLibre: false,
+    mascotasLibres: true,
+    ayudanteLibre: true,
+    herreriaLibre: true,
+  });
+  const pasos = tareasDe(cuentaLibre);
+  assert.deepEqual(pasos.map((p) => p.cola), ["mascotas", "ayudante", "herreria"]);
+  assert.deepEqual(pasos.map((p) => p.titulo), ["Mascotas", "Ayudante", "Herrería"]);
+  assert.equal(pasos.every((p) => p.obligatoria), true);
+  assert.equal(tareasDe(cuenta({ tag: "#Z", desactualizada: true, mascotasLibres: true })).length, 0);
+  const plan = planMantenimiento([cuentaLibre], { minutos: 20 });
+  assert.equal(plan.obligatorias.length, 3);
+  assert.equal(plan.cabe, true);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /mascotasLibres/);
+  assert.match(app, /ayudanteLibre/);
+  assert.match(app, /herreriaLibre/);
 });
