@@ -41,6 +41,7 @@ import { docDe, docVacio, entradaDeImportacion, reducir, sumarDiario } from "./o
 import { avisoTrasImportar } from "./replan.js";
 import { SUEÑO_DEFECTO } from "./prioridades.js";
 import { htmlOperaciones } from "./ui-operaciones.js";
+import { htmlAtencion, htmlMotor } from "./ui-atencion.js";
 import { cargarFuentes, costeSubirTh } from "./fuentes.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
@@ -237,6 +238,11 @@ function route() {
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
   if (name === "perfil") return { name: "perfil", tag: parts[1] ? "#" + parts[1] : null, cat: null };
   if (name === "operaciones") return { name: "operaciones", tag: null, cat: null, sub: parts[1] || "hub" };
+  if ((name === "inicio" && (parts[1] === "bandeja" || parts[1] === "excepciones"))
+    || (name === "agenda" && (parts[1] === "presupuesto" || parts[1] === "ventanas"))
+    || (name === "roster" && (parts[1] === "hibernar" || parts[1] === "detector" || parts[1] === "rescate"))) {
+    return { name, tag: null, cat: null, sub: parts[1] };
+  }
   if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
@@ -1237,6 +1243,7 @@ function renderInicio() {
     <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
+    ${htmlMotor()}
     <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
     <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
     <div class="section">${sectionHead("Abrir hoy", abrirInfo)}${hoyBlock}</div>
@@ -2286,8 +2293,17 @@ function navbar(r) {
   let trail = "";
   let title = titles[r.name] || "";
   let collapsed = "false";
-  if (r.name === "inicio") {
+  if (r.name === "inicio" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
+    collapsed = "true";
+  } else if (r.name === "inicio") {
     trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
+  } else if (r.name === "agenda" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
+    collapsed = "true";
+  } else if (r.name === "roster" && r.sub) {
+    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    collapsed = "true";
   } else if (r.name === "copia" || r.name === "ahora" || r.name === "actualizar") {
     lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
@@ -4393,7 +4409,9 @@ function screenFor(r) {
   if (!state.ready) {
     return `<h1 class="large-title">Clash Progreso</h1><div class="section"><div class="card"><div class="sk sk--line"></div></div></div>`;
   }
+  if (r.name === "inicio" && r.sub) return renderAtencion(r);
   if (r.name === "inicio") return renderInicio();
+  if (r.name === "roster" && r.sub) return renderAtencion(r);
   if (r.name === "roster" || r.name === "ajustes" || r.name === "importar") return renderRoster();
   if (r.name === "progreso") return renderProgreso(r.tag || state.selected);
   if (r.name === "detalle") return renderDetalle(r.tag, r.cat);
@@ -4402,12 +4420,14 @@ function screenFor(r) {
   if (r.name === "copia") return renderCopia();
   if (r.name === "ahora") return renderAhora();
   if (r.name === "ranking") return renderRanking();
+  if (r.name === "agenda" && r.sub) return renderAtencion(r);
   if (r.name === "agenda") return renderAgenda();
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
   if (r.name === "actualizar") return renderActualizar();
+  if (r.name === "operaciones" && (r.sub === "prioridades" || r.sub === "rescate")) return renderAtencion(r);
   if (r.name === "operaciones") return renderOperaciones(r);
   return renderInicio();
 }
@@ -5713,6 +5733,16 @@ function fichasOperacion() {
   });
 }
 
+function renderAtencion(r) {
+  return htmlAtencion({
+    sub: r.sub,
+    now: state.now,
+    sueno: state.sleep,
+    cuentas: fichasOperacion(),
+    doc: docOp(),
+  });
+}
+
 function renderOperaciones(r) {
   return htmlOperaciones({
     sub: r.sub || "hub",
@@ -5727,6 +5757,11 @@ function aplicarOperacion(op, arg) {
   if (op === "nota") {
     const campo = document.querySelector("[data-op-nota]");
     valor = campo ? campo.value : "";
+  }
+  if (op === "hibernar" && String(arg).startsWith("custom|")) {
+    const campo = document.querySelector("[data-op-dias]");
+    const n = Math.round(Number(campo && campo.value));
+    valor = (n > 0 && n <= 365 ? String(n) : "0") + arg.slice("custom".length);
   }
   const cuentas = fichasOperacion();
   const foco = cuentas.find((cuenta) => cuenta.tag === docOp().tagFoco) || cuentas[0];

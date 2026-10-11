@@ -4,19 +4,20 @@ import { ordenarCuentas, tareasDe } from "./prioridades.js";
  * Itinerario de una visita. El estado de un paso es una declaración.
  * `confirmado` no se rellena aquí: solo lo cubre una exportación posterior.
  */
-export function crearSesion({ cuentas, minutos, ahora }) {
+export function crearSesion({ cuentas, minutos, ahora, recomendados }) {
   const tope = Number(minutos) > 0 ? Number(minutos) : 60;
   const orden = ordenarCuentas(cuentas);
   const pasos = [];
   let usados = 0;
-  for (const cuenta of orden) {
-    for (const paso of tareasDe(cuenta)) {
-      if (pasos.length && usados + paso.minutos > tope) continue;
-      pasos.push({ ...paso });
-      usados += paso.minutos;
-    }
+  const fuente = Array.isArray(recomendados)
+    ? recomendados
+    : orden.flatMap((cuenta) => tareasDe(cuenta));
+  for (const paso of fuente) {
+    if (pasos.length && usados + paso.minutos > tope) continue;
+    pasos.push({ ...paso, estado: paso.estado || "pendiente" });
+    usados += paso.minutos;
   }
-  if (!pasos.length) {
+  if (!pasos.length && !Array.isArray(recomendados)) {
     for (const cuenta of orden) {
       if (pasos.length && usados + 2 > tope) break;
       pasos.push({

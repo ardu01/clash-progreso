@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.0.0";
-import { precacheUrls } from "./js/images.js?v=4.0.0";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.1.0";
+import { precacheUrls } from "./js/images.js?v=4.1.0";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -15,6 +15,7 @@ const APP = [
   "./css/views.css",
   "./css/estilo-3.1.css",
   "./css/operaciones.css",
+  "./css/atencion.css",
   "./js/app.js",
   "./js/progress.js",
   "./js/format.js",
@@ -53,6 +54,8 @@ const APP = [
   "./js/fuentes.js",
   "./js/operaciones.js",
   "./js/ui-operaciones.js",
+  "./js/atencion.js",
+  "./js/ui-atencion.js",
   "./js/charts.js",
   "./js/colas.js",
   "./js/schedule.js",
