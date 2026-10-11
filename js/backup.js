@@ -1,6 +1,15 @@
 import { madridDayKey } from "./format.js";
+import { normalizarRecursos } from "./recursos.js";
 import { mergePlanes } from "./roadmap.js";
 import { mergeProvisionals } from "./provisional.js";
+
+function elegirRecursos(local, incoming) {
+  const prev = normalizarRecursos(local);
+  const next = normalizarRecursos(incoming);
+  if (!next) return prev;
+  if (!prev) return next;
+  return (next.actualizado || 0) > (prev.actualizado || 0) ? next : prev;
+}
 
 export function backupFilename(now = Date.now()) {
   return `clash-progreso-copia-${madridDayKey(now)}.json`;
@@ -38,16 +47,20 @@ export function buildBackup({ accounts, exports, planes, provisionales, sueno, d
     schema: 4,
     version,
     exportedAt: new Date(now).toISOString(),
-    accounts: (accounts || []).map((a) => ({
-      tag: a.tag,
-      alias: a.alias,
-      principal: !!a.principal,
-      addedAt: a.addedAt || 0,
-      chip: a.chip || "",
-      objetivo: a.objetivo == null ? null : a.objetivo,
-      grupos: Array.isArray(a.grupos) ? a.grupos : [],
-      meta: a.meta && a.meta.clave ? { clave: a.meta.clave, pct: a.meta.pct } : null,
-    })),
+    accounts: (accounts || []).map((a) => {
+      const recursos = normalizarRecursos(a.recursos);
+      return {
+        tag: a.tag,
+        alias: a.alias,
+        principal: !!a.principal,
+        addedAt: a.addedAt || 0,
+        chip: a.chip || "",
+        objetivo: a.objetivo == null ? null : a.objetivo,
+        grupos: Array.isArray(a.grupos) ? a.grupos : [],
+        meta: a.meta && a.meta.clave ? { clave: a.meta.clave, pct: a.meta.pct } : null,
+        ...(recursos ? { recursos } : {}),
+      };
+    }),
     exports: (exports || []).map((exp) => ({ ...exp })),
     planes: planes || {},
     provisionales: (provisionales || []).map((p) => ({ ...p })),
@@ -89,6 +102,7 @@ export function mergeBackup(current, incoming) {
     if (!raw || typeof raw.tag !== "string" || !raw.tag.startsWith("#")) continue;
     const cur = byTag.get(raw.tag);
     if (!cur) {
+      const recursos = normalizarRecursos(raw.recursos);
       const acc = {
         tag: raw.tag,
         alias: String(raw.alias || "").trim() || raw.tag,
@@ -98,6 +112,7 @@ export function mergeBackup(current, incoming) {
         objetivo: raw.objetivo == null ? null : raw.objetivo,
         grupos: Array.isArray(raw.grupos) ? raw.grupos : [],
         meta: raw.meta && raw.meta.clave ? { clave: raw.meta.clave, pct: raw.meta.pct } : null,
+        ...(recursos ? { recursos } : {}),
       };
       accounts.push(acc);
       byTag.set(raw.tag, acc);
@@ -112,6 +127,8 @@ export function mergeBackup(current, incoming) {
     if (cur.objetivo == null && raw.objetivo != null) cur.objetivo = raw.objetivo;
     if (!(cur.grupos && cur.grupos.length) && Array.isArray(raw.grupos) && raw.grupos.length) cur.grupos = raw.grupos.slice();
     if (cur.meta == null && raw.meta && raw.meta.clave) cur.meta = { clave: raw.meta.clave, pct: raw.meta.pct };
+    const recursos = elegirRecursos(cur.recursos, raw.recursos);
+    if (recursos) cur.recursos = recursos;
   }
   return {
     accounts,

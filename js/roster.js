@@ -1,4 +1,5 @@
 import { ROSTER } from "./progress.js";
+import { normalizarRecursos } from "./recursos.js";
 
 /** Catálogo de las 11 aldeas de prueba que viajan con la app. No es el roster del usuario. */
 export const SEED_CATALOG = ROSTER;
@@ -39,6 +40,7 @@ export function normalizeAccount(raw) {
   if (!tag.startsWith("#")) return null;
   const alias = String(raw.alias ?? raw.nombre ?? "").trim();
   const addedAt = Number.isFinite(raw.addedAt) ? raw.addedAt : Number(raw.añadida) || 0;
+  const recursos = normalizarRecursos(raw.recursos);
   return {
     tag,
     alias: alias || tag,
@@ -48,6 +50,7 @@ export function normalizeAccount(raw) {
     objetivo: raw.objetivo == null ? (seedByTag(tag) ? seedByTag(tag).objetivo : null) : raw.objetivo,
     grupos: cleanGrupos(raw.grupos),
     meta: cleanMeta(raw.meta),
+    ...(recursos ? { recursos } : {}),
   };
 }
 
@@ -173,6 +176,20 @@ export function addAccount(accounts, raw) {
   if (!acc) return accounts.slice();
   if (accounts.some((a) => a.tag === acc.tag)) return accounts.slice();
   return accounts.concat(acc);
+}
+
+export function setRecursos(accounts, tag, raw, now = Date.now()) {
+  const next = normalizarRecursos({ ...(raw || {}), actualizado: now, manual: true });
+  return accounts.map((a) => {
+    if (a.tag !== tag) return a;
+    if (!next) {
+      if (!a.recursos) return a;
+      const copy = { ...a };
+      delete copy.recursos;
+      return copy;
+    }
+    return { ...a, recursos: next };
+  });
 }
 
 export function setMeta(accounts, tag, meta) {

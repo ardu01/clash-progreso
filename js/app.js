@@ -14,7 +14,7 @@ import {
 } from "./import.js";
 import { allExports, clearExports, deleteTag, guardarDocumentos, guardarRecuperacion, guardarSchema, latestByTag, latestCopyAt, leerDocumentos, leerSchema, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
-  addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal,
+  addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal, setRecursos,
 } from "./roster.js";
 import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
@@ -23,12 +23,14 @@ import { estadoColas } from "./colas.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
+import { cubrir, recursosDeCuenta } from "./recursos.js";
+import { TH_FUENTE, TH_URL, costeTh, costeThRango } from "./th-costes.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
 import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import {
-  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, defaultPlan, effectivePlan,
+  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
@@ -369,6 +371,7 @@ function toMeta(a, featured) {
     objetivo: a.objetivo == null ? null : a.objetivo,
     grupos: a.grupos || [],
     meta: a.meta || null,
+    recursos: a.recursos || null,
     featured: featured === a.tag,
     added: true,
   };
@@ -874,6 +877,24 @@ function costOf(exp, th) {
   return remainingCost(piecesOf(exp, state.index, th));
 }
 
+function ayuntamientoLine(exp) {
+  const th = townHallLevel(exp);
+  if (!Number.isInteger(th)) return "";
+  const siguiente = costeTh(th + 1);
+  if (!siguiente) return "";
+  const plan = exp.tag && state.planes ? state.planes[exp.tag] : null;
+  const meta = exp.tag ? accountByTag(exp.tag) : null;
+  let hasta = th + 1;
+  const pedido = plan && Number.isInteger(plan.th) ? plan.th : (meta && Number.isInteger(meta.objetivo) ? meta.objetivo : null);
+  if (pedido != null && pedido > th) hasta = Math.min(18, pedido);
+  let text = `TH${th} → ${th + 1} · ${fmtRes(siguiente.oro)} oro · ${textoSegundos(siguiente.segundos)}`;
+  if (hasta > th + 1) {
+    const rango = costeThRango(th, hasta);
+    if (rango && rango.oro) text += ` · hasta TH${hasta}: ${fmtRes(rango.oro)} oro · ${textoSegundos(rango.segundos)}`;
+  }
+  return `<p class="t-body">Ayuntamiento ${esc(text)}</p>`;
+}
+
 function resourceAllowsItem(it) {
   const filtro = state.filters.recurso;
   if (!filtro || filtro === "todos") return true;
@@ -1012,11 +1033,13 @@ function costCard(exp, th, full) {
   const bag = cost.total;
   const line = costBits(bag) || "Nada pendiente con coste conocido";
   const miss = bag.sinCoste ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 paso" : `${bag.sinCoste} pasos`} sin coste en la fuente: no se ha sumado.</p>` : "";
-  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
+  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}, sin subir el ayuntamiento. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos. <a href="${esc(TH_URL)}" target="_blank" rel="noopener noreferrer" title="${esc(TH_FUENTE)}">Ayuntamiento</a>.</p>`;
+  const hall = ayuntamientoLine(exp);
   if (!full) {
     return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo</h2>
       <p class="t-body">${esc(line)}</p>
+      ${hall}
       ${miss}${cite}
     </div></div>`;
   }
@@ -1029,6 +1052,7 @@ function costCard(exp, th, full) {
   return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo de TH${th}</h2>
       <p class="t-body">${esc(line)}</p>
+      ${hall}
       ${miss}${cite}
     </div></div>
     ${rows ? `<div class="section"><ul class="list">${rows}</ul></div>` : ""}`;
@@ -1101,7 +1125,14 @@ function roadmapHacia(meta, objetivo) {
   const cur = stored ? effectivePlan(stored) : null;
   const guardado = !!(cur && cur.th != null && cur.th >= objetivo);
   const plan = guardado ? cur : { ...defaultPlan(), th: objetivo };
-  return buildRoadmap({
+  const key = claveRoadmap({
+    tag: meta.tag + "\0" + objetivo,
+    timestamp: exp.timestamp,
+    plan,
+    sueno: state.sleep,
+    now: state.now,
+  });
+  return cachedRoad(key, () => buildRoadmap({
     exp,
     index: state.index,
     tag: meta.tag,
@@ -1109,7 +1140,7 @@ function roadmapHacia(meta, objetivo) {
     provisionals: state.provisionales,
     sleep: activeSleep(),
     now: state.now,
-  });
+  }));
 }
 
 function objetivosFlota(list) {
@@ -1464,14 +1495,15 @@ function filasRushHtml(filas) {
       : (fila.actual < fila.requerido ? `Nv ${fila.actual} → ${fila.requerido}` : `Nv ${fila.actual} · pedido ${fila.requerido}`);
     const cuenta = fila.cantidad > 1 ? ` · ${fila.tienen}/${fila.cantidad}` : "";
     const estado = fila.hecho ? "Ya está" : fila.enCurso ? "En curso" : "Falta";
-    const aviso = fila.clase === "sugerencia" ? "Sugerencia" : "provisional";
+    const aviso = fila.clase === "sugerencia" ? "Sugerencia" : (fila.provisional === false ? "" : "provisional");
     const chip = fila.clase === "sugerencia" && !fila.hecho ? "Sugerencia" : estado;
     let extra = "";
     if (fila.sinDato) extra = " · Sin coste: el nivel no viene en la exportación";
     else if (!fila.hecho && fila.coste && (fila.coste.oro || fila.coste.elixir || fila.coste.oscuro || fila.coste.muros || fila.coste.segundos || fila.coste.sinCoste)) {
       extra = ` · ${textoCosteReq(fila.coste)}`;
     }
-    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(fila.title)} <span class="num">${esc(nivel)}${cuenta}</span></span><span class="row__sub">${estado}${esc(extra)} · ${aviso}</span></span><span class="chip${fila.hecho ? "" : " chip--warn"}">${chip}</span></div></li>`;
+    const cola = aviso ? ` · ${aviso}` : "";
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(fila.title)} <span class="num">${esc(nivel)}${cuenta}</span></span><span class="row__sub">${estado}${esc(extra)}${cola}</span></span><span class="chip${fila.hecho ? "" : " chip--warn"}">${chip}</span></div></li>`;
   }).join("");
 }
 
@@ -1539,6 +1571,7 @@ function renderPlan(tag) {
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
+    ${coberturaCard(meta, road)}
     ${road.rush ? rushPanel(road) : ""}
     <div class="section"><div class="card"><div class="section-head"><h2 class="t-headline">Criterio</h2>${infoBtn(notas.join(" "))}</div>${cifras}</div></div>
     ${roadmapList(road)}
@@ -2562,6 +2595,7 @@ function renderProgreso(tag) {
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     ${exp && inFleet ? summaryCard(a, meta) : ""}
+    ${recursosCard(meta)}
     ${exp && inFleet ? rushCard(meta) : ""}
     ${links}
     ${body}
@@ -2656,6 +2690,94 @@ function categoryHead(catKey, count, a) {
 
 function isWallMax(it) {
   return it.max != null && it.lvl >= it.max;
+}
+
+const RECURSO_CAMPOS = [
+  ["oro", "Oro"],
+  ["elixir", "Elixir"],
+  ["oscuro", "Oscuro"],
+  ["brillante", "Brillante"],
+  ["glowy", "Reluciente"],
+  ["starry", "Estrellada"],
+];
+
+function recursoInput(clave, etiqueta, valor, prefijo) {
+  const name = prefijo ? `${prefijo}${clave}` : clave;
+  const v = valor == null ? "" : String(valor);
+  return `<label>${esc(etiqueta)}<input inputmode="numeric" enterkeyhint="done" autocomplete="off" data-res="${esc(name)}" value="${esc(v)}" aria-label="${esc(etiqueta)}"></label>`;
+}
+
+function recursosCard(meta) {
+  if (!meta) return "";
+  const rec = recursosDeCuenta(meta);
+  const fecha = rec && rec.actualizado ? fmtFin(rec.actualizado) : "Sin fecha";
+  const abierto = !!(rec && rec.ingresos);
+  const campos = RECURSO_CAMPOS.map(([clave, etiqueta]) => recursoInput(clave, etiqueta, rec && rec[clave])).join("");
+  const ingresos = RECURSO_CAMPOS.map(([clave, etiqueta]) => recursoInput(clave, etiqueta, rec && rec.ingresos && rec.ingresos[clave], "ing-")).join("");
+  return `<div class="section" data-recursos="${esc(meta.tag)}"><div class="card">
+    <div class="section-head"><h2 class="t-headline">Recursos <span class="chip">Manual</span></h2>${infoBtn("Cifras a mano. La exportación no trae el oro ni las menas, así que no están confirmadas. Al día es un ingreso estimado.")}</div>
+    <p class="t-footnote c-2">${esc(fecha)}</p>
+    <div class="res-grid">${campos}</div>
+    <button type="button" class="btn btn--plain" data-recursos-dia aria-pressed="${abierto ? "true" : "false"}" aria-expanded="${abierto ? "true" : "false"}">Al día</button>
+    <div class="res-grid" data-recursos-ingresos ${abierto ? "" : "hidden"}>${ingresos}</div>
+    <button type="button" class="btn btn--primary btn--block" data-recursos-save>Guardar</button>
+  </div></div>`;
+}
+
+const NOMBRE_FALTA = {
+  oro: "oro",
+  elixir: "elixir",
+  oscuro: "oscuro",
+  brillante: "brillante",
+  glowy: "reluciente",
+  starry: "estrellada",
+  muros: "oro o elixir",
+};
+
+function textoCubrir(res) {
+  if (!res) return "";
+  if (res.alcanza) return "Te alcanza";
+  const orden = ["oro", "elixir", "oscuro", "muros", "brillante", "glowy", "starry"];
+  const bits = [];
+  for (const clave of orden) {
+    if (!(clave in res.falta)) continue;
+    const valor = res.falta[clave];
+    const nombre = NOMBRE_FALTA[clave] || clave;
+    bits.push(valor == null ? `sin ${nombre}` : `faltan ${fmtRes(valor)} ${nombre}`);
+  }
+  let line = bits.join(" · ") || "Falta";
+  if (res.dias) line += ` · ~${res.dias} d`;
+  return line;
+}
+
+function siguientePaso(road) {
+  const list = (road.orden || []).filter((s) => s.inicio != null);
+  list.sort((a, b) => a.inicio - b.inicio || String(a.title).localeCompare(String(b.title), "es"));
+  return list[0] || (road.orden || [])[0] || null;
+}
+
+function costeObjetivo(road) {
+  const base = road.rush ? road.rush.coste : road.coste;
+  if (road.rush || !(road.targetTh > road.currentTh)) return base;
+  const extra = costeThRango(road.currentTh, road.targetTh);
+  if (!extra) return base;
+  return { ...base, oro: (base.oro || 0) + extra.oro };
+}
+
+function coberturaCard(meta, road) {
+  const rec = recursosDeCuenta(meta);
+  if (!rec) return "";
+  const paso = siguientePaso(road);
+  const sig = paso ? cubrir(rec, costeDePaso(paso)) : null;
+  const obj = cubrir(rec, costeObjetivo(road));
+  const nombre = paso ? `${paso.title} Nv ${paso.fromLvl} → ${paso.toLvl}` : "Nada pendiente";
+  const sigTxt = paso ? textoCubrir(sig) : "Nada pendiente";
+  const cls = (res, vacio) => (vacio || (res && res.alcanza) ? "cubre-ok" : "cubre-no");
+  return `<div class="section" data-cobertura><div class="card">
+    <div class="section-head"><h2 class="t-headline">¿Alcanza? <span class="chip">Manual</span></h2>${infoBtn("Con las cifras a mano de la cuenta. Sin esas cifras, el plan no cambia.")}</div>
+    <p class="t-body ${cls(sig, !paso)}">Siguiente · ${esc(nombre)}: ${esc(sigTxt)}</p>
+    <p class="t-body ${cls(obj, false)}">Objetivo: ${esc(textoCubrir(obj))}</p>
+  </div></div>`;
 }
 
 function summaryCard(a) {
@@ -3101,7 +3223,7 @@ function mejorasCostes() {
     const a = viewOf(meta.tag);
     return `<div class="section"><div class="card acct-tile">
         ${thumb(1000001, { size: 52, th: a.th })}
-        <div class="acct-tile__main"><div class="section-head"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>${infoBtn(`Hasta el máximo de TH${a.th}. No es el coste de subir el ayuntamiento.`)}</div>
+        <div class="acct-tile__main"><div class="section-head"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>${infoBtn(`Hasta el máximo de TH${a.th}. Ese total no incluye subir el ayuntamiento: va en su propia línea.`)}</div>
         </div>
       </div>${costCard(exp, a.th, true)}</div>`;
   }).join("");
@@ -5081,6 +5203,35 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-actualizar]")) { abrirActualizar(); return; }
+    const guardarRec = origen.closest("[data-recursos-save]");
+    if (guardarRec) {
+      const root = guardarRec.closest("[data-recursos]");
+      const tag = root && root.getAttribute("data-recursos");
+      const leer = (name) => {
+        const el = root && root.querySelector(`[data-res="${name}"]`);
+        return el ? el.value : "";
+      };
+      const raw = { ingresos: {} };
+      for (const [clave] of RECURSO_CAMPOS) {
+        raw[clave] = leer(clave);
+        raw.ingresos[clave] = leer(`ing-${clave}`);
+      }
+      state.accounts = setRecursos(state.accounts, tag, raw, Date.now());
+      persistRoster();
+      avisoDiscreto(recursosDeCuenta(state.accounts.find((a) => a.tag === tag)) ? "Guardado" : "Sin cifras");
+      render();
+      return;
+    }
+    const alDia = origen.closest("[data-recursos-dia]");
+    if (alDia) {
+      const root = alDia.closest("[data-recursos]");
+      const panel = root && root.querySelector("[data-recursos-ingresos]");
+      const open = alDia.getAttribute("aria-pressed") !== "true";
+      alDia.setAttribute("aria-pressed", open ? "true" : "false");
+      alDia.setAttribute("aria-expanded", open ? "true" : "false");
+      if (panel) panel.hidden = !open;
+      return;
+    }
     const ctor = origen.closest("[data-ctor]");
     if (ctor) {
       const tag = ctor.dataset.ctorTag;

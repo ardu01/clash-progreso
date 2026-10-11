@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { levelCost, sumLevels } from "../js/costs.js";
+import { costeTh } from "../js/th-costes.js";
 import { analyze, builderStatus, indexCaps } from "../js/progress.js";
 import { HEROES_FUERA } from "../js/plan.js";
 import { reconcileMessage, reconcileProvisionals, toggleProvisional } from "../js/provisional.js";
@@ -250,6 +251,12 @@ function sumaPasos(orden) {
       total.segConstructor += row[1];
       continue;
     }
+    if (step.id === "town-hall") {
+      const row = costeTh(step.toLvl);
+      total.oro += row.oro;
+      total.segConstructor += row.segundos;
+      continue;
+    }
     const part = sumLevels(step.id, step.fromLvl, step.toLvl, 1);
     total.oro += part.oro;
     total.elixir += part.elixir;
@@ -268,7 +275,15 @@ test("rush esencial solo programa los requisitos y rush estratégico suma sugere
   assert.equal(esencial.orden.some((s) => s.categoryKey === "laboratorio"), false);
   assert.equal(esencial.orden.some((s) => s.id === "1000008"), false);
   assert.equal(esencial.orden.every((s) => s.rushClase === "requisito"), true);
-  assert.equal(esencial.orden.some((s) => s.id !== "1000071" && s.toLvl > 1), false);
+  assert.equal(esencial.orden.some((s) => s.id !== "1000071" && s.id !== "town-hall" && s.toLvl > 1), false);
+  const ayuntamiento = esencial.orden.find((s) => s.id === "town-hall");
+  assert.ok(ayuntamiento);
+  assert.equal(ayuntamiento.fromLvl, 16);
+  assert.equal(ayuntamiento.toLvl, 17);
+  assert.equal(ayuntamiento.seconds, costeTh(17).segundos);
+  const fins = esencial.orden.filter((s) => s.id !== "town-hall" && s.queue === "constructor" && s.fin != null).map((s) => s.fin);
+  if (fins.length) assert.ok(ayuntamiento.inicio >= Math.max(...fins));
+  assert.equal(esencial.rush.filas.some((f) => f.id === "town-hall" && f.provisional === false), true);
   const sala = esencial.rush.filas.find((f) => f.id === "1000071");
   assert.equal(sala.requerido, 10);
   assert.equal(sala.clase, "requisito");
@@ -353,6 +368,9 @@ test("rush esencial solo programa los requisitos y rush estratégico suma sugere
   assert.match(app, /Coste total/);
   assert.match(app, /Tiempo con/);
   assert.match(app, /Fecha estimada/);
+  assert.match(app, /data-cobertura/);
+  assert.match(app, /data-recursos-save/);
+  assert.match(app, /recursosDeCuenta/);
   assert.equal(app.includes("cuello de botella"), false);
   assert.equal(app.includes("ID deducido"), false);
 });

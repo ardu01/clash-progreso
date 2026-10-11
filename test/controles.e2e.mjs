@@ -110,6 +110,7 @@ async function paso(label, sel, hash, title, opts = {}) {
   const loc = page.locator(sel).first();
   await loc.waitFor({ state: "visible" });
   if (opts.punto) {
+    await loc.scrollIntoViewIfNeeded();
     const box = await loc.boundingBox();
     check(!!box, label + " sin caja");
     if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);

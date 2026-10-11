@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.1</strong><br>
+  <strong>Versión 4.1.3</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -41,6 +41,10 @@ Datos de prueba del 7 de octubre de 2026.
 | Análisis en claro | Agenda en claro |
 | --- | --- |
 | <img src="docs/capturas/313-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/313-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
+
+| Recursos | Plan |
+| --- | --- |
+| <img src="docs/capturas/317-recursos-oscuro.png" width="200" alt="Detalle de cuenta en oscuro: oro, elixir, oscuro y menas escritos a mano, con la marca Manual"> | <img src="docs/capturas/317-plan-oscuro.png" width="200" alt="Plan en oscuro: cuánto falta para la siguiente mejora y el oro para subir el ayuntamiento"> |
 
 | Plan, rushear | Requisitos para subir |
 | --- | --- |
@@ -84,15 +88,7 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-El motor de atención multicuenta decide qué cuenta necesita intervención y cuándo. Vive en Inicio, Agenda, Cuentas y Operaciones: no añade una pestaña. Separa lo confirmado en la exportación, lo anotado a mano y lo estimado. No da por acabada una mejora porque un temporizador viejo haya llegado a cero, y no mueve los temporizadores.
-
-Operaciones es la sexta pestaña. Ahí están la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras y el diario. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
-
-Cada pestaña anterior sigue con un solo trabajo. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo. Copia y el tema siguen en el engranaje de Inicio.
-
-En pantalla quedan títulos, cifras e iconos. Las explicaciones largas están en un ⓘ que se abre al tocar. Las tarjetas, las cabeceras, los filtros, las barras y las filas usan el mismo espaciado en toda la app, con el estilo Clash.
-
-Nada se ha quitado: lo que antes estaba mezclado sigue a un toque, en su pestaña. Rushear esencial y estratégico siguen en el plan de cada cuenta.
+Cada cuenta puede anotar oro, elixir, oscuro y menas a mano. El plan dice si alcanzan para la siguiente mejora y para subir el ayuntamiento. El oro y el tiempo de esa subida salen de los datos del edificio. Sin esas cifras, el plan no cambia.
 
 ## Funciones
 
@@ -230,7 +226,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v38` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v40` y la de imágenes `cp-img-v9`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -238,6 +234,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.3 | Recursos manuales por cuenta, con fecha. El plan y el coste hasta el máximo incluyen subir el ayuntamiento y, si hay cifras, dicen si alcanzan. |
 | 4.1.1 | Explorar estrategias: varias cuentas a la vez, con sesiones (por defecto 19:00–21:00) y sin usar el sueño como límite. El resultado es simulación. Pasarla al plan es un paso aparte. A 180 y 365 días solo se compara. |
 | 4.1.0 | Motor de atención multicuenta, sin pestaña nueva: bandeja, excepciones, presupuesto semanal, ventanas, hibernación, detector y prioridades. Rescatar flota despierta sin tocar temporizadores. |
 | 4.0.0 | Operaciones, la sexta pestaña: sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras y diario. IndexedDB conserva los exports. Adoptar un gemelo o una plantilla pasa por el plan. |

@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 4.1.3)
+
+Main ya era `4.1.1`. `APP_VERSION` es `4.1.3`, `SHELL_CACHE` es `cp-shell-v40` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit. Operaciones, el motor de atención y explorar estrategias no se tocan.
+
+`js/recursos.js` expone `recursosDeCuenta`, `normalizarRecursos` y `cubrir`. La bolsa guarda oro, elixir, oscuro, brillante, glowy y starry, con `actualizado`, `manual: true` e `ingresos` opcional. Una cifra vacía es desconocida, no cero. `js/th-costes.js` expone `costeTh` y `costeThRango` (TH2–TH18) citados de clash-of-clans-data 0.18.0, `data/home/town-hall/town-hall.json`. El arma no entra en ese coste. `normalizeAccount` conserva `recursos` y `buildBackup` solo lo escribe si hay cifras. `mergeBackup` no borra las cifras locales si la copia no las trae; si las trae, gana la `actualizado` más nueva. En Rushear, el paso `town-hall` se coloca cuando ya han terminado los requisitos de constructor y entra en el coste y en la lista. El total «hasta el máximo» de la aldea sigue sin ese oro: la mejora del ayuntamiento va en su línea. Sin cifras manuales, el plan no añade el aviso de si alcanza. El plan hacia un objetivo se reutiliza en el mismo minuto. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.16)
 
 `APP_VERSION` es `3.1.16` y `SHELL_CACHE` es `cp-shell-v35`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.

@@ -614,3 +614,17 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .info-pop[hidden] { display: none; }
 .chip-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
 .card > .section-head { margin-bottom: 8px; }
+
+/* 3.1.17: cifras manuales. El modo oscuro usa los mismos tonos de panel. */
+.res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.res-grid[hidden] { display: none; }
+.res-grid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; font: 600 0.75rem/1.2 var(--font); color: var(--label-2); }
+.res-grid input {
+  width: 100%; min-width: 0; min-height: 44px; padding: 0 8px;
+  border: 2px solid var(--panel-edge); border-radius: var(--r-card);
+  background: var(--panel); color: var(--ink);
+  font: 400 1rem/1.3 var(--font); font-variant-numeric: tabular-nums;
+}
+.card > [data-recursos-dia] { margin-top: 4px; }
+.t-body.cubre-ok { color: var(--green-text); font-weight: 700; }
+.t-body.cubre-no { color: var(--gold); font-weight: 700; }

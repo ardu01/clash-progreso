@@ -1,4 +1,5 @@
 import { addBags, levelCost, sumLevels, usesResource } from "./costs.js";
+import { costeTh } from "./th-costes.js";
 import { HEROES_FUERA } from "./plan.js";
 import { provisionalKey } from "./provisional.js";
 import {
@@ -12,8 +13,8 @@ const SKIP_CAT = new Set(["equipamiento", "aldea", "ayuntamiento"]);
 const HOME_SECTIONS = ["buildings", "traps", "heroes", "guardians", "units", "spells", "siege_machines", "pets"];
 
 export const RUSH_NOTE = "Rush esencial pide solo lo obligatorio para poder mejorar el ayuntamiento. Rush estratégico suma sugerencias editables: laboratorio, campamento, castillo, héroes, fábricas, almacenes y la caseta de animales si ese ayuntamiento la tiene. El tiempo se reparte entre los constructores de la cuenta. Los requisitos son provisionales.";
-export const ESENCIAL_NOTA = "Solo el mínimo obligatorio para poder mejorar el ayuntamiento: los requisitos del juego y nada más. Provisional, porque los datos no traen esa tabla.";
-export const ESTRATEGICO_NOTA = "El mínimo obligatorio más las sugerencias que sigan activas. Cada una se puede quitar. La sugerencia no es un requisito del juego.";
+export const ESENCIAL_NOTA = "Solo el mínimo obligatorio para poder mejorar el ayuntamiento: los requisitos del juego y nada más. Provisional, porque los datos no traen esa tabla. El oro y el tiempo del ayuntamiento sí salen de los datos del edificio.";
+export const ESTRATEGICO_NOTA = "El mínimo obligatorio más las sugerencias que sigan activas. Cada una se puede quitar. La sugerencia no es un requisito del juego. El oro y el tiempo del ayuntamiento salen de los datos del edificio.";
 
 /** Sugerencias del rush estratégico. El id «heroes» agrupa a todos los héroes. */
 export const SUGERENCIAS_RUSH = [
@@ -469,7 +470,70 @@ function pasosRush(exp, index, plan, tag, goal, current) {
     if (obj.id === "inferno-artillery") steps.push(...pasosArma(exp, obj));
     else steps.push(...pasosDeObjetivo(exp, index, obj, owned));
   }
-  return { steps, objetivos, sugerencias, filas: filasDeObjetivos(exp, index, objetivos, steps) };
+  const hallSteps = pasosAyuntamiento(exp, current, goal.target);
+  steps.push(...hallSteps);
+  const filas = filasDeObjetivos(exp, index, objetivos, steps);
+  if (goal.target > current) {
+    filas.push(filaAyuntamiento(exp, current, goal.target, hallSteps));
+    filas.sort((a, b) => Number(a.hecho) - Number(b.hecho) || a.title.localeCompare(b.title, "es"));
+  }
+  return { steps, objetivos, sugerencias, filas };
+}
+
+function pasosAyuntamiento(exp, current, target) {
+  if (!Number.isInteger(current) || !Number.isInteger(target) || target <= current) return [];
+  const hall = (exp.buildings || []).find((b) => b && String(b.data) === "1000001");
+  let from = current;
+  let notBefore = null;
+  let blocked = false;
+  if (hall && hall.timer != null) {
+    const hora = finDe(exp.timestamp, hall.timer);
+    from += 1;
+    if (hora.exacta) notBefore = hora.fin;
+    else blocked = true;
+  }
+  const steps = [];
+  for (let lv = from; lv < target; lv += 1) {
+    const cost = costeTh(lv + 1);
+    steps.push({
+      id: "town-hall",
+      fromLvl: lv,
+      toLvl: lv + 1,
+      goal: target,
+      instance: "town-hall",
+      categoryKey: "ayuntamiento",
+      queue: "constructor",
+      title: "Ayuntamiento",
+      seconds: cost ? cost.segundos : null,
+      notBefore,
+      blocked,
+      provisional: false,
+      markedAt: 0,
+      rushClase: "requisito",
+      rushRazon: "Coste de mejorar el ayuntamiento.",
+    });
+  }
+  return steps;
+}
+
+function filaAyuntamiento(exp, current, target, steps) {
+  const hall = (exp.buildings || []).find((b) => b && String(b.data) === "1000001");
+  const bag = bagOf(steps);
+  return {
+    id: "town-hall",
+    title: "Ayuntamiento",
+    actual: current,
+    requerido: target,
+    cantidad: 1,
+    tienen: 1,
+    hecho: current >= target,
+    enCurso: !!(hall && hall.timer != null && current < target),
+    sinDato: false,
+    provisional: false,
+    coste: bolsaVisible(bag),
+    clase: "requisito",
+    razon: "Coste de mejorar el ayuntamiento.",
+  };
 }
 
 function collectSteps(exp, index, plan, tag) {
@@ -548,7 +612,7 @@ function applyFilters(steps, plan) {
     if (plan.categoria && step.categoryKey !== plan.categoria) continue;
     if (!focusKeeps(step, plan)) continue;
     if (plan.recurso && plan.recurso !== "todos") {
-      if (step.id === "inferno-artillery") {
+      if (step.id === "inferno-artillery" || step.id === "town-hall") {
         if (plan.recurso !== "oro") continue;
       } else if (!usesResource(step.id, step.toLvl, plan.recurso)) continue;
     }
@@ -677,6 +741,19 @@ function placeStep(step, lanes, sleep, now, cursor) {
 }
 
 function partePaso(step) {
+  if (step.id === "town-hall") {
+    const row = costeTh(step.toLvl);
+    const bag = {
+      oro: 0, elixir: 0, oscuro: 0, muros: 0, brillante: 0, resplandeciente: 0, estelar: 0,
+      segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, sinCoste: 0,
+    };
+    if (!row) bag.sinCoste = 1;
+    else {
+      bag.oro = row.oro;
+      bag.segConstructor = row.segundos;
+    }
+    return bag;
+  }
   if (step.id !== "inferno-artillery") return sumLevels(step.id, step.fromLvl, step.toLvl, 1);
   const row = ARMA_TH17.levels[step.toLvl];
   const bag = {
@@ -689,6 +766,10 @@ function partePaso(step) {
     bag.segConstructor = row.s;
   }
   return bag;
+}
+
+export function costeDePaso(step) {
+  return step ? partePaso(step) : null;
 }
 
 function bagOf(steps) {
@@ -811,7 +892,18 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
 
 export function programar(steps, lanes, sleep, now) {
   const cursor = new Map();
-  const orden = steps.map((step) => placeStep(step, lanes, sleep, now, cursor));
+  const orden = [];
+  let despues = 0;
+  for (const step of steps) {
+    const listo = step.id === "town-hall"
+      ? { ...step, notBefore: Math.max(step.notBefore || 0, despues) }
+      : step;
+    const placed = placeStep(listo, lanes, sleep, now, cursor);
+    orden.push(placed);
+    if (step.id !== "town-hall" && step.queue === "constructor" && placed.fin != null && placed.fin > despues) {
+      despues = placed.fin;
+    }
+  }
   const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
   const tiempos = tiemposConstructor(orden);
   return {
