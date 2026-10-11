@@ -101,7 +101,8 @@ async function barrer(page, donde) {
       res = await page.evaluate(async (i) => {
         const firma = () => {
           const screen = document.querySelector("#screen");
-          const text = (screen?.textContent || "").replace(/\s+/g, " ");
+          const capa = document.querySelector(".sheet, .alert");
+          const text = ((screen?.textContent || "") + "\n" + (capa?.textContent || "")).replace(/\s+/g, " ");
           let sig = 0;
           for (let n = 0; n < text.length; n += 1) sig = (Math.imul(sig, 31) + text.charCodeAt(n)) | 0;
           return {
