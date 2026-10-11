@@ -12,20 +12,25 @@ import {
   duplicateMsg, foreignMsg, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
   planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
-import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
+import { allExports, clearExports, deleteTag, latestByTag, latestCopyAt, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
-  addAccount, cleanGrupos, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setPrincipal,
+  addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal,
 } from "./roster.js";
-import { clipboardImportPlan } from "./paste.js";
+import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
 import { compareAccounts, fleetSnapshot, rankAccounts, whatNow } from "./fleet.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
-import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
+import { COST_SOURCE, COST_URL, categoryUses, equipmentPieces, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
 import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
+import {
+  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, defaultPlan, effectivePlan,
+  maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
+} from "./roadmap.js";
+import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -88,6 +93,13 @@ const state = {
   rankKey: localStorage.getItem("cp-rank") || "media",
   notifyOn: localStorage.getItem("cp-notify") === "1",
   sleep: loadSleep(),
+  planes: loadPlanes(),
+  provisionales: loadProvisionals(),
+  theme: loadTheme(),
+  staleDays: loadStaleDays(),
+  rosterQ: "",
+  levelKind: localStorage.getItem("cp-level-kind") || "th",
+  copyAt: null,
   added: [],
   flashTags: new Set(),
   scrollAdded: false,
@@ -103,6 +115,34 @@ function loadFilters() {
   } catch {
     return base;
   }
+}
+
+function loadPlanes() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-planes") || "{}");
+    return raw && typeof raw === "object" ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadProvisionals() {
+  try {
+    const list = JSON.parse(localStorage.getItem("cp-provisional") || "[]");
+    return Array.isArray(list) ? list.map(normalizeProvisional).filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadTheme() {
+  const t = localStorage.getItem("cp-theme");
+  return t === "light" || t === "dark" || t === "sistema" ? t : "sistema";
+}
+
+function loadStaleDays() {
+  const n = Number(localStorage.getItem("cp-stale-days"));
+  return Number.isFinite(n) && n >= 1 ? Math.round(n) : 7;
 }
 
 function loadSleep() {
@@ -129,6 +169,9 @@ function route() {
   const parts = raw.split("/").filter(Boolean);
   let name = parts[0] || "roster";
   if (name === "cuentas") name = "roster";
+  if (name === "progreso" && parts[1] && parts[2] === "equipamiento") {
+    return { name: "equipo", tag: "#" + parts[1], cat: null };
+  }
   if (name === "progreso" && parts[1] && (parts[2] === "plan" || parts[2] === "historial")) {
     return { name: parts[2], tag: "#" + parts[1], cat: null };
   }
@@ -137,12 +180,12 @@ function route() {
   }
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
-  if (name === "ahora" || name === "ranking" || name === "agenda") return { name, tag: null, cat: null };
+  if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
 
 function baseTab(r) {
-  if (r.name === "detalle" || r.name === "progreso" || r.name === "plan" || r.name === "historial") return "progreso";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "plan" || r.name === "historial" || r.name === "equipo") return "progreso";
   if (r.name === "agenda") return "roster";
   if (r.name === "mejoras") return "mejoras";
   if (r.name === "graficos" || r.name === "evolucion") return "graficos";
@@ -233,6 +276,7 @@ function toMeta(a, featured) {
     roleClass: a.principal ? "chip--main" : "",
     objetivo: a.objetivo == null ? null : a.objetivo,
     grupos: a.grupos || [],
+    meta: a.meta || null,
     featured: featured === a.tag,
     added: true,
   };
@@ -533,12 +577,22 @@ function goalChip(th, objetivo) {
   return `<span class="chip">TH${th} → ${objetivo}</span>`;
 }
 
+function goalBar(meta, view) {
+  const g = meta && meta.meta;
+  if (!g || !view || !g.pct) return "";
+  const cur = g.clave === "media" ? view.media : (view.cats[g.clave] && view.cats[g.clave].pct);
+  if (cur == null) return "";
+  const p = Math.max(0, Math.min(100, (cur / g.pct) * 100));
+  const label = g.clave === "media" ? "Media" : (CATEGORIES.find((c) => c.key === g.clave) || {}).label || g.clave;
+  return `<span class="goal" role="img" aria-label="Meta ${esc(label)} ${fmtPct(cur)} de ${g.pct} %"><span class="goal__fill" style="--p:${p.toFixed(1)}"></span></span>`;
+}
+
 function accountChip(meta) {
   return `<span class="chip chip--muted chip--sm">${esc(meta.chip)}</span>`;
 }
 
 function upgrades(exp) {
-  return upgradesOf(exp).map((u) => ({ ...u, done: u.end <= state.now }));
+  return upgradesOf(exp).filter((u) => u.queue !== "equipamiento").map((u) => ({ ...u, done: u.end <= state.now }));
 }
 
 function nextUpgrade(exp) {
@@ -548,8 +602,46 @@ function nextUpgrade(exp) {
 
 function fmtWhen(ms) { return fmtFin(ms); }
 
+function staleLimit() {
+  const n = Number(state.staleDays);
+  return (Number.isFinite(n) && n >= 1 ? n : 7) * 86400000;
+}
+
 function stale(exp) {
-  return state.now - exp.timestamp * 1000 > 7 * 86400000;
+  return !!exp && state.now - exp.timestamp * 1000 > staleLimit();
+}
+
+function villageCats() {
+  return CATEGORIES.filter((c) => c.key !== "equipamiento");
+}
+
+function applyTheme(theme) {
+  const t = theme || state.theme || "sistema";
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+}
+
+function savePlanes() {
+  localStorage.setItem("cp-planes", JSON.stringify(state.planes));
+}
+
+function saveProvisionals() {
+  localStorage.setItem("cp-provisional", JSON.stringify(state.provisionales));
+}
+
+function accountRoadmap(meta) {
+  const exp = expOf(meta.tag);
+  if (!exp || !state.index) return null;
+  const raw = state.planes[meta.tag];
+  return buildRoadmap({
+    exp,
+    index: state.index,
+    tag: meta.tag,
+    plan: raw,
+    provisionals: state.provisionales,
+    sleep: activeSleep(),
+    now: state.now,
+  });
 }
 
 const CAT_COLOR = {
@@ -797,7 +889,7 @@ function costCard(exp, th, full) {
       ${miss}${cite}
     </div></div>`;
   }
-  const rows = CATEGORIES.map((c) => {
+  const rows = villageCats().map((c) => {
     const part = cost.porCategoria[c.key];
     const text = costBits(part);
     if (!text) return "";
@@ -811,19 +903,47 @@ function costCard(exp, th, full) {
     ${rows ? `<div class="section"><ul class="list">${rows}</ul></div>` : ""}`;
 }
 
+function pasoAhora(paso) {
+  const nv = `Nv ${paso.fromLvl} → ${paso.toLvl}`;
+  let when = "";
+  if (paso.sinDuracion) when = " · sin tiempo en la fuente";
+  else if (paso.sinHora || paso.fin == null) when = " · sin hora exacta";
+  else when = ` · acaba ${fmtFin(paso.fin)}`;
+  const mark = paso.provisional ? " · provisional" : "";
+  return `${paso.titulo} libre · ${paso.title} ${nv}${when}${mark}`;
+}
+
 function renderAhora() {
-  const items = whatNow(fleetRows(allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters))), state.now);
+  const accounts = allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
+  const items = [];
+  for (const meta of accounts) {
+    const exp = expOf(meta.tag);
+    if (!exp) continue;
+    const road = accountRoadmap(meta);
+    if (!road) continue;
+    const pasos = ahoraDe(road);
+    const terminadas = upgrades(exp).filter((u) => u.done && !u.extra);
+    if (!pasos.length && !terminadas.length) continue;
+    items.push({ meta, road, pasos, terminadas });
+  }
   const list = items.length
-    ? `<ul class="list">${items.map((row) => `<li><a class="row" href="#/progreso/${row.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${esc(row.motivos.join(" · "))}</span></span>${CHEV}</a></li>`).join("")}</ul>`
-    : `<div class="card empty"><p class="t-title3">Nada urgente</p><p class="t-subhead c-2">No hay constructores, laboratorios ni casas de mascotas libres, ni mejoras ya terminadas.</p></div>`;
+    ? `<ul class="list">${items.map((row) => {
+      const lines = row.pasos.map((p) => pasoAhora(p));
+      if (row.terminadas.length) {
+        lines.push(row.terminadas.length === 1 ? "1 mejora de la exportación ya ha terminado" : `${row.terminadas.length} mejoras de la exportación ya han terminado`);
+      }
+      const label = planLabel(row.road.plan, row.road.currentTh);
+      return `<li><a class="row" href="#/progreso/${row.meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">${esc(row.meta.nombre)}</span><span class="row__sub">${esc(label)} · TH${row.road.currentTh == null ? "—" : row.road.currentTh}</span><span class="row__sub">${esc(lines.join(" · "))}</span></span>${CHEV}</a></li>`;
+    }).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">Nada que hacer ahora</p><p class="t-subhead c-2">Ninguna cuenta tiene un constructor, el laboratorio o la casa de mascotas libres con un paso pendiente en su plan.</p></div>`;
   const on = state.notifyOn;
   return `<h1 class="large-title">Ahora</h1>
-    <p class="large-sub">Cuentas con una cola libre o una mejora ya terminada, según la última exportación.</p>
+    <p class="large-sub">El siguiente paso del plan de cada cuenta, cuando una cola está libre. Sin plan guardado, el criterio es Maxear TH actual.</p>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="section">${list}</div>
     <div class="section"><div class="card">
       <h2 class="t-headline">Aviso al terminar</h2>
-      <p class="t-body">Si la app está abierta, puede avisar cuando llegue el fin de la próxima mejora. Con la app cerrada haría falta un servidor de avisos, y esta app no tiene servidor.</p>
+      <p class="t-body">Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada haría falta un servidor, y esta app no tiene servidor.</p>
       <button type="button" class="btn ${on ? "btn--secondary" : "btn--primary"} btn--block" data-notify aria-pressed="${on ? "true" : "false"}">${on ? "Avisos activados" : "Activar avisos"}</button>
     </div></div>`;
 }
@@ -840,7 +960,7 @@ function renderRanking() {
   }).join("");
   const picked = compareAccounts(rows, state.compareTags);
   const cols = picked.map((row) => {
-    const cats = CATEGORIES.filter((c) => row.cats[c.key] != null).map((c) => `<div class="bar-row"><span>${esc(c.label)}</span>${barHtml(c.key, row.cats[c.key], null, { mini: true, label: `${c.label} ${fmtPct(row.cats[c.key])}` })}<span class="num">${fmtPct(row.cats[c.key])}</span></div>`).join("");
+    const cats = villageCats().filter((c) => row.cats[c.key] != null).map((c) => `<div class="bar-row"><span>${esc(c.label)}</span>${barHtml(c.key, row.cats[c.key], null, { mini: true, label: `${c.label} ${fmtPct(row.cats[c.key])}` })}<span class="num">${fmtPct(row.cats[c.key])}</span></div>`).join("");
     return `<div class="card compare-col"><h3 class="t-headline">${esc(row.nombre)}</h3><p class="t-title2 num">${fmtPct(row.media)}</p><p class="t-footnote c-2">TH${row.th == null ? "—" : row.th}</p><div class="chart-bars">${cats}</div></div>`;
   }).join("");
   const compare = picked.length >= 2
@@ -854,6 +974,73 @@ function renderRanking() {
     ${compare}`;
 }
 
+function setAccountPlan(tag, patch) {
+  const cur = state.planes[tag] ? normalizePlanStored(state.planes[tag]) : defaultPlan();
+  state.planes = { ...state.planes, [tag]: { ...cur, ...patch } };
+  savePlanes();
+}
+
+function normalizePlanStored(raw) {
+  const plan = effectivePlan(raw);
+  return plan;
+}
+
+function planControls(meta, road) {
+  const plan = road.plan;
+  const maxTh = maxTownHall(state.index);
+  const current = road.currentTh || 1;
+  const thOpts = [`<option value=""${!plan.th || plan.th === current ? " selected" : ""}>TH actual (${current})</option>`];
+  for (let th = current + 1; th <= maxTh; th += 1) {
+    thOpts.push(`<option value="${th}"${plan.th === th ? " selected" : ""}>TH${th}</option>`);
+  }
+  const flag = (id, label) => `<button type="button" data-plan-flag="${id}" aria-pressed="${plan[id] ? "true" : "false"}">${label}</button>`;
+  const cats = [`<option value="">Todas</option>`].concat(villageCats().map((c) => `<option value="${c.key}"${plan.categoria === c.key ? " selected" : ""}>${esc(c.label)}</option>`));
+  const rec = ["todos", "oro", "elixir", "oscuro"].map((id) => `<option value="${id}"${plan.recurso === id ? " selected" : ""}>${id === "todos" ? "Cualquier recurso" : id}</option>`);
+  const durs = DURATIONS.map((d) => `<option value="${d.id}"${plan.duracion === d.id ? " selected" : ""}>${esc(d.label)}</option>`);
+  const modo = (id, label) => `<button type="button" role="tab" data-plan-modo="${id}" aria-selected="${plan.modo === id}">${label}</button>`;
+  return `<div class="section"><div class="card">
+      <h2 class="t-headline">${esc(planLabel(plan, current))}</h2>
+      <p class="t-footnote c-2">${road.configured ? "Plan guardado en esta cuenta." : "Esta cuenta no tiene plan guardado: se usa Maxear TH actual."}</p>
+      <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Objetivo">${modo("maxear", "Maxear")}${modo("rushear", "Rushear")}</div></div>
+      <label class="sort-label">TH objetivo
+        <select data-plan-th="${esc(meta.tag)}" aria-label="TH objetivo">${thOpts.join("")}</select>
+      </label>
+      <div class="chip-row" role="toolbar" aria-label="Filtros del plan">${flag("ataque", "Ataque")}${flag("defensa", "Defensa")}${flag("muros", "Muros")}${flag("heroes", "Héroes")}</div>
+      <label class="sort-label">Categoría
+        <select data-plan-cat="${esc(meta.tag)}" aria-label="Categoría del plan">${cats.join("")}</select>
+      </label>
+      <label class="sort-label">Recurso
+        <select data-plan-recurso="${esc(meta.tag)}" aria-label="Recurso del plan">${rec.join("")}</select>
+      </label>
+      <label class="sort-label">Duración
+        <select data-plan-dur="${esc(meta.tag)}" aria-label="Duración del plan">${durs.join("")}</select>
+      </label>
+    </div></div>`;
+}
+
+function roadmapList(road) {
+  const view = timelineRows(road.orden, 40);
+  if (!view.pasos && !road.sinTiempo.length) {
+    return `<div class="section"><div class="card empty"><p class="t-title3">Nada pendiente con este criterio</p></div></div>`;
+  }
+  const rows = view.rows.map((row) => {
+    const times = row.cnt > 1 ? ` × ${row.cnt}` : "";
+    let when = "Sin siguiente fecha";
+    if (row.sinDuracion) when = "Sin tiempo en la fuente";
+    else if (row.sinHora || row.fin == null) when = "Sin hora exacta: el temporizador en curso no es un número";
+    else when = `Empieza ${fmtFin(row.inicio)} · acaba ${fmtFin(row.fin)}`;
+    const mark = row.provisional ? " · provisional" : "";
+    const pressed = row.provisional ? "true" : "false";
+    const keys = encodeURIComponent(JSON.stringify(row.keys));
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(row.title)} <span class="num">Nv ${row.fromLvl} → ${row.toLvl}${times}</span></span><span class="row__sub">${esc(when)}${esc(mark)}</span></span><button type="button" class="btn-text" data-prov="${keys}" data-prov-tag="${esc(road.tag)}" aria-pressed="${pressed}">${row.provisional ? "Quitar" : "Marcar"}</button></div></li>`;
+  }).join("");
+  const more = view.ocultas ? `<p class="section-footer">Y ${view.ocultas} grupos más. El coste y la fecha final incluyen todos los pasos.</p>` : "";
+  const missing = road.sinTiempo.length
+    ? `<p class="section-footer">${road.sinTiempo.length === 1 ? "1 paso" : `${road.sinTiempo.length} pasos`} sin tiempo en la fuente: el filtro de duración no los incluye.</p>`
+    : "";
+  return `<div class="section"><div class="section-header"><span>Línea de tiempo</span></div><ul class="list">${rows}</ul>${more}${missing}</div>`;
+}
+
 function renderPlan(tag) {
   const meta = accountByTag(tag);
   const exp = meta && expOf(meta.tag);
@@ -861,25 +1048,22 @@ function renderPlan(tag) {
   if (!meta || !exp || !view) {
     return `<h1 class="large-title">Plan</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
   }
-  const builders = builderStatus(exp);
-  const ups = upgrades(exp);
-  const plan = upgradePlan(planCandidates(exp, view), {
-    tag: meta.tag,
-    constructoresLibres: builders.known && !builders.over ? builders.free || 0 : 0,
-    labLibre: !ups.some((u) => u.queue === "laboratorio" && !u.done),
-    mascotasLibres: !ups.some((u) => u.queue === "mascotas" && !u.done),
-  });
-  const fuera = plan.heroesFuera ? `<p class="t-footnote c-2">En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan.</p>` : "";
-  const empty = !plan.constructor.length && !plan.laboratorio && !plan.mascotas && !plan.equipamiento
-    ? `<div class="section"><div class="card empty"><p class="t-title3">Nada pendiente con este criterio</p></div></div>`
-    : `${planList("Constructor", plan.constructor)}${planList("Laboratorio", plan.laboratorio)}${planList("Mascotas", plan.mascotas)}${planList("Equipamiento", plan.equipamiento)}`;
+  const road = accountRoadmap(meta);
+  const fuera = road.heroesFuera ? `<p class="t-footnote c-2">En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan.</p>` : "";
+  const rush = road.plan.modo === "rushear" ? `<p class="t-footnote c-2">${esc(RUSH_NOTE)}</p>` : "";
+  const capNote = road.targetTh > road.currentTh
+    ? `<p class="t-footnote c-2">Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.</p>`
+    : "";
+  const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
+  const desconocido = road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`;
+  const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2><p class="t-body">${esc(plan.criterio || PLAN_CRITERIO)}</p>${fuera}</div></div>
+    ${planControls(meta, road)}
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2><p class="t-body">${esc(PLAN_TIMELINE)}</p>${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${fuera}${hora}${desconocido}</div></div>
     ${sleepCard()}
-    ${timelineHtml(timelineOf(meta, exp, view))}
+    ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
-    ${empty}
     ${costCard(exp, view.th, true)}`;
 }
 
@@ -1061,7 +1245,7 @@ function chartAccounts() {
 
 function chartCategories(list) {
   const filtro = state.filters.recurso;
-  if (!filtro || filtro === "todos") return CATEGORIES.slice();
+  if (!filtro || filtro === "todos") return villageCats();
   const keys = new Set();
   for (const meta of list) {
     const exp = latestInRange(meta.tag);
@@ -1069,7 +1253,7 @@ function chartCategories(list) {
     const set = allowedCats(exp, townHallLevel(exp));
     if (set) for (const key of set) keys.add(key);
   }
-  return CATEGORIES.filter((c) => keys.has(c.key));
+  return villageCats().filter((c) => keys.has(c.key));
 }
 
 function snapshotRow(meta) {
@@ -1285,6 +1469,8 @@ function armNotices() {
 }
 
 async function savePlan(plan, opts = {}) {
+  const before = new Map();
+  for (const it of plan.save) before.set(it.value.tag, state.latest.get(it.value.tag) || null);
   try {
     for (const it of plan.save) await putExport(it.value);
   } catch {
@@ -1308,9 +1494,35 @@ async function savePlan(plan, opts = {}) {
   persistRoster();
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
+  const avisos = [];
+  const seenTags = new Set();
+  for (const it of plan.save) {
+    const tag = it.value.tag;
+    if (seenTags.has(tag)) continue;
+    seenTags.add(tag);
+    const rec = reconcileProvisionals(state.provisionales, { tag, before: before.get(tag), after: state.latest.get(tag) });
+    state.provisionales = rec.provisionales;
+    avisos.push(...rec.avisos);
+  }
+  saveProvisionals();
+  try {
+    await putCopy(buildBackup({
+      accounts: state.accounts,
+      exports: state.rows,
+      planes: state.planes,
+      provisionales: state.provisionales,
+      version: APP_VERSION,
+    }));
+    state.copyAt = Date.now();
+  } catch { /* la copia automática no bloquea el guardado */ }
   armFlash(plan.tags);
   const known = plan.save.filter((it) => it.kind !== "new");
-  showToast("ok", known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`));
+  const base = known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`);
+  const extra = reconcileMessage(avisos);
+  const batch = plan.save.length > 1 ? batchSummary(plan.save.map((it) => ({ kind: it.kind }))) : "";
+  const pending = allAccounts().filter((meta) => stale(expOf(meta.tag))).map((meta) => meta.nombre);
+  const pendingNote = plan.save.length > 1 && pending.length ? ` Siguen sin actualizar: ${pending.join(", ")}.` : "";
+  showToast("ok", [base, batch, extra].filter(Boolean).join(". ") + pendingNote);
   state.importUi = freshImport();
   if (location.hash !== "#/roster") location.hash = "#/roster";
   else render();
@@ -1372,7 +1584,7 @@ async function toggleNotify() {
 
 function navbar(r) {
   const tab = baseTab(r);
-  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle", ahora: "Ahora", ranking: "Ranking", plan: "Plan", historial: "Historial", agenda: "Agenda" };
+  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle", ahora: "Ahora", ranking: "Ranking", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento" };
   let lead = "";
   let trail = "";
   let title = titles[tab] || titles[r.name] || "";
@@ -1426,7 +1638,9 @@ function subImported() {
 function renderRoster() {
   const list = allAccounts();
   const sortLabel = state.sortMode === "nombre" ? "nombre" : state.sortMode === "pct" ? "%" : "TH";
-  const shown = list.filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
+  const q = state.rosterQ.trim().toLocaleLowerCase("es");
+  const shown = list.filter((meta) => accountVisible(accountFilterMeta(meta), state.filters)
+    && (!q || String(meta.alias || meta.tag).toLocaleLowerCase("es").includes(q) || meta.tag.toLocaleLowerCase("es").includes(q)));
   const empty = list.length
     ? ""
     : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
@@ -1437,6 +1651,8 @@ function renderRoster() {
   return `<h1 class="large-title">Cuentas</h1>
     <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ordenadas por ${esc(sortLabel)}</p>
     ${rosterTools(shown)}
+    ${staleCard()}
+    <label class="filter-search"><span class="sr-only">Buscar cuenta</span><input data-roster-q type="search" enterkeyhint="search" placeholder="Buscar cuenta" value="${esc(state.rosterQ)}" aria-label="Buscar cuenta"></label>
     <label class="sort-label">Ordenar
       <select data-sort aria-label="Ordenar cuentas">
         <option value="th"${state.sortMode === "th" ? " selected" : ""}>TH</option>
@@ -1448,6 +1664,18 @@ function renderRoster() {
     ${list.length ? `<div class="section"><ul class="list">${rows}</ul>${seedNote}</div>` : seedNote}
     <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
 `;
+}
+
+function staleCard() {
+  const days = state.staleDays;
+  const pending = allAccounts().filter((meta) => {
+    const exp = expOf(meta.tag);
+    return !exp || stale(exp);
+  });
+  if (!pending.length) return "";
+  const lis = pending.map((meta) => `<li><a class="row" href="#/progreso/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${expOf(meta.tag) ? "Sin actualización reciente" : "Sin importar"}</span></span>${CHEV}</a></li>`).join("");
+  const dia = days === 1 ? "día" : "días";
+  return `<div class="section"><div class="section-header"><span>Actualizar todas</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
 }
 
 function isSeedRoster(list) {
@@ -1479,7 +1707,8 @@ function rowCuenta(meta) {
     ${thumb(1000001, { size: 44, th: a.th })}
     <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
       <span class="row__title">${title} ${mark}</span>
-      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
+      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? " · sin actualizar" : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
+      ${goalBar(meta, a)}
     </a>
     <span class="row__trail"><span class="num row__pct">${fmtPct(a.media)}</span></span>
     <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
@@ -1577,7 +1806,8 @@ function renderProgreso(tag) {
   const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
   const links = exp ? `<div class="section"><ul class="list">
-      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Qué subir a continuación</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Línea de tiempo hasta el TH objetivo</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/equipo/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Equipamiento</span><span class="row__sub">Niveles y menas, aparte de la aldea</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
     </ul></div>` : "";
   const body = !exp
@@ -1593,6 +1823,7 @@ function renderProgreso(tag) {
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     ${exp && inFleet ? summaryCard(a, meta) : ""}
+    ${exp && inFleet ? rushCard(meta) : ""}
     ${exp && inFleet ? costCard(exp, a.th, false) : ""}
     ${links}
     ${body}
@@ -1600,9 +1831,16 @@ function renderProgreso(tag) {
 `;
 }
 
+function rushCard(meta) {
+  const gaps = rushGaps(state.rows, state.index, meta.tag);
+  if (!gaps.length) return "";
+  const lis = gaps.map((g) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(g.label)}</span><span class="row__sub">${fmtPct(g.pct)} del máximo de TH${g.th}. El aviso sale por debajo del 50 %.</span></span></div></li>`).join("");
+  return `<div class="section"><div class="section-header"><span>Al subir de TH</span></div><ul class="list">${lis}</ul><p class="section-footer">Hace falta más de una exportación. Los héroes de ${esc(HEROES_FUERA)} no entran en este aviso.</p></div>`;
+}
+
 function filterControls(counts, filt) {
   const short = { ejercito_edif: "Ejército" };
-  const chips = [{ key: "todas", label: "Todas" }].concat(CATEGORIES.map((c) => ({ key: c.key, label: short[c.key] || c.label })));
+  const chips = [{ key: "todas", label: "Todas" }].concat(villageCats().map((c) => ({ key: c.key, label: short[c.key] || c.label })));
   const buttons = chips.map((c) => {
     const n = counts[c.key] || 0;
     const on = filt.cat === c.key;
@@ -1676,7 +1914,7 @@ function summaryCard(a) {
 function catsBlock(exp, meta) {
   const a = viewOf(meta.tag);
   const allow = allowedCats(exp, a.th);
-  const cats = CATEGORIES.filter((c) => !allow || allow.has(c.key));
+  const cats = villageCats().filter((c) => !allow || allow.has(c.key));
   const legend = a.thSig
     ? `Relleno: nivel actual · Marca: máximo TH${a.th} · Final: máximo TH${a.thSig}`
     : `Relleno: nivel actual frente al máximo de TH${a.th}`;
@@ -2907,7 +3145,14 @@ async function removeAdded(tag) {
 
 async function exportBackup() {
   const now = Date.now();
-  const payload = buildBackup({ accounts: state.accounts, exports: state.rows, now, version: APP_VERSION });
+  const payload = buildBackup({
+    accounts: state.accounts,
+    exports: state.rows,
+    planes: state.planes,
+    provisionales: state.provisionales,
+    now,
+    version: APP_VERSION,
+  });
   const name = backupFilename(now);
   const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
   const file = new File([blob], name, { type: "application/json" });
@@ -2940,7 +3185,12 @@ async function restoreBackupText(text) {
     showToast("err", "Esa copia no se puede leer");
     return;
   }
-  const merged = mergeBackup({ accounts: state.accounts, exports: state.rows }, data);
+  const merged = mergeBackup({
+    accounts: state.accounts,
+    exports: state.rows,
+    planes: state.planes,
+    provisionales: state.provisionales,
+  }, data);
   try {
     for (const exp of merged.exports) {
       if (state.rows.some((r) => r.tag === exp.tag && r.timestamp === exp.timestamp)) continue;
@@ -2951,6 +3201,10 @@ async function restoreBackupText(text) {
     return;
   }
   state.accounts = merged.accounts;
+  state.planes = merged.planes || {};
+  state.provisionales = merged.provisionales || [];
+  savePlanes();
+  saveProvisionals();
   persistRoster();
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
@@ -3027,6 +3281,131 @@ function renderToast() {
   return `<div class="toast toast--${state.toast.kind} material-float" role="status">${esc(state.toast.text)}</div>`;
 }
 
+function levelCard(list) {
+  const kinds = [["th", "TH"], ["heroes", "Héroes"], ["estructuras", "Estructuras"], ["muros", "Muros"], ["lab", "Laboratorio"], ["mascotas", "Mascotas"], ["cara", "Cara a cara"], ["mismo", "Mismo TH"], ["ritmo", "Ritmo"]];
+  const chips = kinds.map(([id, label]) => filterChip("data-level-kind", id, label, state.levelKind === id)).join("");
+  const body = levelBody(list, state.levelKind);
+  return `<div class="card"><h2 class="t-headline">Niveles</h2><p class="t-footnote c-2">Niveles de la exportación, no porcentajes. Con una sola importación hay un punto: no se inventan más. El equipamiento no entra aquí.</p><div class="chip-row" role="toolbar" aria-label="Vista de niveles">${chips}</div>${body}</div>`;
+}
+
+function levelBody(list, kind) {
+  if (kind === "th") {
+    const rows = list.map((meta) => {
+      const points = state.rows.filter((r) => r.tag === meta.tag).slice().sort((a, b) => a.timestamp - b.timestamp)
+        .map((exp) => `TH${townHallLevel(exp)} · ${madridDayKey(exp.timestamp * 1000)}`);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(points.join(" → ") || "Sin datos")}</span></span></div></li>`;
+    }).join("");
+    return `<ul class="list">${rows}</ul>`;
+  }
+  if (kind === "heroes" || kind === "mascotas") {
+    const rows = list.map((meta) => {
+      const view = viewOf(meta.tag);
+      const source = kind === "heroes" ? (view && view.heroes) || [] : (view && view.pets) || [];
+      const bits = source.filter((h) => h.max != null).map((h) => `${nameOf(h.id) || "Ítem"} ${h.lvl}/${h.max}`);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(bits.join(" · ") || "Sin niveles")}</span></span></div></li>`;
+    }).join("");
+    return `<ul class="list">${rows}</ul>`;
+  }
+  if (kind === "estructuras" || kind === "lab") {
+    const keys = kind === "lab" ? ["laboratorio"] : ["defensas", "recursos", "ejercito_edif", "trampas", "muros"];
+    const rows = list.map((meta) => {
+      const exp = expOf(meta.tag);
+      const view = viewOf(meta.tag);
+      if (!exp || !view) return "";
+      const bits = keys.map((key) => {
+        const items = key === "muros"
+          ? (view.walls && view.walls.hist || []).filter((h) => h.cnt)
+          : categoryItems(exp, state.index, key, view.th).filter((it) => it.max != null && !it.capsOnly);
+        let sum = 0;
+        let n = 0;
+        let at = 0;
+        if (key === "muros") {
+          for (const h of items) { sum += h.lvl * h.cnt; n += h.cnt; if (view.walls.max != null && h.lvl >= view.walls.max) at += h.cnt; }
+        } else {
+          for (const it of items) {
+            const cnt = it.cnt || 1;
+            sum += (it.lvl || 0) * cnt;
+            n += cnt;
+            if ((it.lvl || 0) >= it.max) at += cnt;
+          }
+        }
+        const mean = n ? Math.round((sum / n) * 10) / 10 : null;
+        const label = (CATEGORIES.find((c) => c.key === key) || {}).label || key;
+        return mean == null ? "" : `${label} ${fmtNum(mean)} · ${at} al máximo`;
+      }).filter(Boolean);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(bits.join(" · "))}</span></span></div></li>`;
+    }).join("");
+    return `<ul class="list">${rows}</ul>`;
+  }
+  if (kind === "muros") {
+    const rows = list.map((meta) => {
+      const view = viewOf(meta.tag);
+      const hist = (view && view.walls && view.walls.hist || []).filter((h) => h.cnt);
+      const bits = hist.map((h) => `Nv ${h.lvl} × ${h.cnt}`);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(bits.join(" · ") || "Sin muros")}</span></span></div></li>`;
+    }).join("");
+    return `<ul class="list">${rows}</ul>`;
+  }
+  if (kind === "cara") {
+    const picked = compareAccounts(fleetRows(list), state.compareTags);
+    if (picked.length < 2) return `<p class="t-footnote c-2">Marca de 2 a 3 cuentas en Ranking para verlas juntas.</p>`;
+    const ids = new Set();
+    for (const row of picked) for (const h of (viewOf(row.tag) && viewOf(row.tag).heroes) || []) ids.add(h.id);
+    const lines = [...ids].map((id) => {
+      const cells = picked.map((row) => {
+        const h = ((viewOf(row.tag) && viewOf(row.tag).heroes) || []).find((x) => x.id === id);
+        return `${row.nombre} ${h && h.lvl != null ? h.lvl : "—"}/${h && h.max != null ? h.max : "—"}`;
+      });
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(nameOf(id) || "Héroe")}</span><span class="row__sub">${esc(cells.join(" · "))}</span></span></div></li>`;
+    }).join("");
+    return `<ul class="list">${lines}</ul>`;
+  }
+  if (kind === "mismo") {
+    const groups = new Map();
+    for (const meta of list) {
+      const view = viewOf(meta.tag);
+      if (!view || view.th == null) continue;
+      if (!groups.has(view.th)) groups.set(view.th, []);
+      groups.get(view.th).push(meta);
+    }
+    const blocks = [...groups.entries()].sort((a, b) => b[0] - a[0]).map(([th, metas]) => {
+      if (metas.length < 2) return "";
+      const bits = metas.map((meta) => `${meta.nombre} ${fmtPct(viewOf(meta.tag).media)}`);
+      return `<li><div class="row"><span class="row__main"><span class="row__title">TH${th}</span><span class="row__sub">${esc(bits.join(" · "))}</span></span></div></li>`;
+    }).join("");
+    return blocks ? `<ul class="list">${blocks}</ul>` : `<p class="t-footnote c-2">No hay dos cuentas con el mismo TH en este filtro.</p>`;
+  }
+  const rows = list.map((meta) => {
+    const pace = weeklyPace(pairsOf(meta.tag));
+    const text = pace.ritmo == null ? "Hacen falta dos importaciones. No se inventa un ritmo de 0." : `${fmtNum(pace.ritmo)} niveles por semana · ${pace.total} niveles`;
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(text)}</span></span></div></li>`;
+  }).join("");
+  return `<ul class="list">${rows}</ul>`;
+}
+
+function renderEquipo(tag) {
+  const list = allAccounts().filter((meta) => expOf(meta.tag));
+  const meta = (tag && accountByTag(tag)) || list.find((m) => m.tag === state.selected) || list[0];
+  if (!meta || !expOf(meta.tag)) {
+    return `<h1 class="large-title">Equipamiento</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p></div></div>`;
+  }
+  const exp = expOf(meta.tag);
+  const view = viewOf(meta.tag);
+  const pieces = equipmentPieces(exp, state.index, view.th);
+  const bag = remainingCost(pieces).total;
+  const ores = [
+    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
+    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
+    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
+  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
+  const options = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === meta.tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
+  return `<h1 class="large-title">Equipamiento</h1>
+    <p class="large-sub">${esc(meta.nombre)} · este apartado no entra en la media, el plan ni los gráficos de la aldea.</p>
+    <label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
+    <div class="section"><div class="card"><h2 class="t-headline">Menas hasta el máximo de TH${view.th}</h2><p class="t-body">${esc(ores)}</p><p class="t-footnote c-2">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Solo si el libro trae el número.</p></div></div>
+    ${equipBlock(exp, meta)}`;
+}
+
 function screenFor(r) {
   if (!state.ready) {
     return `<h1 class="large-title">Clash Progreso</h1><div class="section"><div class="card"><div class="sk sk--line"></div></div></div>`;
@@ -3042,6 +3421,7 @@ function screenFor(r) {
   if (r.name === "agenda") return renderAgenda();
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
+  if (r.name === "equipo") return renderEquipo(r.tag);
   return renderRoster();
 }
 
@@ -3050,7 +3430,7 @@ function renderGraficos() {
   if (!allAccounts().some((m) => expOf(m.tag))) {
     return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
   }
-  const kinds = [["lineas", "Líneas"], ["barras", "Barras"], ["apiladas", "Apiladas"], ["radar", "Radar"], ["calor", "Calor"], ["ritmo", "Ritmo"]];
+  const kinds = [["lineas", "Líneas"], ["barras", "Barras"], ["apiladas", "Apiladas"], ["radar", "Radar"], ["calor", "Calor"], ["ritmo", "Ritmo"], ["niveles", "Niveles"]];
   const kindChips = kinds.map(([id, label]) => filterChip("data-chart-kind", id, label, state.chartKind === id)).join("");
   const needsAccount = state.chartKind === "radar" || state.chartKind === "ritmo";
   const tag = list.some((m) => m.tag === state.chartTag) ? state.chartTag : (list[0] ? list[0].tag : "");
@@ -3071,6 +3451,8 @@ function renderGraficos() {
       card = `<div class="card"><h2 class="t-headline">Radar · ${esc(meta.nombre)}</h2>${snap ? radarSvg(snap.view, cats) : ""}</div>`;
     } else if (state.chartKind === "calor") {
       card = `<div class="card"><h2 class="t-headline">Cuentas × categorías</h2>${heatHtml(snaps, cats)}</div>`;
+    } else if (state.chartKind === "niveles") {
+      card = levelCard(list);
     } else {
       card = `<div class="card"><h2 class="t-headline">Ritmo · ${esc(meta.nombre)}</h2>${paceBlock(tag)}</div>`;
     }
@@ -3140,9 +3522,18 @@ function renderCopia() {
       <p class="t-body">Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial.</p>
       <p class="t-footnote c-2">${esc(thLine)}</p>
       <p class="t-footnote c-2">Última importación: ${esc(lastImportLabel())}</p>
+      ${copyWarning()}
       <button type="button" class="btn btn--primary btn--block" data-backup>Exportar JSON · ${n} cuentas</button>
       <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar desde una copia</button>
-      <p class="t-footnote c-2">Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú.</p>
+      <p class="t-footnote c-2">Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú. La copia incluye las marcas provisionales del plan y la meta de cada cuenta.</p>
+    </div></div>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">Apariencia</h2>
+      <div class="chip-row" role="toolbar" aria-label="Tema">${[["sistema", "Sistema"], ["light", "Claro"], ["dark", "Oscuro"]].map(([id, label]) => `<button type="button" data-theme="${id}" aria-pressed="${state.theme === id ? "true" : "false"}">${label}</button>`).join("")}</div>
+      <label class="sort-label">Días sin actualizar
+        <input data-stale-days type="number" min="1" max="90" value="${state.staleDays}" aria-label="Días sin actualizar">
+      </label>
+      <p class="t-footnote c-2">Una cuenta avisa cuando la exportación tiene más de esos días. El valor inicial es 7.</p>
     </div></div>
     <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
       <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
@@ -3167,6 +3558,15 @@ function renderCopia() {
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
 }
 
+function copyWarning() {
+  const at = state.copyAt;
+  if (!at) return `<p class="t-footnote c-2">Aún no hay una copia automática en este iPhone. Se guarda al importar.</p>`;
+  const days = Math.floor((state.now - at) / 86400000);
+  if (days < 7) return `<p class="t-footnote c-2">Copia automática del ${esc(fmtWhen(at))}.</p>`;
+  const dia = days === 1 ? "día" : "días";
+  return `<p class="t-footnote c-2">La última copia automática es del ${esc(fmtWhen(at))}. Llevas ${days} ${dia} sin una copia nueva.</p>`;
+}
+
 function lastImportLabel() {
   if (!state.rows.length) return "aún no hay";
   const max = state.rows.reduce((m, r) => Math.max(m, r.timestamp || 0), 0);
@@ -3189,6 +3589,16 @@ function renderEditor() {
         </label>
         <div class="section"><button type="button" class="btn btn--secondary btn--block" data-grupo-add>Añadir grupo</button></div>
         ${(meta.grupos || []).length ? `<div class="chip-row" role="list" aria-label="Grupos">${meta.grupos.map((g) => `<button type="button" data-grupo-del="${esc(g)}" aria-label="Quitar ${esc(g)}">${esc(g)}</button>`).join("")}</div>` : `<p class="section-footer">Sin grupos. Sirven para filtrar en Cuentas, Gráficos y Ranking.</p>`}
+        <label class="sort-label">Meta de progreso
+          <select data-meta-clave aria-label="Meta">
+            <option value="" ${!meta.meta ? "selected" : ""}>Sin meta</option>
+            <option value="media" ${meta.meta && meta.meta.clave === "media" ? "selected" : ""}>Media</option>
+            ${villageCats().map((c) => `<option value="${c.key}" ${meta.meta && meta.meta.clave === c.key ? "selected" : ""}>${esc(c.label)}</option>`).join("")}
+          </select>
+        </label>
+        <label class="alias-field">Porcentaje de la meta
+          <input data-meta-pct type="number" min="1" max="100" inputmode="numeric" aria-label="Porcentaje de la meta" value="${meta.meta ? meta.meta.pct : ""}">
+        </label>
         <div class="section"><button type="button" class="btn btn--secondary btn--block" data-principal="${esc(meta.tag)}">${meta.principal ? "Quitar Principal" : "Marcar como Principal"}</button></div>
         <div class="section"><button type="button" class="btn btn--destructive btn--block" data-delete="${esc(meta.tag)}">Borrar cuenta</button></div>
         <p class="section-footer">Puede haber varias cuentas Principal. Si no marcas ninguna, destaca la de TH más alto.</p>
@@ -3426,6 +3836,43 @@ function bind(r) {
       return;
     }
     if (ev.target.closest("[data-paste-now]")) { await pasteNow(); return; }
+    const modo = ev.target.closest("[data-plan-modo]");
+    if (modo) {
+      const tag = route().tag;
+      if (tag) setAccountPlan(tag, { modo: modo.dataset.planModo === "rushear" ? "rushear" : "maxear" });
+      render();
+      return;
+    }
+    const flag = ev.target.closest("[data-plan-flag]");
+    if (flag) {
+      const tag = route().tag;
+      const id = flag.dataset.planFlag;
+      if (tag && state.planes[tag] == null) setAccountPlan(tag, {});
+      const plan = effectivePlan(state.planes[tag]);
+      if (tag && ["ataque", "defensa", "muros", "heroes"].includes(id)) setAccountPlan(tag, { [id]: !plan[id] });
+      render();
+      return;
+    }
+    const prov = ev.target.closest("[data-prov]");
+    if (prov) {
+      const tag = prov.dataset.provTag;
+      let keys = [];
+      try { keys = JSON.parse(decodeURIComponent(prov.dataset.prov)); } catch { keys = []; }
+      const road = accountRoadmap(accountByTag(tag) || { tag });
+      const steps = road ? road.orden.filter((s) => keys.includes(s.key)) : [];
+      for (const step of steps) state.provisionales = toggleProvisional(state.provisionales, step, tag, state.now);
+      saveProvisionals();
+      render();
+      return;
+    }
+    const themeBtn = ev.target.closest("button[data-theme]");
+    if (themeBtn) {
+      state.theme = themeBtn.dataset.theme;
+      localStorage.setItem("cp-theme", state.theme);
+      applyTheme(state.theme);
+      render();
+      return;
+    }
     if (ev.target.closest("[data-notify]")) { await toggleNotify(); return; }
     if (ev.target.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
     if (ev.target.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
@@ -3439,6 +3886,8 @@ function bind(r) {
     if (grupo && grupo.dataset.grupoDel == null) { setFilter({ grupo: grupo.dataset.grupo || "" }); render(); return; }
     const kind = ev.target.closest("[data-chart-kind]");
     if (kind) { state.chartKind = kind.dataset.chartKind; localStorage.setItem("cp-chart-kind", state.chartKind); render(); return; }
+    const levelKind = ev.target.closest("[data-level-kind]");
+    if (levelKind) { state.levelKind = levelKind.dataset.levelKind; localStorage.setItem("cp-level-kind", state.levelKind); render(); return; }
     const rank = ev.target.closest("[data-rank]");
     if (rank) { state.rankKey = rank.dataset.rank; localStorage.setItem("cp-rank", state.rankKey); render(); return; }
     const compare = ev.target.closest("[data-compare]");
@@ -3691,7 +4140,10 @@ function bind(r) {
     if (tab) { ev.preventDefault(); document.getElementById("screen")?.scrollTo?.({ top: 0 }); window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   };
   const sel = document.querySelector("[data-account]");
-  if (sel) sel.onchange = () => { location.hash = "#/progreso/" + sel.value.slice(1); };
+  if (sel) sel.onchange = () => {
+    const tail = sel.value.slice(1);
+    location.hash = route().name === "equipo" ? "#/equipo/" + tail : "#/progreso/" + tail;
+  };
   const sort = document.querySelector("[data-sort]");
   if (sort) sort.onchange = () => { state.sortMode = sort.value; localStorage.setItem("cp-sort", state.sortMode); render(); };
   const chart = document.querySelector("[data-chart]");
@@ -3708,6 +4160,50 @@ function bind(r) {
   if (desde) desde.onchange = () => { setFilter({ desde: desde.value }); render(); };
   const hasta = document.querySelector("[data-hasta]");
   if (hasta) hasta.onchange = () => { setFilter({ hasta: hasta.value }); render(); };
+  const rosterQ = document.querySelector("[data-roster-q]");
+  if (rosterQ) rosterQ.oninput = () => {
+    const pos = rosterQ.selectionStart;
+    state.rosterQ = rosterQ.value;
+    render();
+    const again = document.querySelector("[data-roster-q]");
+    if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch { /* tipo search */ } }
+  };
+  document.querySelectorAll("[data-plan-th], [data-plan-cat], [data-plan-recurso], [data-plan-dur]").forEach((input) => {
+    input.onchange = () => {
+      const tag = route().tag;
+      if (!tag) return;
+      const patch = {};
+      const thSel = document.querySelector("[data-plan-th]");
+      const catSel = document.querySelector("[data-plan-cat]");
+      const recSel = document.querySelector("[data-plan-recurso]");
+      const durSel = document.querySelector("[data-plan-dur]");
+      if (thSel) patch.th = thSel.value ? Number(thSel.value) : null;
+      if (catSel) patch.categoria = catSel.value || "";
+      if (recSel) patch.recurso = recSel.value || "todos";
+      if (durSel) patch.duracion = durSel.value || "";
+      setAccountPlan(tag, patch);
+      render();
+    };
+  });
+  const staleDays = document.querySelector("[data-stale-days]");
+  if (staleDays) staleDays.onchange = () => {
+    const n = Math.max(1, Math.min(90, Math.round(Number(staleDays.value) || 7)));
+    state.staleDays = n;
+    localStorage.setItem("cp-stale-days", String(n));
+    render();
+  };
+  const metaClave = document.querySelector("[data-meta-clave]");
+  const metaPct = document.querySelector("[data-meta-pct]");
+  const saveMeta = () => {
+    if (!state.editor) return;
+    const clave = metaClave ? metaClave.value : "";
+    const pct = metaPct ? Number(metaPct.value) : NaN;
+    state.accounts = setMeta(state.accounts, state.editor, clave ? { clave, pct } : null);
+    persistRoster();
+    render();
+  };
+  if (metaClave) metaClave.onchange = saveMeta;
+  if (metaPct) metaPct.onchange = saveMeta;
   const search = document.querySelector("[data-psearch]");
   if (search) search.oninput = () => {
     const pos = search.selectionStart;
@@ -3857,6 +4353,7 @@ async function purgeImages() {
 }
 
 async function boot() {
+  applyTheme(state.theme);
   state.added = loadAdded();
   announce("");
   render();
@@ -3881,7 +4378,23 @@ async function boot() {
   });
   state.accounts = migrated.accounts;
   persistRoster();
+  try { state.copyAt = await latestCopyAt(); } catch { state.copyAt = null; }
   state.ready = true;
+  const lote = loteTextFromUrl(location.href);
+  if (lote) {
+    history.replaceState(null, "", location.pathname + location.search + "#/roster");
+    const imported = clipboardImportPlan(lote, classifyCtx());
+    if (imported.plan.save.length) await savePlan(imported.plan);
+    else {
+      state.importUi = freshImport();
+      state.importUi.active = true;
+      state.importUi.mode = "paste";
+      state.importUi.text = lote;
+      state.importUi.items = imported.items;
+      state.importUi.phase = imported.items.length ? "batch" : "entry";
+      location.hash = "#/importar";
+    }
+  }
   render();
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js", { type: "module" })

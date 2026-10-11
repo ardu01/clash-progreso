@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.0.0</strong><br>
+  <strong>Versión 3.1.0</strong><br>
   Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -16,37 +16,36 @@ Clash Progreso guarda las exportaciones que cada persona pega, calcula el avance
 
 iPhone (393×852, escala 3), con las exportaciones del 7 de octubre de 2026.
 
-| Cuentas | Progreso | Mejoras |
+| Cuentas | Qué hacer ahora | Plan |
 | --- | --- | --- |
-| <img src="docs/capturas/30-cuentas.png" width="220" alt="Lista de cuentas, botón Pegar exportación y resumen de la flota"> | <img src="docs/capturas/30-progreso.png" width="220" alt="Progreso de C1 con filtros y categorías"> | <img src="docs/capturas/30-mejoras.png" width="220" alt="Mejoras en curso"> |
+| <img src="docs/capturas/31-cuentas.png" width="220" alt="Cuentas con búsqueda y lista de las que hay que actualizar"> | <img src="docs/capturas/31-ahora.png" width="220" alt="Siguiente paso del plan de cada cuenta, con Maxear TH actual si no hay plan guardado"> | <img src="docs/capturas/31-plan.png" width="220" alt="Línea de tiempo del plan con objetivo, TH y filtros"> |
 
-| Gráficos | Barras | Mapa de calor |
+| Progreso | Equipamiento | Niveles |
 | --- | --- | --- |
-| <img src="docs/capturas/30-graficos-lineas.png" width="220" alt="Líneas de evolución de todas las cuentas"> | <img src="docs/capturas/30-graficos-barras.png" width="220" alt="Barras agrupadas por categoría y por cuenta"> | <img src="docs/capturas/30-graficos-calor.png" width="220" alt="Mapa de calor de cuentas por categoría"> |
+| <img src="docs/capturas/31-progreso.png" width="220" alt="Progreso de la aldea, sin el equipamiento en la media"> | <img src="docs/capturas/31-equipo.png" width="220" alt="Equipamiento de héroes, aparte de la aldea"> | <img src="docs/capturas/31-niveles.png" width="220" alt="Tabla de niveles reales de las cuentas"> |
 
-| Qué hacer ahora | Ranking | Agenda |
-| --- | --- | --- |
-| <img src="docs/capturas/30-ahora.png" width="220" alt="Cuentas con constructor, laboratorio o mejora terminada"> | <img src="docs/capturas/30-ranking.png" width="220" alt="Ranking de cuentas"> | <img src="docs/capturas/30-agenda.png" width="220" alt="Agenda de constructores libres por día"> |
-
-| Plan | Historial | Copia |
-| --- | --- | --- |
-| <img src="docs/capturas/30-plan-linea.png" width="220" alt="Línea de tiempo de constructores, laboratorio y casa de mascotas"> | <img src="docs/capturas/30-historial.png" width="220" alt="Historial, ritmo y rachas de una cuenta"> | <img src="docs/capturas/30-copia.png" width="220" alt="Copia de seguridad y aviso de la Fan Content Policy"> |
+| Copia | Oscuro |
+| --- | --- |
+| <img src="docs/capturas/31-copia.png" width="220" alt="Copia, tema y aviso de la Fan Content Policy"> | <img src="docs/capturas/31-oscuro.png" width="220" alt="La misma lista de cuentas en tema oscuro"> |
 
 ## Funciones
 
 ### Cuentas
 
 - Lista de las aldeas de prueba y de las que se importen después. Se pueden marcar como Principal y ordenar.
-- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas y añade o actualiza por tag. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`.
+- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas por el tag y añade o actualiza. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`, o abrir la app con varias aldeas juntas (`docs/atajo.md`).
+- Búsqueda por el alias de la cuenta.
 - Grupos opcionales (hasta 6, de 16 caracteres: principal, farming, TH11) para filtrar en Cuentas, Gráficos y Ranking.
+- Meta opcional de una categoría o de la media, con una barra de progreso.
 - Resumen de la flota: media, constructores ocupados y libres, laboratorios y casas de mascotas libres, y la próxima mejora con hora.
+- Lista de cuentas sin actualización reciente. El plazo se cambia en Copia; el valor inicial es más de 7 días.
 - Accesos a Qué hacer ahora, Ranking y Agenda.
 
 ### Progreso y filtros
 
-- Porcentajes por categoría con la misma regla de la 2.x: el máximo lo deciden los topes, no el estado del nombre.
+- Porcentajes por categoría con la misma regla de la 2.x: el máximo lo deciden los topes, no el estado del nombre. La media es la media de las categorías de la aldea. El equipamiento va en su propio apartado y no entra en esa media.
 - Filtros de periodo (7 días, 30 días, 3 meses, todo o un rango), recurso (oro, elixir, oscuro, otros), ayuntamiento y grupo. Valen en Progreso y en Gráficos.
-- Coste y tiempo hasta el máximo del ayuntamiento actual: oro, elixir, oscuro, otros recursos y días de constructor. La fuente es `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento.
+- Coste y tiempo hasta el máximo del ayuntamiento actual: oro, elixir, oscuro, otros recursos y días de constructor. La fuente es `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento ni el de las menas.
 
 ### Gráficos
 
@@ -57,17 +56,21 @@ Todas las cuentas visibles van en el mismo gráfico, con un color fijo y una ley
 - Barras apiladas (cada color es el % de una categoría, no una suma de recursos).
 - Mapa de calor de cuentas × categorías.
 - Radar y ritmo semanal, de una cuenta.
+- Niveles: evolución del TH, héroes frente a su máximo, media de niveles por categoría, distribución de muros, laboratorio, mascotas, cara a cara, cuentas del mismo TH y niveles por semana.
 
-Cada punto es una exportación real. Con un solo día importado, la línea es un punto.
+Cada punto es una exportación real. Con un solo día importado, la línea es un punto y el ritmo no muestra un 0 inventado. El equipamiento no entra en estos gráficos.
 
-### Plan y agenda
+### Plan, ahora y agenda
 
-- Plan por cuenta: laboratorio, edificios de ejército, héroes, defensas, trampas, recursos, muros, mascotas y equipamiento. Dentro de cada grupo va primero lo más atrasado. Se proponen tantas obras como constructores libres.
+- El plan es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige Maxear o Rushear y el TH objetivo (el actual o uno superior). Se pueden combinar prioridad de ataque, de defensa, muros, héroes, categoría, recurso y duración.
+- Para un TH objetivo superior, el nivel pedido es el máximo del TH anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados. No hay una lista oficial de requisitos de ayuntamiento en los datos, y la pantalla lo dice.
+- Cada paso lleva coste, tiempo y fecha estimada de Madrid, con los constructores de esa cuenta. En la línea se marcan las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
+- **Qué hacer ahora** enseña, en cada cuenta, el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Si la cuenta no tiene plan guardado, el criterio es Maxear TH actual.
 - Los héroes de `#28PLGP0G2` no entran en el plan.
-- Cada constructor, el laboratorio y la casa de mascotas tienen una línea: qué se está mejorando, a qué hora de Madrid queda libre y qué toca después.
+- El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe frente al máximo, menas (brillante, resplandeciente y estelar) y comparación.
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
 - Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
-- La agenda junta esas horas de todas las cuentas: qué queda libre cada día y a qué hora.
+- La agenda junta las horas reales de la exportación. Las marcas del plan no entran en la agenda ni en los avisos.
 
 ### Historial, ranking y avisos
 
@@ -77,7 +80,9 @@ Cada punto es una exportación real. Con un solo día importado, la línea es un
 
 ### Copia
 
-- JSON con las cuentas y el historial. Al restaurar se fusiona por tag y por fecha de exportación: no borra lo que solo está en el iPhone.
+- JSON con las cuentas, el historial, los planes, las marcas provisionales y la meta de cada cuenta. Al importar se guarda sola una copia en este iPhone. Si pasan 7 días sin otra, Copia lo avisa.
+- Al restaurar se fusiona por tag y por fecha de exportación: no borra lo que solo está en el iPhone, ni un plan o una marca que la copia no traiga.
+- Tema del sistema, claro u oscuro.
 - Descarga de imágenes para usarlas sin conexión.
 - Restaurar los datos de prueba o borrar todos los datos, con confirmación.
 
@@ -104,16 +109,19 @@ El menú en inglés, comprobado, es *Settings → More Settings → Data Export 
 
 Si el botón no puede leer el portapapeles, se abre Importar: mantén pulsado el campo y elige Pegar, o elige uno o varios `.json` en Archivos.
 
+Para traer varias aldeas seguidas desde el juego, el atajo está en `docs/atajo.md`.
+
 ## Privacidad
 
-Las cuentas, el historial, los grupos, los filtros y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
+Las cuentas, el historial, los grupos, las metas, los planes, las marcas provisionales, los filtros, el tema y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
-Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. Las imágenes no cambian respecto a la 2.1.4 y siguen en la caché `cp-img-v5`.
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v18` y la de imágenes `cp-img-v6`.
 
 ## Historial de versiones
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.0 | Qué hacer ahora sale del plan de cada cuenta. Línea de tiempo con TH objetivo y marcas. Equipamiento aparte de la media. Niveles, meta, tema oscuro, búsqueda, copia automática y atajo para varias aldeas. |
 | 3.0.0 | Varias cuentas en los mismos gráficos, pegado directo, flota, filtros, plan con agenda, coste hasta el máximo, ranking, historial con rachas y avisos con la app abierta. |
 | 2.1.4 | Encuadre de los iconos en Safari (el dibujo al 85 %) e identificación de niveles y piezas. |
 | 2.1.3 | Iconos con margen. La interfaz deja de mostrar «ID deducido». |

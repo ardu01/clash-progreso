@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, upgradesOf, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES } from "../js/progress.js";
+import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, upgradesOf, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES, VILLAGE_KEYS } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
 import { fmtBytes, fmtFin, fmtPct } from "../js/format.js";
 import { APP_VERSION, SHELL_CACHE, IMAGE_CACHE } from "../js/caches.js";
@@ -66,17 +66,15 @@ const EXPECTED_EQ = {
 const CATS = ["defensas", "ejercito_edif", "laboratorio", "heroes", "mascotas", "equipamiento", "trampas", "recursos", "muros"];
 
 // Desvíos conocidos frente a snapshots.csv.
-// Laboratorio: 4000109, 26000123 y 4000188 no entran en el máximo (siguen sin identificar).
+// Laboratorio: 4000109, 26000123 y 4000188 ya están identificados y el % coincide con el CSV.
+// El equipamiento no entra en la media, así que pct_media y pct_sig_media se apartan del CSV.
 // Defensas frente a otro TH: instancias colocadas contra el máximo de ese TH; las que faltan
 // son el cupo de ClashRecord menos las colocadas (nunca negativo). Incluye Inferno Artillery,
 // que no tiene ficha en el manifiesto.
 const KNOWN = new Set([
-  "#28PLGP0G2 pct_laboratorio",
   "#28PLGP0G2 pct_media",
   "#28PLGP0G2 pct_equipamiento",
   "#R00C8CPQC pct_sig_defensas",
-  "#R00C8CPQC pct_laboratorio",
-  "#R00C8CPQC pct_sig_laboratorio",
   "#R00C8CPQC pct_media",
   "#R00C8CPQC pct_sig_media",
   "#R00C8CPQC pct_equipamiento",
@@ -85,6 +83,22 @@ const KNOWN = new Set([
   "#R02YUVC0J pct_sig_defensas",
   "#R02YUVC0J pct_media",
   "#R02YUVC0J pct_sig_media",
+  "#GUQUV98JG pct_media",
+  "#GUQUV98JG pct_sig_media",
+  "#GVG9GCYUV pct_media",
+  "#GVG9GCYUV pct_sig_media",
+  "#R02YVYLJ8 pct_media",
+  "#R02YVYLJ8 pct_sig_media",
+  "#GJPJP9JP0 pct_media",
+  "#GJPJP9JP0 pct_sig_media",
+  "#GVPU80R80 pct_media",
+  "#GVPU80R80 pct_sig_media",
+  "#GVUQ2C2VC pct_media",
+  "#GVUQ2C2VC pct_sig_media",
+  "#GVVYVU802 pct_media",
+  "#GVVYVU802 pct_sig_media",
+  "#GVPU2CJR8 pct_media",
+  "#GVPU2CJR8 pct_sig_media",
 ]);
 
 test("el equipamiento mostrado es el de la exportación, sin filtrar", () => {
@@ -192,22 +206,22 @@ test("las piezas id_deducido siguen en el recuento y salen de sin identificar", 
     assert.equal(piece.heroe, "Dragon Duke");
     assert.equal(piece.meta.nombre_pendiente, false);
   }
-  const fangs = pieces.find((p) => p.id === "90000016");
+  const arrow = pieces.find((p) => p.id === "90000016");
+  assert.equal(arrow.unknown, false);
+  assert.equal(arrow.meta.estado, "ok");
+  assert.equal(arrow.meta.nombre, "Flecha monolítica");
+  assert.equal(arrow.heroe, "Archer Queen");
+  const fangs = pieces.find((p) => p.id === "90000059");
   assert.equal(fangs.unknown, false);
   assert.equal(fangs.meta.estado, "ok");
-  assert.equal(fangs.meta.nombre, "Colmillos eléctricos");
   assert.equal(fangs.heroe, "Dragon Duke");
-  const arrow = pieces.find((p) => p.id === "90000059");
-  assert.equal(arrow.unknown, false);
-  assert.equal(arrow.meta.estado, "faltante");
-  assert.equal(arrow.heroe, "Archer Queen");
-  assert.equal(arrow.meta.nombre_en, "Monolith Arrow");
-  assert.equal(pieces.filter((p) => p.unknown).length, 1);
+  assert.equal(fangs.meta.nombre, "Colmillos eléctricos");
+  assert.equal(pieces.filter((p) => p.unknown).length, 0);
   const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
-  assert.equal(c1.cats.equipamiento.pct, 62.3);
+  assert.equal(c1.cats.equipamiento.pct, 61.4);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
-  assert.equal(c2.cats.equipamiento.pct, 60.2);
-  assert.equal(c2.cats.equipamiento.sigPct, 60.2);
+  assert.equal(c2.cats.equipamiento.pct, 58.9);
+  assert.equal(c2.cats.equipamiento.sigPct, 58.9);
 });
 
 test("Inferno Artillery solo en el detalle, sin id inventado", () => {
@@ -238,10 +252,10 @@ test("Inferno Artillery solo en el detalle, sin id inventado", () => {
   }
 });
 
-test("399 sha256 coinciden con el manifiesto v2.1", () => {
-  assert.equal(manifest.version_set_imagenes, "v2.1");
-  assert.equal(manifest.peso_imagenes.total_archivos, 399);
-  assert.equal(manifest.peso_imagenes.total_bytes, 77485701);
+test("420 sha256 coinciden con el manifiesto v3.1", () => {
+  assert.equal(manifest.version_set_imagenes, "v3.1");
+  assert.equal(manifest.peso_imagenes.total_archivos, 420);
+  assert.equal(manifest.peso_imagenes.total_bytes, 84830388);
   assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 220);
   assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 21579962);
   assert.equal(manifest.peso_imagenes.umbral_pesado_bytes, 3000000);
@@ -255,7 +269,7 @@ test("399 sha256 coinciden con el manifiesto v2.1", () => {
       if (im && im.ruta) want.set(im.ruta, im);
     }
   }
-  assert.equal(want.size, 399);
+  assert.equal(want.size, 420);
   const dir = join(root, "assets/images");
   const files = [];
   const walk = (rel) => {
@@ -266,7 +280,7 @@ test("399 sha256 coinciden con el manifiesto v2.1", () => {
     }
   };
   walk("");
-  assert.equal(files.length, 399);
+  assert.equal(files.length, 420);
   for (const rel of files) {
     const im = want.get(rel);
     assert.ok(im, rel);
@@ -354,11 +368,11 @@ test("el máximo de cada fila sale de caps por nombre_en", () => {
   assert.deepEqual([hero("28000007").lvl, hero("28000007").max], [10, 15]);
   assert.equal(levelLine(hero("28000007")).text, "Nv 10 / 15");
   assert.equal(c2.cats.heroes.pct, 23.5);
-  assert.equal(c2.cats.equipamiento.pct, 60.2);
-  assert.equal(c2.offense, 34.5);
+  assert.equal(c2.cats.equipamiento.pct, 58.9);
+  assert.equal(c2.offense, 34.2);
 
   const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
-  assert.equal(c1.cats.equipamiento.pct, 62.3);
+  assert.equal(c1.cats.equipamiento.pct, 61.4);
   assert.equal(c1.cats.heroes.pct, Number(byTag.get("#28PLGP0G2").pct_heroes));
 
   const th13 = analyze(exportsByTag.get("#GUQUV98JG"), index);
@@ -410,10 +424,10 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
 
-test("manifest.json coincide con la v2.1", () => {
+test("manifest.json coincide con la v3.1", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "0d23a9216e2e1ecc2345a988ed474c92b247ae01ba4b02d33e0d2a6b293993da");
-  assert.equal(manifest.version_set_imagenes, "v2.1");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "a810373cc80e8fa67edbf924a2d8f529dfcaa45817d9a5686e481841afe20fc4");
+  assert.equal(manifest.version_set_imagenes, "v3.1");
 });
 
 /** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
@@ -435,17 +449,17 @@ function fnFromApp(signature, name, deps = {}) {
 }
 
 const V110 = {
-  "#28PLGP0G2": { media: 64.1, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [63.1, null], ejercito_edif: [96.1, null], equipamiento: [62.3, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
-  "#R00C8CPQC": { media: 49.2, sigMedia: 46.3, cats: { defensas: [66.9, 61.3], laboratorio: [45.4, 41.7], ejercito_edif: [86.2, 80.6], equipamiento: [60.2, 60.2], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
-  "#GUQUV98JG": { media: 62.9, sigMedia: 49.3, cats: { defensas: [69.2, 62.6], laboratorio: [53.7, 47.9], ejercito_edif: [83.3, 75.8], equipamiento: [67.9, 57.3], mascotas: [null, 0], heroes: [32.7, 28.1], trampas: [48.9, 39.6], recursos: [72.3, 67.4], muros: [75.3, 64.9] } },
-  "#GVG9GCYUV": { media: 60, sigMedia: 47.1, cats: { defensas: [68.6, 62], laboratorio: [45.6, 40.6], ejercito_edif: [81.7, 74.2], equipamiento: [80.8, 68.4], mascotas: [null, 0], heroes: [33.1, 28.4], trampas: [26.5, 21.5], recursos: [68.1, 63.4], muros: [75.4, 65] } },
-  "#R02YVYLJ8": { media: 58.6, sigMedia: 45.8, cats: { defensas: [65.9, 59.6], laboratorio: [44.1, 39.3], ejercito_edif: [78.3, 71.2], equipamiento: [73.5, 62.2], mascotas: [null, 0], heroes: [30.9, 26.6], trampas: [38.8, 31.4], recursos: [61.1, 56.9], muros: [75.9, 65.4] } },
-  "#GJPJP9JP0": { media: 41.8, sigMedia: 32.9, cats: { defensas: [42.5, 38.7], laboratorio: [34.1, 30.4], ejercito_edif: [68.3, 62.1], equipamiento: [54.5, 46.2], mascotas: [null, 0], heroes: [17.5, 15], trampas: [22, 17.8], recursos: [52.7, 49.1], muros: [42.9, 36.9] } },
-  "#GVPU80R80": { media: 51.8, sigMedia: 44, cats: { defensas: [55.5, 46.8], laboratorio: [48.1, 38.4], ejercito_edif: [79.6, 69.2], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [34.7, 24.8], trampas: [24.5, 19.7], recursos: [61.2, 56.6], muros: [51.3, 47.3] } },
-  "#GVUQ2C2VC": { media: 57.3, sigMedia: 48.8, cats: { defensas: [68.3, 57.5], laboratorio: [55.7, 44.5], ejercito_edif: [82.8, 72], equipamiento: [66.7, 55.6], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [18.4, 14.8], recursos: [67.7, 62.6], muros: [61.2, 56.5] } },
-  "#GVVYVU802": { media: 58.1, sigMedia: 49.2, cats: { defensas: [66.3, 55.8], laboratorio: [55.2, 44.1], ejercito_edif: [81.7, 71], equipamiento: [77.2, 63.8], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [28.2, 22.7], recursos: [58.4, 54], muros: [60.5, 55.9] } },
-  "#GVPU2CJR8": { media: 51.2, sigMedia: 43.4, cats: { defensas: [57.3, 48.2], laboratorio: [49.7, 39.7], ejercito_edif: [80.6, 70.1], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [38, 27.1], trampas: [19, 15.3], recursos: [55.9, 51.7], muros: [50, 46.2] } },
-  "#R02YUVC0J": { media: 49.2, sigMedia: 41.7, cats: { defensas: [54.4, 45.8], laboratorio: [47, 37.6], ejercito_edif: [77.4, 67.3], equipamiento: [57.4, 47], mascotas: [null, null], heroes: [35.3, 25.2], trampas: [19, 15.3], recursos: [59.3, 54.9], muros: [44.1, 40.7] } },
+  "#28PLGP0G2": { media: 64.2, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [62.3, null], ejercito_edif: [96.1, null], equipamiento: [61.4, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
+  "#R00C8CPQC": { media: 47.7, sigMedia: 44.5, cats: { defensas: [66.9, 61.3], laboratorio: [44.9, 40.9], ejercito_edif: [86.2, 80.6], equipamiento: [58.9, 58.9], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
+  "#GUQUV98JG": { media: 62.2, sigMedia: 48.3, cats: { defensas: [69.2, 62.6], laboratorio: [53.7, 47.9], ejercito_edif: [83.3, 75.8], equipamiento: [67.9, 57.3], mascotas: [null, 0], heroes: [32.7, 28.1], trampas: [48.9, 39.6], recursos: [72.3, 67.4], muros: [75.3, 64.9] } },
+  "#GVG9GCYUV": { media: 57, sigMedia: 44.4, cats: { defensas: [68.6, 62], laboratorio: [45.6, 40.6], ejercito_edif: [81.7, 74.2], equipamiento: [80.8, 68.4], mascotas: [null, 0], heroes: [33.1, 28.4], trampas: [26.5, 21.5], recursos: [68.1, 63.4], muros: [75.4, 65] } },
+  "#R02YVYLJ8": { media: 56.4, sigMedia: 43.8, cats: { defensas: [65.9, 59.6], laboratorio: [44.1, 39.3], ejercito_edif: [78.3, 71.2], equipamiento: [73.5, 62.2], mascotas: [null, 0], heroes: [30.9, 26.6], trampas: [38.8, 31.4], recursos: [61.1, 56.9], muros: [75.9, 65.4] } },
+  "#GJPJP9JP0": { media: 40, sigMedia: 31.2, cats: { defensas: [42.5, 38.7], laboratorio: [34.1, 30.4], ejercito_edif: [68.3, 62.1], equipamiento: [54.5, 46.2], mascotas: [null, 0], heroes: [17.5, 15], trampas: [22, 17.8], recursos: [52.7, 49.1], muros: [42.9, 36.9] } },
+  "#GVPU80R80": { media: 50.7, sigMedia: 43.3, cats: { defensas: [55.5, 46.8], laboratorio: [48.1, 38.4], ejercito_edif: [79.6, 69.2], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [34.7, 24.8], trampas: [24.5, 19.7], recursos: [61.2, 56.6], muros: [51.3, 47.3] } },
+  "#GVUQ2C2VC": { media: 55.9, sigMedia: 47.8, cats: { defensas: [68.3, 57.5], laboratorio: [55.7, 44.5], ejercito_edif: [82.8, 72], equipamiento: [66.7, 55.6], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [18.4, 14.8], recursos: [67.7, 62.6], muros: [61.2, 56.5] } },
+  "#GVVYVU802": { media: 55.4, sigMedia: 47.2, cats: { defensas: [66.3, 55.8], laboratorio: [55.2, 44.1], ejercito_edif: [81.7, 71], equipamiento: [77.2, 63.8], mascotas: [null, null], heroes: [37.3, 26.7], trampas: [28.2, 22.7], recursos: [58.4, 54], muros: [60.5, 55.9] } },
+  "#GVPU2CJR8": { media: 50.1, sigMedia: 42.6, cats: { defensas: [57.3, 48.2], laboratorio: [49.7, 39.7], ejercito_edif: [80.6, 70.1], equipamiento: [59.4, 48.8], mascotas: [null, null], heroes: [38, 27.1], trampas: [19, 15.3], recursos: [55.9, 51.7], muros: [50, 46.2] } },
+  "#R02YUVC0J": { media: 48.1, sigMedia: 41, cats: { defensas: [54.4, 45.8], laboratorio: [47, 37.6], ejercito_edif: [77.4, 67.3], equipamiento: [57.4, 47], mascotas: [null, null], heroes: [35.3, 25.2], trampas: [19, 15.3], recursos: [59.3, 54.9], muros: [44.1, 40.7] } },
 };
 
 function latestOf(rows, tag) {
@@ -468,7 +482,7 @@ test("los porcentajes de las 11 cuentas: defensas como en 1.1.0; equipamiento de
       assert.equal(a.cats[c.key].sigPct, pair[1], roster.tag + " sig " + c.key);
     }
   }
-  assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 62.3);
+  assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 61.4);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(c2.cats.defensas.pct, 66.9);
   assert.equal(c2.cats.defensas.sigPct, 61.3);
@@ -528,21 +542,24 @@ test("un id desconocido con timestamp posterior sale como ? y queda fuera del %"
 
 test("un nivel por encima del máximo cuenta como el máximo y lleva el chip", () => {
   const base = exportsByTag.get("#28PLGP0G2");
-  const cap = capsMaxFor(index, "90000000", 18);
+  const cap = capsMaxFor(index, "1000009", 18);
   assert.ok(cap > 1);
   const over = structuredClone(base);
   over.timestamp = base.timestamp + 90;
-  over.equipment.find((e) => String(e.data) === "90000000").lvl = cap + 1;
+  const cannon = over.buildings.find((e) => String(e.data) === "1000009");
+  assert.ok(cannon, "C1 trae la torre de arqueras 1000009");
+  cannon.lvl = cap + 1;
   const atMax = structuredClone(base);
-  atMax.equipment.find((e) => String(e.data) === "90000000").lvl = cap;
+  atMax.buildings.find((e) => String(e.data) === "1000009").lvl = cap;
   const overView = analyze(over, index);
   const maxView = analyze(atMax, index);
-  assert.equal(overView.cats.equipamiento.pct, maxView.cats.equipamiento.pct);
-  assert.ok(overView.cats.equipamiento.pct <= 100);
-  const piece = equipmentView(over, index, 18).find((p) => p.id === "90000000");
+  assert.equal(overView.cats.defensas.pct, maxView.cats.defensas.pct);
+  assert.ok(overView.cats.defensas.pct <= 100);
+  const piece = categoryItems(over, index, "defensas", 18).find((p) => p.id === "1000009" && p.lvl === cap + 1);
+  assert.ok(piece);
   assert.equal(piece.lvl, cap + 1);
   assert.equal(piece.max, cap);
-  assert.equal(piece.overMax, true);
+  assert.equal(piece.lvl > piece.max, true);
   assert.equal(overMaxLabel(piece.lvl, piece.max), "Máximo desactualizado");
   assert.equal(levelLine(piece).text, `Nv ${cap + 1} / ${cap}`);
   const rows = [...exportsByTag.values()];
@@ -604,19 +621,19 @@ test("si solo sube el ayuntamiento no hay lista de cambios", () => {
   assert.equal(item.changes.noChanges, false);
 });
 
-test("C2 cuenta 1 sin identificar fuera del porcentaje", () => {
+test("C2 no cuenta sin identificar fuera del porcentaje", () => {
   const base = exportsByTag.get("#R00C8CPQC");
   const exp = structuredClone(base);
   exp.timestamp = base.timestamp + 40;
   const item = classifyEntries([{ name: "c2.json", text: JSON.stringify(exp) }], importCtx([...exportsByTag.values()]))[0];
   assert.equal(item.kind, "ready");
-  assert.equal(item.changes.unknownCount, 1);
+  assert.equal(item.changes.unknownCount, 0);
 });
 
-test("versión 3.0.0 y cachés cp-shell-v17 / cp-img-v5", () => {
-  assert.equal(APP_VERSION, "3.0.0");
-  assert.equal(SHELL_CACHE, "cp-shell-v17");
-  assert.equal(IMAGE_CACHE, "cp-img-v5");
+test("versión 3.1.0 y cachés cp-shell-v18 / cp-img-v6", () => {
+  assert.equal(APP_VERSION, "3.1.0");
+  assert.equal(SHELL_CACHE, "cp-shell-v18");
+  assert.equal(IMAGE_CACHE, "cp-img-v6");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
@@ -636,11 +653,12 @@ test("versión 3.0.0 y cachés cp-shell-v17 / cp-img-v5", () => {
   assert.equal(sw.includes("cp-shell-v14"), false);
   assert.equal(sw.includes("cp-shell-v15"), false);
   assert.equal(sw.includes("cp-shell-v16"), false);
+  assert.equal(sw.includes("cp-shell-v17"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v17/);
-  assert.match(caches, /cp-img-v5/);
+  assert.match(caches, /cp-shell-v18/);
+  assert.match(caches, /cp-img-v6/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
@@ -677,7 +695,7 @@ function unidentifiedSplit(exp) {
   return { noticeSum, equipment, total: noticeSum + equipment, notices };
 }
 
-test("sin identificar: C1 da 4 y las otras diez dan 1, el mismo número en los dos sitios", () => {
+test("sin identificar: las once cuentas dan 0 en la importación y en los avisos", () => {
   const rows = [...exportsByTag.values()];
   for (const roster of ROSTER) {
     const exp = exportsByTag.get(roster.tag);
@@ -685,29 +703,24 @@ test("sin identificar: C1 da 4 y las otras diez dan 1, el mismo número en los d
     fresh.timestamp = exp.timestamp + 40;
     const item = classifyEntries([{ name: "nueva.json", text: JSON.stringify(fresh) }], importCtx(rows))[0];
     const split = unidentifiedSplit(exp);
-    const want = roster.tag === "#28PLGP0G2" ? 4 : 1;
-    assert.equal(item.changes.unknownCount, want, roster.tag);
-    assert.equal(split.total, want, roster.tag + " avisos");
+    assert.equal(item.changes.unknownCount, 0, roster.tag);
+    assert.equal(split.total, 0, roster.tag + " avisos");
+    assert.equal(split.noticeSum, 0, roster.tag);
+    assert.equal(split.equipment, 0, roster.tag);
+    assert.equal(split.notices.laboratorio || 0, 0, roster.tag);
     assert.equal(split.notices.defensas || 0, 0, roster.tag + " defensas");
     assert.equal(outsidePct(index, "107000008", townHallLevel(exp)), false, roster.tag);
-    if (roster.tag === "#28PLGP0G2") {
-      assert.equal(split.notices.laboratorio, 3);
-      assert.equal(split.equipment, 1);
-      assert.equal(unknownMsg(item.changes.unknownCount), "4 ítems sin identificar: se guardan igual.");
-    } else {
-      assert.equal(split.equipment, 1);
-      assert.equal(split.noticeSum, 0, roster.tag);
-      const ids = categoryItems(exp, index, "equipamiento", townHallLevel(exp))
-        .filter((it) => outsidePct(index, it.id, townHallLevel(exp)))
-        .map((it) => it.id)
-        .sort();
-      assert.deepEqual(ids, ["90000061"]);
-    }
+    assert.equal(outsidePct(index, "90000061", townHallLevel(exp)), false, roster.tag);
   }
   assert.equal(unknownMsg(1), "1 ítem sin identificar: se guarda igual.");
+  assert.equal(unknownMsg(0), "0 ítems sin identificar: se guardan igual.");
   const helper = presentItem(index, "93000003");
-  assert.equal(helper.unknown, true);
-  assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 4);
+  assert.equal(helper.unknown, false);
+  assert.equal(helper.title, "Picador");
+  const pendant = presentItem(index, "90000061");
+  assert.equal(pendant.unknown, false);
+  assert.equal(pendant.title, "Portal portátil");
+  assert.equal(unidentifiedSplit(exportsByTag.get("#28PLGP0G2")).total, 0);
 });
 
 test("107000008 se muestra como Logger, sin marca de ID deducido, y no entra en el aviso", () => {
@@ -753,7 +766,7 @@ test("el Logger se muestra entero, sin recortar la caja; los niveles 2 a 5 usan 
   assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
-  assert.equal(IMAGE_CACHE, "cp-img-v5");
+  assert.equal(IMAGE_CACHE, "cp-img-v6");
 });
 
 test("la media sin cambio no repite el valor ni pone flecha", () => {
@@ -764,10 +777,10 @@ test("la media sin cambio no repite el valor ni pone flecha", () => {
   const flat = classifyEntries([{ name: "igual.json", text: JSON.stringify(same) }], importCtx(rows))[0];
   assert.equal(flat.kind, "ready");
   assert.equal(flat.changes.delta.dir, "flat");
-  assert.equal(flat.changes.mediaTo, 49.2);
-  assert.equal(mediaLine(flat.changes), fmtPct(49.2) + " · sin cambio");
+  assert.equal(flat.changes.mediaTo, 47.7);
+  assert.equal(mediaLine(flat.changes), fmtPct(47.7) + " · sin cambio");
   assert.equal(mediaLine(flat.changes).includes("→"), false);
-  assert.equal(mediaLine(flat.changes).split(fmtPct(49.2)).length - 1, 1);
+  assert.equal(mediaLine(flat.changes).split(fmtPct(47.7)).length - 1, 1);
   const moved = structuredClone(base);
   moved.timestamp = base.timestamp + 80;
   const wall = moved.buildings.find((b) => b.data === 1000010);
@@ -863,9 +876,8 @@ test("ofensiva: media de laboratorio y héroes", () => {
   assert.equal(got("#R02YUVC0J"), 41.1);
   assert.equal(got("#GUQUV98JG"), Number(byTag.get("#GUQUV98JG").pct_ofensiva));
   assert.equal(got("#R02YUVC0J"), Number(byTag.get("#R02YUVC0J").pct_ofensiva));
-  // El CSV de C2 (34,2) aún cuenta Ruin Witch y Angry Spell. Sin esos máximos el laboratorio
-  // sube a 45,4 y la media con héroes (23,5) es 34,5.
-  assert.equal(got("#R00C8CPQC"), 34.5);
+  // Con Bruja caída y Hechizo de cólera en el laboratorio, C2 vuelve al 34,2 del CSV.
+  assert.equal(got("#R00C8CPQC"), 34.2);
 });
 
 test("1.1.4: fmtWhen deja la fecha y la hora con espacio de no separación", () => {
@@ -1653,7 +1665,7 @@ test("2.0.0: los contadores de los chips son las mismas filas que pinta el filtr
     const view = analyze(exp, index);
     const rows = progressRows(exp, index);
     assert.ok(rows.some((r) => r.categoryKey === "muros" && r.cnt > 0), tag);
-    const unlocked = CATEGORIES.map((c) => view.cats[c.key].pct).filter((v) => v != null);
+    const unlocked = VILLAGE_KEYS.map((key) => view.cats[key].pct).filter((v) => v != null);
     assert.equal(view.media, averagePct(unlocked), tag);
     if (view.th < 14) assert.equal(view.cats.mascotas.pct, null, tag);
     for (const status of ["todos", "pendientes", "maximo"]) {
@@ -1897,7 +1909,11 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["102000033"].nombre, "Vela incandescente (Hitpoints)");
   assert.equal(manifest.items["102000041"].nombre, "Catapulta explosiva (Explosion Damage)");
   assert.equal(manifest.items["90000060"].nombre, "Mazo de la venganza");
-  assert.equal(manifest.items["90000061"].estado, "sin_identificar");
+  assert.equal(manifest.items["90000061"].nombre, "Portal portátil");
+  assert.equal(manifest.items["90000061"].estado, "faltante");
+  assert.equal(manifest.items["90000061"].imagen, null);
+  assert.equal(manifest.items["93000003"].nombre, "Picador");
+  assert.equal(manifest.items["93000003"].estado, "ok");
 });
 
 test("2.1.0: sin entrada de nivel se usa el PNG base; Tiradora no tiene niveles publicados", () => {
@@ -2050,8 +2066,8 @@ test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", 
   assert.equal(new Set(urls).size, 220);
   assert.equal(urls.length, manifest.peso_imagenes.precache_instalacion_archivos);
   const list = catalog(manifest);
-  assert.equal(list.length, 399);
-  assert.equal(new Set(list.map((im) => im.url)).size, 399);
+  assert.equal(list.length, 420);
+  assert.equal(new Set(list.map((im) => im.url)).size, 420);
   assert.equal(list.reduce((s, im) => s + im.bytes, 0), manifest.peso_imagenes.total_bytes);
   assert.equal(list.filter((im) => im.precache).length, 220);
   for (const id of ["107000000", "107000001", "107000008"]) {

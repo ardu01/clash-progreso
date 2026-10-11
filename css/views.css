@@ -215,3 +215,6 @@ textarea:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid
 .heat__cell.is-na { background: var(--fill-1); }
 .radar text { fill: var(--label-2); font: 600 10px/12px var(--font); text-anchor: middle; dominant-baseline: middle; }
 .radar .ring { fill: none; stroke: var(--separator); stroke-width: 1; }
+.goal { display: block; height: 4px; margin-top: 6px; border-radius: 2px; background: var(--fill-3); }
+.goal__fill { display: block; height: 100%; width: calc(var(--p) * 1%); max-width: 100%; border-radius: 2px; background: var(--tint); }
+.row .btn-text[aria-pressed="true"] { color: var(--orange-text); }

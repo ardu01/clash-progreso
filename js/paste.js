@@ -57,6 +57,21 @@ function splitObjects(text) {
   return out;
 }
 
+/** Texto de `#lote=` o `?lote=` (también `datos`). Vacío si no viene. */
+export function loteTextFromUrl(href) {
+  try {
+    const url = new URL(String(href || ""), "https://ardu01.github.io/clash-progreso/");
+    const fromQuery = url.searchParams.get("lote") || url.searchParams.get("datos");
+    if (fromQuery) return fromQuery;
+    let hash = url.hash.replace(/^#/, "");
+    if (hash.startsWith("/")) hash = hash.slice(1);
+    const hp = new URLSearchParams(hash);
+    return hp.get("lote") || hp.get("datos") || "";
+  } catch {
+    return "";
+  }
+}
+
 /** Clasifica lo pegado. Guardar es decisión de quien llama: `plan.save`. */
 export function clipboardImportPlan(text, ctx) {
   const chunks = extractExports(text);

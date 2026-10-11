@@ -78,11 +78,15 @@ export function achievements(view, pairs) {
   const alMaximo = [];
   if (view && view.cats) {
     for (const [key, row] of Object.entries(view.cats)) {
+      if (key === "equipamiento") continue;
       if (row && row.pct != null && row.num != null && row.den && row.num >= row.den) alMaximo.push(key);
     }
   }
-  const thCompletado = !!(view && view.media != null && alMaximo.length && view.cats
-    && Object.values(view.cats).filter((row) => row && row.pct != null).every((row) => row.num >= row.den));
+  const village = view && view.cats
+    ? Object.entries(view.cats).filter(([key, row]) => key !== "equipamiento" && row && row.pct != null)
+    : [];
+  const thCompletado = !!(view && view.media != null && alMaximo.length && village.length
+    && village.every(([, row]) => row.num >= row.den));
   return {
     alMaximo,
     thCompletado,

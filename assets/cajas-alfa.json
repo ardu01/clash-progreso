@@ -2392,5 +2392,131 @@
   "y": 0,
   "w": 165,
   "h": 165
+ },
+ "images/hero-equipment/monolith-arrow.png": {
+  "x": 0,
+  "y": 19,
+  "w": 303,
+  "h": 310
+ },
+ "images/hero-equipment/stun-blaster.png": {
+  "x": 73,
+  "y": 65,
+  "w": 896,
+  "h": 913
+ },
+ "images/hero-equipment/flame-blower.png": {
+  "x": 87,
+  "y": 60,
+  "w": 859,
+  "h": 905
+ },
+ "images/hero-equipment/revenge-deck.png": {
+  "x": 162,
+  "y": 110,
+  "w": 685,
+  "h": 694
+ },
+ "images/hero-equipment/noble-iron.png": {
+  "x": 15,
+  "y": 144,
+  "w": 968,
+  "h": 800
+ },
+ "images/crafting/hot-candle-1.png": {
+  "x": 430,
+  "y": 454,
+  "w": 160,
+  "h": 254
+ },
+ "images/crafting/hot-candle-2.png": {
+  "x": 428,
+  "y": 454,
+  "w": 164,
+  "h": 255
+ },
+ "images/crafting/hot-candle-3.png": {
+  "x": 419,
+  "y": 433,
+  "w": 180,
+  "h": 282
+ },
+ "images/crafting/hot-candle-4.png": {
+  "x": 426,
+  "y": 433,
+  "w": 166,
+  "h": 277
+ },
+ "images/crafting/hero-hunter-1.png": {
+  "x": 403,
+  "y": 488,
+  "w": 219,
+  "h": 254
+ },
+ "images/crafting/hero-hunter-2.png": {
+  "x": 400,
+  "y": 488,
+  "w": 225,
+  "h": 257
+ },
+ "images/crafting/hero-hunter-3.png": {
+  "x": 400,
+  "y": 488,
+  "w": 225,
+  "h": 259
+ },
+ "images/crafting/hero-hunter-4.png": {
+  "x": 400,
+  "y": 480,
+  "w": 225,
+  "h": 267
+ },
+ "images/crafting/cake-a-pult-1.png": {
+  "x": 203,
+  "y": 80,
+  "w": 565,
+  "h": 756
+ },
+ "images/crafting/cake-a-pult-2.png": {
+  "x": 169,
+  "y": 11,
+  "w": 699,
+  "h": 877
+ },
+ "images/crafting/cake-a-pult-3.png": {
+  "x": 164,
+  "y": 15,
+  "w": 703,
+  "h": 873
+ },
+ "images/crafting/cake-a-pult-4.png": {
+  "x": 164,
+  "y": 0,
+  "w": 703,
+  "h": 888
+ },
+ "images/siege-machines/sky-wagon.png": {
+  "x": 191,
+  "y": 105,
+  "w": 452,
+  "h": 489
+ },
+ "images/spells/angry-spell.png": {
+  "x": 0,
+  "y": 0,
+  "w": 1024,
+  "h": 1024
+ },
+ "images/helpers/prospector.png": {
+  "x": 0,
+  "y": 0,
+  "w": 401,
+  "h": 444
+ },
+ "images/troops/ruin-witch.png": {
+  "x": 142,
+  "y": 224,
+  "w": 740,
+  "h": 655
  }
 }

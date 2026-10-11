@@ -14,6 +14,14 @@ function seedByTag(tag) {
   return SEED_CATALOG.find((r) => r.tag === tag) || null;
 }
 
+export function cleanMeta(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const clave = String(raw.clave || "").trim().slice(0, 24);
+  const pctN = Number(raw.pct);
+  if (!clave || !Number.isFinite(pctN)) return null;
+  return { clave, pct: Math.max(1, Math.min(100, Math.round(pctN))) };
+}
+
 export function cleanGrupos(raw) {
   const list = Array.isArray(raw) ? raw : [];
   const out = [];
@@ -39,6 +47,7 @@ export function normalizeAccount(raw) {
     chip: raw.chip || (seedByTag(tag) && seedByTag(tag).chip) || chipFromTag(tag),
     objetivo: raw.objetivo == null ? (seedByTag(tag) ? seedByTag(tag).objetivo : null) : raw.objetivo,
     grupos: cleanGrupos(raw.grupos),
+    meta: cleanMeta(raw.meta),
   };
 }
 
@@ -164,6 +173,11 @@ export function addAccount(accounts, raw) {
   if (!acc) return accounts.slice();
   if (accounts.some((a) => a.tag === acc.tag)) return accounts.slice();
   return accounts.concat(acc);
+}
+
+export function setMeta(accounts, tag, meta) {
+  const next = cleanMeta(meta);
+  return accounts.map((a) => (a.tag === tag ? { ...a, meta: next } : a));
 }
 
 export function setGrupos(accounts, tag, grupos) {
