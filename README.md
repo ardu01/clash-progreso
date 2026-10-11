@@ -1,57 +1,141 @@
-# Clash Progreso
+<p align="center">
+  <img src="icons/apple-touch-icon-180.png" width="180" alt="Icono de Clash Progreso: castillo sobre un cartel de madera">
+</p>
 
-PWA estática (2.1.4) para seguir el progreso de las cuentas de Clash of Clans que cada persona importa. Sin backend, sin login y sin llamadas a redes de Supercell en tiempo de ejecución: las imágenes salen del repositorio. Las 11 exportaciones incluidas son datos de prueba: se pueden añadir, renombrar y borrar cuentas.
+<h1 align="center">Clash Progreso</h1>
 
-This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
+<p align="center">
+  <strong>Versión 3.0.0</strong><br>
+  Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
+  <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
+</p>
 
-## Cómo abrirla
+Clash Progreso guarda las exportaciones que cada persona pega, calcula el avance hacia el máximo del ayuntamiento y lo compara entre cuentas. No hay login ni backend. Las 11 aldeas incluidas son datos de prueba: se pueden añadir, renombrar y borrar.
 
-La app usa rutas relativas y está pensada para GitHub Pages en `https://ardu01.github.io/clash-progreso/`.
+## Capturas
 
-En local, sírvela bajo ese mismo subpath:
+iPhone (393×852, escala 3), con las exportaciones del 7 de octubre de 2026.
 
-```bash
-mkdir -p /tmp/pages
-ln -s "$PWD" /tmp/pages/clash-progreso
-python3 -m http.server 8765 --directory /tmp/pages
-```
+| Cuentas | Progreso | Mejoras |
+| --- | --- | --- |
+| <img src="docs/capturas/30-cuentas.png" width="220" alt="Lista de cuentas, botón Pegar exportación y resumen de la flota"> | <img src="docs/capturas/30-progreso.png" width="220" alt="Progreso de C1 con filtros y categorías"> | <img src="docs/capturas/30-mejoras.png" width="220" alt="Mejoras en curso"> |
 
-Abre `http://127.0.0.1:8765/clash-progreso/#/roster`.
+| Gráficos | Barras | Mapa de calor |
+| --- | --- | --- |
+| <img src="docs/capturas/30-graficos-lineas.png" width="220" alt="Líneas de evolución de todas las cuentas"> | <img src="docs/capturas/30-graficos-barras.png" width="220" alt="Barras agrupadas por categoría y por cuenta"> | <img src="docs/capturas/30-graficos-calor.png" width="220" alt="Mapa de calor de cuentas por categoría"> |
 
-## Probar sin conexión
+| Qué hacer ahora | Ranking | Agenda |
+| --- | --- | --- |
+| <img src="docs/capturas/30-ahora.png" width="220" alt="Cuentas con constructor, laboratorio o mejora terminada"> | <img src="docs/capturas/30-ranking.png" width="220" alt="Ranking de cuentas"> | <img src="docs/capturas/30-agenda.png" width="220" alt="Agenda de constructores libres por día"> |
 
-1. Carga la app una vez con red (el service worker guarda la interfaz y las 220 imágenes con `precarga: true`: 21.579.962 bytes). El resto se guarda al verlas.
-2. En Chrome: Application → Service Workers → Offline, o corta la red.
-3. Recarga `#/roster`. Cuentas, Progreso, Mejoras, Gráficos y Copia siguen disponibles. Si falta la imagen del nivel y no hay red, se muestra el PNG del edificio, sin la marca de nivel.
-4. En Copia, el botón muestra lo que falta con `fmtBytes(total_bytes − ya guardados)`. El total sale de `assets/manifest.json` → `peso_imagenes.total_bytes` (77.485.701 bytes, 399 archivos). `pesado` sigue siendo más de 3 MB; en esta versión no hay ninguna.
-5. Importar: Ajustes o Roster → Importar. Pega un JSON o elige varios archivos. Tiene que traer `tag`, `timestamp` y el ayuntamiento `1000001`.
+| Plan | Historial | Copia |
+| --- | --- | --- |
+| <img src="docs/capturas/30-plan-linea.png" width="220" alt="Línea de tiempo de constructores, laboratorio y casa de mascotas"> | <img src="docs/capturas/30-historial.png" width="220" alt="Historial, ritmo y rachas de una cuenta"> | <img src="docs/capturas/30-copia.png" width="220" alt="Copia de seguridad y aviso de la Fan Content Policy"> |
 
-## Datos
+## Funciones
 
-- Exportaciones del 7 de octubre de 2026 en `data/2026-10-07/`.
-- `data/snapshots.csv` es la referencia del histórico de ese día.
-- Máximos por ayuntamiento: **solo** `data/caps_clashrecord.json` (ClashRecord). No hay otra tabla de niveles en la app.
-- Nombres e imágenes: **solo** `assets/manifest.json` y los PNG de `assets/images/` (Fan Kit, sin modificar). Lo que no tiene imagen oficial está en `assets/FALTANTES.md`.
+### Cuentas
 
-## Porcentajes y el CSV
+- Lista de las aldeas de prueba y de las que se importen después. Se pueden marcar como Principal y ordenar.
+- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas y añade o actualiza por tag. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`.
+- Grupos opcionales (hasta 6, de 16 caracteres: principal, farming, TH11) para filtrar en Cuentas, Gráficos y Ranking.
+- Resumen de la flota: media, constructores ocupados y libres, laboratorios y casas de mascotas libres, y la próxima mejora con hora.
+- Accesos a Qué hacer ahora, Ranking y Agenda.
 
-Casi todas las categorías coinciden con `snapshots.csv` (redondeo par a 1 decimal). La media es la media de esos porcentajes ya redondeados, sin mascotas si el ayuntamiento es menor de 14.
+### Progreso y filtros
 
-El % de equipamiento no cuenta piezas de nivel 1 ni sin identificar. Las tropas, hechizos y asedios sin identificar (4000109, 26000123, 4000188) tampoco entran en el máximo de laboratorio. En defensas crafteadas y el guardián sin ficha, el tope sale de `caps_clashrecord.json` cuando hay una correspondencia única; la pantalla sigue diciendo «sin identificar» y no usa el nombre inglés del archivo de máximos.
+- Porcentajes por categoría con la misma regla de la 2.x: el máximo lo deciden los topes, no el estado del nombre.
+- Filtros de periodo (7 días, 30 días, 3 meses, todo o un rango), recurso (oro, elixir, oscuro, otros), ayuntamiento y grupo. Valen en Progreso y en Gráficos.
+- Coste y tiempo hasta el máximo del ayuntamiento actual: oro, elixir, oscuro, otros recursos y días de constructor. La fuente es `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento.
 
-Defensas frente a un TH (el suyo o el siguiente): cada edificio colocado se compara con el máximo de ese TH, también si el cupo ya es 0 por una fusión. Las que faltan son el recuento de ClashRecord menos las colocadas, y ese hueco no baja de cero. Inferno Artillery no está en el manifiesto; en TH17 suma un hueco de nivel 0 al denominador.
+### Gráficos
 
-La ofensiva es la media del % de laboratorio y del % de héroes, con el redondeo de `offense_pct` en `roster_snapshot.py`.
+Todas las cuentas visibles van en el mismo gráfico, con un color fijo y una leyenda legible en el iPhone:
 
-Desvíos que quedan frente a `snapshots.csv`:
+- Líneas superpuestas del porcentaje medio.
+- Barras agrupadas por categoría.
+- Barras apiladas (cada color es el % de una categoría, no una suma de recursos).
+- Mapa de calor de cuentas × categorías.
+- Radar y ritmo semanal, de una cuenta.
 
-- `#R02YUVC0J` defensas 54,4 % (el CSV dice 55,6 %). En TH11 el archivo de máximos cuenta 5 torres de magos y esta cuenta tiene 4; la que falta entra como 0. La media queda 49,2 % (el CSV dice 49,4 %) y hacia TH12, 45,8 % y 41,7 % de media (el CSV dice 46,8 % y 41,9 %). La ofensiva sí coincide: 41,1 %.
-- C2, defensas hacia TH17: 61,3 % (el CSV dice 61,7 %). El % de TH16 sí es 66,9 %. La décima que falta es Inferno Artillery, sin ficha en el manifiesto, que entra como 0/5 solo en esa comparación. En el detalle de TH16 la fila dice «Disponible en TH17», sin barra, con iniciales y el nombre del archivo de máximos.
-- C2, laboratorio 45,4 % (el CSV dice 44,9 %) porque Ruin Witch y Angry Spell ya no cuentan. La ofensiva queda 34,5 % (el CSV dice 34,2 %). En C1 el laboratorio pasa de 62,3 % a 63,1 % y la ofensiva de 54,1 % a 54,5 %. `#GUQUV98JG` sigue en 43,2 %.
-- Equipamiento v1.2: Fire Heart, Rocket Backpack y Electro Fangs pasan a `id_deducido` y, con nivel mayor que 1, entran en el % con la misma fórmula (el CSV los tenía sin identificar). C1 queda en 61,6 % (el CSV dice 58,4 %) y la media en 64,0 % (el CSV dice 63,6 %). C2 queda en 58,6 % (el CSV dice 57,3 %); la media sube a 49,0 % (el CSV dice 48,8 %) y hacia TH17 a 46,1 % (el CSV dice 45,9 %).
+Cada punto es una exportación real. Con un solo día importado, la línea es un punto.
 
-Constructores: el total es la suma de `cnt` de `1000015`. Ocupan constructor las mejoras con `timer` en edificios (incluido el laboratorio `1000007` y la casa de mascotas `1000068`), trampas, héroes y guardianes, salvo las que llevan `extra: true`. Esas salen en la misma lista con el subtítulo B.O.B, no suman un punto y no restan libres. Las de tropas, hechizos y asedios no ocupan constructor. Con estas exportaciones ninguna cuenta tiene libres. C1 tiene 6 ocupados para 5: se muestra el recuento y el chip «Revisar constructores», sin señalar una mejora concreta y sin un libre negativo.
+### Plan y agenda
+
+- Plan por cuenta: laboratorio, edificios de ejército, héroes, defensas, trampas, recursos, muros, mascotas y equipamiento. Dentro de cada grupo va primero lo más atrasado. Se proponen tantas obras como constructores libres.
+- Los héroes de `#28PLGP0G2` no entran en el plan.
+- Cada constructor, el laboratorio y la casa de mascotas tienen una línea: qué se está mejorando, a qué hora de Madrid queda libre y qué toca después.
+- Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
+- Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
+- La agenda junta esas horas de todas las cuentas: qué queda libre cada día y a qué hora.
+
+### Historial, ranking y avisos
+
+- Historial de lo que subió entre importaciones, ritmo en niveles por semana de Madrid, y rachas (semanas seguidas mejorando, categoría al máximo, ayuntamiento completado).
+- Ranking y comparación de dos o tres cuentas.
+- Aviso cuando termina una mejora, solo con la app abierta en un iPhone con la PWA instalada (iOS 16.4 o posterior, si el sistema deja usar notificaciones). Con la app cerrada no hay aviso: eso exigiría un servidor, y esta app no tiene.
+
+### Copia
+
+- JSON con las cuentas y el historial. Al restaurar se fusiona por tag y por fecha de exportación: no borra lo que solo está en el iPhone.
+- Descarga de imágenes para usarlas sin conexión.
+- Restaurar los datos de prueba o borrar todos los datos, con confirmación.
+
+## Instalarla en el iPhone
+
+1. Abre [https://ardu01.github.io/clash-progreso/](https://ardu01.github.io/clash-progreso/) en **Safari**.
+2. Toca **Compartir**.
+3. Toca **Añadir a pantalla de inicio** y confirma.
+4. A partir de ahí, ábrela desde el icono.
+
+Safari y la app de la pantalla de inicio no comparten datos. Lo que importes en una pestaña de Safari no aparece en la app instalada: impórtalo desde el icono.
+
+La primera visita con red guarda la interfaz. Las imágenes se pueden descargar desde Copia para abrirlas sin conexión.
+
+## Exportar la aldea y pegarla
+
+En el juego, el camino que muestra la app es:
+
+**Ajustes → Más ajustes → Exportar datos → Copiar.**
+
+El juego copia un JSON al portapapeles. No crea un archivo y no incluye el nombre del jugador. En Clash Progreso, en Cuentas, toca **Pegar exportación**.
+
+El menú en inglés, comprobado, es *Settings → More Settings → Data Export → Copy*. Los nombres en español de esos menús siguen sin confirmar; la app usa los de arriba hasta poder comprobarlos en el cliente.
+
+Si el botón no puede leer el portapapeles, se abre Importar: mantén pulsado el campo y elige Pegar, o elige uno o varios `.json` en Archivos.
+
+## Privacidad
+
+Las cuentas, el historial, los grupos, los filtros y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
+
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. Las imágenes no cambian respecto a la 2.1.4 y siguen en la caché `cp-img-v5`.
+
+## Historial de versiones
+
+| Versión | Qué cambió |
+| --- | --- |
+| 3.0.0 | Varias cuentas en los mismos gráficos, pegado directo, flota, filtros, plan con agenda, coste hasta el máximo, ranking, historial con rachas y avisos con la app abierta. |
+| 2.1.4 | Encuadre de los iconos en Safari (el dibujo al 85 %) e identificación de niveles y piezas. |
+| 2.1.3 | Iconos con margen. La interfaz deja de mostrar «ID deducido». |
+| 2.1.2 | Cada miniatura muestra el PNG entero, sin recorte. |
+| 2.1.1 | Miniaturas al tope de una pantalla @3x. El aviso legal queda solo en Copia. |
+| 2.1.0 | Imagen oficial del nivel de cada edificio. |
+| 2.0.0 | Cuentas propias, cinco pestañas y copia que fusiona sin borrar. |
+| 1.1.6 | Icono de la PWA. |
+| 1.1.5 | Descarga parcial, alertas accesibles y etiquetas de equipamiento. |
+| 1.1.4 | Auditoría de diseño, foco en las hojas y manifiesto v1.4.1. |
+| 1.1.3 | Ajustes de Importar y manifiesto v1.3.2. |
+| 1.1.2 | Logger, recuento de «sin identificar» y ajustes de Importar. |
+| 1.1.1 | Importar rediseñado y contador de imágenes. |
+| 1.1.0 | Imágenes v1.2 y máximo en cada fila. |
+| 1.0 | Primera PWA, con las 11 cuentas de prueba. |
+
+El detalle de cálculos e interfaz está en `docs/sistema.md`.
 
 ## Aviso
 
-This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: www.supercell.com/fan-content-policy.
+This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: [www.supercell.com/fan-content-policy](https://www.supercell.com/fan-content-policy).
+
+Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.
+
+[Leer la Fan Content Policy](https://supercell.com/en/fan-content-policy/)

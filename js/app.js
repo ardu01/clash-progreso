@@ -14,8 +14,16 @@ import {
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
-  addAccount, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setPrincipal,
+  addAccount, cleanGrupos, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setPrincipal,
 } from "./roster.js";
+import { clipboardImportPlan } from "./paste.js";
+import { accountVisible, dayInRange } from "./range.js";
+import { compareAccounts, fleetSnapshot, rankAccounts, whatNow } from "./fleet.js";
+import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
+import { achievements, historyPairs, weeklyPace } from "./history.js";
+import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
+import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
+import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 
@@ -74,6 +82,12 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
+  filters: loadFilters(),
+  chartKind: localStorage.getItem("cp-chart-kind") || "lineas",
+  compareTags: loadCompare(),
+  rankKey: localStorage.getItem("cp-rank") || "media",
+  notifyOn: localStorage.getItem("cp-notify") === "1",
+  sleep: loadSleep(),
   added: [],
   flashTags: new Set(),
   scrollAdded: false,
@@ -82,21 +96,54 @@ const state = {
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
+function loadFilters() {
+  const base = { tiempo: "todo", recurso: "todos", th: "", grupo: "", desde: "", hasta: "" };
+  try {
+    return { ...base, ...JSON.parse(localStorage.getItem("cp-filters") || "{}") };
+  } catch {
+    return base;
+  }
+}
+
+function loadSleep() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("cp-sueno") || "null");
+    if (!saved || typeof saved !== "object") return { desde: "", hasta: "" };
+    return { desde: String(saved.desde || ""), hasta: String(saved.hasta || "") };
+  } catch {
+    return { desde: "", hasta: "" };
+  }
+}
+
+function loadCompare() {
+  try {
+    const list = JSON.parse(localStorage.getItem("cp-compare") || "[]");
+    return Array.isArray(list) ? list.slice(0, 3) : [];
+  } catch {
+    return [];
+  }
+}
+
 function route() {
   const raw = (location.hash || "#/roster").replace(/^#\/?/, "");
   const parts = raw.split("/").filter(Boolean);
   let name = parts[0] || "roster";
   if (name === "cuentas") name = "roster";
+  if (name === "progreso" && parts[1] && (parts[2] === "plan" || parts[2] === "historial")) {
+    return { name: parts[2], tag: "#" + parts[1], cat: null };
+  }
   if (name === "progreso" && parts[1] && parts[2]) {
     return { name: "detalle", tag: "#" + parts[1], cat: parts[2] };
   }
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
+  if (name === "ahora" || name === "ranking" || name === "agenda") return { name, tag: null, cat: null };
   return { name, tag: null, cat: null };
 }
 
 function baseTab(r) {
-  if (r.name === "detalle" || r.name === "progreso") return "progreso";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "plan" || r.name === "historial") return "progreso";
+  if (r.name === "agenda") return "roster";
   if (r.name === "mejoras") return "mejoras";
   if (r.name === "graficos" || r.name === "evolucion") return "graficos";
   if (r.name === "copia") return "copia";
@@ -185,6 +232,7 @@ function toMeta(a, featured) {
     role: a.principal ? "Principal" : "",
     roleClass: a.principal ? "chip--main" : "",
     objetivo: a.objetivo == null ? null : a.objetivo,
+    grupos: a.grupos || [],
     featured: featured === a.tag,
     added: true,
   };
@@ -504,15 +552,840 @@ function stale(exp) {
   return state.now - exp.timestamp * 1000 > 7 * 86400000;
 }
 
+const CAT_COLOR = {
+  defensas: "#5856D6",
+  laboratorio: "#AF52DE",
+  ejercito_edif: "#30B0C7",
+  equipamiento: "#FF2D55",
+  mascotas: "#00C7BE",
+  heroes: "#32ADE6",
+  trampas: "#A2845E",
+  recursos: "#FFCC00",
+  muros: "#6E7A8A",
+};
+
+function setFilter(patch) {
+  state.filters = { ...state.filters, ...patch };
+  localStorage.setItem("cp-filters", JSON.stringify(state.filters));
+}
+
+function accountFilterMeta(meta) {
+  const exp = expOf(meta.tag);
+  const th = exp ? townHallLevel(exp) : "";
+  return { th: th == null ? "" : th, principal: !!meta.principal, grupos: meta.grupos || [] };
+}
+
+function fleetRow(meta) {
+  const exp = expOf(meta.tag);
+  const view = exp ? viewOf(meta.tag) : null;
+  if (!exp || !view) return null;
+  const ups = upgrades(exp);
+  const active = ups.filter((u) => !u.done && !u.extra);
+  const cats = {};
+  for (const c of CATEGORIES) cats[c.key] = view.cats[c.key] ? view.cats[c.key].pct : null;
+  return {
+    tag: meta.tag,
+    nombre: meta.nombre,
+    chip: meta.chip,
+    th: view.th,
+    media: view.media,
+    builders: builderStatus(exp),
+    labLibre: !ups.some((u) => u.queue === "laboratorio" && !u.done),
+    mascotasLibres: !ups.some((u) => u.queue === "mascotas" && !u.done),
+    proxima: active.length ? active[0].end : null,
+    mejoras: ups,
+    cats,
+    principal: !!meta.principal,
+    grupos: meta.grupos || [],
+  };
+}
+
+function fleetRows(list) {
+  return (list || allAccounts()).map(fleetRow).filter(Boolean);
+}
+
+function latestInRange(tag) {
+  const rows = state.rows.filter((r) => r.tag === tag).slice().sort((a, b) => b.timestamp - a.timestamp);
+  for (const exp of rows) {
+    if (dayInRange(madridDayKey(exp.timestamp * 1000), state.filters, state.now)) return exp;
+  }
+  return null;
+}
+
+function pairsOf(tag) {
+  return historyPairs(state.rows.filter((r) => r.tag === tag), state.index);
+}
+
+function fmtRes(n) {
+  return new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 }).format(n || 0);
+}
+
+function bagDays(seg) {
+  return Math.round(((seg || 0) / 86400) * 10) / 10;
+}
+
+function costBits(bag) {
+  if (!bag) return "";
+  const bits = [];
+  if (bag.oro) bits.push(`${fmtRes(bag.oro)} oro`);
+  if (bag.elixir) bits.push(`${fmtRes(bag.elixir)} elixir`);
+  if (bag.oscuro) bits.push(`${fmtRes(bag.oscuro)} oscuro`);
+  if (bag.muros) bits.push(`${fmtRes(bag.muros)} oro o elixir`);
+  if (bag.brillante) bits.push(`${fmtRes(bag.brillante)} brillante`);
+  if (bag.resplandeciente) bits.push(`${fmtRes(bag.resplandeciente)} resplandeciente`);
+  if (bag.estelar) bits.push(`${fmtRes(bag.estelar)} estelar`);
+  const times = [];
+  const dias = bag.diasConstructor != null ? bag.diasConstructor : bagDays(bag.segConstructor);
+  if (dias) times.push(`${fmtNum(dias)} d constructor`);
+  const lab = bagDays(bag.segLaboratorio);
+  const pets = bagDays(bag.segMascotas);
+  if (lab) times.push(`${fmtNum(lab)} d laboratorio`);
+  if (pets) times.push(`${fmtNum(pets)} d mascotas`);
+  return bits.concat(times).join(" · ");
+}
+
+function costOf(exp, th) {
+  return remainingCost(piecesOf(exp, state.index, th));
+}
+
+function resourceAllowsItem(it) {
+  const filtro = state.filters.recurso;
+  if (!filtro || filtro === "todos") return true;
+  const key = it.categoryKey || "";
+  if (key === "muros" || String(it.id) === "1000010") return filtro === "oro" || filtro === "elixir";
+  if (filtro === "oscuro" || filtro === "otros") {
+    if (key === "muros") return false;
+  }
+  if (it.capsOnly || it.id == null) return false;
+  if (it.max != null && (it.lvl || 0) >= it.max) return false;
+  return usesResource(String(it.id), (it.lvl || 0) + 1, filtro);
+}
+
+function allowedCats(exp, th) {
+  const filtro = state.filters.recurso;
+  if (!filtro || filtro === "todos") return null;
+  const set = categoryUses(piecesOf(exp, state.index, th), filtro) || new Set();
+  if (filtro === "oscuro" || filtro === "otros") set.delete("muros");
+  return set;
+}
+
+function filterChip(attr, value, label, on) {
+  return `<button type="button" ${attr}="${esc(value)}" aria-pressed="${on ? "true" : "false"}">${esc(label)}</button>`;
+}
+
+function filterBar(opts = {}) {
+  const f = state.filters;
+  const parts = [];
+  if (opts.tiempo !== false) {
+    const tiempos = [["7", "7 días"], ["30", "30 días"], ["90", "3 meses"], ["todo", "Todo"], ["rango", "Rango"]];
+    parts.push(`<div class="chip-row" role="toolbar" aria-label="Periodo">${tiempos.map(([v, l]) => filterChip("data-tiempo", v, l, f.tiempo === v)).join("")}</div>`);
+    if (f.tiempo === "rango") {
+      parts.push(`<div class="date-row">
+        <label>Desde<input type="date" data-desde value="${esc(f.desde)}" aria-label="Desde"></label>
+        <label>Hasta<input type="date" data-hasta value="${esc(f.hasta)}" aria-label="Hasta"></label>
+      </div>`);
+    }
+  }
+  if (opts.recurso !== false) {
+    const recursos = [["todos", "Todos"], ["oro", "Oro"], ["elixir", "Elixir"], ["oscuro", "Oscuro"], ["otros", "Otros"]];
+    parts.push(`<div class="chip-row" role="toolbar" aria-label="Recurso">${recursos.map(([v, l]) => filterChip("data-recurso", v, l, f.recurso === v)).join("")}</div>`);
+  }
+  if (opts.th) {
+    const ths = new Set();
+    for (const meta of allAccounts()) {
+      const exp = expOf(meta.tag);
+      const th = exp ? townHallLevel(exp) : null;
+      if (th != null) ths.add(th);
+    }
+    const list = [...ths].sort((a, b) => a - b);
+    if (list.length) {
+      const buttons = [filterChip("data-th", "", "Todos", !f.th)].concat(list.map((th) => filterChip("data-th", String(th), `TH${th}`, String(f.th) === String(th))));
+      parts.push(`<div class="chip-row" role="toolbar" aria-label="Ayuntamiento">${buttons.join("")}</div>`);
+    }
+  }
+  if (opts.grupo) {
+    const grupos = new Set();
+    for (const meta of allAccounts()) for (const g of meta.grupos || []) grupos.add(g);
+    const buttons = [filterChip("data-grupo", "", "Todas", !f.grupo), filterChip("data-grupo", "principal", "Principal", f.grupo === "principal")]
+      .concat([...grupos].sort((a, b) => a.localeCompare(b, "es")).map((g) => filterChip("data-grupo", g, g, f.grupo === g)));
+    parts.push(`<div class="chip-row" role="toolbar" aria-label="Grupo">${buttons.join("")}</div>`);
+  }
+  return parts.join("");
+}
+
+function rosterTools(shown) {
+  const snap = fleetSnapshot(fleetRows(shown));
+  const prox = snap.proxima
+    ? `${esc(snap.proxima.nombre)} · ${esc(fmtFin(snap.proxima.fin))}`
+    : "Ninguna en curso";
+  const media = snap.media == null ? "—" : fmtPct(snap.media);
+  return `<div class="section"><button type="button" class="btn btn--primary btn--block" data-paste-now>Pegar exportación</button></div>
+    ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    <div class="section"><div class="card fleet-card">
+      <h2 class="t-headline">Todas las cuentas</h2>
+      <p class="t-body">Media ${media}</p>
+      <p class="t-footnote c-2">Constructores: ${snap.constructoresLibres} libres · ${snap.constructoresOcupados} ocupados</p>
+      <p class="t-footnote c-2">Laboratorios libres: ${snap.laboratoriosLibres} · Casas de mascotas libres: ${snap.mascotasLibres}</p>
+      <p class="t-footnote c-2">Próxima mejora: ${prox}</p>
+      <p class="link-row"><a href="#/ahora">Qué hacer ahora</a><a href="#/ranking">Ranking</a><a href="#/agenda">Agenda</a></p>
+    </div></div>`;
+}
+
+function queueOfCategory(key) {
+  if (key === "laboratorio") return "laboratorio";
+  if (key === "mascotas") return "mascotas";
+  if (key === "equipamiento") return "herreria";
+  return "constructor";
+}
+
+function planCandidates(exp, view) {
+  const busy = new Set(upgrades(exp).filter((u) => !u.done).map((u) => String(u.id)));
+  const out = [];
+  for (const cat of CATEGORIES) {
+    if (cat.key === "muros") {
+      const w = view.walls;
+      if (!w || w.max == null) continue;
+      const present = (w.hist || []).filter((h) => h.cnt && h.lvl < w.max).slice().sort((a, b) => a.lvl - b.lvl);
+      if (!present.length) continue;
+      out.push({
+        categoryKey: "muros",
+        queue: "constructor",
+        title: "Muro",
+        lvl: present[0].lvl,
+        max: w.max,
+        upgrading: false,
+        id: "1000010",
+      });
+      continue;
+    }
+    for (const it of categoryItems(exp, state.index, cat.key, view.th)) {
+      if (it.capsOnly || it.id == null || it.max == null || (it.lvl || 0) >= it.max) continue;
+      const title = nameOf(it.id) || "Ítem";
+      out.push({
+        categoryKey: cat.key,
+        queue: queueOfCategory(cat.key),
+        title: it.cnt > 1 ? `${title} ×${it.cnt}` : title,
+        lvl: it.lvl || 0,
+        max: it.max,
+        upgrading: busy.has(String(it.id)),
+        id: String(it.id),
+      });
+    }
+  }
+  return out;
+}
+
+function planList(title, items) {
+  const list = (Array.isArray(items) ? items : items ? [items] : []).filter(Boolean);
+  if (!list.length) return "";
+  return `<div class="section"><div class="section-header"><span>${esc(title)}</span></div><ul class="list">${list.map((item) => {
+    const wait = item.espera ? " · en espera de un constructor" : "";
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(item.title)}</span><span class="row__sub num">Nv ${item.lvl} / ${item.max}${esc(wait)}</span></span></div></li>`;
+  }).join("")}</ul></div>`;
+}
+
+function costCard(exp, th, full) {
+  const cost = costOf(exp, th);
+  const bag = cost.total;
+  const line = costBits(bag) || "Nada pendiente con coste conocido";
+  const miss = bag.sinCoste ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 paso" : `${bag.sinCoste} pasos`} sin coste en la fuente: no se ha sumado.</p>` : "";
+  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
+  if (!full) {
+    return `<div class="section"><div class="card">
+      <h2 class="t-headline">Hasta el máximo</h2>
+      <p class="t-body">${esc(line)}</p>
+      ${miss}${cite}
+    </div></div>`;
+  }
+  const rows = CATEGORIES.map((c) => {
+    const part = cost.porCategoria[c.key];
+    const text = costBits(part);
+    if (!text) return "";
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(c.label)}</span><span class="row__sub">${esc(text)}</span></span></div></li>`;
+  }).join("");
+  return `<div class="section"><div class="card">
+      <h2 class="t-headline">Hasta el máximo de TH${th}</h2>
+      <p class="t-body">${esc(line)}</p>
+      ${miss}${cite}
+    </div></div>
+    ${rows ? `<div class="section"><ul class="list">${rows}</ul></div>` : ""}`;
+}
+
+function renderAhora() {
+  const items = whatNow(fleetRows(allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters))), state.now);
+  const list = items.length
+    ? `<ul class="list">${items.map((row) => `<li><a class="row" href="#/progreso/${row.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${esc(row.motivos.join(" · "))}</span></span>${CHEV}</a></li>`).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">Nada urgente</p><p class="t-subhead c-2">No hay constructores, laboratorios ni casas de mascotas libres, ni mejoras ya terminadas.</p></div>`;
+  const on = state.notifyOn;
+  return `<h1 class="large-title">Ahora</h1>
+    <p class="large-sub">Cuentas con una cola libre o una mejora ya terminada, según la última exportación.</p>
+    ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    <div class="section">${list}</div>
+    <div class="section"><div class="card">
+      <h2 class="t-headline">Aviso al terminar</h2>
+      <p class="t-body">Si la app está abierta, puede avisar cuando llegue el fin de la próxima mejora. Con la app cerrada haría falta un servidor de avisos, y esta app no tiene servidor.</p>
+      <button type="button" class="btn ${on ? "btn--secondary" : "btn--primary"} btn--block" data-notify aria-pressed="${on ? "true" : "false"}">${on ? "Avisos activados" : "Activar avisos"}</button>
+    </div></div>`;
+}
+
+function renderRanking() {
+  const rows = fleetRows(allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters)));
+  const ranked = rankAccounts(rows, state.rankKey);
+  const keys = [["media", "Media"], ["th", "TH"], ["libres", "Libres"]];
+  const chips = keys.map(([id, label]) => filterChip("data-rank", id, label, state.rankKey === id)).join("");
+  const list = ranked.map((row) => {
+    const on = state.compareTags.includes(row.tag);
+    const libres = row.builders && row.builders.free != null ? `${row.builders.free} libres` : "constructores ?";
+    return `<li><div class="row row--account"><span class="row__main"><span class="row__title">${row.puesto}. ${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${fmtPct(row.media)} · ${esc(libres)}</span></span><button type="button" class="btn-text" data-compare="${esc(row.tag)}" aria-pressed="${on ? "true" : "false"}">${on ? "Quitar" : "Comparar"}</button></div></li>`;
+  }).join("");
+  const picked = compareAccounts(rows, state.compareTags);
+  const cols = picked.map((row) => {
+    const cats = CATEGORIES.filter((c) => row.cats[c.key] != null).map((c) => `<div class="bar-row"><span>${esc(c.label)}</span>${barHtml(c.key, row.cats[c.key], null, { mini: true, label: `${c.label} ${fmtPct(row.cats[c.key])}` })}<span class="num">${fmtPct(row.cats[c.key])}</span></div>`).join("");
+    return `<div class="card compare-col"><h3 class="t-headline">${esc(row.nombre)}</h3><p class="t-title2 num">${fmtPct(row.media)}</p><p class="t-footnote c-2">TH${row.th == null ? "—" : row.th}</p><div class="chart-bars">${cats}</div></div>`;
+  }).join("");
+  const compare = picked.length >= 2
+    ? `<div class="section"><h2 class="section-header"><span>Comparación</span></h2><div class="compare-grid">${cols}</div><p class="section-footer">Cada barra es el % de esa categoría. No suma recursos.</p></div>`
+    : `<p class="section-footer">Elige de 2 a 3 cuentas para verlas juntas.</p>`;
+  return `<h1 class="large-title">Ranking</h1>
+    <p class="large-sub">${ranked.length === 1 ? "1 cuenta" : `${ranked.length} cuentas`} con datos.</p>
+    ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    <div class="chip-row" role="toolbar" aria-label="Orden del ranking">${chips}</div>
+    <div class="section"><ul class="list">${list || `<li><div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div></li>`}</ul></div>
+    ${compare}`;
+}
+
+function renderPlan(tag) {
+  const meta = accountByTag(tag);
+  const exp = meta && expOf(meta.tag);
+  const view = exp ? viewOf(meta.tag) : null;
+  if (!meta || !exp || !view) {
+    return `<h1 class="large-title">Plan</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
+  }
+  const builders = builderStatus(exp);
+  const ups = upgrades(exp);
+  const plan = upgradePlan(planCandidates(exp, view), {
+    tag: meta.tag,
+    constructoresLibres: builders.known && !builders.over ? builders.free || 0 : 0,
+    labLibre: !ups.some((u) => u.queue === "laboratorio" && !u.done),
+    mascotasLibres: !ups.some((u) => u.queue === "mascotas" && !u.done),
+  });
+  const fuera = plan.heroesFuera ? `<p class="t-footnote c-2">En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan.</p>` : "";
+  const empty = !plan.constructor.length && !plan.laboratorio && !plan.mascotas && !plan.equipamiento
+    ? `<div class="section"><div class="card empty"><p class="t-title3">Nada pendiente con este criterio</p></div></div>`
+    : `${planList("Constructor", plan.constructor)}${planList("Laboratorio", plan.laboratorio)}${planList("Mascotas", plan.mascotas)}${planList("Equipamiento", plan.equipamiento)}`;
+  return `<h1 class="large-title">Plan</h1>
+    <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2><p class="t-body">${esc(plan.criterio || PLAN_CRITERIO)}</p>${fuera}</div></div>
+    ${sleepCard()}
+    ${timelineHtml(timelineOf(meta, exp, view))}
+    <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
+    ${empty}
+    ${costCard(exp, view.th, true)}`;
+}
+
+function activeSleep() {
+  return sleepFromClocks(state.sleep.desde, state.sleep.hasta);
+}
+
+function saveSleep(desde, hasta) {
+  state.sleep = { desde: desde || "", hasta: hasta || "" };
+  localStorage.setItem("cp-sueno", JSON.stringify(state.sleep));
+}
+
+function sleepCard() {
+  const s = state.sleep;
+  const igual = s.desde && s.hasta && s.desde === s.hasta;
+  const nota = igual
+    ? "Las dos horas son la misma: no se aplica ningún tramo."
+    : "Horas de Madrid. Si lo dejas vacío, no se mueve ninguna mejora.";
+  return `<div class="section"><div class="card">
+      <h2 class="t-headline">Horas de sueño</h2>
+      <p class="t-body">La siguiente mejora no empieza ni termina en ese tramo. La hora de lo que ya se está mejorando no se cambia: sale de la exportación.</p>
+      <div class="date-row">
+        <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
+        <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
+      </div>
+      <button type="button" class="btn btn--plain btn--block" data-sueno-clear>Sin horario de sueño</button>
+      <p class="t-footnote c-2">${esc(nota)}</p>
+    </div></div>`;
+}
+
+function actualesDe(exp) {
+  const out = [];
+  const push = (it, queue) => {
+    if (!it || it.timer == null) return;
+    const hora = finDe(exp.timestamp, it.timer);
+    out.push({
+      queue,
+      extra: !!it.extra,
+      id: String(it.data),
+      nombre: nameOf(it.data) || "Mejora",
+      done: hora.exacta && hora.fin <= state.now,
+      exacta: hora.exacta,
+      fin: hora.fin,
+    });
+  };
+  for (const b of exp.buildings || []) push(b, "constructor");
+  for (const it of exp.traps || []) push(it, "constructor");
+  for (const it of exp.heroes || []) push(it, "constructor");
+  for (const it of exp.guardians || []) push(it, "constructor");
+  for (const it of exp.units || []) push(it, "laboratorio");
+  for (const it of exp.spells || []) push(it, "laboratorio");
+  for (const it of exp.siege_machines || []) push(it, "laboratorio");
+  for (const it of exp.pets || []) push(it, "mascotas");
+  return out;
+}
+
+function timelineOf(meta, exp, view) {
+  const builders = builderStatus(exp);
+  return accountTimeline({
+    builders,
+    actuales: actualesDe(exp),
+    siguientes: planQueue(planCandidates(exp, view), { tag: meta.tag }),
+    sleep: activeSleep(),
+    now: state.now,
+    mascotas: view.th >= 14,
+  });
+}
+
+function lineaTexto(line) {
+  let actual = "Libre ahora";
+  if (line.actual && !line.actual.exacta) actual = `${line.actual.nombre}. Sin hora exacta en la exportación.`;
+  else if (line.actual && line.actual.exacta) {
+    actual = `${line.actual.nombre} · libre ${fmtFin(line.actual.fin)}`;
+    if (line.enSueno) actual += " · cae en horas de sueño";
+  }
+  let next = "Sin siguiente con este criterio";
+  const sig = line.siguiente;
+  if (sig && sig.sinHora) next = `${sig.title}. No se programa: la mejora en curso no trae hora.`;
+  else if (sig && sig.sinDuracion) next = `${sig.title}. Sin tiempo oficial para el siguiente nivel: no se inventa el fin.`;
+  else if (sig && sig.fin != null) {
+    next = `${sig.title} · empieza ${fmtFin(sig.inicio)} · acaba ${fmtFin(sig.fin)}`;
+    if (sig.finEnSueno) next += " · el fin cae de noche porque dura más que el tiempo despierto";
+  }
+  return { actual, next };
+}
+
+function timelineHtml(tl) {
+  const aviso = tl.avisoHora
+    ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>`
+    : "";
+  const desconocido = tl.totalConocido
+    ? ""
+    : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`;
+  const rows = tl.lineas.map((line) => {
+    const text = lineaTexto(line);
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(line.titulo)}</span><span class="row__sub">${esc(text.actual)}</span><span class="row__sub">${esc(text.next)}</span></span></div></li>`;
+  }).join("");
+  return `<div class="section"><div class="section-header"><span>Días y constructores</span></div>
+    <ul class="list">${rows}</ul>${aviso}${desconocido}</div>`;
+}
+
+function renderAgenda() {
+  const list = allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters) && expOf(meta.tag));
+  const cuentas = list.map((meta) => {
+    const exp = expOf(meta.tag);
+    const view = viewOf(meta.tag);
+    if (!exp || !view) return null;
+    return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, lineas: timelineOf(meta, exp, view).lineas };
+  }).filter(Boolean);
+  const agenda = fleetAgenda(cuentas, { now: state.now, dias: 21 });
+  const days = agenda.dias.map((day) => {
+    const rows = day.eventos.map((ev) => {
+      const cuando = ev.ahora ? "Libre ahora" : fmtFin(ev.fin);
+      const sueno = ev.enSueno ? " · en horas de sueño; la siguiente espera a despertar" : "";
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(cuando)}${esc(sueno)}</span></span></div></li>`;
+    }).join("");
+    return `<div class="section"><div class="section-header"><span>${esc(dayHeading(day.ms, state.now))}</span></div><ul class="list">${rows}</ul></div>`;
+  }).join("");
+  const sin = agenda.sinHora.length
+    ? `<div class="section"><div class="section-header"><span>Sin hora exacta</span></div><ul class="list">${agenda.sinHora.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.actual || "Mejora en curso")}. La exportación no trae la hora. No se inventa.</span></span></div></li>`).join("")}</ul></div>`
+    : "";
+  const later = agenda.masAdelante.length
+    ? `<div class="section"><div class="section-header"><span>Más adelante</span></div><ul class="list">${agenda.masAdelante.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(fmtFin(ev.fin))}</span></span></div></li>`).join("")}</ul></div>`
+    : "";
+  const empty = !days && !sin && !later
+    ? `<div class="section"><div class="card empty"><p class="t-title3">Nada que agendar</p><p class="t-subhead c-2">No hay colas libres ni mejoras con hora en este filtro.</p></div></div>`
+    : "";
+  return `<h1 class="large-title">Agenda</h1>
+    <p class="large-sub">Cuándo queda libre cada constructor, el laboratorio y la casa de mascotas.</p>
+    ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    ${sleepCard()}
+    ${days}${later}${sin}${empty}
+    <p class="section-footer">La hora es la de Madrid y sale de la exportación. Un día sin libres no se lista.</p>`;
+}
+
+function renderHistorial(tag) {
+  const meta = accountByTag(tag);
+  const exp = meta && expOf(meta.tag);
+  const view = exp ? viewOf(meta.tag) : null;
+  if (!meta || !view) {
+    return `<h1 class="large-title">Historial</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
+  }
+  const all = pairsOf(meta.tag);
+  const pairs = all.filter((p) => dayInRange(p.day, state.filters, state.now));
+  const pace = weeklyPace(pairs);
+  const logros = achievements(view, all);
+  const cats = logros.alMaximo.map((key) => {
+    const cat = CATEGORIES.find((c) => c.key === key);
+    return cat ? cat.label : key;
+  });
+  const logroBits = [];
+  if (logros.racha > 0) logroBits.push(logros.racha === 1 ? "1 semana seguida mejorando" : `${logros.racha} semanas seguidas mejorando`);
+  if (cats.length) logroBits.push(`Al máximo: ${cats.join(", ")}`);
+  if (logros.thCompletado) logroBits.push(`TH${view.th} completado`);
+  const logroCard = `<div class="section"><div class="card">
+      <h2 class="t-headline">Rachas y logros</h2>
+      <p class="t-body">${esc(logroBits.join(" · ") || "Todavía no hay racha ni categoría al máximo.")}</p>
+      <p class="t-footnote c-2">La racha cuenta semanas de Madrid seguidas, hasta la última importación, con alguna subida. No depende del filtro de fechas.</p>
+    </div></div>`;
+  const ritmo = pace.ritmo == null
+    ? `<p class="t-footnote c-2">Hacen falta dos importaciones en el periodo para calcular el ritmo.</p>`
+    : `<p class="t-title2 num">${fmtNum(pace.ritmo)} <span class="t-footnote">niveles/semana</span></p><p class="t-footnote c-2">${pace.total} niveles en ${pace.weeks.length === 1 ? "1 semana" : `${pace.weeks.length} semanas`} con subidas.</p>`;
+  const changes = pairs.slice().reverse().map((pair) => {
+    const lines = (pair.rows || []).map((row) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(row.title)}</span><span class="row__sub">${esc(row.change)}</span></span></div></li>`).join("");
+    const th = pair.thFrom != null && pair.thTo != null && pair.thTo !== pair.thFrom ? ` · TH${pair.thFrom} → TH${pair.thTo}` : "";
+    return `<div class="section"><div class="section-header"><span>${esc(pair.day)}</span><span class="num">${pair.levels} niveles${esc(th)}</span></div><ul class="list">${lines || `<li><div class="row"><span class="row__main"><span class="row__sub">Sin cambios de nivel</span></span></div></li>`}</ul></div>`;
+  }).join("");
+  return `<h1 class="large-title">Historial</h1>
+    <p class="large-sub">${esc(meta.nombre)}</p>
+    ${filterBar({ tiempo: true, recurso: false, th: false, grupo: false })}
+    ${logroCard}
+    <div class="section"><div class="card"><h2 class="t-headline">Ritmo del periodo</h2>${ritmo}</div></div>
+    ${changes || `<div class="section"><div class="card empty"><p class="t-title3">Sin importaciones en este periodo</p></div></div>`}`;
+}
+
+function chartAccounts() {
+  return allAccounts().filter((meta) => accountVisible(accountFilterMeta(meta), state.filters) && latestInRange(meta.tag));
+}
+
+function chartCategories(list) {
+  const filtro = state.filters.recurso;
+  if (!filtro || filtro === "todos") return CATEGORIES.slice();
+  const keys = new Set();
+  for (const meta of list) {
+    const exp = latestInRange(meta.tag);
+    if (!exp) continue;
+    const set = allowedCats(exp, townHallLevel(exp));
+    if (set) for (const key of set) keys.add(key);
+  }
+  return CATEGORIES.filter((c) => keys.has(c.key));
+}
+
+function snapshotRow(meta) {
+  const exp = latestInRange(meta.tag);
+  const view = exp ? analyze(exp, state.index) : null;
+  if (!view) return null;
+  const cats = {};
+  for (const c of CATEGORIES) cats[c.key] = view.cats[c.key] ? view.cats[c.key].pct : null;
+  return {
+    tag: meta.tag,
+    nombre: meta.nombre,
+    chip: meta.chip,
+    color: accountColor(state.accounts.findIndex((a) => a.tag === meta.tag)),
+    th: view.th,
+    media: view.media,
+    cats,
+    view,
+  };
+}
+
+function legendLabel(meta) {
+  if (!meta || !meta.nombre || meta.nombre === meta.tag) return meta && (meta.chip || meta.tag) || "";
+  return meta.nombre;
+}
+
+function mediaLines(list) {
+  return list.map((meta) => {
+    const name = legendLabel(meta);
+    return {
+      name,
+      color: accountColor(state.accounts.findIndex((a) => a.tag === meta.tag)),
+      points: evolutionPoints(meta.tag).filter((p) => dayInRange(p.day, state.filters, state.now)).map((p) => ({
+        day: p.day,
+        v: p.v,
+        label: `${name} ${fmtPct(p.v)}`,
+      })),
+    };
+  });
+}
+
+function categoryLines(tag) {
+  const rows = state.rows.filter((r) => r.tag === tag).slice().sort((a, b) => a.timestamp - b.timestamp);
+  const exp = latestInRange(tag);
+  const allow = exp ? allowedCats(exp, townHallLevel(exp)) : null;
+  return CATEGORIES.filter((c) => !allow || allow.has(c.key)).map((c) => ({
+    name: c.label,
+    color: CAT_COLOR[c.key] || "#5856D6",
+    points: rows.map((row) => {
+      const day = madridDayKey(row.timestamp * 1000);
+      if (!dayInRange(day, state.filters, state.now)) return null;
+      const view = analyze(row, state.index);
+      const v = view.cats[c.key] && view.cats[c.key].pct;
+      if (v == null) return null;
+      return { day, v, label: `${c.label} ${fmtPct(v)}` };
+    }).filter(Boolean),
+  }));
+}
+
+function multiLineSvg(series, aria) {
+  const named = lineSeries(series);
+  if (!named.length) return `<p class="t-footnote c-2">Sin puntos en este periodo. Cada punto sería una exportación real.</p>`;
+  const colorOf = new Map((series || []).map((s) => [s.name, s.color]));
+  const days = [...new Set(named.flatMap((s) => s.points.map((p) => p.day)))].sort();
+  const xOf = (day) => {
+    if (days.length === 1) return 170;
+    const i = days.indexOf(day);
+    return 40 + ((300 - 40) * i) / (days.length - 1);
+  };
+  const yOf = (v) => 156 - ((v || 0) / 100) * (156 - 12);
+  const lines = named.map((s) => {
+    const color = colorOf.get(s.name) || CAT_COLOR.defensas;
+    const coords = s.points.map((p) => `${xOf(p.day)},${yOf(p.v)}`).join(" ");
+    const dots = s.points.map((p) => `<circle cx="${xOf(p.day)}" cy="${yOf(p.v)}" r="3.5" fill="${color}"><title>${esc(p.label || `${s.name} ${fmtPct(p.v)}`)}</title></circle>`).join("");
+    const poly = s.points.length > 1 ? `<polyline points="${coords}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : "";
+    return poly + dots;
+  }).join("");
+  const legend = named.map((s) => {
+    const color = colorOf.get(s.name) || CAT_COLOR.defensas;
+    return `<span class="legend"><i style="background:${color}"></i>${esc(s.name)}</span>`;
+  }).join("");
+  return `<svg class="chart" viewBox="0 0 343 180" role="img" aria-label="${esc(aria)}">
+      <g class="chart__grid"><line x1="32" x2="335" y1="12" y2="12"/><line x1="32" x2="335" y1="84" y2="84"/><line x1="32" x2="335" y1="156" y2="156"/></g>
+      <g class="chart__y"><text x="26" y="16">100</text><text x="26" y="88">50</text><text x="26" y="160">0</text></g>
+      ${lines}
+      <g class="chart__x"><text x="${xOf(days[0])}" y="174">${esc(chartDay(days[0]))}</text>${days.length > 1 ? `<text x="${xOf(days[days.length - 1])}" y="174">${esc(chartDay(days[days.length - 1]))}</text>` : ""}</g>
+    </svg>
+    <div class="legend-row legend-row--cuentas">${legend}</div>
+    <p class="t-footnote c-2">Cada punto es una exportación real.</p>`;
+}
+
+function groupedHtml(rows, cats) {
+  const groups = groupedBars(rows, cats);
+  return groups.map((row) => {
+    const bars = row.bars.filter((b) => b.value != null).map((b) => `<div class="bar-row"><span>${esc(b.label)}</span>${barHtml(b.key, b.value, null, { mini: true, label: `${b.label} ${fmtPct(b.value)}` })}<span class="num">${fmtPct(b.value)}</span></div>`).join("");
+    return `<h3 class="t-headline">${esc(row.nombre)}</h3><div class="chart-bars">${bars}</div>`;
+  }).join("");
+}
+
+function stackedHtml(rows, cats) {
+  return rows.map((row) => {
+    const segs = cats.map((c) => {
+      const v = row.cats[c.key];
+      if (v == null) return "";
+      return `<i class="cat-${CAT_CLASS[c.key]}" style="flex:${Math.max(0, v)} 1 0" title="${esc(c.label)} ${esc(fmtPct(v))}"></i>`;
+    }).join("");
+    const aria = cats.map((c) => row.cats[c.key] == null ? "" : `${c.label} ${fmtPct(row.cats[c.key])}`).filter(Boolean).join(", ");
+    return `<div class="bar-row"><span>${esc(row.chip || row.nombre)}</span><div class="stack-bar" role="img" aria-label="${esc(aria)}">${segs}</div></div>`;
+  }).join("");
+}
+
+function heatHtml(rows, cats) {
+  const grid = heatmap(rows, cats);
+  const colorOf = new Map((rows || []).map((row) => [row.tag, row.color || ""]));
+  const head = `<div class="heat__row" style="--cols:${cats.length}"><span></span>${cats.map((c) => `<span class="heat__lab" title="${esc(c.label)}">${esc(c.label.slice(0, 3))}</span>`).join("")}</div>`;
+  const body = grid.map((row) => {
+    const color = colorOf.get(row.tag) || "";
+    const cells = row.cells.map((cell) => {
+      if (cell.value == null) return `<span class="heat__cell is-na" title="${esc(cell.label)}: bloqueada"></span>`;
+      const k = Math.max(0.18, cell.value / 100).toFixed(3);
+      const style = color ? `--k:${k};--acct:${color}` : `--k:${k}`;
+      const cls = color ? "heat__cell has-acct" : "heat__cell";
+      return `<span class="${cls}" style="${style}" title="${esc(row.nombre)} · ${esc(cell.label)} ${esc(fmtPct(cell.value))}"></span>`;
+    }).join("");
+    return `<div class="heat__row" style="--cols:${cats.length}"><span class="heat__name">${esc(row.chip || row.nombre)}</span>${cells}</div>`;
+  }).join("");
+  const legend = (rows || []).filter((row) => row.color).map((row) => `<span class="legend"><i style="background:${row.color}"></i>${esc(legendLabel(row))}</span>`).join("");
+  return `<div class="heat" role="img" aria-label="Mapa de cuentas por categoría">${head}${body}</div><div class="legend-row legend-row--cuentas">${legend}</div><p class="t-footnote c-2">Cada celda es el % de esa categoría, teñida con el color de la cuenta.</p>`;
+}
+
+function groupedCategoryHtml(snaps, cats) {
+  const groups = groupedByCategory(snaps, cats);
+  const legend = snaps.map((row) => `<span class="legend"><i style="background:${row.color}"></i>${esc(legendLabel(row))} ${esc(fmtPct(row.media))}</span>`).join("");
+  const blocks = groups.map((group) => {
+    const bars = group.bars.map((bar) => {
+      if (bar.value == null) return `<i class="is-na" title="${esc(bar.label)}: bloqueada"></i>`;
+      return `<i style="--c:${bar.color};--k:${Math.max(0.04, bar.value / 100).toFixed(3)}" title="${esc(bar.label)} ${esc(fmtPct(bar.value))}"></i>`;
+    }).join("");
+    const aria = group.bars.filter((bar) => bar.value != null).map((bar) => `${bar.label} ${fmtPct(bar.value)}`).join(", ");
+    return `<div class="gcat"><h3>${esc(group.label)}</h3><div class="gbar" role="img" aria-label="${esc(aria)}">${bars}</div></div>`;
+  }).join("");
+  return `<div class="legend-row legend-row--cuentas">${legend}</div>${blocks}<p class="t-footnote c-2">Cada grupo es una categoría. Cada barra es una cuenta, con su color.</p>`;
+}
+
+function radarSvg(view, cats) {
+  const list = cats.map((c) => ({ key: c.key, label: c.label, value: view.cats[c.key] ? view.cats[c.key].pct : null })).filter((c) => c.value != null);
+  const pts = radarPoints(list);
+  if (pts.length < 3) return `<p class="t-footnote c-2">Hacen falta al menos tres categorías desbloqueadas.</p>`;
+  const n = pts.length;
+  const ring = (k) => pts.map((_, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    return `${(160 + Math.cos(angle) * 100 * k).toFixed(1)},${(120 + Math.sin(angle) * 100 * k).toFixed(1)}`;
+  }).join(" ");
+  const spokes = pts.map((p, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const x = (160 + Math.cos(angle) * 100).toFixed(1);
+    const y = (120 + Math.sin(angle) * 100).toFixed(1);
+    const lx = (160 + Math.cos(angle) * 118).toFixed(1);
+    const ly = (120 + Math.sin(angle) * 118).toFixed(1);
+    return `<line x1="160" y1="120" x2="${x}" y2="${y}" class="chart__grid"/><text x="${lx}" y="${ly}">${esc(String(p.label).split(" ")[0])}</text>`;
+  }).join("");
+  const aria = pts.map((p) => `${p.label} ${fmtPct(p.value)}`).join(", ");
+  return `<svg class="chart radar" viewBox="0 0 320 250" role="img" aria-label="${esc(aria)}">
+      <polygon class="ring" points="${ring(0.5)}"/><polygon class="ring" points="${ring(1)}"/>
+      ${spokes}
+      <polygon class="chart__area" points="${pts.map((p) => `${p.x},${p.y}`).join(" ")}"/>
+      <polygon class="chart__line" points="${pts.map((p) => `${p.x},${p.y}`).join(" ")}"/>
+    </svg>`;
+}
+
+function paceBlock(tag) {
+  const pairs = pairsOf(tag).filter((p) => dayInRange(p.day, state.filters, state.now));
+  const pace = weeklyPace(pairs);
+  if (pace.ritmo == null) return `<p class="t-footnote c-2">Hacen falta dos importaciones en el periodo.</p>`;
+  const max = Math.max(...pace.weeks.map((w) => w.levels), 1);
+  const bars = pace.weeks.map((w) => `<div class="bar-row"><span>${esc(String(w.week).slice(5))}</span>${barHtml("defensas", (w.levels / max) * 100, null, { mini: true, plain: true, label: `${w.week}: ${w.levels} niveles` })}<span class="num">${w.levels}</span></div>`).join("");
+  return `<p class="t-title2 num">${fmtNum(pace.ritmo)} <span class="t-footnote">niveles/semana</span></p><div class="chart-bars">${bars}</div>`;
+}
+
+function periodNote(tag) {
+  const pairs = pairsOf(tag).filter((p) => dayInRange(p.day, state.filters, state.now));
+  const n = pairs.reduce((s, p) => s + p.levels, 0);
+  const label = state.filters.tiempo === "todo" ? "en todo el historial" : "en el periodo";
+  return `${n} ${n === 1 ? "nivel" : "niveles"} ${label}. El % es el de la última exportación.`;
+}
+
+function armNotices() {
+  clearTimeout(armNotices._t);
+  armNotices._t = 0;
+  if (!state.ready || !state.notifyOn) return;
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  let soonest = null;
+  for (const meta of allAccounts()) {
+    const exp = expOf(meta.tag);
+    if (!exp) continue;
+    for (const u of upgrades(exp)) {
+      if (u.extra || u.done) continue;
+      if (!soonest || u.end < soonest.end) soonest = { end: u.end, nombre: meta.nombre };
+    }
+  }
+  if (!soonest) return;
+  const wait = soonest.end - Date.now();
+  if (wait <= 0) return;
+  const fireAt = soonest.end;
+  armNotices._t = setTimeout(() => {
+    if (Date.now() + 1500 >= fireAt) {
+      try {
+        new Notification("Mejora terminada", { body: `${soonest.nombre}: una mejora ha llegado a su fin.` });
+      } catch { /* el navegador no mostró el aviso */ }
+    }
+    state.now = Date.now();
+    armNotices();
+  }, Math.min(wait, 2147483647));
+}
+
+async function savePlan(plan, opts = {}) {
+  try {
+    for (const it of plan.save) await putExport(it.value);
+  } catch {
+    if (opts.sheet) {
+      state.importUi.saveError = true;
+      render();
+    } else showToast("err", "No se pudo guardar");
+    return;
+  }
+  for (const it of plan.save) {
+    if (it.kind !== "new") continue;
+    const th = townHallLevel(it.value);
+    state.accounts = addAccount(state.accounts, {
+      tag: it.value.tag,
+      alias: it.value.tag,
+      principal: false,
+      addedAt: Date.now(),
+      chip: makeChip(it.value.tag, th),
+    });
+  }
+  persistRoster();
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  armFlash(plan.tags);
+  const known = plan.save.filter((it) => it.kind !== "new");
+  showToast("ok", known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`));
+  state.importUi = freshImport();
+  if (location.hash !== "#/roster") location.hash = "#/roster";
+  else render();
+}
+
+async function pasteNow() {
+  let text = "";
+  try {
+    text = await navigator.clipboard.readText();
+  } catch {
+    state.importUi = freshImport();
+    state.importUi.active = true;
+    state.importUi.mode = "paste";
+    showToast("err", "Safari no dejó leer el portapapeles. Pega el JSON en el campo.");
+    if (location.hash !== "#/importar") location.hash = "#/importar";
+    else render();
+    return;
+  }
+  const { items, plan } = clipboardImportPlan(text || "", classifyCtx());
+  if (!plan.save.length) {
+    state.importUi = freshImport();
+    state.importUi.active = true;
+    state.importUi.mode = "paste";
+    state.importUi.text = text || "";
+    state.importUi.items = items;
+    state.importUi.phase = items.length > 1 ? "batch" : (items.length ? "single" : "entry");
+    state.importUi.needsFocus = true;
+    if (!items.length) showToast("err", "No hay una exportación en el portapapeles.");
+    if (location.hash !== "#/importar") location.hash = "#/importar";
+    else render();
+    return;
+  }
+  await savePlan(plan);
+}
+
+async function toggleNotify() {
+  if (typeof Notification === "undefined") {
+    showToast("err", "Este navegador no permite avisos.");
+    render();
+    return;
+  }
+  if (!state.notifyOn) {
+    let perm = Notification.permission;
+    if (perm === "default") {
+      try { perm = await Notification.requestPermission(); } catch { perm = "denied"; }
+    }
+    if (perm !== "granted") {
+      state.notifyOn = false;
+      localStorage.setItem("cp-notify", "0");
+      showToast("err", "Sin permiso de avisos.");
+      render();
+      return;
+    }
+    state.notifyOn = true;
+  } else state.notifyOn = false;
+  localStorage.setItem("cp-notify", state.notifyOn ? "1" : "0");
+  render();
+}
+
 function navbar(r) {
   const tab = baseTab(r);
-  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle" };
+  const titles = { roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Gráficos", copia: "Copia", detalle: "Detalle", ahora: "Ahora", ranking: "Ranking", plan: "Plan", historial: "Historial", agenda: "Agenda" };
   let lead = "";
   let trail = "";
   let title = titles[tab] || titles[r.name] || "";
   let collapsed = "false";
   if (r.name === "roster" || r.name === "importar") {
     trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
+  } else if (r.name === "plan" || r.name === "historial") {
+    title = r.name === "plan" ? "Plan" : "Historial";
+    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Progreso</button>`;
+    collapsed = "true";
+  } else if (r.name === "ahora" || r.name === "ranking" || r.name === "agenda") {
+    lead = `<button class="btn-text" data-go="#/roster"><svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Cuentas</button>`;
+    collapsed = "true";
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
     title = cat ? cat.label : "Detalle";
@@ -553,15 +1426,17 @@ function subImported() {
 function renderRoster() {
   const list = allAccounts();
   const sortLabel = state.sortMode === "nombre" ? "nombre" : state.sortMode === "pct" ? "%" : "TH";
+  const shown = list.filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
   const empty = list.length
     ? ""
     : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
-  const rows = list.map(rowCuenta).join("");
+  const rows = shown.map(rowCuenta).join("");
   const seedNote = isSeedRoster(list)
     ? `<p class="section-footer">Las ${list.length} son de prueba: añade, renombra o borra cuentas. % = media de las categorías desbloqueadas.</p>`
     : `<p class="section-footer">% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.</p>`;
   return `<h1 class="large-title">Cuentas</h1>
-    <p class="large-sub">${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`} · ordenadas por ${esc(sortLabel)}</p>
+    <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ordenadas por ${esc(sortLabel)}</p>
+    ${rosterTools(shown)}
     <label class="sort-label">Ordenar
       <select data-sort aria-label="Ordenar cuentas">
         <option value="th"${state.sortMode === "th" ? " selected" : ""}>TH</option>
@@ -604,7 +1479,7 @@ function rowCuenta(meta) {
     ${thumb(1000001, { size: 44, th: a.th })}
     <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
       <span class="row__title">${title} ${mark}</span>
-      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}</span>
+      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
     </a>
     <span class="row__trail"><span class="num row__pct">${fmtPct(a.media)}</span></span>
     <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
@@ -697,21 +1572,31 @@ function renderProgreso(tag) {
   const a = exp ? viewOf(meta.tag) : null;
   const sub = !a ? "Sin importar" : `${esc(meta.tag)} · media ${fmtPct(a.media)}`;
   const filt = state.progFilter;
-  const rows = exp ? progressRows(exp, state.index) : [];
+  const inFleet = accountVisible(accountFilterMeta(meta), state.filters);
+  const rows = exp ? progressRows(exp, state.index).filter(resourceAllowsItem) : [];
   const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
+  const links = exp ? `<div class="section"><ul class="list">
+      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Qué subir a continuación</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
+    </ul></div>` : "";
   const body = !exp
     ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`
-    : `${filterControls(counts, filt)}${narrowed ? filterList(exp, meta, a) : catsBlock(exp, meta)}`;
+    : !inFleet
+      ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta queda fuera del filtro</p><button type="button" class="btn btn--secondary" data-clear-filters>Quitar filtros de cuenta</button></div></div>`
+      : `${filterControls(counts, filt)}<p class="section-footer">${esc(periodNote(meta.tag))}</p>${narrowed ? filterList(exp, meta, a) : catsBlock(exp, meta)}`;
   return `<h1 class="large-title">Progreso</h1>
     <div class="section"><div class="list picker"><a class="row row--thumb44" href="#/progreso/${meta.tag.slice(1)}">
       ${exp ? thumb(1000001, { size: 44, th: a.th }) : `<span class="thumb thumb--44 thumb--empty">TH</span>`}
       <span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${sub}</span></span>
       <svg class="chevron" viewBox="0 0 9 14" aria-hidden="true"><path d="M2 1.5 6.5 7 2 12.5M5 1.5 9 7 5 12.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
-    ${exp ? summaryCard(a, meta) : ""}
+    ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
+    ${exp && inFleet ? summaryCard(a, meta) : ""}
+    ${exp && inFleet ? costCard(exp, a.th, false) : ""}
+    ${links}
     ${body}
-    ${exp && !narrowed ? builderBaseSection(exp) : ""}
+    ${exp && inFleet && !narrowed ? builderBaseSection(exp) : ""}
 `;
 }
 
@@ -733,7 +1618,7 @@ function filterControls(counts, filt) {
 
 function filterList(exp, meta, a) {
   const filt = state.progFilter;
-  const visible = sortFilterRows(applyFilter(progressRows(exp, state.index), {
+  const visible = sortFilterRows(applyFilter(progressRows(exp, state.index).filter(resourceAllowsItem), {
     category: filt.cat,
     status: filt.status,
     query: filt.q,
@@ -790,14 +1675,21 @@ function summaryCard(a) {
 
 function catsBlock(exp, meta) {
   const a = viewOf(meta.tag);
+  const allow = allowedCats(exp, a.th);
+  const cats = CATEGORIES.filter((c) => !allow || allow.has(c.key));
   const legend = a.thSig
     ? `Relleno: nivel actual · Marca: máximo TH${a.th} · Final: máximo TH${a.thSig}`
     : `Relleno: nivel actual frente al máximo de TH${a.th}`;
-  const rows = CATEGORIES.map((c) => catRow(exp, meta, a, c)).join("");
+  const rows = cats.map((c) => catRow(exp, meta, a, c)).join("");
+  const showWalls = (!allow || allow.has("muros")) && state.filters.recurso !== "oscuro" && state.filters.recurso !== "otros";
+  const showHeroes = !allow || allow.has("heroes");
+  if (!cats.length) {
+    return `<div class="section"><div class="card empty"><p class="t-title3">Nada con ese recurso</p><p class="t-subhead c-2">Prueba otro recurso o vuelve a Todos.</p></div></div>`;
+  }
   return `<p class="section-footer" style="margin-bottom:8px">${esc(legend)}</p>
     <div class="section" style="margin-top:0"><ul class="list">${rows}</ul></div>
-    ${wallsCard(a)}
-    ${heroesCard(a)}`;
+    ${showWalls ? wallsCard(a) : ""}
+    ${showHeroes ? heroesCard(a) : ""}`;
 }
 
 function catRow(exp, meta, a, c) {
@@ -958,7 +1850,7 @@ function renderDetalle(tag, catKey) {
   const a = viewOf(tag);
   if (catKey === "muros") return renderMuros(a);
   const row = a.cats[catKey];
-  const items = categoryItems(exp, state.index, catKey, a.th);
+  const items = categoryItems(exp, state.index, catKey, a.th).filter((it) => resourceAllowsItem({ ...it, categoryKey: catKey }));
   const groups = groupDetail(items);
   const maxed = row.num != null && row.den && row.num >= row.den;
   const head = row.pct == null
@@ -1054,6 +1946,10 @@ function detailRow(it, catKey, a) {
 }
 
 function renderMuros(a) {
+  const filtro = state.filters.recurso;
+  if (filtro === "oscuro" || filtro === "otros") {
+    return `<div class="section"><div class="card empty"><p class="t-title3">Los muros no usan ese recurso</p><p class="t-subhead c-2">Se pagan con oro o con elixir, uno de los dos.</p></div></div>`;
+  }
   const w = a.walls || { pieces: 0, num: 0, max: null, hist: [] };
   const parts = wallParts(a);
   const medio = w.pieces ? w.num / w.pieces : 0;
@@ -1959,32 +2855,7 @@ function goBackImport() {
 async function commitImport() {
   const plan = planBatch(state.importUi.items);
   if (!plan.save.length) return;
-  try {
-    for (const it of plan.save) await putExport(it.value);
-  } catch {
-    state.importUi.saveError = true;
-    render();
-    return;
-  }
-  for (const it of plan.save) {
-    if (it.kind !== "new") continue;
-    const th = townHallLevel(it.value);
-    state.accounts = addAccount(state.accounts, {
-      tag: it.value.tag,
-      alias: it.value.tag,
-      principal: false,
-      addedAt: Date.now(),
-      chip: makeChip(it.value.tag, th),
-    });
-  }
-  persistRoster();
-  state.rows = await allExports();
-  state.latest = latestByTag(state.rows);
-  armFlash(plan.tags);
-  const known = plan.save.filter((it) => it.kind !== "new");
-  showToast("ok", known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`));
-  state.importUi = freshImport();
-  location.hash = "#/roster";
+  await savePlan(plan, { sheet: true });
 }
 
 async function addNewAccount() {
@@ -2166,46 +3037,53 @@ function screenFor(r) {
   if (r.name === "mejoras") return renderMejoras();
   if (r.name === "graficos" || r.name === "evolucion") return renderGraficos();
   if (r.name === "copia") return renderCopia();
+  if (r.name === "ahora") return renderAhora();
+  if (r.name === "ranking") return renderRanking();
+  if (r.name === "agenda") return renderAgenda();
+  if (r.name === "plan") return renderPlan(r.tag);
+  if (r.name === "historial") return renderHistorial(r.tag);
   return renderRoster();
 }
 
 function renderGraficos() {
-  const list = allAccounts().filter((m) => expOf(m.tag));
-  if (!list.length) {
+  const list = chartAccounts();
+  if (!allAccounts().some((m) => expOf(m.tag))) {
     return `<h1 class="large-title">Gráficos</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
   }
-  const tag = list.some((m) => m.tag === state.chartTag) ? state.chartTag : list[0].tag;
-  const meta = accountByTag(tag);
-  const view = viewOf(tag);
+  const kinds = [["lineas", "Líneas"], ["barras", "Barras"], ["apiladas", "Apiladas"], ["radar", "Radar"], ["calor", "Calor"], ["ritmo", "Ritmo"]];
+  const kindChips = kinds.map(([id, label]) => filterChip("data-chart-kind", id, label, state.chartKind === id)).join("");
+  const needsAccount = state.chartKind === "radar" || state.chartKind === "ritmo";
+  const tag = list.some((m) => m.tag === state.chartTag) ? state.chartTag : (list[0] ? list[0].tag : "");
+  const meta = tag ? accountByTag(tag) : null;
   const opts = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
-  const cats = CATEGORIES.filter((c) => view.cats[c.key] && view.cats[c.key].pct != null);
-  const bars = cats.map((c) => {
-    const row = view.cats[c.key];
-    return `<div class="bar-row"><span>${esc(c.label)}</span>${barHtml(c.key, row.pct, null, { mini: true, label: `${c.label} ${fmtPct(row.pct)}` })}<span class="num">${fmtPct(row.pct)}</span></div>`;
-  }).join("");
-  const compare = list.map((m) => {
-    const v = viewOf(m.tag);
-    return `<div class="bar-row"><span>${esc(m.chip || m.nombre)}</span>${barHtml("defensas", v.media, null, { mini: true, plain: true, label: `${m.nombre} ${fmtPct(v.media)}` })}<span class="num">${fmtPct(v.media)}</span></div>`;
-  }).join("");
+  const cats = chartCategories(list);
+  const snaps = list.map(snapshotRow).filter(Boolean);
+  let card = `<div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div>`;
+  if (list.length && (meta || !needsAccount)) {
+    if (state.chartKind === "lineas") {
+      card = `<div class="card"><h2 class="t-headline">Evolución de las cuentas</h2>${multiLineSvg(mediaLines(list), "Evolución del porcentaje de cada cuenta")}</div>`;
+    } else if (state.chartKind === "barras") {
+      card = `<div class="card"><h2 class="t-headline">Por categoría</h2><p class="t-footnote c-2">Cada barra es el % de una cuenta en la última exportación del periodo.</p>${groupedCategoryHtml(snaps, cats)}</div>`;
+    } else if (state.chartKind === "apiladas") {
+      card = `<div class="card"><h2 class="t-headline">Comparación</h2><p class="t-footnote c-2">Cada color es el % de una categoría. No es una suma de oro, elixir ni oscuro.</p><div class="chart-bars">${stackedHtml(snaps, cats)}</div></div>`;
+    } else if (state.chartKind === "radar") {
+      const snap = snaps.find((s) => s.tag === tag);
+      card = `<div class="card"><h2 class="t-headline">Radar · ${esc(meta.nombre)}</h2>${snap ? radarSvg(snap.view, cats) : ""}</div>`;
+    } else if (state.chartKind === "calor") {
+      card = `<div class="card"><h2 class="t-headline">Cuentas × categorías</h2>${heatHtml(snaps, cats)}</div>`;
+    } else {
+      card = `<div class="card"><h2 class="t-headline">Ritmo · ${esc(meta.nombre)}</h2>${paceBlock(tag)}</div>`;
+    }
+  }
+  const picker = needsAccount && list.length
+    ? `<label class="sort-label">Cuenta <select data-chart aria-label="Cuenta del gráfico">${opts}</select></label>`
+    : "";
   return `<h1 class="large-title">Gráficos</h1>
     <p class="large-sub">% del máximo del TH de cada cuenta. La media no incluye categorías bloqueadas.</p>
-    <label class="sort-label">Cuenta
-      <select data-chart aria-label="Cuenta del gráfico">${opts}</select>
-    </label>
-    <div class="section"><div class="card">
-      <h2 class="t-headline">${esc(meta.nombre)} · por categoría</h2>
-      <div class="chart-bars">${bars}</div>
-    </div></div>
-    <div class="section"><div class="card">
-      <h2 class="t-headline">Comparativa de cuentas</h2>
-      <p class="t-footnote c-2">Media de las categorías desbloqueadas</p>
-      <div class="chart-bars">${compare}</div>
-    </div></div>
-    <div class="section"><div class="card">
-      <h2 class="t-headline">Evolución ${esc(meta.nombre)}</h2>
-      ${evolutionChart(tag)}
-    </div></div>
-`;
+    ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
+    <div class="chip-row" role="toolbar" aria-label="Tipo de gráfico">${kindChips}</div>
+    ${picker}
+    <div class="section">${card}</div>`;
 }
 
 function evolutionPoints(tag) {
@@ -2306,6 +3184,11 @@ function renderEditor() {
         <label class="alias-field">Alias
           <input data-alias-edit maxlength="24" autocapitalize="words" autocomplete="off" aria-label="Alias" value="${esc(meta.alias || meta.tag)}">
         </label>
+        <label class="alias-field">Grupo
+          <input data-grupo-text maxlength="16" autocapitalize="off" autocomplete="off" aria-label="Nuevo grupo" placeholder="farming, TH11…">
+        </label>
+        <div class="section"><button type="button" class="btn btn--secondary btn--block" data-grupo-add>Añadir grupo</button></div>
+        ${(meta.grupos || []).length ? `<div class="chip-row" role="list" aria-label="Grupos">${meta.grupos.map((g) => `<button type="button" data-grupo-del="${esc(g)}" aria-label="Quitar ${esc(g)}">${esc(g)}</button>`).join("")}</div>` : `<p class="section-footer">Sin grupos. Sirven para filtrar en Cuentas, Gráficos y Ranking.</p>`}
         <div class="section"><button type="button" class="btn btn--secondary btn--block" data-principal="${esc(meta.tag)}">${meta.principal ? "Quitar Principal" : "Marcar como Principal"}</button></div>
         <div class="section"><button type="button" class="btn btn--destructive btn--block" data-delete="${esc(meta.tag)}">Borrar cuenta</button></div>
         <p class="section-footer">Puede haber varias cuentas Principal. Si no marcas ninguna, destaca la de TH más alto.</p>
@@ -2526,6 +3409,7 @@ function render() {
     state.scrollAdded = false;
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
   }
+  armNotices();
 }
 
 function bind(r) {
@@ -2539,6 +3423,55 @@ function bind(r) {
         return;
       }
       location.hash = dest;
+      return;
+    }
+    if (ev.target.closest("[data-paste-now]")) { await pasteNow(); return; }
+    if (ev.target.closest("[data-notify]")) { await toggleNotify(); return; }
+    if (ev.target.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
+    if (ev.target.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
+    const tiempo = ev.target.closest("[data-tiempo]");
+    if (tiempo) { setFilter({ tiempo: tiempo.dataset.tiempo }); render(); return; }
+    const recurso = ev.target.closest("[data-recurso]");
+    if (recurso) { setFilter({ recurso: recurso.dataset.recurso }); render(); return; }
+    const thf = ev.target.closest("[data-th]");
+    if (thf) { setFilter({ th: thf.dataset.th || "" }); render(); return; }
+    const grupo = ev.target.closest("[data-grupo]");
+    if (grupo && grupo.dataset.grupoDel == null) { setFilter({ grupo: grupo.dataset.grupo || "" }); render(); return; }
+    const kind = ev.target.closest("[data-chart-kind]");
+    if (kind) { state.chartKind = kind.dataset.chartKind; localStorage.setItem("cp-chart-kind", state.chartKind); render(); return; }
+    const rank = ev.target.closest("[data-rank]");
+    if (rank) { state.rankKey = rank.dataset.rank; localStorage.setItem("cp-rank", state.rankKey); render(); return; }
+    const compare = ev.target.closest("[data-compare]");
+    if (compare) {
+      const tag = compare.dataset.compare;
+      const has = state.compareTags.includes(tag);
+      if (!has && state.compareTags.length >= 3) showToast("err", "Como máximo 3 cuentas.");
+      else {
+        state.compareTags = has ? state.compareTags.filter((t) => t !== tag) : state.compareTags.concat(tag);
+        localStorage.setItem("cp-compare", JSON.stringify(state.compareTags));
+      }
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-grupo-add]")) {
+      const input = document.querySelector("[data-grupo-text]");
+      const acc = state.accounts.find((a) => a.tag === state.editor);
+      const next = cleanGrupos((acc && acc.grupos || []).concat(input ? input.value : ""));
+      if (!acc || next.length === (acc.grupos || []).length) showToast("err", "Ese grupo no se ha añadido.");
+      else {
+        state.accounts = setGrupos(state.accounts, state.editor, next);
+        persistRoster();
+      }
+      render();
+      return;
+    }
+    const gdel = ev.target.closest("[data-grupo-del]");
+    if (gdel) {
+      const acc = state.accounts.find((a) => a.tag === state.editor);
+      const next = (acc && acc.grupos || []).filter((g) => g !== gdel.dataset.grupoDel);
+      state.accounts = setGrupos(state.accounts, state.editor, next);
+      persistRoster();
+      render();
       return;
     }
     const seg = ev.target.closest("[data-seg]");
@@ -2763,6 +3696,18 @@ function bind(r) {
   if (sort) sort.onchange = () => { state.sortMode = sort.value; localStorage.setItem("cp-sort", state.sortMode); render(); };
   const chart = document.querySelector("[data-chart]");
   if (chart) chart.onchange = () => { state.chartTag = chart.value; localStorage.setItem("cp-chart", state.chartTag); render(); };
+  document.querySelectorAll("[data-sueno]").forEach((input) => {
+    input.onchange = () => {
+      const desdeSueno = document.querySelector('[data-sueno="desde"]');
+      const hastaSueno = document.querySelector('[data-sueno="hasta"]');
+      saveSleep(desdeSueno ? desdeSueno.value : "", hastaSueno ? hastaSueno.value : "");
+      render();
+    };
+  });
+  const desde = document.querySelector("[data-desde]");
+  if (desde) desde.onchange = () => { setFilter({ desde: desde.value }); render(); };
+  const hasta = document.querySelector("[data-hasta]");
+  if (hasta) hasta.onchange = () => { setFilter({ hasta: hasta.value }); render(); };
   const search = document.querySelector("[data-psearch]");
   if (search) search.oninput = () => {
     const pos = search.selectionStart;
@@ -2954,11 +3899,17 @@ window.addEventListener("hashchange", () => {
 });
 document.addEventListener("keydown", (ev) => { if (!onAlertKey(ev)) onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") { state.now = Date.now(); if (route().name === "mejoras") render(); }
+  if (document.visibilityState !== "visible") return;
+  state.now = Date.now();
+  const name = route().name;
+  if (name === "mejoras" || name === "ahora" || name === "roster") render();
+  else armNotices();
 });
 setInterval(() => {
   state.now = Date.now();
-  if (route().name === "mejoras") render();
+  const name = route().name;
+  if (name === "mejoras" || name === "ahora") render();
+  else armNotices();
 }, 60000);
 window.addEventListener("online", () => {
   retryOfflineThumbs();

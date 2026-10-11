@@ -187,3 +187,31 @@
 .sheet .section { margin-bottom: var(--sp-5); }
 textarea:focus, .btn:focus { outline: none; }
 textarea:focus-visible, .btn:focus-visible, a:focus-visible { outline: 3px solid var(--tint); outline-offset: 2px; }
+
+.link-row { display: flex; gap: 16px; margin-top: 8px; }
+.link-row a { color: var(--tint); font-weight: 600; }
+.date-row { display: flex; gap: 8px; margin: 0 var(--margin-r) var(--sp-3) var(--margin-l); }
+.date-row label { flex: 1; display: flex; flex-direction: column; gap: 4px; font: 600 0.75rem/1.2 var(--font); color: var(--label-2); }
+.date-row input { min-height: 44px; border: 2px solid #1E1B16; border-radius: var(--r-card); background: var(--panel-2); color: var(--ink); font: 400 1rem/1.3 var(--font); padding: 0 8px; }
+.legend-row { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; }
+.legend { display: inline-flex; align-items: center; gap: 4px; font: 600 0.75rem/1.2 var(--font); color: var(--label-2); }
+.legend i { width: 10px; height: 10px; border-radius: 2px; }
+.legend-row--cuentas { gap: 6px 10px; }
+.legend-row--cuentas .legend { font-size: 0.82rem; color: var(--label); }
+.legend-row--cuentas .legend i { width: 12px; height: 12px; border-radius: 3px; }
+.gcat { margin: 14px 0 4px; }
+.gcat h3 { margin: 0 0 6px; font: 600 0.82rem/1.2 var(--font); }
+.gbar { display: flex; align-items: flex-end; gap: 3px; height: 88px; }
+.gbar i { flex: 1 1 0; min-width: 6px; border-radius: 3px 3px 0 0; background: var(--c, var(--tint)); height: calc(var(--k, 0) * 100%); min-height: 2px; }
+.gbar i.is-na { background: var(--fill-1); height: 8%; min-height: 4px; }
+.stack-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--fill-1); min-width: 0; }
+.stack-bar i { display: block; height: 100%; background: var(--cat); min-width: 2px; }
+.compare-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.heat { display: grid; gap: 3px; overflow-x: auto; }
+.heat__row { display: grid; grid-template-columns: 3.2rem repeat(var(--cols), minmax(1.6rem, 1fr)); gap: 3px; align-items: center; }
+.heat__name, .heat__lab { font: 600 0.65rem/1 var(--font); color: var(--label-2); overflow: hidden; text-overflow: ellipsis; }
+.heat__cell { height: 28px; border-radius: 4px; background: color-mix(in srgb, var(--tint) calc(var(--k) * 100%), var(--bg-2)); }
+.heat__cell.has-acct { background: color-mix(in srgb, var(--acct) calc(var(--k) * 100%), var(--bg-2)); }
+.heat__cell.is-na { background: var(--fill-1); }
+.radar text { fill: var(--label-2); font: 600 10px/12px var(--font); text-anchor: middle; dominant-baseline: middle; }
+.radar .ring { fill: none; stroke: var(--separator); stroke-width: 1; }

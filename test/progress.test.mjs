@@ -613,9 +613,9 @@ test("C2 cuenta 1 sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 1);
 });
 
-test("versión 2.1.4 y cachés cp-shell-v16 / cp-img-v5", () => {
-  assert.equal(APP_VERSION, "2.1.4");
-  assert.equal(SHELL_CACHE, "cp-shell-v16");
+test("versión 3.0.0 y cachés cp-shell-v17 / cp-img-v5", () => {
+  assert.equal(APP_VERSION, "3.0.0");
+  assert.equal(SHELL_CACHE, "cp-shell-v17");
   assert.equal(IMAGE_CACHE, "cp-img-v5");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -635,16 +635,18 @@ test("versión 2.1.4 y cachés cp-shell-v16 / cp-img-v5", () => {
   assert.equal(sw.includes("cp-shell-v13"), false);
   assert.equal(sw.includes("cp-shell-v14"), false);
   assert.equal(sw.includes("cp-shell-v15"), false);
+  assert.equal(sw.includes("cp-shell-v16"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v16/);
+  assert.match(caches, /cp-shell-v17/);
   assert.match(caches, /cp-img-v5/);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
   assert.equal(caches.includes("cp-shell-v14"), false);
   assert.equal(caches.includes("cp-shell-v15"), false);
+  assert.equal(caches.includes("cp-shell-v16"), false);
   assert.equal(caches.includes("cp-img-v4"), false);
   assert.match(app, /APP_VERSION/);
   assert.match(app, /imageChoice/);
@@ -1733,7 +1735,7 @@ test("2.0.0: la copia fusiona por tag y fecha y no borra lo que solo está en el
     now: noon,
   });
   assert.equal(file.app, "clash-progreso");
-  assert.equal(file.version, "2.1.4");
+  assert.equal(file.version, "3.0.0");
   const merged = mergeBackup({ accounts: localAccounts, exports: localExports }, file);
   const a = merged.accounts.find((x) => x.tag === "#A");
   assert.equal(a.alias, "Mia");
