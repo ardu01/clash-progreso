@@ -74,7 +74,7 @@ const state = {
   cacheCount: 0,
   dl: { phase: "idle", doneBytes: 0, doneCount: 0, total: 0, errors: 0, note: "" },
   seg: {},
-  mejorasMode: localStorage.getItem("cp-mejoras") || "cuenta",
+  mejorasMode: ["plan", "costes", "equipo"].includes(localStorage.getItem("cp-mejoras")) ? localStorage.getItem("cp-mejoras") : "plan",
   evo: localStorage.getItem("cp-evo") || "roster",
   sortMode: localStorage.getItem("cp-sort") || "th",
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
@@ -95,7 +95,8 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
-  agendaVista: ["24h", "7d", "cuenta"].includes(localStorage.getItem("cp-agenda")) ? localStorage.getItem("cp-agenda") : "24h",
+  agendaVista: ["24h", "7d", "cuenta", "curso"].includes(localStorage.getItem("cp-agenda")) ? localStorage.getItem("cp-agenda") : "24h",
+  cursoVista: localStorage.getItem("cp-curso") === "cuenta" ? "cuenta" : "fin",
   actualizarManual: false,
   actualizarFocus: false,
   actualizarBorrador: "",
@@ -229,11 +230,20 @@ function route() {
 
 function baseTab(r) {
   if (r.name === "inicio" || r.name === "ahora" || r.name === "copia" || r.name === "actualizar") return "inicio";
-  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
-  if (r.name === "mejoras") return "mejoras";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
+  if (r.name === "mejoras" || r.name === "plan" || r.name === "equipo") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
-  if (r.name === "agenda" || r.name === "plan") return "agenda";
+  if (r.name === "agenda") return "agenda";
   return "inicio";
+}
+
+function infoBtn(texto) {
+  if (!texto) return "";
+  return `<button type="button" class="info" data-info aria-expanded="false" aria-pressed="false" aria-label="Más información">ⓘ</button><p class="info-pop" hidden>${esc(texto)}</p>`;
+}
+
+function sectionHead(titulo, info) {
+  return `<div class="section-head"><div class="section-header"><span>${titulo}</span></div>${infoBtn(info)}</div>`;
 }
 
 const ICON = {
@@ -891,18 +901,15 @@ function filterBar(opts = {}) {
 function rosterTools(shown) {
   const snap = fleetSnapshot(fleetRows(shown));
   const prox = snap.proxima
-    ? `${esc(snap.proxima.nombre)} · ${esc(fmtFin(snap.proxima.fin))}`
+    ? `${snap.proxima.nombre} · ${fmtFin(snap.proxima.fin)}`
     : "Ninguna en curso";
   const media = snap.media == null ? "—" : fmtPct(snap.media);
-  return `<div class="section"><button type="button" class="btn btn--primary btn--block" data-paste-now>Pegar exportación</button></div>
+  const info = `Constructores: ${snap.frase}. Laboratorios: ${snap.laboratoriosLibres} libres en la exportación${snap.laboratoriosEstimados ? ` · ${snap.laboratoriosEstimados} estimados` : ""}. Casas de mascotas: ${snap.mascotasLibres} libres en la exportación${snap.mascotasEstimadas ? ` · ${snap.mascotasEstimadas} estimadas` : ""}. Próxima mejora: ${prox}.`;
+  return `<div class="section">${sectionHead("Pegar", "Lee el portapapeles, detecta una o varias aldeas por la etiqueta y las añade o actualiza.")}<button type="button" class="btn btn--primary btn--block" data-paste-now>Pegar exportación</button></div>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="section"><div class="card fleet-card">
-      <h2 class="t-headline">Todas las cuentas</h2>
-      <p class="t-body">Media ${media}</p>
-      <p class="t-footnote c-2">Constructores: ${esc(snap.frase)}</p>
-      <p class="t-footnote c-2">Laboratorios: ${snap.laboratoriosLibres} libres en la exportación${snap.laboratoriosEstimados ? ` · ${snap.laboratoriosEstimados} estimados` : ""} · Casas de mascotas: ${snap.mascotasLibres} libres en la exportación${snap.mascotasEstimadas ? ` · ${snap.mascotasEstimadas} estimadas` : ""}</p>
-      <p class="t-footnote c-2">Próxima mejora: ${prox}</p>
-      <p class="link-row"><a href="#/ahora">Qué hacer ahora</a><a href="#/ranking">Ranking</a><a href="#/agenda">Agenda</a></p>
+      <div class="section-head"><h2 class="t-headline">Todas las cuentas</h2>${infoBtn(info)}</div>
+      <p class="t-title2 num">${media}</p>
     </div></div>`;
 }
 
@@ -1130,7 +1137,7 @@ function fechaFlota(ms) {
 
 function analisisNav(activo) {
   const a = (id, href, label) => `<a href="${href}" role="tab" aria-selected="${activo === id}">${label}</a>`;
-  return `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Análisis">${a("ranking", "#/ranking", "Ranking y comparar")}${a("graficos", "#/graficos", "Gráficos")}</nav></div>`;
+  return `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Análisis">${a("ranking", "#/ranking", "Ranking")}${a("graficos", "#/graficos", "Gráficos")}</nav></div>`;
 }
 
 function renderInicio() {
@@ -1139,7 +1146,7 @@ function renderInicio() {
   const rows = fleetRows(list);
   const snap = fleetSnapshot(rows);
   const nCuentas = list.length;
-  const cabecera = `Clash Progreso · Centro de mando · ${nCuentas === 1 ? "1 cuenta" : `${nCuentas} cuentas`}`;
+  const cabecera = `Centro de mando · ${nCuentas === 1 ? "1 cuenta" : `${nCuentas} cuentas`}`;
   const hayDatos = withData.length > 0;
   const thOf = (m) => (expOf(m.tag) ? viewOf(m.tag).th : null);
   const enObjetivo = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) >= m.objetivo).length;
@@ -1178,10 +1185,11 @@ function renderInicio() {
   const hoyRows = deHoy.map((p, i) => `<li><a class="row row--tile" href="#/progreso/${p.meta.tag.slice(1)}/plan"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(p.meta.nombre)}</span><span class="row__sub">${esc(textoCola(p))}</span></span>${CHEV}</a></li>`).join("");
   const hoyBlock = deHoy.length
     ? `<ul class="list list--tiles orden-list">${hoyRows}</ul>`
-    : `<div class="card empty"><p class="t-title3">Hoy no queda libre ninguna cola con hora</p><p class="t-subhead c-2">Cuando un constructor, el laboratorio o la casa de mascotas tengan hora, el orden sale aquí.</p></div>`;
-  const sinHoraNote = sinHora.length
-    ? `<p class="section-footer">${sinHora.length === 1 ? "1 cuenta tiene" : `${sinHora.length} cuentas tienen`} una cola del plan sin hora exacta. No entra en este orden.</p>`
-    : "";
+    : `<div class="card empty"><p class="t-title3">—</p></div>`;
+  const abrirInfo = [
+    "Orden según el plan de cada cuenta y la cola que queda libre antes. Si el temporizador no es un número, no se inventa la hora.",
+    sinHora.length === 1 ? "1 cuenta tiene una cola del plan sin hora exacta. No entra en este orden." : sinHora.length ? `${sinHora.length} cuentas tienen una cola del plan sin hora exacta. No entra en este orden.` : "",
+  ].filter(Boolean).join(" ");
   const flota = objetivosFlota(list).map((g) => `<li><div class="row row--tile"><span class="row__main"><span class="row__title">${esc(g.titulo)}</span><span class="row__sub">${g.ya} de ${g.total} ya${g.comp ? ` · ${esc(g.comp)}` : ""}</span>${meterHtml(g.pct, `${g.ya} de ${g.total}`)}<span class="row__sub">${esc(g.fecha)}</span></span></div></li>`).join("");
   const fila = (p) => {
     const m = p.meta;
@@ -1194,18 +1202,16 @@ function renderInicio() {
         <span class="row__sub">${esc(sub)}</span>
         ${v ? meterHtml(v.media, `Media ${fmtPct(v.media)}`) : ""}</span>${CHEV}</a></li>`;
   };
+  const siguiente = ordenadas[0];
   return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">${esc(cabecera)}</p>
-    <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
+    <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
-    <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
-    <div class="section"><div class="section-header"><span>Próximas finalizaciones</span></div>${proxBlock}</div>
-    <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
-      <p class="t-footnote c-2">Orden según el plan de cada cuenta y la cola que queda libre antes. Si el temporizador no es un número, no se inventa la hora.</p>
-      ${hoyBlock}${sinHoraNote}</div>
-    <div class="section"><div class="section-header"><span>Objetivos de flota</span></div><ul class="list list--tiles">${flota || `<li><div class="card empty"><p class="t-title3">Sin objetivos</p></div></li>`}</ul></div>
-    <h2 class="group-label inicio-h2">Tus cuentas <span>· por cuándo queda libre una cola del plan</span></h2>
-    <div class="section"><ul class="list list--tiles">${ordenadas.map(fila).join("")}</ul></div>`;
+    <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
+    <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
+    <div class="section">${sectionHead("Abrir hoy", abrirInfo)}${hoyBlock}</div>
+    <div class="section">${sectionHead("Objetivos de flota", "Cuentas que comparten objetivo. La fecha es el fin del plan hasta el máximo del ayuntamiento anterior.")}<ul class="list list--tiles">${flota || `<li><div class="card empty"><p class="t-title3">Sin objetivos</p></div></li>`}</ul></div>
+    <div class="section">${sectionHead("Siguiente", "La primera del orden. La lista completa está en Cuentas.")}${siguiente ? `<ul class="list list--tiles">${fila(siguiente)}</ul>` : ""}<p class="section-footer"><a href="#/roster">Todas las cuentas</a></p></div>`;
 }
 
 function renderAhora() {
@@ -1239,15 +1245,14 @@ function renderAhora() {
       const media = viewOf(row.meta.tag).media;
       return `<li><a class="row row--tile" href="#/progreso/${row.meta.tag.slice(1)}/plan">${th == null ? "" : thumb(1000001, { size: 44, th }) }<span class="row__main"><span class="row__title">${esc(row.meta.nombre)}</span><span class="row__sub">${esc(label)} · TH${th == null ? "—" : th}</span><span class="row__sub">${esc(lines.join(" · "))}</span>${meterHtml(media, `Media ${fmtPct(media)}`)}</span>${CHEV}</a></li>`;
     }).join("")}</ul>`
-    : `<div class="card empty"><p class="t-title3">Nada que hacer ahora</p><p class="t-subhead c-2">Ninguna cuenta tiene un constructor, el laboratorio o la casa de mascotas libres con un paso pendiente en su plan.</p></div>`;
+    : `<div class="card empty"><p class="t-title3">—</p></div>`;
   const on = state.notifyOn;
   return `<h1 class="large-title">Ahora</h1>
-    <p class="large-sub">El siguiente paso del plan de cada cuenta, cuando una cola está libre. Sin plan guardado, el criterio es Maxear TH actual.</p>
+    <div class="title-line"><p class="large-sub">Siguiente paso</p>${infoBtn("El siguiente paso del plan de cada cuenta, cuando una cola está libre. Sin plan guardado, el criterio es Maxear TH actual.")}</div>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="section">${list}</div>
     <div class="section"><div class="card">
-      <h2 class="t-headline">Aviso al terminar</h2>
-      <p class="t-body">Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada haría falta un servidor, y esta app no tiene servidor.</p>
+      <div class="section-head"><h2 class="t-headline">Aviso al terminar</h2>${infoBtn("Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada haría falta un servidor, y esta app no tiene servidor.")}</div>
       <button type="button" class="btn ${on ? "btn--secondary" : "btn--primary"} btn--block" data-notify aria-pressed="${on ? "true" : "false"}">${on ? "Avisos activados" : "Activar avisos"}</button>
     </div></div>`;
 }
@@ -1270,10 +1275,10 @@ function renderRanking() {
     return `<div class="card compare-col"><h3 class="t-headline">${esc(row.nombre)}</h3><p class="t-title2 num">${fmtPct(row.media)}</p><p class="t-footnote c-2">TH${row.th == null ? "—" : row.th}</p><div class="chart-bars">${cats}</div></div>`;
   }).join("");
   const compare = picked.length >= 2
-    ? `<div class="section"><h2 class="section-header"><span>Comparación</span></h2><div class="compare-grid">${cols}</div><p class="section-footer">Cada barra es el % de esa categoría. No suma recursos.</p></div>`
-    : `<p class="section-footer">Elige de 2 a 3 cuentas para verlas juntas.</p>`;
+    ? `<div class="section">${sectionHead("Comparación", "Cada barra es el % de esa categoría. No suma recursos.")}<div class="compare-grid">${cols}</div></div>`
+    : `<p class="section-footer">Elige de 2 a 3 cuentas.</p>`;
   return `<h1 class="large-title">Ranking</h1>${analisisNav("ranking")}
-    <p class="large-sub">${ranked.length === 1 ? "1 cuenta" : `${ranked.length} cuentas`} con datos.</p>
+    <p class="large-sub">${ranked.length === 1 ? "1 cuenta" : `${ranked.length} cuentas`}</p>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     <div class="chip-row" role="toolbar" aria-label="Orden del ranking">${chips}</div>
     <div class="section"><ul class="list list--tiles">${list || `<li><div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div></li>`}</ul></div>
@@ -1310,8 +1315,7 @@ function planControls(meta, road) {
     ? `<div class="seg-wrap"><div class="seg" role="tablist" aria-label="Modo de rushear">${rushBtn("esencial", "Rush esencial")}${rushBtn("estrategico", "Rush estratégico")}</div></div>`
     : "";
   return `<div class="section"><div class="card">
-      <h2 class="t-headline">${esc(planLabel(plan, current))}</h2>
-      <p class="t-footnote c-2">${road.configured ? "Planificado: el plan guardado en esta cuenta." : "Recomendado: no hay plan guardado, se usa Maxear TH actual."}</p>
+      <div class="section-head"><h2 class="t-headline">${esc(planLabel(plan, current))}</h2>${infoBtn(road.configured ? "Planificado: el plan guardado en esta cuenta." : "Recomendado: no hay plan guardado, se usa Maxear TH actual.")}</div>
       <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Objetivo">${modo("maxear", "Maxear")}${modo("rushear", "Rushear")}</div></div>
       <label class="sort-label">TH objetivo
         <select data-plan-th="${esc(meta.tag)}" aria-label="TH objetivo">${thOpts.join("")}</select>
@@ -1479,31 +1483,22 @@ function renderPlan(tag) {
     return `<h1 class="large-title">Plan</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
   }
   const road = accountRoadmap(meta);
-  const fuera = road.heroesFuera ? `<p class="t-footnote c-2">En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan.</p>` : "";
-  const rush = road.plan.modo === "rushear" ? `<p class="t-footnote c-2">${esc(RUSH_NOTE)}</p>` : "";
-  const capNote = road.plan.modo !== "rushear" && road.targetTh > road.currentTh
-    ? `<p class="t-footnote c-2">Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.</p>`
-    : "";
-  const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
-  const paralelo = road.plan.modo === "rushear" && road.calendarioSeg != null && road.trabajoSeg > road.calendarioSeg
-    ? `<p class="t-footnote c-2">El fin usa los constructores a la vez. Los días de constructor del coste son la suma del trabajo, no el calendario.</p>`
-    : "";
-  const desconocido = road.plan.modo === "rushear"
-    ? ""
-    : (road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`);
-  const vieja = estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada
-    ? `<p class="t-footnote c-2">Necesita actualización. Se conserva el último plan, del ${esc(fmtWhen(exp.timestamp * 1000))}.</p>`
-    : "";
+  const notas = [PLAN_TIMELINE];
+  if (road.heroesFuera) notas.push(`En ${HEROES_FUERA} los héroes quedan fuera del plan.`);
+  if (road.plan.modo === "rushear") notas.push(RUSH_NOTE);
+  else if (road.targetTh > road.currentTh) notas.push(`Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.`);
+  if (road.avisoHora) notas.push("Hay una mejora en curso sin hora exacta. No se le pone una.");
+  if (road.plan.modo === "rushear" && road.calendarioSeg != null && road.trabajoSeg > road.calendarioSeg) notas.push("El fin usa los constructores a la vez. Los días de constructor del coste son la suma del trabajo, no el calendario.");
+  if (road.plan.modo !== "rushear" && !road.conocidos) notas.push("La exportación no trae el número de constructores. No se inventan huecos libres.");
+  if (estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada) notas.push(`Necesita actualización. Se conserva el último plan, del ${fmtWhen(exp.timestamp * 1000)}.`);
   const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
   const cifras = road.rush ? "" : `${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>`;
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
     ${road.rush ? rushPanel(road) : ""}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${cifras}${rush}${capNote}${hora}${paralelo}${desconocido}${vieja}</div></div>
-    ${sleepCard()}
+    <div class="section"><div class="card"><div class="section-head"><h2 class="t-headline">Criterio</h2>${infoBtn(notas.join(" "))}</div>${cifras}</div></div>
     ${roadmapList(road)}
-    <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
     ${costCard(exp, view.th, true)}`;
 }
 
@@ -1531,14 +1526,12 @@ function sleepCard() {
     ? "Las dos horas son la misma: no se aplica ningún tramo."
     : "Horas de Madrid. Si lo dejas vacío, no se mueve ninguna mejora.";
   return `<div class="section"><div class="card">
-      <h2 class="t-headline">Horas de sueño</h2>
-      <p class="t-body">La siguiente mejora no empieza ni termina en ese tramo. La hora de lo que ya se está mejorando no se cambia: sale de la exportación.</p>
+      <div class="section-head"><h2 class="t-headline">Horas de sueño</h2>${infoBtn(`La siguiente mejora no empieza ni termina en ese tramo. La hora de lo que ya se está mejorando no se cambia: sale de la exportación. ${nota}`)}</div>
       <div class="date-row">
         <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
         <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
       </div>
-      ${(s.desde || s.hasta) ? `<button type="button" class="btn btn--plain btn--block" data-sueno-clear>Quitar horario de sueño</button>` : ""}
-      <p class="t-footnote c-2">${esc(nota)}</p>
+      ${(s.desde || s.hasta) ? `<button type="button" class="btn btn--plain btn--block" data-sueno-clear>Quitar</button>` : ""}
     </div></div>`;
 }
 
@@ -1629,8 +1622,8 @@ function renderAgenda() {
     }
     return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, desactualizada: colas.desactualizada, lineas: tl.lineas };
   }).filter(Boolean);
-  const modo = state.agendaVista === "7d" || state.agendaVista === "cuenta" ? state.agendaVista : "24h";
-  const eventos = finalesEn(cuentas, { now: state.now, modo });
+  const modo = ["7d", "cuenta", "curso"].includes(state.agendaVista) ? state.agendaVista : "24h";
+  const eventos = finalesEn(cuentas, { now: state.now, modo: modo === "curso" ? "24h" : modo });
   const filaEv = (ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(fmtFin(ev.fin))}</span></span></div></li>`;
   let cuerpo = "";
   if (!eventos.length) {
@@ -1648,14 +1641,14 @@ function renderAgenda() {
       return `<div class="section"><div class="section-header"><span>${esc(titulo)}</span></div><ul class="list">${g.eventos.map(filaEv).join("")}</ul></div>`;
     }).join("");
   }
-  const nav = `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Agenda"><button type="button" role="tab" data-agenda="24h" aria-selected="${modo === "24h"}">Próximas 24 h</button><button type="button" role="tab" data-agenda="7d" aria-selected="${modo === "7d"}">Próximos 7 días</button><button type="button" role="tab" data-agenda="cuenta" aria-selected="${modo === "cuenta"}">Por cuenta</button></nav></div>`;
+  const nav = `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Agenda"><button type="button" role="tab" data-agenda="24h" aria-selected="${modo === "24h"}">24 h</button><button type="button" role="tab" data-agenda="7d" aria-selected="${modo === "7d"}">7 días</button><button type="button" role="tab" data-agenda="cuenta" aria-selected="${modo === "cuenta"}">Cuenta</button><button type="button" role="tab" data-agenda="curso" aria-selected="${modo === "curso"}">En curso</button></nav></div>`;
+  const cuerpoVista = modo === "curso" ? mejorasEnCurso() : cuerpo;
   return `<h1 class="large-title">Agenda</h1>
-    <p class="large-sub">Finalizaciones con hora, de la exportación. Una cuenta sin actualizar no entra.</p>
+    <div class="title-line"><p class="large-sub">Finalizaciones</p>${infoBtn("Finalizaciones con hora, de la exportación. Una cuenta sin actualizar no entra. La hora es la de Madrid. Si varias cuentas caen en la misma hora, es una sola sesión.")}</div>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     ${nav}
     ${sleepCard()}
-    ${cuerpo}
-    <p class="section-footer">La hora es la de Madrid. Si varias cuentas caen en la misma hora, es una sola sesión.</p>`;
+    ${cuerpoVista}`;
 }
 
 function renderHistorial(tag) {
@@ -2279,12 +2272,16 @@ function navbar(r) {
     title = "Perfil";
     lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
-  } else if (r.name === "plan" || r.name === "historial" || r.name === "equipo") {
-    title = r.name === "plan" ? "Plan" : r.name === "historial" ? "Historial" : "Equipamiento";
+  } else if (r.name === "historial") {
+    title = "Historial";
     const backTag = r.tag || state.selected;
     lead = backTag
       ? `<button class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
       : `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    collapsed = "true";
+  } else if (r.name === "plan" || r.name === "equipo") {
+    title = r.name === "plan" ? "Plan" : "Equipamiento";
+    lead = `<button class="btn-text" data-go="#/mejoras">${BACK} Mejoras</button>`;
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
@@ -2335,12 +2332,12 @@ function renderRoster() {
     ? ""
     : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
   const rows = shown.map(rowCuenta).join("");
-  const seedNote = isSeedRoster(list)
-    ? `<p class="section-footer">Las ${list.length} son de prueba: añade, renombra o borra cuentas. % = media de las categorías desbloqueadas.</p>`
-    : `<p class="section-footer">% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.</p>`;
+  const seedInfo = isSeedRoster(list)
+    ? `Las ${list.length} son de prueba: añade, renombra o borra cuentas. % = media de las categorías desbloqueadas.`
+    : "% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.";
   return `<h1 class="large-title">Cuentas</h1>
-    <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ordenadas por ${esc(sortLabel)}</p>
-    <div class="section">${botonActualizar()}<p class="section-footer">Recorre la lista, copia en el juego y pega cada cuenta al volver.</p></div>
+    <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ${esc(sortLabel)}</p>
+    <div class="section">${sectionHead("Actualizar", "Recorre la lista, copia en el juego y pega cada cuenta al volver.")}${botonActualizar()}</div>
     ${rosterTools(shown)}
     ${staleCard()}
     <label class="filter-search"><span class="sr-only">Buscar cuenta</span><input data-roster-q type="search" enterkeyhint="search" placeholder="Buscar cuenta" value="${esc(state.rosterQ)}" aria-label="Buscar cuenta"></label>
@@ -2352,7 +2349,7 @@ function renderRoster() {
       </select>
     </label>
     ${empty}
-    ${list.length ? `<div class="section"><ul class="list list--tiles">${rows}</ul>${seedNote}</div>` : seedNote}
+    ${list.length ? `<div class="section">${sectionHead("Lista", seedInfo)}<ul class="list list--tiles">${rows}</ul></div>` : infoBtn(seedInfo)}
     <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
 `;
 }
@@ -2366,7 +2363,7 @@ function staleCard() {
   if (!pending.length) return "";
   const lis = pending.map((meta) => `<li><a class="row" href="#/progreso/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${expOf(meta.tag) ? "Sin actualización reciente" : "Sin importar"}</span></span>${CHEV}</a></li>`).join("");
   const dia = days === 1 ? "día" : "días";
-  return `<div class="section"><div class="section-header"><span>Hace tiempo sin datos</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
+  return `<div class="section">${sectionHead("Hace tiempo sin datos", `Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.`)}<ul class="list">${lis}</ul></div>`;
 }
 
 function isSeedRoster(list) {
@@ -2497,9 +2494,9 @@ function renderProgreso(tag) {
   const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
   const links = exp ? `<div class="section"><ul class="list">
-      <li><a class="row" href="#/perfil/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Perfil</span><span class="row__sub">Lo que trae la exportación</span></span>${CHEV}</a></li>
-      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Línea de tiempo hasta el TH objetivo</span></span>${CHEV}</a></li>
-      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/perfil/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Perfil</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan</span></span>${CHEV}</a></li>
+      <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span></span>${CHEV}</a></li>
     </ul></div>` : "";
   const body = !exp
     ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`
@@ -2514,9 +2511,7 @@ function renderProgreso(tag) {
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     ${exp && inFleet ? summaryCard(a, meta) : ""}
-    ${exp && inFleet ? `<div class="section"><div class="card">${constructorControl(meta, exp)}</div></div>` : ""}
     ${exp && inFleet ? rushCard(meta) : ""}
-    ${exp && inFleet ? costCard(exp, a.th, false) : ""}
     ${links}
     ${body}
     ${exp && inFleet ? equipoSection(exp, meta) : ""}
@@ -2532,20 +2527,20 @@ function equipoSection(exp, meta) {
   const row = view.cats.equipamiento;
   const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
   const conTope = rows.filter((p) => !p.bloqueado).length;
-  return `<div class="section"><div class="section-header"><span>Equipamiento</span></div>
+  return `<div class="section">${sectionHead("Equipamiento", "No entra en la media, el plan ni el coste de la aldea. El total de la flota está en Mejoras.")}
     <ul class="list list--tiles"><li><a class="row row--tile" href="#/equipo/${meta.tag.slice(1)}">
-      <span class="row__main"><span class="row__title">Piezas de héroe</span>
-        <span class="row__sub">${conTope} con tope · ${esc(pct)} · aparte de la aldea</span>
+      <span class="row__main"><span class="row__title">Piezas</span>
+        <span class="row__sub">${conTope} · ${esc(pct)}</span>
         <span class="row__sub">${esc(ores)}</span>
       </span>${CHEV}</a></li></ul>
-    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea. El total de la flota está en Equipamiento.</p></div>`;
+    </div>`;
 }
 
 function rushCard(meta) {
   const gaps = rushGaps(state.rows, state.index, meta.tag);
   if (!gaps.length) return "";
-  const lis = gaps.map((g) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(g.label)}</span><span class="row__sub">${fmtPct(g.pct)} del máximo de TH${g.th}. El aviso sale por debajo del 50 %.</span></span></div></li>`).join("");
-  return `<div class="section"><div class="section-header"><span>Al subir de TH</span></div><ul class="list">${lis}</ul><p class="section-footer">Hace falta más de una exportación. Los héroes de ${esc(HEROES_FUERA)} no entran en este aviso.</p></div>`;
+  const lis = gaps.map((g) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(g.label)}</span><span class="row__sub">${fmtPct(g.pct)} · TH${g.th}</span></span></div></li>`).join("");
+  return `<div class="section">${sectionHead("Al subir de TH", `Hace falta más de una exportación. El aviso sale por debajo del 50 %. Los héroes de ${HEROES_FUERA} no entran en este aviso.`)}<ul class="list">${lis}</ul></div>`;
 }
 
 function filterControls(counts, filt) {
@@ -2613,11 +2608,13 @@ function isWallMax(it) {
 }
 
 function summaryCard(a) {
-  const sig = a.thSig ? `<p class="t-footnote c-2">TH${a.thSig}: ${fmtPct(a.sigMedia)}</p>` : "";
-  const sigOff = a.thSig ? `<p class="t-footnote c-2">TH${a.thSig}: ${fmtPct(a.sigOffense)}</p>` : "";
-  return `<div class="section"><div class="card summary">
-    <div><p class="t-footnote c-2">Media</p><p class="t-title1 num">${fmtPct(a.media)}</p><p class="t-footnote c-2">del máximo de TH${a.th}</p>${sig}</div>
-    <div><p class="t-footnote c-2">Ofensiva</p><p class="t-title1 num">${fmtPct(a.offense)}</p><p class="t-footnote c-2">Media de laboratorio y héroes</p>${sigOff}</div>
+  const info = `Media del máximo de TH${a.th}.${a.thSig ? ` TH${a.thSig}: ${fmtPct(a.sigMedia)}.` : ""} Ofensiva: media de laboratorio y héroes.${a.thSig ? ` TH${a.thSig}: ${fmtPct(a.sigOffense)}.` : ""}`;
+  return `<div class="section"><div class="card">
+    <div class="section-head"><h2 class="t-headline">Resumen</h2>${infoBtn(info)}</div>
+    <div class="summary">
+      <div><p class="t-footnote c-2">Media</p><p class="t-title1 num">${fmtPct(a.media)}</p></div>
+      <div><p class="t-footnote c-2">Ofensiva</p><p class="t-title1 num">${fmtPct(a.offense)}</p></div>
+    </div>
   </div></div>`;
 }
 
@@ -2634,8 +2631,7 @@ function catsBlock(exp, meta) {
   if (!cats.length) {
     return `<div class="section"><div class="card empty"><p class="t-title3">Nada con ese recurso</p><p class="t-subhead c-2">Prueba otro recurso o vuelve a Todos.</p></div></div>`;
   }
-  return `<p class="section-footer" style="margin-bottom:8px">${esc(legend)}</p>
-    <div class="section" style="margin-top:0"><ul class="list">${rows}</ul></div>
+  return `<div class="section">${sectionHead("Aldea", legend)}<ul class="list">${rows}</ul></div>
     ${showWalls ? wallsCard(a) : ""}
     ${showHeroes ? heroesCard(a) : ""}`;
 }
@@ -2994,30 +2990,57 @@ function builderLine(exp) {
 }
 
 function renderMejoras() {
+  const mode = state.mejorasMode === "costes" || state.mejorasMode === "equipo" ? state.mejorasMode : "plan";
+  const n = allAccounts().filter((r) => expOf(r.tag)).length;
+  const body = mode === "costes" ? mejorasCostes() : mode === "equipo" ? mejorasEquipo() : mejorasPlan();
+  const tab = (id, label) => `<button type="button" role="tab" data-mej="${id}" aria-selected="${mode === id}">${label}</button>`;
+  return `<h1 class="large-title">Mejoras</h1>
+    <p class="large-sub">${n === 1 ? "1 cuenta" : `${n} cuentas`}</p>
+    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Mejoras">
+      ${tab("plan", "Plan")}${tab("costes", "Costes")}${tab("equipo", "Equipo")}
+    </div></div>
+    ${body}
+  `;
+}
+
+function mejorasPlan() {
+  const rows = allAccounts().map((meta) => {
+    const exp = expOf(meta.tag);
+    const road = exp ? accountRoadmap(meta) : null;
+    const label = road ? planLabel(road.plan, road.currentTh) : "Sin datos";
+    const th = road && road.currentTh != null ? `TH${road.currentTh}` : "";
+    const fin = road && road.rush && road.rush.fin ? fmtFin(road.rush.fin) : road && road.fin ? fmtFin(road.fin) : "";
+    const sub = [th, label, fin].filter(Boolean).join(" · ");
+    const thumbHtml = exp ? thumb(1000001, { size: 44, th: viewOf(meta.tag).th }) : "";
+    return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
+  }).join("");
+  return `<div class="section">${sectionHead("Plan", "Maxear o rushear, por cuenta. Rush esencial es el mínimo para subir el ayuntamiento. Rush estratégico suma sugerencias que se pueden quitar.")}<ul class="list list--tiles">${rows || `<li><div class="card empty"><p class="t-title3">Sin cuentas</p></div></li>`}</ul></div>`;
+}
+
+function mejorasEquipo() {
+  const flota = `<li><a class="row" href="#/equipo"><span class="row__main"><span class="row__title">Flota</span></span>${CHEV}</a></li>`;
+  const rows = allAccounts().filter((meta) => expOf(meta.tag)).map((meta) => {
+    const a = viewOf(meta.tag);
+    return `<li><a class="row row--tile" href="#/equipo/${meta.tag.slice(1)}">${thumb(1000001, { size: 44, th: a.th })}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">TH${a.th}</span></span>${CHEV}</a></li>`;
+  }).join("");
+  return `<div class="section">${sectionHead("Equipamiento", "Piezas de héroe y menas. No entra en la media ni en el plan.")}<ul class="list list--tiles">${flota}${rows}</ul></div>`;
+}
+
+function mejorasEnCurso() {
   const all = [];
   for (const meta of allAccounts()) {
     const exp = expOf(meta.tag);
     if (!exp) continue;
     for (const u of upgrades(exp)) all.push({ ...u, meta, exp });
   }
+  const vista = state.cursoVista === "cuenta" ? "cuenta" : "fin";
+  const chip = (id, label) => `<button type="button" data-curso="${id}" aria-pressed="${vista === id}">${label}</button>`;
+  const chips = `<div class="chip-row" role="toolbar" aria-label="En curso">${chip("fin", "Por fin")}${chip("cuenta", "Por cuenta")}</div>`;
+  if (!all.length) return `${chips}<div class="section"><div class="card empty"><p class="t-title3">—</p></div></div>`;
   const active = all.filter((u) => !u.done);
-  const mode = state.mejorasMode === "costes" || state.mejorasMode === "cuenta" ? state.mejorasMode : "fin";
-  const vacio = `<div class="card empty"><p class="t-title3">No hay datos</p><p class="t-subhead c-2">Importa la exportación JSON de cada cuenta.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div>`;
-  const libres = `<div class="card empty"><p class="t-title3">No hay mejoras en curso</p><p class="t-subhead c-2">Todas las colas están libres según la última importación.</p></div>`;
-  const body = !all.length
-    ? vacio
-    : mode === "costes" ? mejorasCostes()
-      : mode === "cuenta" ? mejorasPorCuenta()
-        : active.length === 0 && all.every((u) => u.done) ? libres : mejorasPorFin(all);
-  return `<h1 class="large-title">Mejoras</h1>
-    <p class="large-sub">${active.length} en curso · ${allAccounts().filter((r) => expOf(r.tag)).length} cuentas</p>
-    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Orden de mejoras">
-      <button role="tab" data-mej="fin" aria-selected="${mode === "fin"}">Por fin</button>
-      <button role="tab" data-mej="cuenta" aria-selected="${mode === "cuenta"}">Por cuenta</button>
-      <button role="tab" data-mej="costes" aria-selected="${mode === "costes"}">Costes</button>
-    </div></div>
-    ${body}
-`;
+  if (vista === "cuenta") return chips + mejorasPorCuenta();
+  if (!active.length && all.every((u) => u.done)) return `${chips}<div class="section"><div class="card empty"><p class="t-title3">—</p></div></div>`;
+  return chips + mejorasPorFin(all);
 }
 
 function mejorasCostes() {
@@ -3027,8 +3050,7 @@ function mejorasCostes() {
     const a = viewOf(meta.tag);
     return `<div class="section"><div class="card acct-tile">
         ${thumb(1000001, { size: 52, th: a.th })}
-        <div class="acct-tile__main"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>
-          <p class="t-footnote c-2">Hasta el máximo de TH${a.th}. No es el coste de subir el ayuntamiento.</p>
+        <div class="acct-tile__main"><div class="section-head"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>${infoBtn(`Hasta el máximo de TH${a.th}. No es el coste de subir el ayuntamiento.`)}</div>
         </div>
       </div>${costCard(exp, a.th, true)}</div>`;
   }).join("");
@@ -3041,16 +3063,19 @@ function mejorasPorFin(all) {
     vencidosCtor += row.builders.vencidos || 0;
     if (row.builders.known && !row.builders.over && row.builders.free > 0) free.push({ meta: accountByTag(row.tag), b: row.builders });
   }
-  const freeCard = free.length ? `<div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres en la exportación</p>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
+  const libreInfo = free.length
+    ? `${free.length === 1 ? "1 cuenta" : `${free.length} cuentas`} con constructores libres en la exportación.`
+    : "";
+  const estimadoInfo = vencidosCtor
+    ? `${vencidosCtor === 1 ? "1 temporizador de constructor ya habría acabado" : `${vencidosCtor} temporizadores de constructor ya habrían acabado`}. Es una estimación de la última exportación, no un constructor confirmado.`
+    : "";
+  const freeCard = free.length ? `<div class="section"><div class="card"><div class="chip-cloud">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
-        return `<span class="chip chip--account">${thumb(1000001, { size: 22, pad: 1, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
-      }).join("")}</div>
-    </div></div>` : "";
+        return `<span class="chip chip--account">${thumb(1000001, { size: 22, pad: 1, th: a.th })} ${esc(meta.chip)} ${b.free}</span>`;
+      }).join("")}</div></div></div>` : "";
   const done = all.filter((u) => u.done);
   const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end || rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag));
-  const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Estimadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
+  const doneBlock = done.length ? `<div class="section">${sectionHead("Estimadas", "Pendiente de reimportar. No es un constructor confirmado.")}<ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
     const key = madridDayKey(u.end);
@@ -3059,10 +3084,7 @@ function mejorasPorFin(all) {
   }
   for (const list of byDay.values()) list.sort((a, b) => rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag) || a.end - b.end);
   const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><ul class="list">${list.map(upRow).join("")}</ul></div>`).join("");
-  const estimadoNote = vencidosCtor
-    ? `<p class="section-footer">${vencidosCtor === 1 ? "1 temporizador de constructor ya habría acabado" : `${vencidosCtor} temporizadores de constructor ya habrían acabado`}. Es una estimación de la última exportación, no un constructor confirmado.</p>`
-    : "";
-  return freeCard + estimadoNote + doneBlock + days + helpersBlock();
+  return `<div class="section">${sectionHead("En curso", [libreInfo, estimadoInfo].filter(Boolean).join(" "))}</div>` + freeCard + doneBlock + days + helpersBlock();
 }
 
 function mejorasPorCuenta() {
@@ -3077,17 +3099,18 @@ function mejorasPorCuenta() {
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
     const bob = list.filter((u) => u.extra && u.queue === "constructor").length;
     const slots = slotsHtml(b, labN, petN, a.th >= 14);
+    const notas = [];
+    if (colas.desactualizada) notas.push("Necesita actualización. Se conserva el último plan.");
+    if (colas.builders.vencidos) notas.push(colas.builders.vencidos === 1 ? "1 temporizador ya habría acabado (estimado). No es un constructor confirmado." : `${colas.builders.vencidos} temporizadores ya habrían acabado (estimado). No es un constructor confirmado.`);
+    notas.push(`Tiempos desde la exportación de ${fmtWhen(exp.timestamp * 1000)}.`);
     return `<div class="section"><div class="card acct-tile">
         ${thumb(1000001, { size: 52, th: a.th })}
-        <div class="acct-tile__main"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>
+        <div class="acct-tile__main"><div class="section-head"><div class="t-headline acct-tile__name">${esc(meta.nombre)}</div>${infoBtn(notas.join(" "))}</div>
           ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
           ${builderHead(b, bob)}
           ${slots}
-          ${colas.desactualizada ? `<p class="t-footnote c-2" style="margin:8px 0 0">Necesita actualización. Se conserva el último plan.</p>` : ""}
-          ${colas.builders.vencidos ? `<p class="t-footnote c-2" style="margin:8px 0 0">${colas.builders.vencidos === 1 ? "1 temporizador ya habría acabado (estimado)" : `${colas.builders.vencidos} temporizadores ya habrían acabado (estimado)`}. No es un constructor confirmado.</p>` : ""}
-          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}.</p>
         </div>
-      </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
+      </div><ul class="list">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
   }).join("");
 }
 
@@ -4206,17 +4229,16 @@ function renderEquipoCuenta(meta, list) {
   const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
   return `<label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
     ${oreCard(bag, `${meta.nombre} · TH${view.th}.`)}
-    <div class="section"><div class="section-header"><span>Filtros</span></div>
+    <div class="section">${sectionHead("Filtros", `Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""} Progreso del equipamiento ${pct}. El % no cuenta piezas en nivel 1 ni sin identificar.`)}
       <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Rareza">${rare("todos", "Todos")}${rare("Common", "Común")}${rare("Epic", "Épica")}</div></div>
       <label class="sort-label">Héroe <select data-eq-heroe aria-label="Héroe">${heroOpts}</select></label>
       <div class="chip-row" role="toolbar" aria-label="Más filtros">
         <button type="button" data-eq-bloqueados aria-pressed="${filtro.bloqueados ? "true" : "false"}">Mostrar bloqueados</button>
         <button type="button" data-eq-ocultar aria-pressed="${filtro.ocultar ? "true" : "false"}">Ocultar elegidos</button>
       </div>
-      <p class="section-footer">Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""}</p>
     </div>
     <div class="section stack">${cards || empty}</div>
-    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>.</p>`;
+    <p class="section-footer"><a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">Fuente</a></p>`;
 }
 
 function renderEquipo(tag) {
@@ -4228,7 +4250,7 @@ function renderEquipo(tag) {
   const vista = state.eqVista === "flota" ? "flota" : "cuenta";
   const seg = (id, label) => `<button type="button" role="tab" data-eq-vista="${id}" aria-selected="${vista === id}">${label}</button>`;
   const head = `<h1 class="large-title">Equipamiento</h1>
-    <p class="large-sub">Apartado de cada cuenta, separado de la aldea. No entra en la media, el plan ni los gráficos.</p>
+    <div class="title-line"><p class="large-sub">${vista === "flota" ? "Flota" : esc(meta.nombre)}</p>${infoBtn("Apartado de cada cuenta, separado de la aldea. No entra en la media, el plan ni los gráficos.")}</div>
     <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Alcance">${seg("cuenta", "Esta cuenta")}${seg("flota", "Flota")}</div></div>`;
   return head + (vista === "flota" ? renderEquipoFlota(list) : renderEquipoCuenta(meta, list));
 }
@@ -4377,11 +4399,11 @@ function renderGraficos() {
   let card = `<div class="card empty"><p class="t-title3">Sin cuentas en este filtro</p></div>`;
   if (list.length && (meta || !needsAccount)) {
     if (state.chartKind === "lineas") {
-      card = `<div class="card"><h2 class="t-headline">Evolución de las cuentas</h2>${multiLineSvg(mediaLines(list), "Evolución del porcentaje de cada cuenta")}</div>`;
+      card = `<div class="card"><div class="section-head"><h2 class="t-headline">Evolución</h2>${infoBtn("Porcentaje de cada cuenta en cada exportación del periodo.")}</div>${multiLineSvg(mediaLines(list), "Evolución del porcentaje de cada cuenta")}</div>`;
     } else if (state.chartKind === "barras") {
-      card = `<div class="card"><h2 class="t-headline">Por categoría</h2><p class="t-footnote c-2">Cada barra es el % de una cuenta en la última exportación del periodo.</p>${groupedCategoryHtml(snaps, cats)}</div>`;
+      card = `<div class="card"><div class="section-head"><h2 class="t-headline">Por categoría</h2>${infoBtn("Cada barra es el % de una cuenta en la última exportación del periodo.")}</div>${groupedCategoryHtml(snaps, cats)}</div>`;
     } else if (state.chartKind === "apiladas") {
-      card = `<div class="card"><h2 class="t-headline">Comparación</h2><p class="t-footnote c-2">Cada color es el % de una categoría. No es una suma de oro, elixir ni oscuro.</p><div class="chart-bars">${stackedHtml(snaps, cats)}</div></div>`;
+      card = `<div class="card"><div class="section-head"><h2 class="t-headline">Comparación</h2>${infoBtn("Cada color es el % de una categoría. No es una suma de oro, elixir ni oscuro.")}</div><div class="chart-bars">${stackedHtml(snaps, cats)}</div></div>`;
     } else if (state.chartKind === "radar") {
       const snap = snaps.find((s) => s.tag === tag);
       card = `<div class="card"><h2 class="t-headline">Radar · ${esc(meta.nombre)}</h2>${snap ? radarSvg(snap.view, cats) : ""}</div>`;
@@ -4397,7 +4419,7 @@ function renderGraficos() {
     ? `<label class="sort-label">Cuenta <select data-chart aria-label="Cuenta del gráfico">${opts}</select></label>`
     : "";
   return `<h1 class="large-title">Gráficos</h1>${analisisNav("graficos")}
-    <p class="large-sub">% del máximo del TH de cada cuenta. La media no incluye categorías bloqueadas.</p>
+    <div class="title-line"><p class="large-sub">% del máximo</p>${infoBtn("Porcentaje del máximo del TH de cada cuenta. La media no incluye categorías bloqueadas.")}</div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     <div class="chip-row" role="toolbar" aria-label="Tipo de gráfico">${kindChips}</div>
     ${picker}
@@ -4452,24 +4474,22 @@ function renderCopia() {
   const thLine = [...byTh.entries()].map(([k, c]) => `${c} × ${k}`).join(" · ") || "Sin cuentas";
   const { totalN, count, p, done, status, btn, note } = offlineDlModel();
   return `<h1 class="large-title">Copia</h1>
-    <p class="large-sub">Todo se queda en este iPhone.</p>
+    <p class="large-sub">En este iPhone</p>
     <div class="section"><div class="card">
-      <h2 class="t-headline">Copia de seguridad</h2>
-      <p class="t-body">Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial.</p>
+      <div class="section-head"><h2 class="t-headline">Copia</h2>${infoBtn(`Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial. Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú. La copia incluye las marcas provisionales del plan y la meta de cada cuenta.`)}</div>
+      <p class="t-title2 num">${n}</p>
       <p class="t-footnote c-2">${esc(thLine)}</p>
       <p class="t-footnote c-2">Última importación: ${esc(lastImportLabel())}</p>
       ${copyWarning()}
-      <button type="button" class="btn btn--primary btn--block" data-backup>Exportar JSON · ${n} cuentas</button>
-      <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar desde una copia</button>
-      <p class="t-footnote c-2">Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú. La copia incluye las marcas provisionales del plan y la meta de cada cuenta.</p>
+      <button type="button" class="btn btn--primary btn--block" data-backup>Exportar JSON · ${n}</button>
+      <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar</button>
     </div></div>
     <div class="section"><div class="card">
-      <h2 class="t-headline">Apariencia</h2>
+      <div class="section-head"><h2 class="t-headline">Apariencia</h2>${infoBtn("Una cuenta avisa cuando la exportación tiene más de esos días. El valor inicial es 7.")}</div>
       <div class="chip-row" role="toolbar" aria-label="Tema">${[["sistema", "Sistema"], ["light", "Claro"], ["dark", "Oscuro"]].map(([id, label]) => `<button type="button" data-theme="${id}" aria-pressed="${state.theme === id ? "true" : "false"}">${label}</button>`).join("")}</div>
       <label class="sort-label">Días sin actualizar
         <input data-stale-days type="number" min="1" max="90" value="${state.staleDays}" aria-label="Días sin actualizar">
       </label>
-      <p class="t-footnote c-2">Una cuenta avisa cuando la exportación tiene más de esos días. El valor inicial es 7.</p>
     </div></div>
     <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
       <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
@@ -4482,13 +4502,11 @@ function renderCopia() {
       <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos de prueba</span></span></button></li>
       <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
     </ul></div>
-    <div class="section-header"><span>Acerca de</span></div>
-    <div class="section" style="margin-top:0"><ul class="list">
+    <div class="section">${sectionHead("Acerca de", "Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.")}<ul class="list">
       <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
     </ul></div>
     <div class="section"><div class="card about">
       <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" target="_blank" rel="noopener noreferrer">www.supercell.com/fan-content-policy</a>.</p>
-      <p class="t-body">Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.</p>
       <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Leer la Fan Content Policy</a></p>
     </div></div>
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
@@ -4871,6 +4889,24 @@ function bind(r) {
   try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const info = origen.closest("[data-info]");
+    if (info) {
+      ev.preventDefault();
+      const abierto = info.getAttribute("aria-expanded") === "true";
+      for (const otro of document.querySelectorAll("[data-info]")) {
+        otro.setAttribute("aria-expanded", "false");
+        otro.setAttribute("aria-pressed", "false");
+        const pop = otro.nextElementSibling;
+        if (pop && pop.classList.contains("info-pop")) pop.hidden = true;
+      }
+      if (!abierto) {
+        info.setAttribute("aria-expanded", "true");
+        info.setAttribute("aria-pressed", "true");
+        const pop = info.nextElementSibling;
+        if (pop && pop.classList.contains("info-pop")) pop.hidden = false;
+      }
+      return;
+    }
     const externo = origen.closest("a[href^='http']");
     if (externo) { abrirFuera(ev, externo); return; }
     const dest = destinoDelToque(ev);
@@ -5095,8 +5131,15 @@ function bind(r) {
     const agendaVista = origen.closest("[data-agenda]");
     if (agendaVista) {
       const id = agendaVista.dataset.agenda;
-      state.agendaVista = id === "7d" || id === "cuenta" ? id : "24h";
+      state.agendaVista = id === "7d" || id === "cuenta" || id === "curso" ? id : "24h";
       localStorage.setItem("cp-agenda", state.agendaVista);
+      render();
+      return;
+    }
+    const curso = origen.closest("[data-curso]");
+    if (curso) {
+      state.cursoVista = curso.dataset.curso === "cuenta" ? "cuenta" : "fin";
+      localStorage.setItem("cp-curso", state.cursoVista);
       render();
       return;
     }

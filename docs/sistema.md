@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 3.1.16)
+
+`APP_VERSION` es `3.1.16` y `SHELL_CACHE` es `cp-shell-v35`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+`baseTab` manda el plan y el equipamiento a Mejoras. Historial, perfil y el progreso de la aldea siguen en Cuentas. Agenda ya no resalta el plan. Inicio deja la lista larga en Cuentas y conserva una fila `row--inicio` con la siguiente cuenta. Cuentas quita la fila de enlaces a otras pestañas. Mejoras tiene tres modos (`plan`, `costes`, `equipo`); un valor viejo de `cp-mejoras` (`fin` o `cuenta`) cae en Plan. Esas listas de mejoras en curso pasan a Agenda con `data-agenda="curso"` y, dentro, `data-curso` (`fin` o `cuenta`). El texto largo de las pantallas va en `infoBtn`: el nodo sigue en el DOM, oculto hasta el toque. El margen de sección y el relleno de fila de Inicio y Cuentas vuelven al común; la rejilla de tres columnas de `.row--account` se queda. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.15)
 
 `APP_VERSION` es `3.1.15` y `SHELL_CACHE` es `cp-shell-v34`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
