@@ -55,6 +55,14 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/316-antes-analisis-oscuro.png" width="200" alt="Análisis en oscuro, antes de ordenar las pantallas"> | <img src="docs/capturas/316-antes-agenda-oscuro.png" width="200" alt="Agenda en oscuro, antes de ordenar las pantallas"> |
 
+| Inicio, después | Cuentas, después | Mejoras, después |
+| --- | --- | --- |
+| <img src="docs/capturas/316-despues-inicio-oscuro.png" width="200" alt="Inicio en oscuro, con el resumen y la acción"> | <img src="docs/capturas/316-despues-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro, con la lista y el resumen"> | <img src="docs/capturas/316-despues-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, con el plan de cada cuenta"> |
+
+| Análisis, después | Agenda, después |
+| --- | --- |
+| <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
+
 | Rush esencial | Rush estratégico |
 | --- | --- |
 | <img src="docs/capturas/315-esencial-oscuro.png" width="200" alt="Rush esencial en oscuro: coste, tiempo con los constructores y fecha estimada"> | <img src="docs/capturas/315-estrategico-oscuro.png" width="200" alt="Rush estratégico en oscuro: sugerencias que se pueden quitar"> |
