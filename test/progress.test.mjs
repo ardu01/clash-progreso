@@ -439,12 +439,12 @@ test("muros de C1 y de una cuenta TH11", () => {
 
 test("missing.json coincide con el archivo publicado", () => {
   const buf = readFileSync(new URL("../assets/missing.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "73e51a606ac3e4d966968d2616be0fa5b3c471c84866a2e3b60a6c6d61e9f124");
 });
 
 test("manifest.json coincide con la v3.1.7", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "16e95904ddbaf5c66d2d608f265fd6bb890abd64443ced4e0e1e68f6e052cdfb");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "1c4c52694b756ec61aeb5233e1ef46dc17403cc5d03b1117fca6f8a8cf799b07");
   assert.equal(manifest.version_set_imagenes, "v3.1.7");
 });
 
@@ -2352,6 +2352,12 @@ test("3.1.7: imágenes no oficiales solo donde no hay oficial", () => {
     assert.equal(im.precarga, false, lvl);
   }
   assert.equal(manifest.items["1000097"].estado, "faltante");
+  assert.equal(manifest.items["1000097"].nombre, "Defensa artesanal");
+  const station = manifest.unofficial_images.find((row) => row.file === "unofficial/crafting-station_all.png");
+  assert.equal(station.name_es, "Defensa artesanal");
+  assert.equal(station.ruta, "images/levels/crafting-station.png");
+  assert.equal(JSON.stringify(manifest).includes("Puesto de artesanía"), false);
+  assert.equal(JSON.stringify(manifest).includes("Taller de fabricación"), false);
   assert.equal(manifest.items["1000097"].imagen.official, false);
   assert.equal(manifest.items["1000097"].imagen.ruta, "images/levels/crafting-station.png");
   assert.ok(manifest.items["1000097"].imagen.bytes < 3000000);

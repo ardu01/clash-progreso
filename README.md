@@ -145,7 +145,7 @@ Actualizar la app no borra las cuentas ni el historial. El roster sigue en la ve
 
 | Versión | Qué cambió |
 | --- | --- |
-| 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel: 25 PNG nuevos (lado largo como máximo 512). La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. No entra la base del constructor. |
+| 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel: 25 PNG nuevos (lado largo como máximo 512). La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. El Crafting Station se llama Defensa artesanal. No entra la base del constructor. |
 | 3.1.6 | Perfil de cada cuenta, desde Cuentas: nombre de la cuenta, etiqueta, ayuntamiento y los ajustes que trae la exportación (constructores y ayudantes). Los héroes se ven con el nivel y el máximo de ese TH. Lo que el JSON no trae no se muestra y no se rellena a mano. |
 | 3.1.5 | En Equipamiento, por cuenta y en el total de la flota: mena brillante, reluciente y estrellada para maxearlo todo, con filtros y el coste de cada nivel pendiente. Usa las tablas ya corregidas de Flecha monolítica y Colmillos eléctricos. |
 | 3.1.4 | Imagen oficial de 14 niveles que estaban prestados y de la torre de supermagos. Nombres del texto del juego: Escolta títere, Orbe oscuro, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Cohetes de defensa. L.A.S.S.I. lleva el punto. |
