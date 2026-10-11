@@ -3610,5 +3610,95 @@
   "y": 56,
   "w": 332,
   "h": 432
+ },
+ "images/levels/hidden-tesla_16.png": {
+  "x": 223,
+  "y": 184,
+  "w": 65,
+  "h": 137
+ },
+ "images/levels/hidden-tesla_17.png": {
+  "x": 98,
+  "y": 41,
+  "w": 319,
+  "h": 471
+ },
+ "images/levels/x-bow_12.png": {
+  "x": 193,
+  "y": 246,
+  "w": 126,
+  "h": 119
+ },
+ "images/levels/x-bow_13.png": {
+  "x": 151,
+  "y": 130,
+  "w": 200,
+  "h": 192
+ },
+ "images/levels/scattershot_6.png": {
+  "x": 189,
+  "y": 243,
+  "w": 127,
+  "h": 121
+ },
+ "images/levels/scattershot_7.png": {
+  "x": 153,
+  "y": 92,
+  "w": 225,
+  "h": 216
+ },
+ "images/levels/workshop_8.png": {
+  "x": 96,
+  "y": 39,
+  "w": 295,
+  "h": 406
+ },
+ "images/levels/builder-s-hut_8.png": {
+  "x": 1,
+  "y": 67,
+  "w": 511,
+  "h": 445
+ },
+ "images/levels/pet-house_12.png": {
+  "x": 183,
+  "y": 223,
+  "w": 136,
+  "h": 146
+ },
+ "images/levels/inferno-tower_12.png": {
+  "x": 65,
+  "y": 0,
+  "w": 363,
+  "h": 501
+ },
+ "images/levels/air-bomb_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 66,
+  "h": 103
+ },
+ "images/levels/giga-bomb_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 304,
+  "h": 303
+ },
+ "images/levels/giga-bomb_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 304,
+  "h": 303
+ },
+ "images/levels/super-wizard-tower_1.png": {
+  "x": 67,
+  "y": 53,
+  "w": 378,
+  "h": 413
+ },
+ "images/levels/super-wizard-tower_2.png": {
+  "x": 67,
+  "y": 28,
+  "w": 378,
+  "h": 460
  }
 }
