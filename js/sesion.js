@@ -58,10 +58,13 @@ export function marcarPaso(sesion, id, estado) {
   };
 }
 
-/** La pregunta siguiente. Si no queda ninguna, la sesión pide otra vuelta. */
+/** La pregunta siguiente. Lo pospuesto espera a que no quede nada pendiente. */
 export function siguientePaso(sesion) {
   if (!sesion || sesion.cerrada) return null;
-  return (sesion.pasos || []).find((paso) => paso.estado === "pendiente" || paso.estado === "pospuesto") || null;
+  const pasos = sesion.pasos || [];
+  return pasos.find((paso) => paso.estado === "pendiente")
+    || pasos.find((paso) => paso.estado === "pospuesto")
+    || null;
 }
 
 export function eficiencia(sesion) {

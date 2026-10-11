@@ -58,6 +58,10 @@ test("4.0: la sesión guía en orden, no confirma, y el mantenimiento avisa si n
   assert.equal(marcado.pasos[0].confirmado, undefined);
   assert.equal(eficiencia(marcado).frase, "Sin confirmar");
   assert.ok(siguientePaso(marcado));
+  const diferido = marcarPaso(sesion, sesion.pasos[0].id, "pospuesto");
+  assert.notEqual(siguientePaso(diferido).id, sesion.pasos[0].id);
+  const solo = marcarPaso({ ...sesion, pasos: [sesion.pasos[0]] }, sesion.pasos[0].id, "pospuesto");
+  assert.equal(siguientePaso(solo).estado, "pospuesto");
   const justo = planMantenimiento([
     cuenta({ tag: "#X", libreAccion: 1 }),
     cuenta({ tag: "#Y", libreAccion: 1, desactualizada: true }),

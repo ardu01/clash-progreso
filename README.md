@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.16</strong><br>
+  <strong>Versión 4.0.0</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -63,6 +63,11 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
 
+| Operaciones | Sesión | Simulador |
+| --- | --- | --- |
+| <img src="docs/capturas/400-operaciones-oscuro.png" width="200" alt="Operaciones en oscuro: sesión inteligente y el resto de herramientas"> | <img src="docs/capturas/400-sesion-oscuro.png" width="200" alt="Sesión en oscuro, con el paso siguiente y los minutos"> | <img src="docs/capturas/400-simulador-oscuro.png" width="200" alt="Simulador en oscuro: el cálculo no cambia la aldea"> |
+| <img src="docs/capturas/400-operaciones-claro.png" width="200" alt="Operaciones con el tema claro"> | <img src="docs/capturas/400-sesion-claro.png" width="200" alt="Sesión con el tema claro"> | |
+
 | Rush esencial | Rush estratégico |
 | --- | --- |
 | <img src="docs/capturas/315-esencial-oscuro.png" width="200" alt="Rush esencial en oscuro: coste, tiempo con los constructores y fecha estimada"> | <img src="docs/capturas/315-estrategico-oscuro.png" width="200" alt="Rush estratégico en oscuro: sugerencias que se pueden quitar"> |
@@ -70,7 +75,9 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-Cada pestaña hace una sola cosa. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo. Copia y el tema siguen en el engranaje de Inicio.
+Operaciones es la sexta pestaña. Ahí están la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras y el diario. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
+
+Cada pestaña anterior sigue con un solo trabajo. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo. Copia y el tema siguen en el engranaje de Inicio.
 
 En pantalla quedan títulos, cifras e iconos. Las explicaciones largas están en un ⓘ que se abre al tocar. Las tarjetas, las cabeceras, los filtros, las barras y las filas usan el mismo espaciado en toda la app, con el estilo Clash.
 
@@ -78,7 +85,7 @@ Nada se ha quitado: lo que antes estaba mezclado sigue a un toque, en su pestañ
 
 ## Funciones
 
-La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
+La barra de abajo tiene seis pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis**, **Agenda** y **Operaciones**. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
 
 ### Inicio
 
@@ -141,6 +148,22 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - Historial de lo que subió entre importaciones, ritmo en niveles por semana y rachas: semanas seguidas mejorando, una categoría al máximo o el ayuntamiento completado.
 - Aviso cuando termina una mejora, solo con la app abierta y si el iPhone permite notificaciones de la app instalada. Con la app cerrada no hay aviso: eso exigiría un servidor, y esta app no tiene.
 
+### Operaciones
+
+La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
+
+- **Sesión inteligente.** Guía cuenta por cuenta. Dentro de cada aldea, el constructor libre va antes. Los minutos van de 10 a 120, y el día de juego cabe entre 1 y 2 horas. Marcar un paso no lo confirma: eso solo lo hace una exportación posterior.
+- **Mantenimiento.** Lo justo para que un constructor no quede parado.
+- **Simulador.** Constructores, horas y descuentos escritos a mano. Sin objetos mágicos. Calcular no cambia la aldea.
+- **Gemelos.** Señala la cuenta que va por detrás y qué le falta. Confirmar lo pasa al plan real.
+- **Equilibrio.** Ataque frente a defensa, por categoría.
+- **Predicción.** Fechas probable, mejor y peor. Con menos de dos importaciones dice que hay pocos datos. A 180 y 365 días solo compara: no afirma el día.
+- **Guerras y CWL.** Lo anotado a mano. Un campo vacío dice «Sin anotar», no un cero.
+- **Diario.** Importaciones, lo visto al importar, subidas de ayuntamiento y apuntes. No afirma el minuto de una mejora.
+- **Plantillas.** Subir de ayuntamiento, héroes al máximo, guerra, rush esencial, muros y laboratorio. En C1 la de héroes no entra.
+
+Al importar, si la sesión tenía pasos marcados, Operaciones avisa que el plan se recalculó y que esos pasos siguen sin confirmar.
+
 ### Copiar la aldea en el juego
 
 El camino que muestra la app es:
@@ -155,7 +178,7 @@ Si el botón no puede leer el portapapeles, mantén pulsado el campo y elige Peg
 
 ### Copia y aspecto
 
-- Una copia con las cuentas, el historial, los planes, las marcas y la meta de cada cuenta. Al importar se guarda sola una copia en este iPhone. Si pasan 7 días sin otra, Copia lo avisa.
+- Una copia con las cuentas, el historial, los planes, las marcas, la meta de cada cuenta, el horario de sueño y los apuntes de Operaciones. Al importar se guarda sola una copia en este iPhone. Si pasan 7 días sin otra, Copia lo avisa.
 - Al restaurar se junta por etiqueta y por fecha: no borra lo que solo está en el iPhone, ni un plan o una marca que la copia no traiga.
 - Tema del sistema, claro u oscuro.
 - Descarga de imágenes para usarlas sin conexión.
@@ -163,7 +186,7 @@ Si el botón no puede leer el portapapeles, mantén pulsado el campo y elige Peg
 
 ## Privacidad
 
-Las cuentas, el historial, los grupos, las metas, los planes, las marcas, los filtros, el tema y las horas de sueño se quedan en este iPhone. No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del teléfono es el archivo de copia, si lo guardas tú (Archivos, AirDrop u otra app del sistema).
+Las cuentas, el historial, los grupos, las metas, los planes, las marcas, los filtros, el tema, las horas de sueño y los apuntes de Operaciones se quedan en este iPhone. No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del teléfono es el archivo de copia, si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
 Actualizar la app no borra las cuentas ni el historial. Una cuenta que hayas borrado no vuelve a aparecer sola.
 
@@ -177,9 +200,9 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 ## Detalles técnicos
 
-La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
+La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v35` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v36` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -187,6 +210,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.0.0 | Operaciones, la sexta pestaña: sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras y diario. IndexedDB conserva los exports. Adoptar un gemelo o una plantilla pasa por el plan. |
 | 3.1.16 | Cada pestaña tiene un solo trabajo. Las explicaciones largas pasan a un ⓘ. Tarjetas, cabeceras, filtros, barras y filas comparten el mismo espaciado. |
 | 3.1.15 | Rushear se elige por cuenta: esencial (solo los requisitos para subir el ayuntamiento) o estratégico (el mínimo más una lista de sugerencias que se puede quitar). Cada modo muestra estructuras, coste total, tiempo con los constructores de la cuenta y fecha estimada. |
 | 3.1.14 | Rushear reparte el tiempo entre los constructores de la cuenta (los del JSON, o 4, 5 o 6 si no vienen). El plan lista los requisitos para subir el ayuntamiento y los marca como provisionales. |

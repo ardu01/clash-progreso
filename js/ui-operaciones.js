@@ -63,7 +63,7 @@ function vistaSesion(m) {
   const cuerpo = !sesion
     ? `<button type="button" class="btn btn--primary btn--block" data-op="sesion-empezar">Empezar</button>`
     : paso
-      ? `<p class="t-title3">${esc(paso.nombre)}</p><p class="t-body">${esc(paso.titulo)} · ${paso.minutos} min</p><p class="t-footnote c-2">${esc(fraseOrigen({ origen: "provisional" }))}</p>
+      ? `<p class="t-title3">${paso.estado === "pospuesto" ? "Pospuesto · " : ""}${esc(paso.nombre)}</p><p class="t-body">${esc(paso.titulo)} · ${paso.minutos} min</p><p class="t-footnote c-2">${esc(fraseOrigen({ origen: "provisional" }))}</p>
         <div class="chip-row">
           <button type="button" data-op="sesion-hecho" data-arg="${esc(paso.id)}">Hecho</button>
           <button type="button" data-op="sesion-saltar" data-arg="${esc(paso.id)}">Saltar</button>

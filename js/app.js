@@ -5529,9 +5529,10 @@ async function measureCache() {
     const hit = await caches.match(img.url);
     if (hit) { bytes += img.bytes; count += 1; }
   }
+  const cambio = bytes !== state.cacheBytes || count !== state.cacheCount;
   state.cacheBytes = bytes;
   state.cacheCount = count;
-  if ((route().name === "ajustes" || route().name === "copia") && state.dl.phase !== "downloading") render();
+  if (cambio && (route().name === "ajustes" || route().name === "copia") && state.dl.phase !== "downloading") render();
 }
 
 async function downloadAll() {
