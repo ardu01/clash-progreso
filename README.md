@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.7</strong><br>
+  <strong>Versión 3.1.8</strong><br>
   Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -57,7 +57,8 @@ La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, *
 ### Cuentas
 
 - Lista de las aldeas de prueba y de las que se importen después. Se pueden marcar como Principal y ordenar.
-- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas por el tag y añade o actualiza. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`, o abrir la app con varias aldeas juntas (`docs/atajo.md`).
+- **Actualizar todas**: un botón en Inicio y en Cuentas abre la lista en el orden de Abrir hoy. Al volver del juego, **Pegar esta cuenta** lee el portapapeles con ese toque. Si Safari no deja, hay un campo para pegar a mano. No hace falta la app Atajos (`docs/atajo.md`).
+- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas por el tag y añade o actualiza. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`.
 - Búsqueda por el alias de la cuenta.
 - Grupos opcionales (hasta 6, de 16 caracteres: principal, farming, TH11) para filtrar en Cuentas, Gráficos y Ranking.
 - Meta opcional de una categoría o de la media, con una barra de progreso.
@@ -133,18 +134,19 @@ El menú en inglés, comprobado, es *Settings → More Settings → Data Export 
 
 Si el botón no puede leer el portapapeles, se abre Importar: mantén pulsado el campo y elige Pegar, o elige uno o varios `.json` en Archivos.
 
-Para traer varias aldeas seguidas desde el juego, el atajo está en `docs/atajo.md`.
+Para recorrer todas las aldeas desde el juego, el modo Actualizar todas está en `docs/atajo.md`.
 
 ## Privacidad
 
 Las cuentas, el historial, los grupos, las metas, los planes, las marcas provisionales, los filtros, el tema y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
-Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v25` y la de imágenes `cp-img-v9`.
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v26` y la de imágenes `cp-img-v9`.
 
 ## Historial de versiones
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.8 | Actualizar todas, dentro de la app: la lista sigue el orden de Abrir hoy, Pegar esta cuenta lee el portapapeles con el toque y, si falla, un campo. Cada cuenta se reconoce por la etiqueta, se marca y se guarda al momento. El progreso (4/11) y la sesión siguen si iOS cierra la app. Ya no hace falta Atajos. |
 | 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel: 25 PNG nuevos (lado largo como máximo 512). La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. El Crafting Station se llama Defensa artesanal. No entra la base del constructor. |
 | 3.1.6 | Perfil de cada cuenta, desde Cuentas: nombre de la cuenta, etiqueta, ayuntamiento y los ajustes que trae la exportación (constructores y ayudantes). Los héroes se ven con el nivel y el máximo de ese TH. Lo que el JSON no trae no se muestra y no se rellena a mano. |
 | 3.1.5 | En Equipamiento, por cuenta y en el total de la flota: mena brillante, reluciente y estrellada para maxearlo todo, con filtros y el coste de cada nivel pendiente. Usa las tablas ya corregidas de Flecha monolítica y Colmillos eléctricos. |

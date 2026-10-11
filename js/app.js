@@ -33,6 +33,10 @@ import {
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
 import { exportFacts } from "./perfil.js";
+import {
+  blankSession, clearSession, compareOrden, isStandalone, mensajePegado, nextOf, ordenDeSesion,
+  progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
+} from "./actualizar.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -89,6 +93,9 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
+  actualizarManual: false,
+  actualizarFocus: false,
+  actualizarBorrador: "",
   filters: loadFilters(),
   chartKind: localStorage.getItem("cp-chart-kind") || "lineas",
   compareTags: loadCompare(),
@@ -218,7 +225,7 @@ function route() {
 }
 
 function baseTab(r) {
-  if (r.name === "inicio" || r.name === "ahora" || r.name === "copia") return "inicio";
+  if (r.name === "inicio" || r.name === "ahora" || r.name === "copia" || r.name === "actualizar") return "inicio";
   if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
   if (r.name === "mejoras") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
@@ -983,10 +990,10 @@ function prioridadDe(meta) {
 }
 
 function comparePrioridad(a, b) {
-  if (a.tier !== b.tier) return a.tier - b.tier;
-  if (a.sortWhen !== b.sortWhen) return a.sortWhen - b.sortWhen;
-  if (!!a.meta.principal !== !!b.meta.principal) return a.meta.principal ? -1 : 1;
-  return String(a.meta.nombre).localeCompare(String(b.meta.nombre), "es");
+  return compareOrden(
+    { tier: a.tier, sortWhen: a.sortWhen, principal: !!a.meta.principal, nombre: a.meta.nombre },
+    { tier: b.tier, sortWhen: b.sortWhen, principal: !!b.meta.principal, nombre: b.meta.nombre },
+  );
 }
 
 function textoCola(item) {
@@ -1149,6 +1156,7 @@ function renderInicio() {
   };
   return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">Centro de mando · ${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`}</p>
+    <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
     ${tiles}
     <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
     <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
@@ -1724,6 +1732,188 @@ function armNotices() {
   }, Math.min(wait, 2147483647));
 }
 
+function abrirActualizar() {
+  let ses = readSession(localStorage);
+  if (!ses) {
+    const order = ordenDeSesion(allAccounts().map((meta) => {
+      const p = prioridadDe(meta);
+      return { tag: meta.tag, tier: p.tier, sortWhen: p.sortWhen, principal: !!meta.principal, nombre: meta.nombre };
+    }));
+    ses = blankSession(order, state.now);
+    writeSession(localStorage, ses);
+  }
+  state.actualizarManual = false;
+  if (location.hash !== "#/actualizar") location.hash = "#/actualizar";
+  else render();
+}
+
+function botonActualizar() {
+  const ses = readSession(localStorage);
+  const extra = ses && ses.order.length ? ` · ${progressOf(ses).label}` : "";
+  return `<button type="button" class="btn btn--primary btn--block" data-actualizar>Actualizar todas${esc(extra)}</button>`;
+}
+
+function nombreCuenta(tag) {
+  const meta = accountByTag(tag);
+  return meta ? meta.nombre : tag;
+}
+
+function filaSesion(ses, tag, i, next) {
+  const row = ses.done[tag];
+  let estado = "Pendiente";
+  if (row && row.kind === "ready") estado = "Cambió";
+  else if (row && row.kind === "older") estado = "Al histórico";
+  else if (row) estado = "Sin cambios";
+  else if (tag === next) estado = "Siguiente";
+  const cls = tag === next && !row ? " chip--main" : " chip--muted";
+  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
+}
+
+function campoPegado(ses) {
+  const texto = ses.pending || state.actualizarBorrador || "";
+  if (!state.actualizarManual && !ses.pending) return "";
+  const aviso = ses.pending
+    ? `<p class="t-body">Quedó un pegado sin guardar. Si iOS cerró la app, tócalo otra vez.</p>`
+    : `<p class="t-footnote c-2">Mantén pulsado el campo y elige Pegar.</p>`;
+  return `${aviso}<label class="t-footnote" for="act-paste">Pega aquí el JSON</label><textarea id="act-paste" class="act-paste" data-actualizar-text autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">${esc(texto)}</textarea><button type="button" class="btn btn--primary btn--block" data-pegar-campo>Guardar este pegado</button>`;
+}
+
+function renderActualizar() {
+  const ses = readSession(localStorage);
+  if (!ses) {
+    return `<h1 class="large-title">Actualizar todas</h1>
+      <p class="large-sub">Sin la app Atajos.</p>
+      <div class="section"><div class="card empty"><p class="t-title3">Aún no hay una lista</p><p class="t-subhead c-2">Se abre con las cuentas en el orden de Abrir hoy.</p><button type="button" class="btn btn--primary" data-actualizar>Empezar</button></div></div>`;
+  }
+  const prog = progressOf(ses);
+  const pct = prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
+  const standalone = isStandalone(navigator, (q) => window.matchMedia(q));
+  const hint = standalone
+    ? "Después de copiar, vuelve a este icono. Safari y el icono de inicio no comparten los datos."
+    : "Después de copiar, vuelve a esta pestaña de Safari. El icono de inicio no comparte estos datos.";
+  const barra = `<div class="section"><div class="card act-card">
+      <div class="act-top"><h2 class="t-headline">Progreso</h2><p class="act-count num" aria-live="polite">${esc(prog.label)}</p></div>
+      <div class="act-bar" role="progressbar" aria-valuenow="${prog.done}" aria-valuemin="0" aria-valuemax="${prog.total}" aria-label="${prog.done} de ${prog.total} cuentas"><span style="width:${pct}%"></span></div>
+    </div></div>`;
+  if (ses.status === "done") {
+    const sum = summaryOf(ses);
+    const bloque = (titulo, tags) => {
+      if (!tags.length) return "";
+      const lis = tags.map((tag) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span></div></li>`).join("");
+      return `<div class="section"><div class="section-header"><span>${titulo}</span></div><ul class="list">${lis}</ul></div>`;
+    };
+    return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
+      <p class="large-sub">Lista terminada</p>
+      ${barra}
+      ${ses.pending ? `<div class="section act-actions">${campoPegado(ses)}</div>` : ""}
+      ${bloque("Cambiaron", sum.changed)}
+      ${bloque("Sin cambios", sum.same)}
+      ${bloque("Al histórico", sum.history)}
+      ${bloque("Sin pegar", sum.missing)}
+      <div class="section"><button type="button" class="btn btn--primary btn--block" data-actualizar-listo>Listo</button></div></div>`;
+  }
+  const next = nextOf(ses);
+  const siguiente = next
+    ? `<div class="section"><div class="card">
+        <p class="t-footnote c-2">Siguiente</p>
+        <h2 class="t-title2">${esc(nombreCuenta(next))}</h2>
+        <p class="tag">${esc(next)}</p>
+        <p class="t-body">En el juego: Ajustes → Más ajustes → Exportar datos → Copiar.</p>
+        <p class="t-footnote c-2">En inglés: Settings → More Settings → Data Export → Copy.</p>
+      </div></div>
+      <p class="section-footer">${esc(hint)}</p>`
+    : `<div class="section"><div class="card empty"><p class="t-title3">No hay cuentas en la lista</p></div></div>`;
+  const manual = state.actualizarManual || !!ses.pending;
+  const lista = ses.order.map((tag, i) => filaSesion(ses, tag, i, next)).join("");
+  return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
+    <p class="large-sub">El orden queda fijo al empezar. ${esc(prog.label)}</p>
+    ${barra}
+    ${siguiente}
+    <div class="section act-actions">
+      <button type="button" class="btn btn--primary btn--block" data-pegar-cuenta>Pegar esta cuenta</button>
+      ${manual ? "" : `<button type="button" class="btn btn--secondary btn--block" data-pegar-mano>Pegar a mano</button>`}
+      ${campoPegado(ses)}
+      <button type="button" class="btn btn--secondary btn--block" data-go="#/inicio">Dejar para luego</button>
+    </div>
+    <div class="section"><div class="section-header"><span>Cuentas</span></div><ul class="list list--tiles orden-list">${lista}</ul></div></div>`;
+}
+
+async function pegarCuenta() {
+  let text = "";
+  try {
+    text = await navigator.clipboard.readText();
+  } catch {
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", "Safari no dejó leer el portapapeles. Pega el JSON en el campo.");
+    render();
+    return;
+  }
+  await aplicarPegado(text);
+}
+
+async function aplicarPegado(text) {
+  const cur = readSession(localStorage);
+  if (!cur) return;
+  const marcado = withPending(cur, text);
+  writeSession(localStorage, marcado);
+  const { items } = clipboardImportPlan(text || "", classifyCtx());
+  const result = recordPaste(marcado, items, state.now);
+  writeSession(localStorage, result.session);
+  const accepted = result.notes.some((n) => n.kind === "ready" || n.kind === "duplicate" || n.kind === "older");
+  if (!accepted) {
+    writeSession(localStorage, { ...result.session, pending: "" });
+    state.actualizarBorrador = text || "";
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", mensajePegado(result.notes, nombreCuenta));
+    render();
+    return;
+  }
+  try {
+    if (result.save.length) await persistirPegado(result.save);
+  } catch {
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", "No se pudo guardar. El texto sigue en este iPhone: toca Guardar este pegado.");
+    render();
+    return;
+  }
+  writeSession(localStorage, { ...result.session, pending: "" });
+  state.actualizarManual = false;
+  state.actualizarBorrador = "";
+  showToast("ok", mensajePegado(result.notes, nombreCuenta));
+  render();
+}
+
+async function persistirPegado(save) {
+  const before = new Map();
+  for (const it of save) before.set(it.value.tag, state.latest.get(it.value.tag) || null);
+  for (const it of save) await putExport(it.value);
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  const seen = new Set();
+  for (const it of save) {
+    const tag = it.value.tag;
+    if (seen.has(tag)) continue;
+    seen.add(tag);
+    const rec = reconcileProvisionals(state.provisionales, { tag, before: before.get(tag), after: state.latest.get(tag) });
+    state.provisionales = rec.provisionales;
+  }
+  saveProvisionals();
+  try {
+    await putCopy(buildBackup({
+      accounts: state.accounts,
+      exports: state.rows,
+      planes: state.planes,
+      provisionales: state.provisionales,
+      version: APP_VERSION,
+    }));
+    state.copyAt = Date.now();
+  } catch { /* la copia automática no bloquea el guardado */ }
+  armFlash(save.map((it) => it.value.tag));
+}
+
 async function savePlan(plan, opts = {}) {
   const before = new Map();
   for (const it of plan.save) before.set(it.value.tag, state.latest.get(it.value.tag) || null);
@@ -1839,14 +2029,14 @@ async function toggleNotify() {
 }
 
 function navbar(r) {
-  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil" };
+  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil", actualizar: "Actualizar" };
   let lead = "";
   let trail = "";
   let title = titles[r.name] || titles[tab] || "";
   let collapsed = "false";
   if (r.name === "inicio") {
     trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
-  } else if (r.name === "copia" || r.name === "ahora") {
+  } else if (r.name === "copia" || r.name === "ahora" || r.name === "actualizar") {
     lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
   } else if (r.name === "roster" || r.name === "importar") {
@@ -1916,6 +2106,7 @@ function renderRoster() {
     : `<p class="section-footer">% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.</p>`;
   return `<h1 class="large-title">Cuentas</h1>
     <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ordenadas por ${esc(sortLabel)}</p>
+    <div class="section">${botonActualizar()}<p class="section-footer">Recorre la lista, copia en el juego y pega cada cuenta al volver.</p></div>
     ${rosterTools(shown)}
     ${staleCard()}
     <label class="filter-search"><span class="sr-only">Buscar cuenta</span><input data-roster-q type="search" enterkeyhint="search" placeholder="Buscar cuenta" value="${esc(state.rosterQ)}" aria-label="Buscar cuenta"></label>
@@ -1941,7 +2132,7 @@ function staleCard() {
   if (!pending.length) return "";
   const lis = pending.map((meta) => `<li><a class="row" href="#/progreso/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${expOf(meta.tag) ? "Sin actualización reciente" : "Sin importar"}</span></span>${CHEV}</a></li>`).join("");
   const dia = days === 1 ? "día" : "días";
-  return `<div class="section"><div class="section-header"><span>Actualizar todas</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
+  return `<div class="section"><div class="section-header"><span>Hace tiempo sin datos</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
 }
 
 function isSeedRoster(list) {
@@ -3928,6 +4119,7 @@ function screenFor(r) {
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
+  if (r.name === "actualizar") return renderActualizar();
   return renderInicio();
 }
 
@@ -4255,6 +4447,13 @@ function settleSheetFocus() {
   state.sheetScroll = null;
 }
 
+function focusActualizar() {
+  if (!state.actualizarFocus) return;
+  state.actualizarFocus = false;
+  const el = document.querySelector("[data-actualizar-text]");
+  if (el) el.focus();
+}
+
 function focusImportTarget() {
   if (!state.importUi.needsFocus) return;
   state.importUi.needsFocus = false;
@@ -4320,6 +4519,7 @@ function render() {
   paintOfflineThumbs();
   settleSheetFocus();
   focusImportTarget();
+  focusActualizar();
   settleAlert();
   if (state.scrollAdded && r.name === "roster") {
     state.scrollAdded = false;
@@ -4390,6 +4590,27 @@ function bind(r) {
       return;
     }
     if (ev.target.closest("[data-paste-now]")) { await pasteNow(); return; }
+    if (ev.target.closest("[data-pegar-cuenta]")) { await pegarCuenta(); return; }
+    if (ev.target.closest("[data-pegar-campo]")) {
+      const campo = document.querySelector("[data-actualizar-text]");
+      await aplicarPegado(campo ? campo.value : "");
+      return;
+    }
+    if (ev.target.closest("[data-pegar-mano]")) {
+      state.actualizarManual = true;
+      state.actualizarFocus = true;
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-actualizar-listo]")) {
+      clearSession(localStorage);
+      state.actualizarManual = false;
+      state.actualizarBorrador = "";
+      if (location.hash !== "#/inicio") location.hash = "#/inicio";
+      else render();
+      return;
+    }
+    if (ev.target.closest("[data-actualizar]")) { abrirActualizar(); return; }
     const modo = ev.target.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;
@@ -4956,6 +5177,9 @@ async function boot() {
       state.importUi.phase = imported.items.length ? "batch" : "entry";
       location.hash = "#/importar";
     }
+  } else {
+    const sesion = readSession(localStorage);
+    if (sesion && route().name !== "actualizar") location.hash = "#/actualizar";
   }
   render();
   if ("serviceWorker" in navigator) {
