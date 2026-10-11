@@ -1177,7 +1177,7 @@ function renderInicio() {
         <span class="row__sub">${esc(sub)}</span>
         ${v ? meterHtml(v.media, `Media ${fmtPct(v.media)}`) : ""}</span>${CHEV}</a></li>`;
   };
-  return `<h1 class="large-title">${esc(cabecera)}</h1>
+  return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
     ${tiles}
