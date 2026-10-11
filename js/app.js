@@ -389,6 +389,7 @@ function nameOf(id) {
 }
 
 function thumbLevel(opts) {
+  if (opts.levelKey != null && opts.levelKey !== "") return opts.levelKey;
   if (opts.lvl != null && opts.lvl !== "") return opts.lvl;
   if (opts.th != null && opts.th !== "") return opts.th;
   return null;
@@ -406,7 +407,7 @@ function thumb(id, opts = {}) {
   const label = nameOf(id) || "";
   const choice = imageChoice(item, thumbLevel(opts));
   const im = choice.im;
-  if (item.estado === "faltante" || !im || (isHeavy(im, item) && !opts.ficha)) {
+  if (!im || (isHeavy(im, item) && !opts.ficha)) {
     const style = known ? "" : ` style="--size:${size}px"`;
     if (opts.ficha && im && isHeavy(im, item)) {
       return imageThumb(cls, size, label, im, opts, choice);
@@ -3552,6 +3553,19 @@ function fichaFrame(inner) {
     </div>`;
 }
 
+function fichaArt(id, item, lvl) {
+  const fastKey = lvl != null && item && item.imagenes_por_nivel && item.imagenes_por_nivel[String(lvl) + "-fast-attack"]
+    ? String(lvl) + "-fast-attack"
+    : null;
+  if (!fastKey) {
+    return `<div style="display:flex;justify-content:center">${thumb(id, { size: 96, ficha: true, lvl })}</div>`;
+  }
+  return `<div class="ficha-modes">
+      <figure>${thumb(id, { size: 72, ficha: true, lvl })}<figcaption class="t-footnote c-2">Largo alcance</figcaption></figure>
+      <figure>${thumb(id, { size: 72, ficha: true, levelKey: fastKey })}<figcaption class="t-footnote c-2">Ataque rápido</figcaption></figure>
+    </div>`;
+}
+
 function fichaSheet() {
   const f = state.ficha;
   if (!f) return "";
@@ -3569,7 +3583,9 @@ function fichaSheet() {
   const badges = [];
   if (unknown) badges.push(`<span class="badge">sin identificar</span>`);
   const notes = [];
-  if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
+  const choice = item ? imageChoice(item, f.lvl) : null;
+  if (choice && choice.im && choice.im.official === false) notes.push(`<p class="t-footnote c-2">Imagen no oficial</p>`);
+  else if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
   if (item && item.nombre_pendiente) notes.push(`<p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
   if (item && (item.rareza || item.heroe)) {
     const parts = [];
@@ -3583,7 +3599,7 @@ function fichaSheet() {
   const marca = item ? imageChoice(item, f.lvl).marca : null;
   const marcaHtml = marca ? `<p class="t-footnote c-2 ficha-marca" data-level-note>${esc(marca)}</p>` : "";
   return fichaFrame(`
-        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true, lvl: f.lvl })}</div>
+        ${fichaArt(f.id, item, f.lvl)}
         ${marcaHtml}
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">${esc(line.text)}${overChip}</p>
@@ -4042,7 +4058,7 @@ function renderCopia() {
     </ul></div>
     <div class="section"><div class="card about">
       <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
-      <p class="t-body">Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
+      <p class="t-body">Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.</p>
       <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
     </div></div>
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;

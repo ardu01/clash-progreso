@@ -3700,5 +3700,155 @@
   "y": 28,
   "w": 378,
   "h": 460
+ },
+ "images/levels/crafting-station.png": {
+  "x": 0,
+  "y": 5,
+  "w": 495,
+  "h": 506
+ },
+ "images/levels/portal-pendant.png": {
+  "x": 0,
+  "y": 0,
+  "w": 301,
+  "h": 286
+ },
+ "images/levels/air-bomb_13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 358,
+  "h": 510
+ },
+ "images/levels/dark-barracks_11.png": {
+  "x": 39,
+  "y": 0,
+  "w": 181,
+  "h": 242
+ },
+ "images/levels/dark-barracks_13.png": {
+  "x": 2,
+  "y": 3,
+  "w": 276,
+  "h": 330
+ },
+ "images/levels/dark-spell-factory_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 330,
+  "h": 328
+ },
+ "images/levels/dark-spell-factory_8.png": {
+  "x": 0,
+  "y": 1,
+  "w": 437,
+  "h": 452
+ },
+ "images/levels/eagle-artillery_7.png": {
+  "x": 3,
+  "y": 2,
+  "w": 242,
+  "h": 217
+ },
+ "images/levels/hero-hall_12.png": {
+  "x": 3,
+  "y": 0,
+  "w": 478,
+  "h": 508
+ },
+ "images/levels/monolith_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 346,
+  "h": 459
+ },
+ "images/levels/mortar_18.png": {
+  "x": 0,
+  "y": 19,
+  "w": 296,
+  "h": 277
+ },
+ "images/levels/multi-archer-tower_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 276,
+  "h": 341
+ },
+ "images/levels/multi-gear-tower_1_long-range.png": {
+  "x": 0,
+  "y": 0,
+  "w": 348,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_1_fast-attack.png": {
+  "x": 0,
+  "y": 0,
+  "w": 448,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_2_long-range.png": {
+  "x": 0,
+  "y": 0,
+  "w": 348,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_2_fast-attack.png": {
+  "x": 0,
+  "y": 0,
+  "w": 448,
+  "h": 512
+ },
+ "images/levels/seeking-air-mine_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 171
+ },
+ "images/levels/skeleton-trap_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 419,
+  "h": 512
+ },
+ "images/levels/spell-factory_8.png": {
+  "x": 5,
+  "y": 21,
+  "w": 214,
+  "h": 193
+ },
+ "images/levels/spell-tower_4.png": {
+  "x": 3,
+  "y": 14,
+  "w": 453,
+  "h": 497
+ },
+ "images/levels/spring-trap_6.png": {
+  "x": 2,
+  "y": 3,
+  "w": 66,
+  "h": 55
+ },
+ "images/levels/spring-trap_7.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_9.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_11.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_13.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
  }
 }
