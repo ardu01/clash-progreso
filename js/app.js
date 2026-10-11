@@ -1,5 +1,5 @@
 import {
-  CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
+  CATEGORIES, HERO_ORDER, ROSTER, VILLAGE_KEYS, analyze, averagePct, builderStatus, categoryItems,
   capsFichaLines, categoryUnlock, catFoot, helpersOf, indexCaps, initials,
   itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, townHallLevel, upgradesOf,
 } from "./progress.js";
@@ -12,7 +12,7 @@ import {
   duplicateMsg, foreignMsg, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
   diffExports, planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
-import { allExports, clearExports, deleteTag, latestByTag, latestCopyAt, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
+import { allExports, clearExports, deleteTag, guardarDocumentos, guardarRecuperacion, guardarSchema, latestByTag, latestCopyAt, leerDocumentos, leerSchema, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
   addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal,
 } from "./roster.js";
@@ -35,6 +35,13 @@ import { normalizeProvisional, reconcileMessage, reconcileProvisionals, togglePr
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
 import { exportFacts } from "./perfil.js";
 import { accionTab } from "./nav.js";
+import { claveRoadmap, trasImportar } from "./gancho.js";
+import { prepararMigracion, verificarDocumentos, volcadoLiteral } from "./migracion.js";
+import { docDe, docVacio, entradaDeImportacion, reducir, sumarDiario } from "./operaciones.js";
+import { avisoTrasImportar } from "./replan.js";
+import { SUEÑO_DEFECTO } from "./prioridades.js";
+import { htmlOperaciones } from "./ui-operaciones.js";
+import { cargarFuentes, costeSubirTh } from "./fuentes.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
@@ -116,6 +123,9 @@ const state = {
   eqFiltro: loadEqFiltro(),
   eqElegidos: loadEqElegidos(),
   copyAt: null,
+  datosFallo: false,
+  fuenteIdb: false,
+  documentos: [],
   added: [],
   flashTags: new Set(),
   scrollAdded: false,
@@ -162,9 +172,11 @@ function loadStaleDays() {
 }
 
 function loadSleep() {
+  const raw = localStorage.getItem("cp-sueno");
+  if (raw == null) return { desde: SUEÑO_DEFECTO.desde, hasta: SUEÑO_DEFECTO.hasta };
   try {
-    const saved = JSON.parse(localStorage.getItem("cp-sueno") || "null");
-    if (!saved || typeof saved !== "object") return { desde: "", hasta: "" };
+    const saved = JSON.parse(raw);
+    if (!saved || typeof saved !== "object") return { desde: SUEÑO_DEFECTO.desde, hasta: SUEÑO_DEFECTO.hasta };
     return { desde: String(saved.desde || ""), hasta: String(saved.hasta || "") };
   } catch {
     return { desde: "", hasta: "" };
@@ -224,6 +236,7 @@ function route() {
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
   if (name === "perfil") return { name: "perfil", tag: parts[1] ? "#" + parts[1] : null, cat: null };
+  if (name === "operaciones") return { name: "operaciones", tag: null, cat: null, sub: parts[1] || "hub" };
   if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
@@ -234,6 +247,7 @@ function baseTab(r) {
   if (r.name === "mejoras" || r.name === "plan" || r.name === "equipo") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
   if (r.name === "agenda") return "agenda";
+  if (r.name === "operaciones") return "operaciones";
   return "inicio";
 }
 
@@ -252,6 +266,7 @@ const ICON = {
   mejoras: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5"/><path d="M14 8.5V14l3.5 2.5"/></svg>`,
   analisis: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`,
   agenda: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="6" width="20" height="18" rx="3"/><path d="M4 11h20M9 3v5M19 3v5"/></svg>`,
+  operaciones: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4h16v20H6z"/><path d="M10 10h8M10 14h8M10 18h5"/></svg>`,
   ajustes: `<svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="14" cy="14" r="4"/><path d="M14 3v4M14 21v4M3 14h4M21 14h4M6.2 6.2l2.8 2.8M19 19l2.8 2.8M6.2 21.8 9 19M19 9l2.8-2.8"/></svg>`,
   choza: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 14 14 5l11 9"/><path d="M6 12v11h16V12"/><path d="M11 23v-5h6v5"/></svg>`,
   objetivo: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5.5"/><circle cx="14" cy="14" r="1.5"/></svg>`,
@@ -314,6 +329,7 @@ function readStoredRoster() {
 
 function persistRoster() {
   localStorage.setItem(ROSTER_KEY, JSON.stringify({ version: 2, accounts: state.accounts }));
+  espejarUsuario();
 }
 
 function viewSnapshot(tag) {
@@ -694,19 +710,26 @@ function applyTheme(theme) {
 
 function savePlanes() {
   localStorage.setItem("cp-planes", JSON.stringify(state.planes));
+  espejarUsuario();
 }
 
 function saveProvisionals() {
   localStorage.setItem("cp-provisional", JSON.stringify(state.provisionales));
+  espejarUsuario();
 }
 
-let roadsThisPaint = null;
+const roadCache = new Map();
 
 function cachedRoad(key, make) {
-  if (!roadsThisPaint) return make();
-  if (roadsThisPaint.has(key)) return roadsThisPaint.get(key);
+  if (roadCache.has(key)) return roadCache.get(key);
   const road = make();
-  roadsThisPaint.set(key, road);
+  roadCache.set(key, road);
+  const minuto = String(Math.floor(state.now / 60000));
+  if (roadCache.size > 80) {
+    for (const k of [...roadCache.keys()]) {
+      if (!String(k).endsWith("\0" + minuto)) roadCache.delete(k);
+    }
+  }
   return road;
 }
 
@@ -714,7 +737,14 @@ function accountRoadmap(meta) {
   const exp = expOf(meta.tag);
   if (!exp || !state.index) return null;
   const raw = state.planes[meta.tag];
-  return cachedRoad(meta.tag + "\0" + state.now, () => buildRoadmap({
+  const key = claveRoadmap({
+    tag: meta.tag,
+    timestamp: exp.timestamp,
+    plan: raw || null,
+    sueno: state.sleep,
+    now: state.now,
+  });
+  return cachedRoad(key, () => buildRoadmap({
     exp,
     index: state.index,
     tag: meta.tag,
@@ -1288,6 +1318,7 @@ function renderRanking() {
 function setAccountPlan(tag, patch) {
   const cur = state.planes[tag] ? normalizePlanStored(state.planes[tag]) : defaultPlan();
   state.planes = { ...state.planes, [tag]: { ...cur, ...patch } };
+  roadCache.clear();
   savePlanes();
 }
 
@@ -1517,6 +1548,8 @@ function activeSleep() {
 function saveSleep(desde, hasta) {
   state.sleep = { desde: desde || "", hasta: hasta || "" };
   localStorage.setItem("cp-sueno", JSON.stringify(state.sleep));
+  roadCache.clear();
+  espejarUsuario();
 }
 
 function sleepCard() {
@@ -2120,14 +2153,9 @@ async function persistirPegado(save) {
     state.provisionales = rec.provisionales;
   }
   saveProvisionals();
+  for (const tag of seen) aplicarGancho(tag);
   try {
-    await putCopy(buildBackup({
-      accounts: state.accounts,
-      exports: state.rows,
-      planes: state.planes,
-      provisionales: state.provisionales,
-      version: APP_VERSION,
-    }));
+    await putCopy(buildBackup(camposCopia()));
     state.copyAt = Date.now();
   } catch { /* la copia automática no bloquea el guardado */ }
   armFlash(save.map((it) => it.value.tag));
@@ -2138,6 +2166,7 @@ async function persistirPegado(save) {
     if (!after || after.timestamp !== it.value.timestamp) continue;
     stats.set(it.value.tag, resultadoDePegado(before.get(it.value.tag), after));
   }
+  anotarCambios(seen, before);
   return stats;
 }
 
@@ -2178,17 +2207,13 @@ async function savePlan(plan, opts = {}) {
     avisos.push(...rec.avisos);
   }
   saveProvisionals();
+  for (const tag of seenTags) aplicarGancho(tag);
   try {
-    await putCopy(buildBackup({
-      accounts: state.accounts,
-      exports: state.rows,
-      planes: state.planes,
-      provisionales: state.provisionales,
-      version: APP_VERSION,
-    }));
+    await putCopy(buildBackup(camposCopia()));
     state.copyAt = Date.now();
   } catch { /* la copia automática no bloquea el guardado */ }
   armFlash(plan.tags);
+  anotarCambios(seenTags, before);
   const known = plan.save.filter((it) => it.kind !== "new");
   const base = known.length ? successToast(known) : (plan.count === 1 ? "1 cuenta importada" : `${plan.count} cuentas importadas`);
   const extra = reconcileMessage(avisos);
@@ -2256,7 +2281,7 @@ async function toggleNotify() {
 }
 
 function navbar(r) {
-  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil", actualizar: "Actualizar" };
+  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil", actualizar: "Actualizar", operaciones: "Operaciones" };
   let lead = "";
   let trail = "";
   let title = titles[r.name] || "";
@@ -2285,6 +2310,10 @@ function navbar(r) {
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
+  } else if (r.name === "operaciones" && r.sub && r.sub !== "hub") {
+    title = "Operaciones";
+    lead = `<button class="btn-text" data-go="#/operaciones">${BACK} Operaciones</button>`;
+    collapsed = "true";
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
     title = cat ? cat.label : "Detalle";
@@ -2309,6 +2338,7 @@ function tabbar(r) {
     ${item("mejoras", "#/mejoras", "Mejoras", ICON.mejoras)}
     ${item("analisis", "#/ranking", "Análisis", ICON.analisis)}
     ${item("agenda", "#/agenda", "Agenda", ICON.agenda)}
+    ${item("operaciones", "#/operaciones", "Operaciones", ICON.operaciones)}
   </nav>`;
 }
 
@@ -3928,14 +3958,7 @@ async function removeAdded(tag) {
 
 async function exportBackup() {
   const now = Date.now();
-  const payload = buildBackup({
-    accounts: state.accounts,
-    exports: state.rows,
-    planes: state.planes,
-    provisionales: state.provisionales,
-    now,
-    version: APP_VERSION,
-  });
+  const payload = buildBackup(camposCopia({ now }));
   const name = backupFilename(now);
   const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
   const file = new File([blob], name, { type: "application/json" });
@@ -3973,6 +3996,8 @@ async function restoreBackupText(text) {
     exports: state.rows,
     planes: state.planes,
     provisionales: state.provisionales,
+    sueno: state.sleep,
+    documentos: state.documentos,
   }, data);
   try {
     for (const exp of merged.exports) {
@@ -3986,8 +4011,11 @@ async function restoreBackupText(text) {
   state.accounts = merged.accounts;
   state.planes = merged.planes || {};
   state.provisionales = merged.provisionales || [];
+  if (merged.sueno) state.sleep = { desde: merged.sueno.desde || "", hasta: merged.sueno.hasta || "" };
+  if (Array.isArray(merged.documentos)) state.documentos = merged.documentos;
   savePlanes();
   saveProvisionals();
+  saveSleep(state.sleep.desde, state.sleep.hasta);
   persistRoster();
   state.rows = await allExports();
   state.latest = latestByTag(state.rows);
@@ -4380,6 +4408,7 @@ function screenFor(r) {
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
   if (r.name === "actualizar") return renderActualizar();
+  if (r.name === "operaciones") return renderOperaciones(r);
   return renderInicio();
 }
 
@@ -4476,7 +4505,8 @@ function renderCopia() {
   return `<h1 class="large-title">Copia</h1>
     <p class="large-sub">En este iPhone</p>
     <div class="section"><div class="card">
-      <div class="section-head"><h2 class="t-headline">Copia</h2>${infoBtn(`Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial. Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú. La copia incluye las marcas provisionales del plan y la meta de cada cuenta.`)}</div>
+      <div class="section-head"><h2 class="t-headline">Copia</h2>${infoBtn(`Un JSON con las ${n} cuentas y las ${hist} exportaciones del historial. Restaurar fusiona por tag y fecha de exportación: no borra nada y conserva todo el historial. Nada sale del iPhone salvo el archivo que guardes tú. La copia incluye las marcas provisionales del plan, la meta de cada cuenta y el horario de sueño.`)}</div>
+      ${state.datosFallo ? `<p class="t-footnote c-2">No se pudo usar el almacén del iPhone. Los datos siguen en este teléfono.</p>` : ""}
       <p class="t-title2 num">${n}</p>
       <p class="t-footnote c-2">${esc(thLine)}</p>
       <p class="t-footnote c-2">Última importación: ${esc(lastImportLabel())}</p>
@@ -4801,7 +4831,6 @@ function abrirFuera(ev, enlace) {
 }
 
 function render() {
-  roadsThisPaint = new Map();
   const r = route();
   if (r.name === "importar") {
     if (!state.importUi.active) {
@@ -4851,7 +4880,6 @@ function render() {
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
   }
   armNotices();
-  roadsThisPaint = null;
 }
 
 function destinoDelToque(ev) {
@@ -4889,6 +4917,12 @@ function bind(r) {
   try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const op = origen.closest("[data-op]");
+    if (op) {
+      ev.preventDefault();
+      aplicarOperacion(op.dataset.op, op.dataset.arg || "");
+      return;
+    }
     const info = origen.closest("[data-info]");
     if (info) {
       ev.preventDefault();
@@ -5575,6 +5609,202 @@ async function purgeImages() {
   render();
 }
 
+function camposCopia(extra = {}) {
+  return {
+    accounts: state.accounts,
+    exports: state.rows,
+    planes: state.planes,
+    provisionales: state.provisionales,
+    sueno: state.sleep,
+    documentos: state.documentos,
+    version: APP_VERSION,
+    ...extra,
+  };
+}
+
+function docOp() {
+  const found = (state.documentos || []).find((d) => d && d.id === "operaciones");
+  if (found) return docDe(found);
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-operaciones") || "null");
+    if (raw && raw.id === "operaciones") return docDe(raw);
+  } catch { /* vacío */ }
+  return docVacio();
+}
+
+function guardarOp(doc) {
+  const limpio = docDe(doc);
+  const rest = (state.documentos || []).filter((d) => d && d.id !== "operaciones" && d.tipo !== "sesion");
+  const sesion = limpio.sesion && !limpio.sesion.cerrada ? { ...limpio.sesion, tipo: "sesion" } : null;
+  state.documentos = rest.concat([limpio]).concat(sesion ? [sesion] : []);
+  try { localStorage.setItem("cp-operaciones", JSON.stringify(limpio)); } catch { /* el teléfono no admite más */ }
+  espejarUsuario();
+}
+
+function espejarUsuario() {
+  if (!state.fuenteIdb) return;
+  const docs = [
+    { id: "roster", tipo: "roster", version: 2, accounts: state.accounts },
+    { id: "planes", tipo: "planes", planes: state.planes },
+    { id: "provisionales", tipo: "provisionales", marcas: state.provisionales },
+    { id: "sueno", tipo: "sueno", desde: state.sleep.desde || "", hasta: state.sleep.hasta || "" },
+  ].concat((state.documentos || []).filter((d) => d && !["roster", "planes", "provisionales", "sueno"].includes(d.id)));
+  guardarDocumentos(docs).catch(() => { state.datosFallo = true; });
+}
+
+function aplicarGancho(tag) {
+  const next = trasImportar({ tag, documentos: state.documentos, now: state.now });
+  state.documentos = next.documentos;
+  if (!next.cambiados) return;
+  const doc = docOp();
+  if (doc.sesion) doc.sesion = { ...doc.sesion, recalcular: state.now };
+  const meta = accountByTag(tag);
+  doc.aviso = avisoTrasImportar(tag, meta && meta.nombre);
+  guardarOp(doc);
+}
+
+function anotarCambios(tags, before) {
+  const entradas = [];
+  for (const tag of tags) {
+    const meta = accountByTag(tag);
+    const after = state.latest.get(tag);
+    const prev = before.get(tag);
+    const res = resultadoDePegado(prev, after);
+    entradas.push(entradaDeImportacion({
+      tag,
+      nombre: meta && meta.nombre,
+      at: state.now,
+      niveles: res.niveles,
+      mejoras: res.mejoras,
+      thAntes: prev ? townHallLevel(prev) : null,
+      thDespues: after ? townHallLevel(after) : null,
+    }));
+  }
+  if (!entradas.length) return;
+  guardarOp(sumarDiario(docOp(), entradas));
+}
+
+function fichasOperacion() {
+  return allAccounts().map((meta) => {
+    const exp = expOf(meta.tag);
+    const view = exp && state.index ? viewOf(meta.tag) : null;
+    const colas = exp ? estadoColas(exp, state.now, { staleMs: staleLimit(), th: view && view.th }) : null;
+    const cats = {};
+    if (view) {
+      for (const key of VILLAGE_KEYS) cats[key] = view.cats[key] ? view.cats[key].pct : null;
+    }
+    const pairs = exp ? pairsOf(meta.tag) : [];
+    return {
+      tag: meta.tag,
+      nombre: meta.nombre,
+      principal: !!meta.principal,
+      th: view ? view.th : null,
+      media: view ? view.media : null,
+      cats,
+      libreAccion: colas ? colas.builders.libresAccion : 0,
+      labLibre: !!(colas && colas.laboratorio.libreAccion),
+      desactualizada: colas ? !!colas.desactualizada : !exp,
+      heroesConTimer: !!(exp && meta.tag !== HEROES_FUERA && (exp.heroes || []).some((h) => h && h.timer != null)),
+      muestras: pairs.length,
+      ritmo: weeklyPace(pairs).ritmo,
+      planModo: state.planes[meta.tag] && state.planes[meta.tag].modo,
+    };
+  });
+}
+
+function renderOperaciones(r) {
+  return htmlOperaciones({
+    sub: r.sub || "hub",
+    now: state.now,
+    cuentas: fichasOperacion(),
+    doc: docOp(),
+  });
+}
+
+function aplicarOperacion(op, arg) {
+  let valor = arg;
+  if (op === "nota") {
+    const campo = document.querySelector("[data-op-nota]");
+    valor = campo ? campo.value : "";
+  }
+  const cuentas = fichasOperacion();
+  const foco = cuentas.find((cuenta) => cuenta.tag === docOp().tagFoco) || cuentas[0];
+  const next = reducir(docOp(), op, valor, {
+    cuentas,
+    now: state.now,
+    costeTh: foco ? costeSubirTh(foco.th) : null,
+  });
+  if (next.plan) setAccountPlan(next.plan.tag, next.plan.patch);
+  guardarOp(next.doc);
+  if (next.toast) showToast("ok", next.toast);
+  render();
+}
+
+function tomarFuente(documentos) {
+  const roster = documentos.find((d) => d.id === "roster");
+  const planes = documentos.find((d) => d.id === "planes");
+  const marcas = documentos.find((d) => d.id === "provisionales");
+  const sueno = documentos.find((d) => d.id === "sueno");
+  if (roster && Array.isArray(roster.accounts)) state.accounts = roster.accounts;
+  if (planes && planes.planes && typeof planes.planes === "object") state.planes = planes.planes;
+  if (marcas && Array.isArray(marcas.marcas)) state.provisionales = marcas.marcas;
+  if (sueno) state.sleep = { desde: sueno.desde || "", hasta: sueno.hasta || "" };
+  state.documentos = documentos.filter((d) => d.id !== "roster" && d.id !== "planes" && d.id !== "provisionales" && d.id !== "sueno");
+  localStorage.setItem(ROSTER_KEY, JSON.stringify({ version: 2, accounts: state.accounts }));
+  localStorage.setItem("cp-planes", JSON.stringify(state.planes));
+  localStorage.setItem("cp-provisional", JSON.stringify(state.provisionales));
+  localStorage.setItem("cp-sueno", JSON.stringify(state.sleep));
+  state.fuenteIdb = true;
+}
+
+async function aplicarMigracion() {
+  try {
+    const schema = await leerSchema();
+    if (schema && schema.version === 3 && schema.migrado === true) {
+      const documentos = await leerDocumentos();
+      const roster = documentos.find((d) => d.id === "roster");
+      const planes = documentos.find((d) => d.id === "planes");
+      const prov = documentos.find((d) => d.id === "provisionales");
+      const ok = verificarDocumentos(documentos, {
+        cuentas: roster && Array.isArray(roster.accounts) ? roster.accounts.length : -1,
+        planes: planes && planes.planes ? Object.keys(planes.planes).length : -1,
+        marcas: prov && Array.isArray(prov.marcas) ? prov.marcas.length : -1,
+      });
+      if (!ok) { state.datosFallo = true; return; }
+      tomarFuente(documentos);
+      return;
+    }
+    const volcado = volcadoLiteral(localStorage);
+    if (!volcado.ok) { state.datosFallo = true; return; }
+    const plan = prepararMigracion({
+      schema,
+      claves: volcado.claves,
+      added: state.added,
+      exportTags: [...new Set(state.rows.map((r) => r.tag))],
+      seeded: localStorage.getItem("cp-seeded"),
+    });
+    await guardarRecuperacion({
+      id: "volcado-" + Date.now(),
+      at: Date.now(),
+      version: APP_VERSION,
+      claves: plan.recuperacion.claves,
+    });
+    if (!plan.migrado) {
+      await guardarSchema({ id: "actual", version: 3, migrado: false });
+      return;
+    }
+    await guardarDocumentos(plan.documentos.concat(state.documentos || []));
+    const escritos = await leerDocumentos();
+    const ok = verificarDocumentos(escritos, plan);
+    await guardarSchema({ id: "actual", version: 3, migrado: ok });
+    if (!ok) return;
+    state.documentos = escritos.filter((d) => d.id !== "roster" && d.id !== "planes" && d.id !== "provisionales" && d.id !== "sueno");
+    state.fuenteIdb = true;
+  } catch {
+    state.datosFallo = true;
+  }
+}
+
 async function boot() {
   applyTheme(state.theme);
   state.added = loadAdded();
@@ -5601,6 +5831,8 @@ async function boot() {
   });
   state.accounts = migrated.accounts;
   persistRoster();
+  await aplicarMigracion();
+  cargarFuentes();
   try { state.copyAt = await latestCopyAt(); } catch { state.copyAt = null; }
   state.ready = true;
   const lote = loteTextFromUrl(location.href);

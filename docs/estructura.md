@@ -11,6 +11,7 @@ Cada pestaña de la barra hace una cosa. Ajustes y Copia no están en la barra: 
 | Mejoras | Plan, rush, costes y equipamiento | `#/mejoras`, `#/progreso/TAG/plan`, `#/equipo`, `#/equipo/TAG` |
 | Análisis | Gráficos, ranking y comparativa | `#/ranking`, `#/graficos` |
 | Agenda | El tiempo | `#/agenda` |
+| Operaciones | Sesión, mantenimiento, simulación, gemelos, equilibrio, predicción, guerras y diario | `#/operaciones` |
 | Aparte | Copia, tema, acerca de | `#/copia` (engranaje de Inicio) |
 
 ## Qué va en cada sitio

@@ -6,9 +6,36 @@ export function backupFilename(now = Date.now()) {
   return `clash-progreso-copia-${madridDayKey(now)}.json`;
 }
 
-export function buildBackup({ accounts, exports, planes, provisionales, now = Date.now(), version = "3.0.0" }) {
+function reloj(s) {
+  if (!s || typeof s !== "object") return { desde: "", hasta: "" };
+  return { desde: String(s.desde || ""), hasta: String(s.hasta || "") };
+}
+
+function mergeSueno(local, incoming) {
+  const a = reloj(local);
+  if (a.desde || a.hasta) return a;
+  return reloj(incoming);
+}
+
+function mergeDocumentos(local, incoming) {
+  const out = [];
+  const seen = new Set();
+  const push = (raw) => {
+    if (!raw || typeof raw !== "object") return;
+    const id = raw.id || [raw.tipo || "", raw.tag || "", raw.creada || raw.en || ""].join("\0");
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    out.push({ ...raw, id });
+  };
+  for (const raw of local || []) push(raw);
+  for (const raw of incoming || []) push(raw);
+  return out;
+}
+
+export function buildBackup({ accounts, exports, planes, provisionales, sueno, documentos, now = Date.now(), version = "3.0.0" }) {
   return {
     app: "clash-progreso",
+    schema: 4,
     version,
     exportedAt: new Date(now).toISOString(),
     accounts: (accounts || []).map((a) => ({
@@ -24,6 +51,8 @@ export function buildBackup({ accounts, exports, planes, provisionales, now = Da
     exports: (exports || []).map((exp) => ({ ...exp })),
     planes: planes || {},
     provisionales: (provisionales || []).map((p) => ({ ...p })),
+    sueno: reloj(sueno),
+    documentos: mergeDocumentos(documentos, []),
   };
 }
 
@@ -91,6 +120,8 @@ export function mergeBackup(current, incoming) {
     addedAccounts,
     planes: mergePlanes(current.planes, incoming && incoming.planes),
     provisionales: mergeProvisionals(current.provisionales, incoming && incoming.provisionales),
+    sueno: mergeSueno(current.sueno, incoming && incoming.sueno),
+    documentos: mergeDocumentos(current.documentos, incoming && incoming.documentos),
   };
 }
 
