@@ -1,6 +1,6 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
-  capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
+  capsFichaLines, categoryUnlock, catFoot, helpersOf, indexCaps, initials,
   itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
@@ -21,7 +21,7 @@ import { accountVisible, dayInRange } from "./range.js";
 import { compareAccounts, fleetSnapshot, rankAccounts } from "./fleet.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
-import { COST_SOURCE, COST_URL, categoryUses, equipmentPieces, piecesOf, remainingCost, usesResource } from "./costs.js";
+import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
 import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
@@ -31,6 +31,7 @@ import {
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
+import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -99,6 +100,9 @@ const state = {
   staleDays: loadStaleDays(),
   rosterQ: "",
   levelKind: localStorage.getItem("cp-level-kind") || "th",
+  eqVista: localStorage.getItem("cp-eq-vista") === "flota" ? "flota" : "cuenta",
+  eqFiltro: loadEqFiltro(),
+  eqElegidos: loadEqElegidos(),
   copyAt: null,
   added: [],
   flashTags: new Set(),
@@ -152,6 +156,33 @@ function loadSleep() {
     return { desde: String(saved.desde || ""), hasta: String(saved.hasta || "") };
   } catch {
     return { desde: "", hasta: "" };
+  }
+}
+
+function loadEqFiltro() {
+  const base = { rareza: "todos", heroe: "todos", bloqueados: false, ocultar: true };
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-eq-filtro") || "{}");
+    const rareza = ["todos", "Common", "Epic"].includes(raw.rareza) ? raw.rareza : "todos";
+    const heroe = typeof raw.heroe === "string" && raw.heroe ? raw.heroe : "todos";
+    return { rareza, heroe, bloqueados: raw.bloqueados === true, ocultar: raw.ocultar !== false };
+  } catch {
+    return base;
+  }
+}
+
+function loadEqElegidos() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-eq-elegidos") || "{}");
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const out = {};
+    for (const [tag, list] of Object.entries(raw)) {
+      if (!tag.startsWith("#") || !Array.isArray(list)) continue;
+      out[tag] = list.map(String);
+    }
+    return out;
+  } catch {
+    return {};
   }
 }
 
@@ -1819,7 +1850,10 @@ function navbar(r) {
     trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
   } else if (r.name === "plan" || r.name === "historial" || r.name === "equipo") {
     title = r.name === "plan" ? "Plan" : r.name === "historial" ? "Historial" : "Equipamiento";
-    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
+    const backTag = r.tag || state.selected;
+    lead = backTag
+      ? `<button class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
+      : `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
@@ -2058,22 +2092,19 @@ function renderProgreso(tag) {
 
 function equipoSection(exp, meta) {
   const view = viewOf(meta.tag);
-  const pieces = equipmentPieces(exp, state.index, view.th);
-  const bag = remainingCost(pieces).total;
-  const ores = [
-    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
-    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
-    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
-  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
+  const rows = equipmentRows(exp, state.index, view.th);
+  const bag = oreTotal(rows);
+  const ores = `${fmtRes(bag.brillante)} brillante · ${fmtRes(bag.reluciente)} reluciente · ${fmtRes(bag.estrellada)} estrellada`;
   const row = view.cats.equipamiento;
   const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
+  const conTope = rows.filter((p) => !p.bloqueado).length;
   return `<div class="section"><div class="section-header"><span>Equipamiento</span></div>
     <ul class="list list--tiles"><li><a class="row row--tile" href="#/equipo/${meta.tag.slice(1)}">
       <span class="row__main"><span class="row__title">Piezas de héroe</span>
-        <span class="row__sub">${pieces.length} piezas · ${esc(pct)} · aparte de la aldea</span>
+        <span class="row__sub">${conTope} con tope · ${esc(pct)} · aparte de la aldea</span>
         <span class="row__sub">${esc(ores)}</span>
       </span>${CHEV}</a></li></ul>
-    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea.</p></div>`;
+    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea. El total de la flota está en Equipamiento.</p></div>`;
 }
 
 function rushCard(meta) {
@@ -2263,48 +2294,75 @@ function heroesCard(a) {
   return `<div class="section"><div class="section-header"><span>Héroes</span></div><ul class="list">${rows}</ul></div>`;
 }
 
-function equipBlock(exp, meta) {
-  const a = viewOf(meta.tag);
-  const pieces = equipmentView(exp, state.index, a.th);
-  const withImg = pieces.filter((p) => p.meta && (p.meta.estado === "ok" || p.meta.estado === "id_deducido")).length;
-  const missing = pieces.filter((p) => p.meta && p.meta.estado === "faltante").length;
-  const unk = pieces.filter((p) => p.unknown).length;
-  const lvl1 = pieces.filter((p) => p.lvl <= 1).length;
-  const row = a.cats.equipamiento;
-  const groups = new Map();
-  for (const id of HERO_ORDER) groups.set(state.index.items[id].nombre_en, []);
-  groups.set("__unk", []);
-  for (const p of pieces) {
-    const key = p.heroe && groups.has(p.heroe) ? p.heroe : "__unk";
-    groups.get(key).push(p);
+function eqHeroes() {
+  return HERO_ORDER.filter((id) => state.index.items[id]).map((id) => ({
+    id,
+    nombreEn: state.index.items[id].nombre_en,
+    nombre: nameOf(id) || state.index.items[id].nombre_en,
+  }));
+}
+
+function elegidosDe(tag) {
+  const list = state.eqElegidos[tag];
+  return Array.isArray(list) ? list : [];
+}
+
+function oreTiles(bag) {
+  const cell = (n, label) => `<div><b class="num">${fmtRes(n)}</b><span>${label}</span></div>`;
+  return `<div class="eq-ores">${cell(bag.brillante, "Brillante")}${cell(bag.reluciente, "Reluciente")}${cell(bag.estrellada, "Estrellada")}</div>`;
+}
+
+function oreCard(bag, note) {
+  const falta = bag.sinCoste
+    ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 nivel no tiene fila en la fuente y no cuenta como cero." : `${bag.sinCoste} niveles no tienen fila en la fuente y no cuentan como cero.`}</p>`
+    : "";
+  return `<div class="section"><div class="card eq-total">
+      <h2 class="t-headline">Total para maxear todo el equipamiento</h2>
+      ${oreTiles(bag)}
+      <p class="t-footnote c-2">${esc(note)} Este total no cambia con los filtros.</p>
+      ${falta}
+    </div></div>`;
+}
+
+function eqLevelRows(row) {
+  if (!row.pendientes.length) return "";
+  const lis = row.pendientes.map((step) => {
+    const cost = step.mena
+      ? `${fmtRes(step.mena.brillante)} brillante · ${fmtRes(step.mena.reluciente)} reluciente · ${fmtRes(step.mena.estrellada)} estrellada`
+      : "Sin coste en la fuente";
+    return `<li class="eq-lv"><b class="num">Nv ${step.nivel}</b><span>${esc(cost)}</span></li>`;
+  }).join("");
+  return `<ul class="eq-lvs">${lis}</ul>`;
+}
+
+function eqPiece(row, tag, elegidos) {
+  const elegido = elegidos.includes(row.id);
+  const rare = rarezaEs(row.rareza);
+  let estado;
+  if (row.bloqueado) {
+    const donde = row.unlockTh != null ? `disponible en TH${row.unlockTh}` : "sin tope en este ayuntamiento";
+    estado = row.lvl != null ? `Nv ${row.lvl} · bloqueado · ${donde}` : `Bloqueado · ${donde}`;
+  } else if (row.overMax) {
+    estado = `Nv ${row.lvl} · máximo desactualizado (máx. ${row.max})`;
+  } else if (row.max != null && row.lvl >= row.max) {
+    estado = `Nv ${row.lvl} / ${row.max} · al máximo`;
+  } else {
+    const n = row.pendientes.length;
+    estado = `Nv ${row.lvl} / ${row.max} · ${n === 1 ? "1 nivel restante" : `${n} niveles restantes`}`;
   }
-  const cards = [];
-  for (const [key, list] of groups) {
-    if (!list.length && key === "__unk") continue;
-    if (!list.length) continue;
-    list.sort((x, y) => {
-      if (x.unknown !== y.unknown) return x.unknown ? 1 : -1;
-      if (y.lvl !== x.lvl) return y.lvl - x.lvl;
-      return x.id < y.id ? -1 : 1;
-    });
-    const heroId = HERO_ORDER.find((id) => state.index.items[id].nombre_en === key);
-    const title = heroId ? (nameOf(heroId) || key) : "Héroe sin identificar";
-    const heroRow = heroId ? a.heroes.find((h) => h.id === heroId) : null;
-    const head = heroId ? thumb(heroId, { size: 28, lvl: heroRow ? heroRow.lvl : null }) : "";
-    const cells = list.map((p) => eqCell(p)).join("");
-    cards.push(`<section class="card eq-group"><header class="eq-group__hdr">${head}<h3>${esc(title)}</h3><span class="num">${list.length} piezas</span></header><ul class="eq-grid">${cells}</ul></section>`);
-  }
-  const maxed = row.num != null && row.den && row.num >= row.den;
-  return `<div class="section"><div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="t-headline" style="margin:0">Equipamiento</h2><span class="t-headline num">${pieces.length} piezas</span></div>
-      <p class="t-footnote c-2">${withImg} con imagen · ${missing} sin imagen · ${unk} sin identificar · ${lvl1} en nivel 1</p>
-      <div class="prog cat-equipamiento">
-        <span>Progreso</span><span class="prog__pct num${maxed ? " is-max" : ""}">${fmtPct(row.pct)}</span>
-        ${barHtml("equipamiento", a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { label: `Equipamiento ${fmtPct(row.pct)}` })}
-        <span class="prog__foot">El % no cuenta piezas en nivel 1 ni sin identificar</span>
+  const aria = [row.nombre, rare, estado, elegido ? "elegida para ocultar" : ""].filter(Boolean).join(", ");
+  return `<li class="eq-piece${elegido ? " is-elegido" : ""}">
+      <div class="eq-piece__top">
+        <button type="button" class="eq-piece__open" data-ficha="${row.id}" data-lvl="${row.lvl == null ? "" : row.lvl}" data-max="${row.max || ""}"${row.unlockTh != null ? ` data-unlock="${row.unlockTh}"` : ""} aria-label="${esc(aria)}">
+          ${thumb(row.id, { size: 52, lvl: row.lvl })}
+          <span class="row__main"><span class="row__title">${esc(row.nombre)}${elegido ? ` <span class="chip chip--muted">Elegida</span>` : ""}</span>
+            <span class="row__sub">${esc([rare, estado].filter(Boolean).join(" · "))}</span>
+          </span>
+        </button>
+        <button type="button" class="btn-text" data-eq-elegir="${esc(row.id)}" data-eq-tag="${esc(tag)}" aria-pressed="${elegido ? "true" : "false"}">${elegido ? "Quitar" : "Elegir"}</button>
       </div>
-    </div></div>
-    <div class="section stack">${cards.join("")}</div>`;
+      ${eqLevelRows(row)}
+    </li>`;
 }
 
 function eqCell(p) {
@@ -3646,27 +3704,79 @@ function levelBody(list, kind) {
   return `<ul class="list">${rows}</ul>`;
 }
 
+function renderEquipoFlota(list) {
+  const accounts = list.map((meta) => {
+    const exp = expOf(meta.tag);
+    const view = viewOf(meta.tag);
+    return {
+      tag: meta.tag,
+      nombre: meta.nombre,
+      th: view ? view.th : null,
+      piezas: equipmentRows(exp, state.index, view && view.th),
+    };
+  });
+  const { total, filas } = fleetOre(accounts);
+  const rows = filas.map((row) => `<li><button type="button" class="row row--tile" data-eq-cuenta="${esc(row.tag)}">
+      <span class="row__main"><span class="row__title">${esc(row.nombre)}</span>
+        <span class="row__sub">TH${row.th == null ? "—" : row.th} · ${fmtRes(row.bag.brillante)} brillante · ${fmtRes(row.bag.reluciente)} reluciente · ${fmtRes(row.bag.estrellada)} estrellada</span>
+      </span>${CHEV}</button></li>`).join("");
+  return `${oreCard(total, `${filas.length === 1 ? "1 cuenta" : `${filas.length} cuentas`}. Cada una usa el tope de su ayuntamiento.`)}
+    <div class="section"><div class="section-header"><span>Por cuenta</span></div><ul class="list list--tiles">${rows}</ul>
+    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p></div>`;
+}
+
+function renderEquipoCuenta(meta, list) {
+  const exp = expOf(meta.tag);
+  const view = viewOf(meta.tag);
+  const rows = equipmentRows(exp, state.index, view.th);
+  const bag = oreTotal(rows);
+  const filtro = state.eqFiltro;
+  const elegidos = elegidosDe(meta.tag);
+  const visible = applyEqFilter(rows, filtro, elegidos);
+  const heroes = eqHeroes();
+  const groups = groupByHero(visible, heroes);
+  const options = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === meta.tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
+  const heroOpts = [`<option value="todos"${filtro.heroe === "todos" ? " selected" : ""}>Todos los héroes</option>`]
+    .concat(heroes.map((h) => `<option value="${esc(h.nombreEn)}"${filtro.heroe === h.nombreEn ? " selected" : ""}>${esc(h.nombre)}</option>`))
+    .join("");
+  const rare = (id, label) => `<button type="button" role="tab" data-eq-rareza="${id}" aria-selected="${(filtro.rareza || "todos") === id}">${label}</button>`;
+  const cards = groups.map((g) => {
+    const hero = heroes.find((h) => h.nombreEn === g.nombreEn);
+    const head = hero ? thumb(hero.id, { size: 28 }) : "";
+    const lis = g.piezas.map((p) => eqPiece(p, meta.tag, elegidos)).join("");
+    return `<section class="card eq-group"><header class="eq-group__hdr">${head}<h3>${esc(g.nombre)}</h3><span class="num">${g.piezas.length}</span></header><ul class="eq-pieces">${lis}</ul></section>`;
+  }).join("");
+  const empty = `<div class="card empty"><p class="t-title3">Nada con ese filtro</p><p class="t-subhead c-2">Prueba otro héroe o muestra los bloqueados.</p></div>`;
+  const ocultos = rows.filter((r) => elegidos.includes(r.id)).length;
+  const row = view.cats.equipamiento;
+  const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
+  return `<label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
+    ${oreCard(bag, `${meta.nombre} · TH${view.th}.`)}
+    <div class="section"><div class="section-header"><span>Filtros</span></div>
+      <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Rareza">${rare("todos", "Todos")}${rare("Common", "Común")}${rare("Epic", "Épica")}</div></div>
+      <label class="sort-label">Héroe <select data-eq-heroe aria-label="Héroe">${heroOpts}</select></label>
+      <div class="chip-row" role="toolbar" aria-label="Más filtros">
+        <button type="button" data-eq-bloqueados aria-pressed="${filtro.bloqueados ? "true" : "false"}">Mostrar bloqueados</button>
+        <button type="button" data-eq-ocultar aria-pressed="${filtro.ocultar ? "true" : "false"}">Ocultar elegidos</button>
+      </div>
+      <p class="section-footer">Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""}</p>
+    </div>
+    <div class="section stack">${cards || empty}</div>
+    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p>`;
+}
+
 function renderEquipo(tag) {
   const list = allAccounts().filter((meta) => expOf(meta.tag));
   const meta = (tag && accountByTag(tag)) || list.find((m) => m.tag === state.selected) || list[0];
   if (!meta || !expOf(meta.tag)) {
     return `<h1 class="large-title">Equipamiento</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p></div></div>`;
   }
-  const exp = expOf(meta.tag);
-  const view = viewOf(meta.tag);
-  const pieces = equipmentPieces(exp, state.index, view.th);
-  const bag = remainingCost(pieces).total;
-  const ores = [
-    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
-    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
-    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
-  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
-  const options = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === meta.tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
-  return `<h1 class="large-title">Equipamiento</h1>
-    <p class="large-sub">${esc(meta.nombre)} · este apartado no entra en la media, el plan ni los gráficos de la aldea.</p>
-    <label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
-    <div class="section"><div class="card"><h2 class="t-headline">Menas hasta el máximo de TH${view.th}</h2><p class="t-body">${esc(ores)}</p><p class="t-footnote c-2">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Solo si el libro trae el número.</p></div></div>
-    ${equipBlock(exp, meta)}`;
+  const vista = state.eqVista === "flota" ? "flota" : "cuenta";
+  const seg = (id, label) => `<button type="button" role="tab" data-eq-vista="${id}" aria-selected="${vista === id}">${label}</button>`;
+  const head = `<h1 class="large-title">Equipamiento</h1>
+    <p class="large-sub">Apartado de cada cuenta, separado de la aldea. No entra en la media, el plan ni los gráficos.</p>
+    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Alcance">${seg("cuenta", "Esta cuenta")}${seg("flota", "Flota")}</div></div>`;
+  return head + (vista === "flota" ? renderEquipoFlota(list) : renderEquipoCuenta(meta, list));
 }
 
 function screenFor(r) {
@@ -4088,6 +4198,54 @@ function render() {
 
 function bind(r) {
   document.getElementById("app").onclick = async (ev) => {
+    const eqVista = ev.target.closest("[data-eq-vista]");
+    if (eqVista) {
+      state.eqVista = eqVista.dataset.eqVista === "flota" ? "flota" : "cuenta";
+      localStorage.setItem("cp-eq-vista", state.eqVista);
+      render();
+      return;
+    }
+    const eqCuenta = ev.target.closest("[data-eq-cuenta]");
+    if (eqCuenta) {
+      state.eqVista = "cuenta";
+      localStorage.setItem("cp-eq-vista", "cuenta");
+      const dest = "#/equipo/" + eqCuenta.dataset.eqCuenta.slice(1);
+      if (location.hash === dest) render();
+      else location.hash = dest;
+      return;
+    }
+    const eqRareza = ev.target.closest("[data-eq-rareza]");
+    if (eqRareza) {
+      state.eqFiltro = { ...state.eqFiltro, rareza: eqRareza.dataset.eqRareza || "todos" };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-eq-bloqueados]")) {
+      state.eqFiltro = { ...state.eqFiltro, bloqueados: !state.eqFiltro.bloqueados };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-eq-ocultar]")) {
+      state.eqFiltro = { ...state.eqFiltro, ocultar: !state.eqFiltro.ocultar };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    const eqElegir = ev.target.closest("[data-eq-elegir]");
+    if (eqElegir) {
+      const tag = eqElegir.dataset.eqTag;
+      const id = eqElegir.dataset.eqElegir;
+      const cur = elegidosDe(tag).slice();
+      const at = cur.indexOf(id);
+      if (at >= 0) cur.splice(at, 1);
+      else cur.push(id);
+      state.eqElegidos = { ...state.eqElegidos, [tag]: cur };
+      localStorage.setItem("cp-eq-elegidos", JSON.stringify(state.eqElegidos));
+      render();
+      return;
+    }
     const go = ev.target.closest("[data-go]");
     if (go) {
       const dest = go.dataset.go;
@@ -4407,6 +4565,12 @@ function bind(r) {
   if (sel) sel.onchange = () => {
     const tail = sel.value.slice(1);
     location.hash = route().name === "equipo" ? "#/equipo/" + tail : "#/progreso/" + tail;
+  };
+  const eqHeroe = document.querySelector("[data-eq-heroe]");
+  if (eqHeroe) eqHeroe.onchange = () => {
+    state.eqFiltro = { ...state.eqFiltro, heroe: eqHeroe.value || "todos" };
+    localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+    render();
   };
   const sort = document.querySelector("[data-sort]");
   if (sort) sort.onchange = () => { state.sortMode = sort.value; localStorage.setItem("cp-sort", state.sortMode); render(); };

@@ -2127,3 +2127,9 @@ Dejan de usar la imagen de otro nivel: Torre Tesla 16 y 17, Ballesta 12 y 13, Ca
 La torre de supermagos (1000102) pasa a `ok` con los niveles 1 y 2. El PNG es el edificio, sin el mago encima. La torre multiusos sigue sin PNG. No se sustituye el ayuntamiento 17 ni el 18, y no se añade la aldea del constructor: siguen 12 tropas y 2 héroes.
 
 Nombres con el texto del juego en español (ClashKingAssets `ES.json`, commit b8f42a7): Escolta títere (90000042), Orbe oscuro (90000043), Copo de escarcha (90000050), Pistola aturdidora (90000056), Cabaña de B.O.B. (1000064) y Cohetes de defensa (1000012; el volcado y la comprobación del manifiesto lo dan así). L.A.S.S.I. (73000000) lleva el punto final. El nombre inglés de cada ficha no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.5)
+
+`APP_VERSION` es `3.1.5`, `SHELL_CACHE` es `cp-shell-v23` e `IMAGE_CACHE` sigue en `cp-img-v8`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+El apartado Equipamiento, dentro de Cuentas y fuera de la media de la aldea, muestra la tarjeta «Total para maxear todo el equipamiento» con mena brillante, reluciente y estrellada. La misma suma, cuenta por cuenta, está en Flota. Los filtros son Todos / Común / Épica, héroe, mostrar bloqueados y ocultar elegidos. Cada pieza lleva imagen, nivel actual y máximo, niveles restantes y el coste de mena de cada nivel pendiente. Una pieza bloqueada es la que no está en la exportación o no tiene tope en ese TH: no entra en el total y no se le inventa un nivel. Elegir una pieza solo la aparta de la lista; la exportación no dice cuál lleva puesta el héroe. Las tablas son las de la 3.1.3: 90000016 con mena estrellada y 90000059 sin ella. El % de las 11 cuentas no cambia.
