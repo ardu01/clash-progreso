@@ -32,6 +32,7 @@ import {
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
+import { exportFacts } from "./perfil.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -211,13 +212,14 @@ function route() {
   }
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
+  if (name === "perfil") return { name: "perfil", tag: parts[1] ? "#" + parts[1] : null, cat: null };
   if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
 
 function baseTab(r) {
   if (r.name === "inicio" || r.name === "ahora" || r.name === "copia") return "inicio";
-  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
   if (r.name === "mejoras") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
   if (r.name === "agenda" || r.name === "plan") return "agenda";
@@ -1836,7 +1838,7 @@ async function toggleNotify() {
 }
 
 function navbar(r) {
-  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento" };
+  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil" };
   let lead = "";
   let trail = "";
   let title = titles[r.name] || titles[tab] || "";
@@ -1848,6 +1850,10 @@ function navbar(r) {
     collapsed = "true";
   } else if (r.name === "roster" || r.name === "importar") {
     trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
+  } else if (r.name === "perfil") {
+    title = "Perfil";
+    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    collapsed = "true";
   } else if (r.name === "plan" || r.name === "historial" || r.name === "equipo") {
     title = r.name === "plan" ? "Plan" : r.name === "historial" ? "Historial" : "Equipamiento";
     const backTag = r.tag || state.selected;
@@ -1955,6 +1961,7 @@ function rowCuenta(meta) {
         <span class="row__title">${esc(meta.nombre)} ${mark}</span>
         <span class="row__sub"><span class="chip chip--muted">Sin importar</span></span>
       </a>
+      <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
       <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
     </div></li>`;
   }
@@ -1970,6 +1977,7 @@ function rowCuenta(meta) {
       ${goalBar(meta, a)}
       ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
+    <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
     <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
   </div></li>`;
 }
@@ -2065,6 +2073,7 @@ function renderProgreso(tag) {
   const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
   const links = exp ? `<div class="section"><ul class="list">
+      <li><a class="row" href="#/perfil/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Perfil</span><span class="row__sub">Lo que trae la exportación</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Línea de tiempo hasta el TH objetivo</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
     </ul></div>` : "";
@@ -3779,6 +3788,112 @@ function renderEquipo(tag) {
   return head + (vista === "flota" ? renderEquipoFlota(list) : renderEquipoCuenta(meta, list));
 }
 
+function perfilAjustes(facts) {
+  const rows = [];
+  if (facts.constructores.known) {
+    const grupos = facts.constructores.grupos.map((g) => `Nv ${g.lvl} × ${g.cnt}`).join(" · ");
+    const bob = facts.bob
+      ? ` ${(nameOf(facts.bob.id) || "Cabaña de B.O.B.")} Nv ${facts.bob.lvl}${facts.bob.cnt > 1 ? ` × ${facts.bob.cnt}` : ""} no entra en este número.`
+      : "";
+    const lvl = facts.constructores.grupos.length ? facts.constructores.grupos[facts.constructores.grupos.length - 1].lvl : null;
+    rows.push(`<li><div class="row row--tile row--thumb44">
+      ${thumb(1000015, { size: 44, lvl })}
+      <span class="row__main"><span class="row__title">Constructores <span class="chip chip--muted">De la exportación</span></span>
+        <span class="row__sub">${esc(grupos + bob)}</span></span>
+      <span class="row__trail num">${facts.constructores.total}</span>
+    </div></li>`);
+  }
+  for (const h of facts.helpers) {
+    const title = nameOf(h.id) || "Ayudante";
+    rows.push(`<li><div class="row row--tile row--thumb44">
+      ${thumb(h.id, { size: 44, lvl: h.lvl })}
+      <span class="row__main"><span class="row__title">${esc(title)} <span class="chip chip--muted">De la exportación</span></span>
+        <span class="row__sub">Nivel en la exportación</span></span>
+      <span class="row__trail num">Nv ${h.lvl}</span>
+    </div></li>`);
+  }
+  if (!rows.length) return "";
+  return `<div class="section"><div class="section-header"><span>Ajustes de perfil</span></div><ul class="list list--tiles">${rows.join("")}</ul>
+    <p class="section-footer">Si la exportación no trae un ajuste, no se muestra.</p></div>`;
+}
+
+function perfilHeroes(view, tag) {
+  if (!view) return "";
+  const rows = view.heroes.map((h) => {
+    const line = levelLine(h);
+    const lvl = h.lvl == null ? 0 : h.lvl;
+    const name = nameOf(h.id) || "Héroe";
+    const aria = heroAria(name, h, line);
+    const title = rowTitle(name);
+    if (!line.bar) {
+      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+        ${thumb(h.id, { size: 40, lvl: h.lvl })}
+        <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
+      </button></li>`;
+    }
+    const p = h.max ? (lvl / h.max) * 100 : 0;
+    const maxed = lvl >= h.max;
+    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+      ${thumb(h.id, { size: 40, lvl: h.lvl })}
+      <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
+      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
+    </button></li>`;
+  }).join("");
+  const nota = tag === HEROES_FUERA
+    ? `En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan. Aquí solo se ve el nivel frente al máximo del ayuntamiento.`
+    : "Nivel de la exportación frente al máximo de este ayuntamiento.";
+  return `<div class="section"><div class="section-header"><span>Niveles de héroes</span></div><ul class="list">${rows}</ul><p class="section-footer">${nota}</p></div>`;
+}
+
+function perfilClan(clan) {
+  if (!clan || !clan.length) return "";
+  const lis = clan.map((row) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(row.etiqueta)}</span></span><span class="row__trail num">${esc(String(row.valor))}</span></div></li>`).join("");
+  return `<div class="section"><div class="section-header"><span>Clan</span></div><ul class="list">${lis}</ul><p class="section-footer">Estos datos vienen en la exportación.</p></div>`;
+}
+
+function renderPerfil(tag) {
+  const list = allAccounts();
+  const meta = (tag && accountByTag(tag)) || list.find((m) => m.tag === state.selected) || list[0];
+  if (!meta) {
+    return `<h1 class="large-title">Perfil</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p></div></div>`;
+  }
+  const options = list.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
+  const picker = `<label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>`;
+  const exp = expOf(meta.tag);
+  if (!exp) {
+    return `<h1 class="large-title">Perfil</h1>
+      <p class="large-sub">${esc(meta.nombre)} · <span class="tag">${esc(meta.tag)}</span></p>
+      ${picker}
+      <div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene exportación</p><p class="t-subhead c-2">El perfil muestra solo lo que trae el JSON.</p></div></div>`;
+  }
+  const facts = exportFacts(exp);
+  const view = viewOf(meta.tag);
+  const th = facts.th == null ? "—" : `TH${facts.th}`;
+  const tiles = [`<div><b class="num">${esc(th)}</b><span>Ayuntamiento</span></div>`];
+  if (facts.casaConstructor != null) {
+    tiles.push(`<div><b class="num">${facts.casaConstructor}</b><span>Casa del constructor</span></div>`);
+  }
+  const when = facts.timestamp ? `Exportación del ${fmtWhen(facts.timestamp * 1000)}` : "Sin fecha en la exportación";
+  const nombre = meta.nombre === meta.tag ? `<span class="tag">${esc(meta.tag)}</span>` : esc(meta.nombre);
+  return `<h1 class="large-title">Perfil</h1>
+    <p class="large-sub">Solo lo que trae la exportación de esta cuenta.</p>
+    ${picker}
+    <div class="section"><div class="card perfil-head">
+      <div class="perfil-id">
+        ${thumb(1000001, { size: 72, th: facts.th })}
+        <span class="row__main">
+          <span class="row__title">${nombre}</span>
+          <span class="row__sub"><span class="tag">${esc(facts.tag || meta.tag)}</span></span>
+        </span>
+      </div>
+      <div class="perfil-tiles">${tiles.join("")}</div>
+      <p class="t-footnote c-2 perfil-note">${esc(when)}. El nombre es el de la cuenta: el JSON no trae el del jugador.</p>
+    </div></div>
+    ${perfilAjustes(facts)}
+    ${perfilHeroes(view, meta.tag)}
+    ${perfilClan(facts.clan)}`;
+}
+
 function screenFor(r) {
   if (!state.ready) {
     return `<h1 class="large-title">Clash Progreso</h1><div class="section"><div class="card"><div class="sk sk--line"></div></div></div>`;
@@ -3796,6 +3911,7 @@ function screenFor(r) {
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
+  if (r.name === "perfil") return renderPerfil(r.tag);
   return renderInicio();
 }
 
@@ -4564,7 +4680,9 @@ function bind(r) {
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => {
     const tail = sel.value.slice(1);
-    location.hash = route().name === "equipo" ? "#/equipo/" + tail : "#/progreso/" + tail;
+    const name = route().name;
+    const prefix = name === "equipo" ? "#/equipo/" : name === "perfil" ? "#/perfil/" : "#/progreso/";
+    location.hash = prefix + tail;
   };
   const eqHeroe = document.querySelector("[data-eq-heroe]");
   if (eqHeroe) eqHeroe.onchange = () => {

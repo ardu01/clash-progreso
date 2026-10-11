@@ -16,6 +16,7 @@ import { buildBackup, mergeBackup, backupFilename, isShareCancel } from "../js/b
 import { averagePct } from "../js/progress.js";
 import { levelCost } from "../js/costs.js";
 import { addOre, applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "../js/equipo.js";
+import { casaConstructorOf, clanOf, exportFacts } from "../js/perfil.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -869,9 +870,90 @@ test("3.1.5: menas del equipamiento con la tabla corregida de 16 y 59", () => {
   assert.equal(app.includes("resplandeciente"), true);
 });
 
-test("versión 3.1.5 y cachés cp-shell-v23 / cp-img-v8", () => {
-  assert.equal(APP_VERSION, "3.1.5");
-  assert.equal(SHELL_CACHE, "cp-shell-v23");
+test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
+  const c1 = exportsByTag.get("#28PLGP0G2");
+  const c2 = exportsByTag.get("#R00C8CPQC");
+  const sinAyuda = exportsByTag.get("#GVPU2CJR8");
+  const facts = exportFacts(c1);
+  assert.equal(facts.tag, "#28PLGP0G2");
+  assert.equal(facts.th, 18);
+  assert.equal(facts.casaConstructor, null);
+  assert.equal(casaConstructorOf(c1), null);
+  assert.equal(facts.clan, null);
+  assert.equal(clanOf(c1), null);
+  assert.equal(facts.constructores.known, true);
+  assert.equal(facts.constructores.total, 5);
+  assert.deepEqual(facts.constructores.grupos, [{ lvl: 6, cnt: 5 }]);
+  assert.equal(facts.bob.cnt, 1);
+  assert.equal(facts.bob.lvl, 1);
+  assert.deepEqual(facts.helpers.map((h) => `${h.id}:${h.lvl}`), [
+    "93000000:4", "93000001:1", "93000002:1", "93000003:1",
+  ]);
+  assert.equal(JSON.stringify(facts).includes("64753"), false);
+  assert.equal(JSON.stringify(facts).includes("28000003"), false);
+  assert.equal("trofeos" in facts, false);
+  assert.equal("liga" in facts, false);
+  assert.equal("estrellasGuerra" in facts, false);
+
+  const secundaria = exportFacts(c2);
+  assert.equal(secundaria.constructores.total, 5);
+  assert.deepEqual(secundaria.constructores.grupos, [{ lvl: 1, cnt: 4 }, { lvl: 3, cnt: 1 }]);
+  assert.equal(secundaria.bob, null);
+  assert.deepEqual(secundaria.helpers.map((h) => h.id), ["93000000", "93000001", "93000002"]);
+  assert.equal(secundaria.clan, null);
+
+  const vacia = exportFacts(sinAyuda);
+  assert.equal(vacia.helpers.length, 0);
+  assert.equal(vacia.constructores.total, 4);
+  assert.equal(vacia.clan, null);
+  assert.equal(vacia.casaConstructor, null);
+
+  for (const exp of exportsByTag.values()) {
+    assert.equal(exportFacts(exp).clan, null);
+    assert.equal(exportFacts(exp).casaConstructor, null);
+  }
+
+  const conClan = exportFacts({
+    tag: "#X",
+    timestamp: 1,
+    buildings: [{ data: 1000001, lvl: 12 }],
+    builderHallLevel: 9,
+    clan: { name: "A.R.D.U", tag: "#2CYV9RRR8", level: 8, badgeUrls: { small: "https://ejemplo" } },
+  });
+  assert.equal(conClan.casaConstructor, 9);
+  assert.equal(conClan.th, 12);
+  assert.deepEqual(conClan.clan.map((row) => row.etiqueta), ["Nombre", "Etiqueta", "Nivel"]);
+  assert.equal(conClan.clan.some((row) => row.clave === "members"), false);
+  assert.equal(clanOf({ clan: {} }), null);
+  assert.equal(clanOf({ clan: { name: "  " } }), null);
+  assert.equal(clanOf({ boosts: { clocktower_cooldown: 10 } }), null);
+
+  const heroes = analyze(c1, index).heroes;
+  assert.deepEqual(heroes.map((h) => [h.id, h.lvl, h.max]), [
+    ["28000000", 61, 110],
+    ["28000001", 57, 110],
+    ["28000002", 34, 85],
+    ["28000004", 18, 55],
+    ["28000006", 31, 95],
+    ["28000007", 20, 25],
+  ]);
+  assert.equal(analyze(c1, index).media, 64.2);
+
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /Ajustes de perfil/);
+  assert.match(app, /Niveles de héroes/);
+  assert.match(app, /De la exportación/);
+  assert.match(app, /fuera del plan/);
+  assert.match(app, /#\/perfil\//);
+  assert.equal(app.includes("data-perfil"), false);
+  assert.equal(app.includes("Trofeos"), false);
+  assert.equal(app.includes("Estrellas de guerra"), false);
+  assert.equal(app.includes("cuello de botella"), false);
+});
+
+test("versión 3.1.6 y cachés cp-shell-v24 / cp-img-v8", () => {
+  assert.equal(APP_VERSION, "3.1.6");
+  assert.equal(SHELL_CACHE, "cp-shell-v24");
   assert.equal(IMAGE_CACHE, "cp-img-v8");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -898,16 +980,19 @@ test("versión 3.1.5 y cachés cp-shell-v23 / cp-img-v8", () => {
   assert.equal(sw.includes("cp-shell-v20"), false);
   assert.equal(sw.includes("cp-shell-v21"), false);
   assert.equal(sw.includes("cp-shell-v22"), false);
+  assert.equal(sw.includes("cp-shell-v23"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v23/);
+  assert.match(caches, /cp-shell-v24/);
   assert.equal(caches.includes("cp-shell-v21"), false);
   assert.equal(caches.includes("cp-shell-v22"), false);
+  assert.equal(caches.includes("cp-shell-v23"), false);
   assert.match(sw, /estilo-3\.1\.css/);
   assert.match(sw, /js\/equipo\.js/);
+  assert.match(sw, /js\/perfil\.js/);
   assert.match(caches, /cp-img-v8/);
   assert.equal(caches.includes("cp-img-v7"), false);
   assert.equal(caches.includes("cp-shell-v11"), false);

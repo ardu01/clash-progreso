@@ -32,6 +32,7 @@ const APP = [
   "./js/history.js",
   "./js/costs.js",
   "./js/equipo.js",
+  "./js/perfil.js",
   "./js/charts.js",
   "./js/schedule.js",
   "./js/roadmap.js",

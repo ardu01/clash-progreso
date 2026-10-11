@@ -503,3 +503,17 @@ html[data-theme="dark"] .chip--muted {
 }
 .eq-lv b { color: var(--ink); min-width: 3.2em; }
 button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 var(--panel-hi), 0 2px 0 rgba(0,0,0,.35); background: var(--panel-2); }
+
+/* 3.1.6: perfil de la cuenta. Losetas del estilo 3.1.2, sin ficha de otra app. */
+.perfil-head { display: grid; gap: 12px; }
+.perfil-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.perfil-id .row__main { min-width: 0; }
+.perfil-id .row__title { font: 900 1.25rem/1.2 var(--font-ui); }
+.perfil-note { margin: 0; }
+.perfil-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 8px; }
+.perfil-tiles > div {
+  display: grid; align-content: start; gap: 4px; padding: 10px 8px 12px; border-radius: 12px; color: var(--ink);
+  background: var(--panel-3); border: 2px solid var(--panel-edge);
+}
+.perfil-tiles b { font: 900 1.412rem/1.05 var(--font-ui); }
+.perfil-tiles span { font: 700 .706rem/1.25 var(--font-ui); color: var(--ink-2); }
