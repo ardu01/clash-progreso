@@ -52,6 +52,7 @@ function hub(m) {
       ${fila("#/operaciones/guerras", "Guerras y CWL", "Anotadas a mano")}
       ${fila("#/operaciones/diario", "Diario", `${(m.doc.diario || []).length} apuntes`)}
       ${fila("#/operaciones/plantillas", "Plantillas", "TH, héroes, guerra, rush, muros, laboratorio")}
+      ${fila("#/operaciones/estrategias", "Explorar estrategias", "Simulación. No cambia el plan hasta que la pases.")}
     </ul></div>`;
 }
 

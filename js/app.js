@@ -42,6 +42,8 @@ import { avisoTrasImportar } from "./replan.js";
 import { SUEÑO_DEFECTO } from "./prioridades.js";
 import { htmlOperaciones } from "./ui-operaciones.js";
 import { htmlAtencion, htmlMotor } from "./ui-atencion.js";
+import { htmlEstrategias } from "./ui-evolucion.js";
+import { empaquetarCuentas, empezarExploracion, pararExploracion } from "./evolucion/control.js";
 import { cargarFuentes, costeSubirTh } from "./fuentes.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
@@ -84,6 +86,9 @@ const state = {
   seg: {},
   mejorasMode: ["plan", "costes", "equipo"].includes(localStorage.getItem("cp-mejoras")) ? localStorage.getItem("cp-mejoras") : "plan",
   evo: localStorage.getItem("cp-evo") || "roster",
+  estrategiasCfg: { horizonte: 90, presupuesto: 90 },
+  estrategiasEstado: "Sin buscar. Simulación.",
+  estrategiasResultado: null,
   sortMode: localStorage.getItem("cp-sort") || "th",
   selected: localStorage.getItem("cp-account") || "#28PLGP0G2",
   accounts: [],
@@ -4427,6 +4432,7 @@ function screenFor(r) {
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
   if (r.name === "actualizar") return renderActualizar();
+  if (r.name === "operaciones" && r.sub === "estrategias") return renderEstrategias();
   if (r.name === "operaciones" && (r.sub === "prioridades" || r.sub === "rescate")) return renderAtencion(r);
   if (r.name === "operaciones") return renderOperaciones(r);
   return renderInicio();
@@ -4937,6 +4943,32 @@ function bind(r) {
   try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const evoChip = origen.closest("[data-evo]");
+    if (evoChip) {
+      ev.preventDefault();
+      const clave = evoChip.dataset.evo;
+      state.estrategiasCfg = { ...state.estrategiasCfg, [clave]: Number(evoChip.dataset.arg) };
+      render();
+      return;
+    }
+    if (origen.closest("[data-evo-empezar]")) {
+      ev.preventDefault();
+      lanzarEstrategias();
+      return;
+    }
+    if (origen.closest("[data-evo-parar]")) {
+      ev.preventDefault();
+      pararExploracion();
+      state.estrategiasEstado = "Parada. Simulación.";
+      render();
+      return;
+    }
+    const adoptar = origen.closest("[data-evo-adoptar]");
+    if (adoptar) {
+      ev.preventDefault();
+      adoptarEstrategia(adoptar.dataset.evoAdoptar);
+      return;
+    }
     const op = origen.closest("[data-op]");
     if (op) {
       ev.preventDefault();
@@ -5731,6 +5763,79 @@ function fichasOperacion() {
       planModo: state.planes[meta.tag] && state.planes[meta.tag].modo,
     };
   });
+}
+
+function renderEstrategias() {
+  return htmlEstrategias({
+    cfg: state.estrategiasCfg,
+    estado: state.estrategiasEstado,
+    resultado: state.estrategiasResultado,
+  });
+}
+
+function lanzarEstrategias() {
+  state.estrategiasEstado = "Buscando… Simulación.";
+  const nodo = document.querySelector("[data-evo-estado]");
+  if (nodo) nodo.textContent = state.estrategiasEstado;
+  const cfg = state.estrategiasCfg;
+  setTimeout(() => {
+    if (route().name !== "operaciones" || route().sub !== "estrategias") return;
+    const packs = empaquetarCuentas(allAccounts().map((meta) => ({
+      exp: expOf(meta.tag),
+      tag: meta.tag,
+      plan: state.planes[meta.tag] || null,
+      provisionals: state.provisionales,
+    })), state.index, state.now);
+    state.estrategiasCuentas = allAccounts().map((meta) => meta.tag);
+    empezarExploracion({
+      packs,
+      ahora: state.now,
+      horizonte: cfg.horizonte,
+      presupuesto: cfg.presupuesto,
+      semilla: 41011,
+      topeEval: 20000,
+      maxMs: 120000,
+    }, (msg) => {
+      if (route().name !== "operaciones" || route().sub !== "estrategias") return;
+      if (msg.tipo === "progreso") {
+        const vivo = document.querySelector("[data-evo-estado]");
+        if (vivo) vivo.textContent = `Generación ${msg.generacion}. Simulación.`;
+        return;
+      }
+      if (msg.tipo === "fin") {
+        state.estrategiasResultado = msg.resultado;
+        state.estrategiasEstado = "Lista. Simulación.";
+        render();
+        return;
+      }
+      if (msg.tipo === "error") {
+        state.estrategiasEstado = "No se pudo buscar.";
+        render();
+      }
+    });
+  }, 0);
+}
+
+function adoptarEstrategia(id) {
+  const res = state.estrategiasResultado;
+  const est = res && (res.estrategias || []).find((item) => item.id === id);
+  const tags = state.estrategiasCuentas || [];
+  if (!est) return;
+  for (let k = 0; k < est.orden.length; k += 1) {
+    const idx = est.orden[k];
+    const tag = tags[idx];
+    if (!tag) continue;
+    const pesos = est.pesos[idx] || [];
+    setAccountPlan(tag, {
+      modo: "maxear",
+      heroes: tag === HEROES_FUERA ? false : pesos[2] >= 0.5,
+      ataque: pesos[0] >= 0.5 || pesos[1] >= 0.5,
+      defensa: pesos[3] >= 0.5 || pesos[4] >= 0.5,
+      muros: pesos[6] >= 0.5,
+    });
+  }
+  showToast("ok", "El plan recoge la estrategia.");
+  render();
 }
 
 function renderAtencion(r) {
