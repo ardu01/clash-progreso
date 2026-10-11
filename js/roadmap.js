@@ -440,6 +440,8 @@ export function ahoraDe(roadmap) {
       sinDuracion: !!step.sinDuracion,
       sinHora: !!step.sinHora,
       provisional: !!step.provisional,
+      origen: step.origen || (step.provisional ? "provisional" : "recomendado"),
+      clase: lane.clase || "real",
       id: step.id,
       key: step.key,
     });

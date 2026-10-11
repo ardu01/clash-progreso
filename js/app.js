@@ -986,14 +986,21 @@ function costCard(exp, th, full) {
     ${rows ? `<div class="section"><ul class="list">${rows}</ul></div>` : ""}`;
 }
 
+function etiquetaPaso(paso) {
+  if (!paso) return "recomendado";
+  if (paso.provisional || paso.origen === "provisional") return "provisional";
+  if (paso.origen === "planificado") return "planificado";
+  return "recomendado";
+}
+
 function pasoAhora(paso) {
   const nv = `Nv ${paso.fromLvl} → ${paso.toLvl}`;
+  const hueco = paso.clase === "estimado" ? "estimado" : "en la exportación";
   let when = "";
   if (paso.sinDuracion) when = " · sin tiempo en la fuente";
   else if (paso.sinHora || paso.fin == null) when = " · sin hora exacta";
   else when = ` · acaba ${fmtFin(paso.fin)}`;
-  const mark = paso.provisional ? " · provisional" : "";
-  return `${paso.titulo} libre · ${paso.title} ${nv}${when}${mark}`;
+  return `${paso.titulo} ${hueco} · ${paso.title} ${nv} · ${etiquetaPaso(paso)}${when}`;
 }
 
 function prioridadDe(meta) {
@@ -1027,13 +1034,12 @@ function comparePrioridad(a, b) {
 function textoCola(item) {
   const lane = item.lane;
   const step = item.step;
+  if (item.desactualizada) return "Necesita actualización. Se conserva el último plan.";
   let cuando = `${lane.titulo} sin hora exacta`;
-  if (item.desactualizada) cuando = "Necesita actualización. Se conserva el último plan.";
-  else if (item.clase === "estimado" && item.libreYa) cuando = `${lane.titulo} libre según la exportación (estimado)`;
-  else if (item.libreYa) cuando = `${lane.titulo} libre en la exportación`;
+  if (item.clase === "estimado" && item.libreYa) cuando = `${lane.titulo} estimado`;
+  else if (item.libreYa) cuando = `${lane.titulo} en la exportación`;
   else if (item.exact && item.when != null) cuando = `${lane.titulo} libre ${fmtFin(item.when)}`;
-  let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl}`;
-  if (step.provisional) paso += " · provisional";
+  let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl} · ${etiquetaPaso(step)}`;
   if (step.sinHora || step.sinDuracion || step.fin == null) paso += " · sin hora de fin";
   else paso += ` · acaba ${fmtFin(step.fin)}`;
   return `${cuando} · ${paso}`;
@@ -1209,15 +1215,22 @@ function renderAhora() {
     if (!exp) continue;
     const road = accountRoadmap(meta);
     if (!road) continue;
+    const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: townHallLevel(exp) });
+    if (colas.desactualizada) {
+      items.push({ meta, road, pasos: [], terminadas: [], desactualizada: true });
+      continue;
+    }
     const pasos = ahoraDe(road);
     const terminadas = upgrades(exp).filter((u) => u.done && !u.extra);
     if (!pasos.length && !terminadas.length) continue;
-    items.push({ meta, road, pasos, terminadas });
+    items.push({ meta, road, pasos, terminadas, desactualizada: false });
   }
   const list = items.length
     ? `<ul class="list list--tiles">${items.map((row) => {
-      const lines = row.pasos.map((p) => pasoAhora(p));
-      if (row.terminadas.length) {
+      const lines = row.desactualizada
+        ? ["Necesita actualización. Se conserva el último plan."]
+        : row.pasos.map((p) => pasoAhora(p));
+      if (!row.desactualizada && row.terminadas.length) {
         lines.push(row.terminadas.length === 1 ? "1 mejora de la exportación ya ha terminado" : `${row.terminadas.length} mejoras de la exportación ya han terminado`);
       }
       const label = planLabel(row.road.plan, row.road.currentTh);
@@ -2242,8 +2255,7 @@ function rowCuenta(meta) {
         <span class="row__title">${esc(meta.nombre)} ${mark}</span>
         <span class="row__sub"><span class="chip chip--muted">Sin importar</span></span>
       </a>
-      <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
-      <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
+      <span class="row__tools"><a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a><button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button></span>
     </div></li>`;
   }
   const a = viewOf(meta.tag);
@@ -2258,8 +2270,7 @@ function rowCuenta(meta) {
       ${goalBar(meta, a)}
       ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
-    <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
-    <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
+    <span class="row__tools"><a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a><button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button></span>
   </div></li>`;
 }
 

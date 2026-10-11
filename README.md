@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.12</strong><br>
+  <strong>Versión 3.1.13</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -28,27 +28,25 @@ Datos de prueba del 7 de octubre de 2026.
 
 | Inicio | Cuentas | Mejoras |
 | --- | --- | --- |
-| <img src="docs/capturas/312-inicio-oscuro.png" width="200" alt="Inicio en oscuro: centro de mando, qué hacer ahora y las próximas finalizaciones"> | <img src="docs/capturas/312-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/312-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, ordenadas por cuándo terminan"> |
+| <img src="docs/capturas/313-inicio-oscuro.png" width="200" alt="Inicio en oscuro: centro de mando, qué hacer ahora y las próximas finalizaciones"> | <img src="docs/capturas/313-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/313-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, ordenadas por cuándo terminan"> |
 
 | Análisis | Agenda | Actualizar todas |
 | --- | --- | --- |
-| <img src="docs/capturas/312-analisis-oscuro.png" width="200" alt="Análisis en oscuro: ranking de cuentas por la media"> | <img src="docs/capturas/312-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las próximas 24 horas y las franjas"> | <img src="docs/capturas/319-actualizar-oscuro.png" width="200" alt="Actualizar todas en oscuro: progreso de la lista y la siguiente cuenta a copiar"> |
+| <img src="docs/capturas/313-analisis-oscuro.png" width="200" alt="Análisis en oscuro: ranking de cuentas por la media"> | <img src="docs/capturas/313-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las próximas 24 horas y las franjas"> | <img src="docs/capturas/319-actualizar-oscuro.png" width="200" alt="Actualizar todas en oscuro: progreso de la lista y la siguiente cuenta a copiar"> |
 
 | Inicio en claro | Cuentas en claro | Mejoras en claro |
 | --- | --- | --- |
-| <img src="docs/capturas/312-inicio-claro.png" width="200" alt="Inicio con el tema claro"> | <img src="docs/capturas/312-cuentas-claro.png" width="200" alt="Cuentas con el tema claro"> | <img src="docs/capturas/312-mejoras-claro.png" width="200" alt="Mejoras con el tema claro"> |
+| <img src="docs/capturas/313-inicio-claro.png" width="200" alt="Inicio con el tema claro"> | <img src="docs/capturas/313-cuentas-claro.png" width="200" alt="Cuentas con el tema claro"> | <img src="docs/capturas/313-mejoras-claro.png" width="200" alt="Mejoras con el tema claro"> |
 
 | Análisis en claro | Agenda en claro |
 | --- | --- |
-| <img src="docs/capturas/312-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/312-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
+| <img src="docs/capturas/313-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/313-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
 
 ## En esta versión
 
-Cada vez que se pinta la pantalla, el plan de cada cuenta se calcula una sola vez y el resto de esa vista lo reutiliza. En el iPhone eso evita repetir el mismo trabajo al abrir Inicio, Mejoras o la agenda.
+Inicio y Cuentas ocupan menos alto. Las cuentas dejan el nombre y el porcentaje con sitio, y Perfil y Editar siguen al lado. El resumen de constructores usa el ancho entero, así que no queda una loseta vacía al lado de la frase larga.
 
-Si el iPhone corta un guardado, la app no se queda esperando ni lo da por hecho. Avisa, y el pegado se puede repetir.
-
-Las cinco pestañas se ven en claro y en oscuro con los mismos datos de prueba.
+Cada paso dice de dónde sale: en la exportación, estimado, planificado, recomendado o provisional. Si la cuenta necesita actualización, Qué hacer ahora no la presenta como una cola libre: pide actualizar y conserva el plan.
 
 ## Funciones
 
@@ -153,7 +151,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v31` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v32` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -161,6 +159,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.13 | Inicio y Cuentas más compactos. Cada paso dice si es de la exportación, estimado, planificado, recomendado o provisional. Una cuenta sin actualizar no sale como cola libre. |
 | 3.1.12 | El plan de cada cuenta se calcula una vez por pintado. Un guardado abortado no se da por hecho. Las cinco pestañas tienen captura en claro y en oscuro. |
 | 3.1.11 | Inicio con las tres cifras de la flota, qué hacer ahora y las tres próximas finalizaciones. Actualizar todas sigue donde se quedó y cierra con un resumen de los datos pegados. La agenda separa 24 horas, 7 días y por cuenta, y agrupa la misma hora en una sesión. |
 | 3.1.10 | Un fallo en un botón no deja la pantalla pillada. Inicio y Cuentas usan el mismo recuento de constructores: libre en la exportación, estimado si el temporizador ya llegó a cero, o «Necesita actualización» si la cuenta es vieja. El porcentaje de cada cuenta es frente al máximo de su ayuntamiento. |

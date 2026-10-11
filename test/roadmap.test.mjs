@@ -65,12 +65,16 @@ test("con una cola libre, ahora enseña el siguiente paso y una marca lo adelant
   const first = road(exp, null, []);
   const pasos = ahoraDe(first);
   assert.ok(pasos.some((p) => p.cola === "constructor"), "hace falta un constructor libre");
+  const libre = pasos.find((p) => p.cola === "constructor");
+  assert.equal(libre.clase, "real");
+  assert.equal(libre.origen, "recomendado");
   const late = first.orden.find((s) => s.queue === "constructor" && s.id !== pasos[0].id);
   assert.ok(late);
   const marks = toggleProvisional([], late, exp.tag, now);
   const again = road(exp, null, marks);
   const next = ahoraDe(again).find((p) => p.cola === "constructor");
   assert.equal(next.provisional, true);
+  assert.equal(next.origen, "provisional");
   assert.equal(next.id, late.id);
   assert.equal(next.fromLvl, late.fromLvl);
   const media = analyze(exp, index).media;
