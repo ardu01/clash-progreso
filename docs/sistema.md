@@ -2087,3 +2087,15 @@ Una marca provisional vive en el plan, con la hora estimada. Al importar, si esa
 Gráficos → Niveles lista el TH, los héroes frente a su máximo, la media de niveles por categoría, la distribución de muros, el laboratorio, las mascotas, el cara a cara (las cuentas marcadas en Ranking), las cuentas del mismo TH y el ritmo en niveles por semana. Con una sola exportación hay un punto. El ritmo no inventa un 0.
 
 La meta `{ clave, pct }` es opcional en cada cuenta. El tema es sistema, claro u oscuro (`cp-theme`). Cuentas se puede buscar por alias. Una cuenta avisa si la exportación supera los días configurados (por defecto, más de 7). Al importar se guarda una copia en IndexedDB y Copia avisa si han pasado 7 días sin otra. El atajo de varias aldeas está en `docs/atajo.md`.
+
+## Nota de cambios (11 oct 2026, 3.1.1)
+
+`APP_VERSION` es `3.1.1`, `SHELL_CACHE` es `cp-shell-v19` e `IMAGE_CACHE` es `cp-img-v7`. `ROSTER_VERSION` sigue en 2. La precarga de instalación sigue en 220 archivos y 21.579.962 bytes: los PNG nuevos van con `precarga: false`.
+
+El lote 2 cubre niveles que la 3.1.0 marcaba como «Imagen del nivel N (no hay oficial del M)». Entran 189 niveles (181 PNG en `images/levels/`). Cada copia tiene el lado largo como máximo a 512 px, PNG con compresión 9 y sin recorte; `sha256_original` es el archivo del Fan Kit. No se usa `levels/army-camp_1.png` (lleva el texto «Level 1» incrustado): el campamento 1 sigue con la imagen del nivel 7. No se usan 23 archivos `low_res` cuyo lado largo es menor que la imagen que ya se mostraba. No se publica el render de marketing de la torre de hechizos 4 ni los PNG deducidos de la torre multiusos. Quedan 72 niveles sin PNG oficial, con la marca de siempre.
+
+Siete etiquetas eran erróneas porque la imagen del rango ya era la oficial. Se quita la marca y `nivel_mostrado` pasa a ser ese nivel, sin cambiar el archivo: Herrería 1 y 4, Bomba 8, Conjunto de explosivos 2 y 8, Mina de rastreo aéreo 4 y Trampa de esqueletos 3.
+
+Nombres con fuente en el blog en español: Catapulta (1000067), Caseta de animales (1000068), Torre Tesla (1000019) y Arrojatroncos (107000008). Siguen en inglés Henchmen Puppet, Frost Flake, Stun Blaster, B.O.B's Hut y Dark Orb. Los héroes no cambian de grafía. 28000007, 90000052, 90000053 y 107000008 pasan a `estado: ok`. Flecha monolítica, Colmillos eléctricos, Portal portátil, Bruja caída, Aerovagón, Hechizo de cólera y Picador ya estaban en la 3.1.0.
+
+73000017 es el Cuervo avaricioso, mascota de TH18, máximo 10. El PNG es el render del Fan Kit con base de césped. En las exportaciones de prueba no aparece, así que C1 lo enseña como Nv 0 / 10. El denominador ya lo contaba; la media no se mueve (C1 64,2, C2 47,7 / 44,5). La Artillería infernal sigue sin ID ni imagen: la fila de topes dice «Artillería infernal» y la ficha solo añade «Sin imagen».
