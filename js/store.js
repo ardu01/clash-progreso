@@ -38,6 +38,7 @@ export async function putExport(exp) {
     tx.objectStore(STORE).put(exp);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("No se pudo guardar"));
   });
 }
 
@@ -52,6 +53,7 @@ export async function deleteTag(tag) {
     }
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("No se pudo guardar"));
   });
 }
 
@@ -62,6 +64,7 @@ export async function clearExports() {
     tx.objectStore(STORE).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("No se pudo guardar"));
   });
 }
 
@@ -72,6 +75,7 @@ export async function putCopy(copy) {
     tx.objectStore("copies").add({ at: Date.now(), copy });
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("No se pudo guardar"));
   });
 }
 

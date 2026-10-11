@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 3.1.12)
+
+`APP_VERSION` es `3.1.12` y `SHELL_CACHE` es `cp-shell-v31`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit. Las capturas de las cinco pestañas, en claro y en oscuro, son PNG de 375×812.
+
+`render` crea `roadsThisPaint` al empezar y lo anula al terminar. `accountRoadmap` guarda el plan de cada tag y de `state.now` solo durante ese pintado; un toque posterior no reutiliza un plan viejo. `putExport`, `deleteTag`, `clearExports` y `putCopy` rechazan también `tx.onabort`, con el error de la transacción o «No se pudo guardar». `test/regresion.test.mjs` recorre las 11 exportaciones del 7 oct 2026: el porcentaje de `analyze`, el importador (`classifyEntries` las deja `ready` y, si ya están guardadas, `duplicate`), la copia (`buildBackup` + `mergeBackup` conserva la media), el plan (`buildRoadmap`) y las cinco pestañas (`accionTab`; si ya estás en Inicio, el toque es `scroll`). El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.11)
 
 `APP_VERSION` es `3.1.11` y `SHELL_CACHE` es `cp-shell-v30`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2.

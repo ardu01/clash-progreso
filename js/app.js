@@ -690,11 +690,21 @@ function saveProvisionals() {
   localStorage.setItem("cp-provisional", JSON.stringify(state.provisionales));
 }
 
+let roadsThisPaint = null;
+
+function cachedRoad(key, make) {
+  if (!roadsThisPaint) return make();
+  if (roadsThisPaint.has(key)) return roadsThisPaint.get(key);
+  const road = make();
+  roadsThisPaint.set(key, road);
+  return road;
+}
+
 function accountRoadmap(meta) {
   const exp = expOf(meta.tag);
   if (!exp || !state.index) return null;
   const raw = state.planes[meta.tag];
-  return buildRoadmap({
+  return cachedRoad(meta.tag + "\0" + state.now, () => buildRoadmap({
     exp,
     index: state.index,
     tag: meta.tag,
@@ -702,7 +712,7 @@ function accountRoadmap(meta) {
     provisionals: state.provisionales,
     sleep: activeSleep(),
     now: state.now,
-  });
+  }));
 }
 
 const CAT_COLOR = {
@@ -4629,6 +4639,7 @@ function abrirFuera(ev, enlace) {
 }
 
 function render() {
+  roadsThisPaint = new Map();
   const r = route();
   if (r.name === "importar") {
     if (!state.importUi.active) {
@@ -4678,6 +4689,7 @@ function render() {
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
   }
   armNotices();
+  roadsThisPaint = null;
 }
 
 function destinoDelToque(ev) {
