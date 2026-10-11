@@ -7,7 +7,8 @@ import { fmtPct } from "./format.js";
  * si `nombre_pendiente`). Nunca `nombre_propuesto` ni `nota_interna`.
  * Los nombres en inglés del archivo de máximos solo sirven para unir cada tope
  * con el id del manifiesto; no se muestran, salvo los ítems que solo están ahí
- * (Inferno Artillery) y se listan en el detalle con ese nombre.
+ * (Artillería infernal, sin ID en los datos) y se listan en el detalle con el
+ * nombre en español. El Cuervo avaricioso (73000017) entra como el resto de mascotas.
  */
 
 const ALIAS = {
@@ -149,7 +150,7 @@ function indexManifest(manifest) {
 
 /**
  * id del manifiesto → { [th]: { max, count } }
- * Greedy Raven no tiene ficha en el manifiesto: queda aparte, solo para el denominador.
+ * El Cuervo avaricioso se une por nombre_en, como el resto de mascotas.
  */
 export function indexCaps(caps, manifest) {
   const { items, byEn } = indexManifest(manifest);
@@ -158,7 +159,6 @@ export function indexCaps(caps, manifest) {
     if (!byId.has(id)) byId.set(id, new Map());
     byId.get(id).set(th, value);
   };
-  let greedy = null;
   let inferno = null;
   const craftMax = new Map();
   for (const [thKey, table] of Object.entries(caps)) {
@@ -168,12 +168,7 @@ export function indexCaps(caps, manifest) {
         craftMax.set(th, value.max);
         continue;
       }
-      if (name === "Greedy Raven") {
-        if (!greedy) greedy = new Map();
-        greedy.set(th, value.max);
-        continue;
-      }
-      // Arma del ayuntamiento: no tiene ficha en el manifiesto. Solo entra en el
+      // Arma del ayuntamiento: no tiene ID en static_data. Solo entra en el
       // denominador de defensas cuando el cupo de ese TH es positivo.
       if (name === "Inferno Artillery") {
         if (!inferno) inferno = new Map();
@@ -189,7 +184,6 @@ export function indexCaps(caps, manifest) {
   return {
     items,
     byId,
-    greedy,
     inferno,
     craftMax,
     defenses: idsBy((it) => it.categoria === "defense"),
@@ -295,9 +289,9 @@ export function catFoot(a, row) {
   return "";
 }
 
-/** Líneas de la ficha de Inferno Artillery: el mismo texto que la fila y las dos notas. */
+/** Líneas de la ficha de la Artillería infernal: el texto de la fila y que no hay imagen. */
 export function capsFichaLines(row) {
-  return [levelLine(row).text, "Sin imagen", "Nombre en español sin confirmar"];
+  return [levelLine(row).text, "Sin imagen"];
 }
 
 export function categoryUnlock(rows) {
@@ -429,9 +423,8 @@ function heroesScore(exp, index, th) {
 function petsScore(exp, index, th) {
   const bag = placed(exp.pets);
   const base = groupScore(index, th, index.pets, bag);
-  const extra = index.greedy && index.greedy.get(th);
-  if (!base.den && !extra) return { num: null, den: null };
-  return { num: base.num, den: base.den + (extra || 0), unlisted: extra || 0 };
+  if (!base.den) return { num: null, den: null };
+  return base;
 }
 
 function wallsScore(exp, index, th) {
@@ -724,7 +717,7 @@ export function helpersOf(exp) {
 }
 
 /**
- * Inferno Artillery solo está en caps_clashrecord.json (sin ficha ni ID).
+ * Artillería infernal solo está en caps_clashrecord.json (sin ficha ni ID).
  * Si este TH la cuenta, la fila es Nv 0 / máx con barra. Si la clave está solo
  * en el TH siguiente, la fila dice «Disponible en THn» y el 0/máx entra en la
  * comparación frente a ese TH, no en el porcentaje del TH de la cuenta.
@@ -735,7 +728,7 @@ function infernoDetail(index, th) {
   const nxt = next && index.inferno ? index.inferno.get(next) : null;
   const base = {
     capsOnly: true,
-    capsName: "Inferno Artillery",
+    capsName: "Artillería infernal",
     id: null,
     lvl: 0,
     section: "caps",
