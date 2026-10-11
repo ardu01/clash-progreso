@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.0</strong><br>
+  <strong>Versión 4.1.1</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -62,6 +62,10 @@ Datos de prueba del 7 de octubre de 2026.
 | Análisis, después | Agenda, después |
 | --- | --- |
 | <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
+
+| Estrategias | Resultado | Estrategias en claro |
+| --- | --- | --- |
+| <img src="docs/capturas/411-estrategias-oscuro.png" width="200" alt="Explorar estrategias en oscuro, con horizonte y minutos al día"> | <img src="docs/capturas/411-resultado-oscuro.png" width="200" alt="Resultado en oscuro: plan actual y estrategias con fechas probable, mejor y peor"> | <img src="docs/capturas/411-estrategias-claro.png" width="200" alt="Explorar estrategias con el tema claro"> |
 
 | Motor de atención | Bandeja | Detector |
 | --- | --- | --- |
@@ -170,6 +174,8 @@ En Inicio, la tarjeta **Motor de atención multicuenta** abre siete vistas. Sigu
 
 La sesión inteligente ejecuta esas recomendaciones.
 
+**Explorar estrategias**, en Operaciones, busca varias formas de repartir las cuentas dentro de las sesiones que escribas (por defecto, 19:00–21:00 cada día). No usa el sueño como límite. Es una simulación: el plan de la cuenta solo cambia si tocas **Pasar al plan**. Con horizonte de 180 o 365 días no afirma una fecha, solo compara.
+
 ### Operaciones
 
 La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
@@ -224,7 +230,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v37` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v38` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -232,6 +238,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.1 | Explorar estrategias: varias cuentas a la vez, con sesiones (por defecto 19:00–21:00) y sin usar el sueño como límite. El resultado es simulación. Pasarla al plan es un paso aparte. A 180 y 365 días solo se compara. |
 | 4.1.0 | Motor de atención multicuenta, sin pestaña nueva: bandeja, excepciones, presupuesto semanal, ventanas, hibernación, detector y prioridades. Rescatar flota despierta sin tocar temporizadores. |
 | 4.0.0 | Operaciones, la sexta pestaña: sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras y diario. IndexedDB conserva los exports. Adoptar un gemelo o una plantilla pasa por el plan. |
 | 3.1.16 | Cada pestaña tiene un solo trabajo. Las explicaciones largas pasan a un ⓘ. Tarjetas, cabeceras, filtros, barras y filas comparten el mismo espaciado. |
