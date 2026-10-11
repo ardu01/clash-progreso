@@ -217,6 +217,9 @@ html[data-theme="dark"] .row.row--destructive {
 .tabbar a span { font-weight: 800; }
 .tabbar svg { width: 24px; height: 24px; stroke-width: 2.4; pointer-events: none; }
 .tabbar a span { pointer-events: none; }
+/* El icono (trazo, sin relleno) y el texto no se comen el toque: en el iPhone el golpe llega al enlace. */
+a[href^="#"] :is(svg, span, img, b),
+button :is(svg) { pointer-events: none; }
 .tabbar a[aria-current="page"] {
   transform: translateY(-3px); color: var(--ink);
   border-color: var(--panel-edge); background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 60%, #FFFFFF) 0 4px, var(--panel) 4px);

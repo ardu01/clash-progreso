@@ -2154,6 +2154,8 @@ Actualizar todas está en Inicio y en Cuentas. Abre una sesión con todas las cu
 
 ## Nota de cambios (11 oct 2026, 3.1.9)
 
-`APP_VERSION` es `3.1.9`, `SHELL_CACHE` es `cp-shell-v27` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+`APP_VERSION` es `3.1.9`, `SHELL_CACHE` es `cp-shell-v28` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
 
-Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando Inicio está marcado porque la pantalla es Actualizar todas, Ahora o Copia. Antes ese toque solo subía arriba y la pantalla no cambiaba. Si la ruta ya es `#/inicio`, el toque sigue subiendo al inicio de la lista. Abrir `#/inicio` no devuelve a la sesión de Actualizar todas. El % de las 11 cuentas no cambia.
+Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando Inicio está marcado porque la pantalla es Actualizar todas, Ahora o Copia. Antes ese toque solo subía arriba y la pantalla no cambiaba. Si la ruta ya es `#/inicio`, el toque sigue subiendo al inicio de la lista. Abrir `#/inicio` no devuelve a la sesión de Actualizar todas.
+
+Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.

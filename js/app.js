@@ -4512,7 +4512,7 @@ function render() {
     screen = screenFor(r);
   } catch (err) {
     console.error(err);
-    screen = `<h1 class="large-title">Inicio</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
+    screen = `<h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
   }
   root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
@@ -4536,31 +4536,50 @@ function render() {
   armNotices();
 }
 
+function destinoDelToque(ev) {
+  const nodo = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
+  if (!nodo || !nodo.closest) return "";
+  const enlace = nodo.closest("a[href^='#']");
+  if (enlace) return enlace.getAttribute("href") || "#/inicio";
+  const mini = nodo.closest(".thumb");
+  const fila = mini && mini.parentElement;
+  if (fila && fila.classList.contains("row--account")) {
+    const principal = fila.querySelector("a.row__main");
+    if (principal) return principal.getAttribute("href") || "";
+  }
+  return "";
+}
+
+function seguirEnlace(ev, href) {
+  const act = accionTab(location.hash, href || "#/inicio");
+  ev.preventDefault();
+  if (act.type === "scroll") {
+    document.getElementById("screen")?.scrollTo?.({ top: 0 });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    return;
+  }
+  if (location.hash !== act.hash) location.hash = act.hash;
+  else render();
+}
+
 function bind(r) {
   document.getElementById("app").onclick = async (ev) => {
-    const tabLink = ev.target.closest(".tabbar a");
-    if (tabLink) {
-      const href = tabLink.getAttribute("href") || "#/inicio";
-      const act = accionTab(location.hash, href);
-      ev.preventDefault();
-      if (act.type === "scroll") {
-        document.getElementById("screen")?.scrollTo?.({ top: 0 });
-        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-        return;
-      }
-      if (location.hash !== act.hash) location.hash = act.hash;
-      else render();
+    const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
+    if (!origen || !origen.closest) return;
+    const dest = destinoDelToque(ev);
+    if (dest) {
+      seguirEnlace(ev, dest);
       return;
     }
-    const eqVista = ev.target.closest("[data-eq-vista]");
+    const eqVista = origen.closest("[data-eq-vista]");
     if (eqVista) {
       state.eqVista = eqVista.dataset.eqVista === "flota" ? "flota" : "cuenta";
       localStorage.setItem("cp-eq-vista", state.eqVista);
       render();
       return;
     }
-    const eqCuenta = ev.target.closest("[data-eq-cuenta]");
+    const eqCuenta = origen.closest("[data-eq-cuenta]");
     if (eqCuenta) {
       state.eqVista = "cuenta";
       localStorage.setItem("cp-eq-vista", "cuenta");
@@ -4569,26 +4588,26 @@ function bind(r) {
       else location.hash = dest;
       return;
     }
-    const eqRareza = ev.target.closest("[data-eq-rareza]");
+    const eqRareza = origen.closest("[data-eq-rareza]");
     if (eqRareza) {
       state.eqFiltro = { ...state.eqFiltro, rareza: eqRareza.dataset.eqRareza || "todos" };
       localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
       render();
       return;
     }
-    if (ev.target.closest("[data-eq-bloqueados]")) {
+    if (origen.closest("[data-eq-bloqueados]")) {
       state.eqFiltro = { ...state.eqFiltro, bloqueados: !state.eqFiltro.bloqueados };
       localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
       render();
       return;
     }
-    if (ev.target.closest("[data-eq-ocultar]")) {
+    if (origen.closest("[data-eq-ocultar]")) {
       state.eqFiltro = { ...state.eqFiltro, ocultar: !state.eqFiltro.ocultar };
       localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
       render();
       return;
     }
-    const eqElegir = ev.target.closest("[data-eq-elegir]");
+    const eqElegir = origen.closest("[data-eq-elegir]");
     if (eqElegir) {
       const tag = eqElegir.dataset.eqTag;
       const id = eqElegir.dataset.eqElegir;
@@ -4601,7 +4620,7 @@ function bind(r) {
       render();
       return;
     }
-    const go = ev.target.closest("[data-go]");
+    const go = origen.closest("[data-go]");
     if (go) {
       const dest = go.dataset.go;
       if (dest === "#/ajustes" || dest === "#/importar") rememberOpener(go, `[data-go="${dest}"]`);
@@ -4612,20 +4631,20 @@ function bind(r) {
       location.hash = dest;
       return;
     }
-    if (ev.target.closest("[data-paste-now]")) { await pasteNow(); return; }
-    if (ev.target.closest("[data-pegar-cuenta]")) { await pegarCuenta(); return; }
-    if (ev.target.closest("[data-pegar-campo]")) {
+    if (origen.closest("[data-paste-now]")) { await pasteNow(); return; }
+    if (origen.closest("[data-pegar-cuenta]")) { await pegarCuenta(); return; }
+    if (origen.closest("[data-pegar-campo]")) {
       const campo = document.querySelector("[data-actualizar-text]");
       await aplicarPegado(campo ? campo.value : "");
       return;
     }
-    if (ev.target.closest("[data-pegar-mano]")) {
+    if (origen.closest("[data-pegar-mano]")) {
       state.actualizarManual = true;
       state.actualizarFocus = true;
       render();
       return;
     }
-    if (ev.target.closest("[data-actualizar-listo]")) {
+    if (origen.closest("[data-actualizar-listo]")) {
       clearSession(localStorage);
       state.actualizarManual = false;
       state.actualizarBorrador = "";
@@ -4633,15 +4652,15 @@ function bind(r) {
       else render();
       return;
     }
-    if (ev.target.closest("[data-actualizar]")) { abrirActualizar(); return; }
-    const modo = ev.target.closest("[data-plan-modo]");
+    if (origen.closest("[data-actualizar]")) { abrirActualizar(); return; }
+    const modo = origen.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;
       if (tag) setAccountPlan(tag, { modo: modo.dataset.planModo === "rushear" ? "rushear" : "maxear" });
       render();
       return;
     }
-    const flag = ev.target.closest("[data-plan-flag]");
+    const flag = origen.closest("[data-plan-flag]");
     if (flag) {
       const tag = route().tag;
       const id = flag.dataset.planFlag;
@@ -4651,7 +4670,7 @@ function bind(r) {
       render();
       return;
     }
-    const prov = ev.target.closest("[data-prov]");
+    const prov = origen.closest("[data-prov]");
     if (prov) {
       const tag = prov.dataset.provTag;
       let keys = [];
@@ -4663,7 +4682,7 @@ function bind(r) {
       render();
       return;
     }
-    const themeBtn = ev.target.closest("button[data-theme]");
+    const themeBtn = origen.closest("button[data-theme]");
     if (themeBtn) {
       state.theme = themeBtn.dataset.theme;
       localStorage.setItem("cp-theme", state.theme);
@@ -4671,24 +4690,24 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-notify]")) { await toggleNotify(); return; }
-    if (ev.target.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
-    if (ev.target.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
-    const tiempo = ev.target.closest("[data-tiempo]");
+    if (origen.closest("[data-notify]")) { await toggleNotify(); return; }
+    if (origen.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
+    if (origen.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
+    const tiempo = origen.closest("[data-tiempo]");
     if (tiempo) { setFilter({ tiempo: tiempo.dataset.tiempo }); render(); return; }
-    const recurso = ev.target.closest("[data-recurso]");
+    const recurso = origen.closest("[data-recurso]");
     if (recurso) { setFilter({ recurso: recurso.dataset.recurso }); render(); return; }
-    const thf = ev.target.closest("[data-th]");
+    const thf = origen.closest("[data-th]");
     if (thf) { setFilter({ th: thf.dataset.th || "" }); render(); return; }
-    const grupo = ev.target.closest("[data-grupo]");
+    const grupo = origen.closest("[data-grupo]");
     if (grupo && grupo.dataset.grupoDel == null) { setFilter({ grupo: grupo.dataset.grupo || "" }); render(); return; }
-    const kind = ev.target.closest("[data-chart-kind]");
+    const kind = origen.closest("[data-chart-kind]");
     if (kind) { state.chartKind = kind.dataset.chartKind; localStorage.setItem("cp-chart-kind", state.chartKind); render(); return; }
-    const levelKind = ev.target.closest("[data-level-kind]");
+    const levelKind = origen.closest("[data-level-kind]");
     if (levelKind) { state.levelKind = levelKind.dataset.levelKind; localStorage.setItem("cp-level-kind", state.levelKind); render(); return; }
-    const rank = ev.target.closest("[data-rank]");
+    const rank = origen.closest("[data-rank]");
     if (rank) { state.rankKey = rank.dataset.rank; localStorage.setItem("cp-rank", state.rankKey); render(); return; }
-    const compare = ev.target.closest("[data-compare]");
+    const compare = origen.closest("[data-compare]");
     if (compare) {
       const tag = compare.dataset.compare;
       const has = state.compareTags.includes(tag);
@@ -4700,7 +4719,7 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-grupo-add]")) {
+    if (origen.closest("[data-grupo-add]")) {
       const input = document.querySelector("[data-grupo-text]");
       const acc = state.accounts.find((a) => a.tag === state.editor);
       const next = cleanGrupos((acc && acc.grupos || []).concat(input ? input.value : ""));
@@ -4712,7 +4731,7 @@ function bind(r) {
       render();
       return;
     }
-    const gdel = ev.target.closest("[data-grupo-del]");
+    const gdel = origen.closest("[data-grupo-del]");
     if (gdel) {
       const acc = state.accounts.find((a) => a.tag === state.editor);
       const next = (acc && acc.grupos || []).filter((g) => g !== gdel.dataset.grupoDel);
@@ -4721,7 +4740,7 @@ function bind(r) {
       render();
       return;
     }
-    const seg = ev.target.closest("[data-seg]");
+    const seg = origen.closest("[data-seg]");
     if (seg) {
       const tag = (route().tag) || state.selected;
       state.seg[tag] = seg.dataset.seg;
@@ -4729,26 +4748,26 @@ function bind(r) {
       render();
       return;
     }
-    const mej = ev.target.closest("[data-mej]");
+    const mej = origen.closest("[data-mej]");
     if (mej) {
       state.mejorasMode = mej.dataset.mej;
       localStorage.setItem("cp-mejoras", state.mejorasMode);
       render();
       return;
     }
-    const pcat = ev.target.closest("[data-pcat]");
+    const pcat = origen.closest("[data-pcat]");
     if (pcat) {
       state.progFilter = { ...state.progFilter, cat: pcat.dataset.pcat };
       render();
       return;
     }
-    const pstatus = ev.target.closest("[data-pstatus]");
+    const pstatus = origen.closest("[data-pstatus]");
     if (pstatus) {
       state.progFilter = { ...state.progFilter, status: pstatus.dataset.pstatus };
       render();
       return;
     }
-    const edit = ev.target.closest("[data-edit]");
+    const edit = origen.closest("[data-edit]");
     if (edit) {
       rememberOpener(edit, `[data-edit="${cssAttr(edit.dataset.edit)}"]`);
       state.editor = edit.dataset.edit;
@@ -4756,8 +4775,8 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-close-editor]")) { state.editor = null; render(); return; }
-    const principal = ev.target.closest("[data-principal]");
+    if (origen.closest("[data-close-editor]")) { state.editor = null; render(); return; }
+    const principal = origen.closest("[data-principal]");
     if (principal) {
       const tag = principal.dataset.principal;
       const cur = state.accounts.find((a) => a.tag === tag);
@@ -4766,7 +4785,7 @@ function bind(r) {
       render();
       return;
     }
-    const del = ev.target.closest("[data-delete]");
+    const del = origen.closest("[data-delete]");
     if (del) {
       const tag = del.dataset.delete;
       const meta = accountByTag(tag);
@@ -4782,9 +4801,9 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-backup]")) { await exportBackup(); return; }
-    if (ev.target.closest("[data-backup-pick]")) { document.querySelector("[data-backup-file]")?.click(); return; }
-    const ficha = ev.target.closest("[data-ficha]");
+    if (origen.closest("[data-backup]")) { await exportBackup(); return; }
+    if (origen.closest("[data-backup-pick]")) { document.querySelector("[data-backup-file]")?.click(); return; }
+    const ficha = origen.closest("[data-ficha]");
     if (ficha) {
       const lvl = Number(ficha.dataset.lvl);
       const max = ficha.dataset.max ? Number(ficha.dataset.max) : null;
@@ -4798,10 +4817,10 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
-    if (ev.target.closest("[data-close]")) { location.hash = "#/roster"; return; }
-    if (ev.target.closest("[data-restore]")) {
-      rememberAlertOpener(ev.target.closest("[data-restore]"), "[data-restore]");
+    if (origen.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
+    if (origen.closest("[data-close]")) { location.hash = "#/roster"; return; }
+    if (origen.closest("[data-restore]")) {
+      rememberAlertOpener(origen.closest("[data-restore]"), "[data-restore]");
       state.alert = {
         title: "¿Restaurar datos incluidos?",
         msg: "Se volverán a cargar las 11 exportaciones del 7 oct 2026. Las importaciones más nuevas se conservan.",
@@ -4813,8 +4832,8 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-wipe]")) {
-      rememberAlertOpener(ev.target.closest("[data-wipe]"), "[data-wipe]");
+    if (origen.closest("[data-wipe]")) {
+      rememberAlertOpener(origen.closest("[data-wipe]"), "[data-wipe]");
       state.alert = {
         title: "¿Borrar todos los datos?",
         msg: "Se eliminarán las importaciones y el histórico de este iPhone.",
@@ -4826,7 +4845,7 @@ function bind(r) {
       render();
       return;
     }
-    const alertBtn = ev.target.closest("[data-alert]");
+    const alertBtn = origen.closest("[data-alert]");
     if (alertBtn) {
       const b = state.alert.buttons[Number(alertBtn.dataset.alert)];
       const act = b && b.act;
@@ -4854,7 +4873,7 @@ function bind(r) {
       render();
       return;
     }
-    const dl = ev.target.closest("[data-dl]");
+    const dl = origen.closest("[data-dl]");
     if (dl) {
       if (dl.dataset.dl === "start") downloadAll();
       if (dl.dataset.dl === "stop" && state.dlAbort) state.dlAbort.abort();
@@ -4869,7 +4888,7 @@ function bind(r) {
       }
       return;
     }
-    const quitar = ev.target.closest("[data-quitar]");
+    const quitar = origen.closest("[data-quitar]");
     if (quitar) {
       const tag = quitar.dataset.quitar;
       const meta = accountByTag(tag);
@@ -4886,7 +4905,7 @@ function bind(r) {
       render();
       return;
     }
-    const im = ev.target.closest("[data-im]");
+    const im = origen.closest("[data-im]");
     if (im) {
       state.importUi.mode = im.dataset.im;
       state.importUi.phase = "entry";
@@ -4897,8 +4916,8 @@ function bind(r) {
       render();
       return;
     }
-    if (ev.target.closest("[data-im-back]")) { goBackImport(); return; }
-    const rowBtn = ev.target.closest("[data-im-row]");
+    if (origen.closest("[data-im-back]")) { goBackImport(); return; }
+    const rowBtn = origen.closest("[data-im-row]");
     if (rowBtn) {
       const idx = Number(rowBtn.dataset.imRow);
       const item = state.importUi.items[idx];
@@ -4913,7 +4932,7 @@ function bind(r) {
       render();
       return;
     }
-    const actBtn = ev.target.closest("[data-act]");
+    const actBtn = origen.closest("[data-act]");
     if (actBtn) {
       const name = actBtn.dataset.act;
       if (name === "paste") { await doPaste(); return; }

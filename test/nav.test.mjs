@@ -26,10 +26,24 @@ test("con Actualizar todas abierta, Inicio sale de la sesión", () => {
   assert.equal(accionTab("#/roster", "#/roster").type, "scroll");
 });
 
-test("el toque de Inicio no se cancela por la pestaña marcada", () => {
+test("Qué hacer ahora, objetivos, Abrir hoy y las tarjetas cambian de ruta", () => {
+  assert.equal(accionTab("#/inicio", "#/ahora").hash, "#/ahora");
+  assert.equal(accionTab("#/inicio", "#/roster").hash, "#/roster");
+  assert.equal(accionTab("#/inicio", "#/agenda").hash, "#/agenda");
+  assert.equal(accionTab("#/roster", "#/ahora").hash, "#/ahora");
+  assert.equal(accionTab("#/inicio", "#/progreso/GJPJP9JP0").hash, "#/progreso/GJPJP9JP0");
+  assert.equal(accionTab("#/inicio", "#/progreso/GJPJP9JP0/plan").hash, "#/progreso/GJPJP9JP0/plan");
+  assert.equal(accionTab("#/actualizar", "#/ahora").hash, "#/ahora");
+  assert.equal(accionTab("#/ahora", "#/ahora").type, "scroll");
+});
+
+test("el toque de un enlace lo abre la app, no el navegador", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.match(app, /accionTab/);
+  assert.match(app, /a\[href\^='#'\]/);
+  assert.match(app, /destinoDelToque/);
   assert.equal(app.includes(".tabbar a[aria-current='page']"), false);
+  assert.equal(app.includes('closest(".tabbar a")'), false);
   assert.equal(app.includes("titles[tab]"), false);
   const boot = app.slice(app.indexOf("async function boot"), app.indexOf("window.addEventListener"));
   assert.match(boot, /abierta !== "inicio"/);
