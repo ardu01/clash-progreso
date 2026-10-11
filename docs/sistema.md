@@ -2151,3 +2151,11 @@ Entran 25 PNG no oficiales (`official: false`) solo donde no había imagen del F
 `APP_VERSION` es `3.1.8`, `SHELL_CACHE` es `cp-shell-v26` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. La precarga de instalación sigue en 220 archivos y 21.579.962 bytes.
 
 Actualizar todas está en Inicio y en Cuentas. Abre una sesión con todas las cuentas, en el orden de Abrir hoy (la misma prioridad: antes la cola con hora, y al final la que no tiene hora exacta). Ese orden se congela al empezar. **Pegar esta cuenta** llama a `navigator.clipboard.readText()` en el mismo toque, en Safari y desde el icono de inicio. Si la lectura falla, sale un campo. La etiqueta del JSON marca esa cuenta, no tiene que ser la sugerida. Una etiqueta que no está en la lista no crea una cuenta. Lo que cambia (`ready`) actualiza la última exportación; un duplicado queda sin cambios; una exportación más antigua solo entra al histórico; un texto inválido no se marca. La sesión y el texto pendiente se escriben en `localStorage` antes del guardado en IndexedDB. Si iOS cierra la app, al abrir se vuelve a la sesión y, si quedó texto, se puede guardar con otro toque. Al terminar se ve qué cuentas cambiaron, cuáles no, cuáles fueron al histórico y cuáles no se pegaron. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.9)
+
+`APP_VERSION` es `3.1.9`, `SHELL_CACHE` es `cp-shell-v28` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando Inicio está marcado porque la pantalla es Actualizar todas, Ahora o Copia. Antes ese toque solo subía arriba y la pantalla no cambiaba. Si la ruta ya es `#/inicio`, el toque sigue subiendo al inicio de la lista. Abrir `#/inicio` no devuelve a la sesión de Actualizar todas.
+
+Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
