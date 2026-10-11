@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { analyze, indexCaps } from "../js/progress.js";
+import { levelCost, sumLevels } from "../js/costs.js";
+import { analyze, builderStatus, indexCaps } from "../js/progress.js";
 import { HEROES_FUERA } from "../js/plan.js";
 import { reconcileMessage, reconcileProvisionals, toggleProvisional } from "../js/provisional.js";
 import {
-  ahoraDe, buildRoadmap, capTownHall, effectivePlan, planIsConfigured, planLabel, rushGaps,
+  ahoraDe, buildRoadmap, capTownHall, constructoresParaPlan, effectivePlan, planIsConfigured, planLabel,
+  requisitosAyuntamiento, rushGaps,
 } from "../js/roadmap.js";
 
 const caps = JSON.parse(readFileSync(new URL("../data/caps_clashrecord.json", import.meta.url)));
@@ -37,14 +39,21 @@ test("la timeline no mete héroes de C1 ni equipamiento", () => {
   assert.equal(built.plan.modo, "maxear");
 });
 
-test("rushear solo usa almacenes, ejército y laboratorio", () => {
-  const built = road(c2, { modo: "rushear", th: null }, []);
-  const ok = new Set(["laboratorio", "ejercito_edif", "recursos"]);
-  assert.ok(built.orden.length > 0);
-  for (const step of built.orden) {
-    assert.equal(ok.has(step.categoryKey), true, step.categoryKey + " " + step.id);
-    if (step.categoryKey === "recursos") assert.equal(["1000005", "1000003", "1000024"].includes(step.id), true);
-  }
+test("el rush por defecto es esencial y un valor raro vuelve a esencial", () => {
+  assert.equal(effectivePlan({ modo: "rushear" }).rush, "esencial");
+  assert.deepEqual(effectivePlan({ modo: "rushear" }).sugerenciasOff, []);
+  assert.equal(effectivePlan({ modo: "rushear", rush: "raro" }).rush, "esencial");
+  assert.equal(effectivePlan({ modo: "rushear", rush: "estrategico" }).rush, "estrategico");
+  assert.deepEqual(
+    effectivePlan({ modo: "rushear", rush: "estrategico", sugerenciasOff: ["1000014", "1000014", "no"] }).sugerenciasOff,
+    ["1000014"],
+  );
+  assert.equal(planLabel(effectivePlan({ modo: "rushear", th: 17 }), 16), "Rush esencial → TH17");
+  assert.equal(planLabel(effectivePlan({ modo: "rushear", rush: "estrategico", th: 17 }), 16), "Rush estratégico → TH17");
+  const actual = road(c2, { modo: "rushear", th: null }, []);
+  assert.equal(actual.plan.rush, "esencial");
+  assert.equal(actual.orden.length, 0);
+  assert.equal(actual.rush.filas.length, 0);
 });
 
 test("el TH objetivo usa el máximo del TH anterior", () => {
@@ -65,12 +74,16 @@ test("con una cola libre, ahora enseña el siguiente paso y una marca lo adelant
   const first = road(exp, null, []);
   const pasos = ahoraDe(first);
   assert.ok(pasos.some((p) => p.cola === "constructor"), "hace falta un constructor libre");
+  const libre = pasos.find((p) => p.cola === "constructor");
+  assert.equal(libre.clase, "real");
+  assert.equal(libre.origen, "recomendado");
   const late = first.orden.find((s) => s.queue === "constructor" && s.id !== pasos[0].id);
   assert.ok(late);
   const marks = toggleProvisional([], late, exp.tag, now);
   const again = road(exp, null, marks);
   const next = ahoraDe(again).find((p) => p.cola === "constructor");
   assert.equal(next.provisional, true);
+  assert.equal(next.origen, "provisional");
   assert.equal(next.id, late.id);
   assert.equal(next.fromLvl, late.fromLvl);
   const media = analyze(exp, index).media;
@@ -119,4 +132,227 @@ test("Qué hacer ahora sale del plan y no de una cola ocupada", () => {
   const freeCtor = busy.lanes.filter((l) => l.cola === "constructor" && l.libreYa);
   const shown = ahoraDe(busy).filter((p) => p.cola === "constructor");
   assert.equal(shown.length, freeCtor.length);
+});
+
+function sinChozas(exp) {
+  const copy = structuredClone(exp);
+  copy.buildings = (copy.buildings || []).filter((b) => String(b.data) !== "1000015" && String(b.data) !== "1000064");
+  for (const sec of ["buildings", "traps", "heroes", "guardians"]) {
+    for (const it of copy[sec] || []) delete it.timer;
+  }
+  return copy;
+}
+
+test("rushear usa las chozas del JSON y suma B.O.B; si no vienen, el ajuste es 4, 5 o 6", () => {
+  const deJson = constructoresParaPlan(c2, 4);
+  assert.equal(deJson.origen, "json");
+  assert.equal(deJson.chozas, builderStatus(c2).total);
+  assert.equal(deJson.bob, false);
+  assert.equal(deJson.total, deJson.chozas);
+  assert.equal(deJson.ajuste, null);
+  const conBob = constructoresParaPlan(c1, null);
+  assert.equal(conBob.origen, "json");
+  assert.equal(conBob.bob, true);
+  assert.equal(conBob.total, builderStatus(c1).total + 1);
+  const vacia = sinChozas(c2);
+  assert.equal(constructoresParaPlan(vacia, 6).origen, "ajuste");
+  assert.equal(constructoresParaPlan(vacia, 6).total, 6);
+  assert.equal(constructoresParaPlan(vacia, 3).total, null);
+  assert.equal(constructoresParaPlan(vacia, null).origen, null);
+  const rush = road(c2, { modo: "rushear", th: 17 }, []);
+  assert.equal(rush.constructores.total, 5);
+  const max = road(c1, { modo: "maxear" }, []);
+  const numerados = max.lanes.filter((l) => l.cola === "constructor" && l.titulo.startsWith("Constructor"));
+  assert.equal(numerados.length, builderStatus(c1).total);
+});
+
+test("rushear reparte las mejoras entre los constructores y no las encadena en serie", () => {
+  const exp = sinChozas(c2);
+  const uno = road(exp, { modo: "rushear", rush: "estrategico", th: 17, constructores: 4 }, []);
+  const lanes = uno.lanes.filter((l) => l.cola === "constructor" && l.titulo.startsWith("Constructor"));
+  assert.equal(lanes.length, 4);
+  assert.equal(lanes.every((l) => l.clase === "ajuste"), true);
+  const pasos = uno.orden.filter((s) => s.queue === "constructor" && s.fin != null && s.seconds != null);
+  assert.ok(pasos.length > 4);
+  const minimo = Math.min(...pasos.map((s) => s.inicio));
+  const aLaVez = pasos.filter((s) => s.inicio === minimo);
+  assert.equal(aLaVez.length, 4);
+  assert.equal(new Set(aLaVez.map((s) => s.laneId)).size, 4);
+  const siguiente = pasos.find((s) => s.instance === aLaVez[0].instance && s.fromLvl === aLaVez[0].toLvl);
+  if (siguiente) assert.ok(siguiente.inicio >= aLaVez[0].fin);
+  assert.ok(uno.trabajoSeg > uno.calendarioSeg);
+  const suma = aLaVez.reduce((n, s) => n + s.seconds, 0);
+  const cal = (Math.max(...aLaVez.map((s) => s.fin)) - minimo) / 1000;
+  assert.ok(cal < suma);
+});
+
+test("los requisitos para subir de TH salen de los topes y se marcan provisionales", () => {
+  const req = requisitosAyuntamiento(c2, index, 17);
+  assert.equal(req.provisional, true);
+  assert.match(req.nota, /Provisional/);
+  assert.equal(req.pasos.length, 1);
+  const filas = req.pasos[0].filas;
+  assert.equal(req.pasos[0].desde, 16);
+  assert.equal(req.pasos[0].hacia, 17);
+  assert.equal(filas.some((f) => f.id === "1000015" || f.id === "1000014" || f.id === "1000064"), false);
+  const heroes = filas.find((f) => f.id === "1000071");
+  assert.ok(heroes);
+  assert.equal(heroes.requerido, 10);
+  assert.equal(heroes.actual, 9);
+  assert.equal(heroes.hecho, false);
+  assert.equal(heroes.provisional, true);
+  assert.equal(heroes.coste.segundos, sumLevels("1000071", 9, 10, 1).segConstructor);
+  const canon = filas.find((f) => f.id === "1000008");
+  assert.equal(canon.hecho, true);
+  assert.equal(canon.tienen, 3);
+  assert.equal(canon.requerido, 1);
+  const muro = filas.find((f) => f.id === "1000010");
+  assert.equal(muro.hecho, true);
+  const actual = requisitosAyuntamiento(c2, index, 16);
+  assert.equal(actual.pasos.length, 0);
+
+  const th17 = structuredClone(c2);
+  const hall = th17.buildings.find((b) => b.data === 1000001);
+  hall.lvl = 17;
+  hall.weapon = 1;
+  const subida = requisitosAyuntamiento(th17, index, 18);
+  const arma = subida.pasos.find((p) => p.desde === 17).filas.find((f) => f.id === "inferno-artillery");
+  assert.ok(arma);
+  assert.equal(arma.provisional, true);
+  assert.equal(arma.actual, 1);
+  assert.equal(arma.requerido, 5);
+  assert.equal(arma.hecho, false);
+  assert.equal(arma.coste.segundos, 518400 + 604800 + 691200 + 864000);
+  assert.equal(arma.coste.oro, 10000000 + 12000000 + 14000000 + 18000000);
+  delete hall.weapon;
+  const sinArma = requisitosAyuntamiento(th17, index, 18);
+  const hueco = sinArma.pasos.find((p) => p.desde === 17).filas.find((f) => f.id === "inferno-artillery");
+  assert.equal(hueco.sinDato, true);
+  assert.equal(hueco.coste, null);
+
+  const sinCanon = structuredClone(c2);
+  sinCanon.buildings = sinCanon.buildings.filter((b) => String(b.data) !== "1000008");
+  const falta = requisitosAyuntamiento(sinCanon, index, 17).pasos[0].filas.find((f) => f.id === "1000008");
+  assert.equal(falta.hecho, false);
+  assert.equal(falta.tienen, 0);
+  assert.equal(falta.cantidad, 3);
+  assert.equal(falta.coste.segundos, levelCost("1000008", 1).s * 3);
+  assert.equal(falta.coste.oro, levelCost("1000008", 1).n * 3);
+});
+
+function sumaPasos(orden) {
+  const arma = { 2: [10000000, 518400], 3: [12000000, 604800], 4: [14000000, 691200], 5: [18000000, 864000] };
+  const total = { oro: 0, elixir: 0, oscuro: 0, muros: 0, segConstructor: 0 };
+  for (const step of orden) {
+    if (step.id === "inferno-artillery") {
+      const row = arma[step.toLvl];
+      total.oro += row[0];
+      total.segConstructor += row[1];
+      continue;
+    }
+    const part = sumLevels(step.id, step.fromLvl, step.toLvl, 1);
+    total.oro += part.oro;
+    total.elixir += part.elixir;
+    total.oscuro += part.oscuro;
+    total.muros += part.muros;
+    total.segConstructor += part.segConstructor;
+  }
+  return total;
+}
+
+test("rush esencial solo programa los requisitos y rush estratégico suma sugerencias editables", () => {
+  const esencial = road(c2, { modo: "rushear", th: 17 }, []);
+  assert.equal(esencial.plan.rush, "esencial");
+  assert.equal(esencial.orden.some((s) => s.id === "1000014"), false);
+  assert.equal(esencial.orden.some((s) => s.categoryKey === "heroes"), false);
+  assert.equal(esencial.orden.some((s) => s.categoryKey === "laboratorio"), false);
+  assert.equal(esencial.orden.some((s) => s.id === "1000008"), false);
+  assert.equal(esencial.orden.every((s) => s.rushClase === "requisito"), true);
+  assert.equal(esencial.orden.some((s) => s.id !== "1000071" && s.toLvl > 1), false);
+  const sala = esencial.rush.filas.find((f) => f.id === "1000071");
+  assert.equal(sala.requerido, 10);
+  assert.equal(sala.clase, "requisito");
+  assert.equal(sala.hecho, false);
+  assert.match(esencial.rush.nota, /requisitos del juego/);
+
+  const est = road(c2, { modo: "rushear", rush: "estrategico", th: 17 }, []);
+  for (const id of ["1000007", "1000000", "1000014", "1000005", "1000003", "1000024", "1000068", "1000006", "1000059"]) {
+    const fila = est.rush.filas.find((f) => f.id === id);
+    assert.ok(fila, id);
+    assert.equal(fila.requerido, index.byId.get(id).get(16).max, id);
+    assert.equal(fila.clase, "sugerencia", id);
+    assert.match(fila.razon, /sugerencia|ejército|refuerzos|oro|elixir|mascotas|tropas|asedio|hechizos|oscuro|cuarto|cuartel|laboratorio|campamento|Caseta|Fábrica|Sin sitio|Abre|No hace falta|Héroes/i, id);
+  }
+  assert.equal(est.orden.some((s) => s.categoryKey === "heroes" && s.rushClase === "sugerencia"), true);
+  assert.match(est.orden.find((s) => s.id === "28000000").rushRazon, /héroe/i);
+  assert.equal(est.orden.some((s) => s.categoryKey === "laboratorio"), false);
+  assert.equal(est.orden.some((s) => s.categoryKey === "defensas" && s.toLvl > 1), false);
+  assert.equal(est.orden.some((s) => s.id === "1000008"), false);
+  const camp = est.orden.find((s) => s.id === "1000000");
+  assert.equal(camp.rushClase, "sugerencia");
+  assert.equal(est.rush.sugerencias.every((s) => s.razon.length > 20), true);
+  assert.equal(est.rush.sugerencias.find((s) => s.id === "1000068").activa, true);
+
+  const suma = sumaPasos(est.orden);
+  assert.equal(est.coste.oro, suma.oro);
+  assert.equal(est.coste.elixir, suma.elixir);
+  assert.equal(est.coste.oscuro, suma.oscuro);
+  assert.equal(est.coste.muros, suma.muros);
+  assert.equal(est.coste.segConstructor, suma.segConstructor);
+  assert.equal(est.rush.coste.oro, suma.oro);
+  assert.equal(est.constructores.total, 5);
+  assert.ok(est.trabajoSeg > est.calendarioSeg);
+  assert.equal(est.fin, Math.max(...est.orden.map((s) => s.fin).filter((n) => n != null)));
+  assert.equal(est.rush.fin, est.fin);
+  assert.equal(est.rush.calendarioSeg, est.calendarioSeg);
+
+  const sinCastillo = road(c2, { modo: "rushear", rush: "estrategico", th: 17, sugerenciasOff: ["1000014"] }, []);
+  assert.equal(sinCastillo.rush.filas.some((f) => f.id === "1000014"), false);
+  assert.equal(sinCastillo.orden.some((s) => s.id === "1000014"), false);
+  assert.equal(sinCastillo.rush.filas.find((f) => f.id === "1000071").requerido, 10);
+  assert.equal(sinCastillo.rush.sugerencias.find((s) => s.id === "1000014").activa, false);
+
+  const sinLab = road(c2, { modo: "rushear", rush: "estrategico", th: 17, sugerenciasOff: ["1000007"] }, []);
+  assert.equal(sinLab.orden.some((s) => s.id === "1000007"), false);
+  const lab = sinLab.rush.filas.find((f) => f.id === "1000007");
+  assert.equal(lab.requerido, 1);
+  assert.equal(lab.hecho, true);
+  assert.equal(lab.clase, "requisito");
+
+  const th11 = JSON.parse(readFileSync(new URL("../data/2026-10-07/th11_R02YUVC0J_2026-10-07_a45e.json", import.meta.url)));
+  const bajo = road(th11, { modo: "rushear", rush: "estrategico", th: 12 }, []);
+  assert.equal(bajo.rush.sugerencias.find((s) => s.id === "1000068").aplica, false);
+  assert.equal(bajo.rush.sugerencias.find((s) => s.id === "1000059").aplica, false);
+  assert.equal(bajo.orden.some((s) => s.id === "1000068" || s.id === "1000059"), false);
+  assert.equal(bajo.rush.filas.some((f) => f.id === "1000068"), false);
+
+  const c1bajo = structuredClone(c1);
+  c1bajo.buildings.find((b) => b.data === 1000001).lvl = 17;
+  const fuera = road(c1bajo, { modo: "rushear", rush: "estrategico", th: 18 }, []);
+  assert.equal(fuera.heroesFuera, true);
+  assert.equal(fuera.orden.some((s) => s.categoryKey === "heroes"), false);
+  assert.equal(fuera.rush.filas.some((f) => f.id === "28000000"), false);
+  assert.equal(fuera.rush.sugerencias.find((s) => s.id === "heroes").aplica, false);
+  assert.match(fuera.rush.sugerencias.find((s) => s.id === "heroes").motivo, /#28PLGP0G2/);
+
+  const th17 = structuredClone(c2);
+  const hall = th17.buildings.find((b) => b.data === 1000001);
+  hall.lvl = 17;
+  hall.weapon = 1;
+  const arma = road(th17, { modo: "rushear", th: 18 }, []);
+  assert.equal(arma.orden.some((s) => s.id === "inferno-artillery" && s.rushClase === "requisito"), true);
+  const costeArma = sumaPasos(arma.orden);
+  assert.equal(arma.coste.oro, costeArma.oro);
+  assert.ok(arma.coste.oro >= 10000000 + 12000000 + 14000000 + 18000000);
+
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /Rush esencial/);
+  assert.match(app, /Rush estratégico/);
+  assert.match(app, /data-rush/);
+  assert.match(app, /data-sugerencia/);
+  assert.match(app, /Coste total/);
+  assert.match(app, /Tiempo con/);
+  assert.match(app, /Fecha estimada/);
+  assert.equal(app.includes("cuello de botella"), false);
+  assert.equal(app.includes("ID deducido"), false);
 });

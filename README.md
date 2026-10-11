@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.12</strong><br>
+  <strong>Versión 3.1.16</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -28,27 +28,53 @@ Datos de prueba del 7 de octubre de 2026.
 
 | Inicio | Cuentas | Mejoras |
 | --- | --- | --- |
-| <img src="docs/capturas/312-inicio-oscuro.png" width="200" alt="Inicio en oscuro: centro de mando, qué hacer ahora y las próximas finalizaciones"> | <img src="docs/capturas/312-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/312-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, ordenadas por cuándo terminan"> |
+| <img src="docs/capturas/313-inicio-oscuro.png" width="200" alt="Inicio en oscuro: centro de mando, qué hacer ahora y las próximas finalizaciones"> | <img src="docs/capturas/313-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/313-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, ordenadas por cuándo terminan"> |
 
 | Análisis | Agenda | Actualizar todas |
 | --- | --- | --- |
-| <img src="docs/capturas/312-analisis-oscuro.png" width="200" alt="Análisis en oscuro: ranking de cuentas por la media"> | <img src="docs/capturas/312-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las próximas 24 horas y las franjas"> | <img src="docs/capturas/319-actualizar-oscuro.png" width="200" alt="Actualizar todas en oscuro: progreso de la lista y la siguiente cuenta a copiar"> |
+| <img src="docs/capturas/313-analisis-oscuro.png" width="200" alt="Análisis en oscuro: ranking de cuentas por la media"> | <img src="docs/capturas/313-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las próximas 24 horas y las franjas"> | <img src="docs/capturas/319-actualizar-oscuro.png" width="200" alt="Actualizar todas en oscuro: progreso de la lista y la siguiente cuenta a copiar"> |
 
 | Inicio en claro | Cuentas en claro | Mejoras en claro |
 | --- | --- | --- |
-| <img src="docs/capturas/312-inicio-claro.png" width="200" alt="Inicio con el tema claro"> | <img src="docs/capturas/312-cuentas-claro.png" width="200" alt="Cuentas con el tema claro"> | <img src="docs/capturas/312-mejoras-claro.png" width="200" alt="Mejoras con el tema claro"> |
+| <img src="docs/capturas/313-inicio-claro.png" width="200" alt="Inicio con el tema claro"> | <img src="docs/capturas/313-cuentas-claro.png" width="200" alt="Cuentas con el tema claro"> | <img src="docs/capturas/313-mejoras-claro.png" width="200" alt="Mejoras con el tema claro"> |
 
 | Análisis en claro | Agenda en claro |
 | --- | --- |
-| <img src="docs/capturas/312-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/312-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
+| <img src="docs/capturas/313-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/313-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
+
+| Plan, rushear | Requisitos para subir |
+| --- | --- |
+| <img src="docs/capturas/314-plan-oscuro.png" width="200" alt="Plan en oscuro: rushear a TH17 y los constructores de la exportación"> | <img src="docs/capturas/314-requisitos-oscuro.png" width="200" alt="Requisitos provisionales para subir el ayuntamiento, en oscuro"> |
+| <img src="docs/capturas/314-plan-claro.png" width="200" alt="Plan con el tema claro"> | <img src="docs/capturas/314-requisitos-claro.png" width="200" alt="Requisitos provisionales con el tema claro"> |
+
+| Inicio, antes | Cuentas, antes | Mejoras, antes |
+| --- | --- | --- |
+| <img src="docs/capturas/316-antes-inicio-oscuro.png" width="200" alt="Inicio en oscuro, antes de ordenar las pantallas"> | <img src="docs/capturas/316-antes-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro, antes de ordenar las pantallas"> | <img src="docs/capturas/316-antes-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, antes de ordenar las pantallas"> |
+
+| Análisis, antes | Agenda, antes |
+| --- | --- |
+| <img src="docs/capturas/316-antes-analisis-oscuro.png" width="200" alt="Análisis en oscuro, antes de ordenar las pantallas"> | <img src="docs/capturas/316-antes-agenda-oscuro.png" width="200" alt="Agenda en oscuro, antes de ordenar las pantallas"> |
+
+| Inicio, después | Cuentas, después | Mejoras, después |
+| --- | --- | --- |
+| <img src="docs/capturas/316-despues-inicio-oscuro.png" width="200" alt="Inicio en oscuro, con el resumen y la acción"> | <img src="docs/capturas/316-despues-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro, con la lista y el resumen"> | <img src="docs/capturas/316-despues-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, con el plan de cada cuenta"> |
+
+| Análisis, después | Agenda, después |
+| --- | --- |
+| <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
+
+| Rush esencial | Rush estratégico |
+| --- | --- |
+| <img src="docs/capturas/315-esencial-oscuro.png" width="200" alt="Rush esencial en oscuro: coste, tiempo con los constructores y fecha estimada"> | <img src="docs/capturas/315-estrategico-oscuro.png" width="200" alt="Rush estratégico en oscuro: sugerencias que se pueden quitar"> |
+| <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
 
 ## En esta versión
 
-Cada vez que se pinta la pantalla, el plan de cada cuenta se calcula una sola vez y el resto de esa vista lo reutiliza. En el iPhone eso evita repetir el mismo trabajo al abrir Inicio, Mejoras o la agenda.
+Cada pestaña hace una sola cosa. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo. Copia y el tema siguen en el engranaje de Inicio.
 
-Si el iPhone corta un guardado, la app no se queda esperando ni lo da por hecho. Avisa, y el pegado se puede repetir.
+En pantalla quedan títulos, cifras e iconos. Las explicaciones largas están en un ⓘ que se abre al tocar. Las tarjetas, las cabeceras, los filtros, las barras y las filas usan el mismo espaciado en toda la app, con el estilo Clash.
 
-Las cinco pestañas se ven en claro y en oscuro con los mismos datos de prueba.
+Nada se ha quitado: lo que antes estaba mezclado sigue a un toque, en su pestaña. Rushear esencial y estratégico siguen en el plan de cada cuenta.
 
 ## Funciones
 
@@ -63,7 +89,7 @@ El centro de mando de la flota.
 - **Próximas finalizaciones**: las tres mejoras de la flota que acaban antes, con la cuenta y la hora. Si no hay ninguna, un guion.
 - **Abrir hoy**: en qué orden abrir las cuentas, según el plan y la hora en que queda libre un constructor, el laboratorio o la casa de mascotas. Si el temporizador no es un número, esa cuenta no entra en el orden y no se inventa la hora.
 - **Objetivos de flota**: las cuentas que comparten objetivo, cuántas ya están y una fecha estimada. Esa fecha es el fin del plan hasta el máximo del ayuntamiento anterior, no el día de subir el ayuntamiento. Si la cuenta no tiene un plan guardado para ese objetivo, el criterio es maxear.
-- Tus cuentas, con la miniatura del ayuntamiento, en ese mismo orden. Al tocar una se abre su progreso.
+- La siguiente cuenta de ese orden. La lista completa está en Cuentas.
 
 ### Cuentas
 
@@ -73,13 +99,13 @@ El centro de mando de la flota.
 - Búsqueda por el nombre de la cuenta.
 - Grupos opcionales, para filtrar en Cuentas, en Análisis y en la agenda.
 - Una meta opcional, de una categoría o de la media, con su barra.
-- Resumen de todas: media, constructores ocupados y libres, laboratorios y casas de mascotas libres, y la próxima mejora con hora.
+- Resumen de todas: la media. Constructores, laboratorios, casas de mascotas y la próxima mejora están en el ⓘ.
 - Aviso de cuentas que llevan tiempo sin datos. El plazo se cambia en Copia; al principio son más de 7 días.
 - El equipamiento de cada cuenta va en su propia sección, debajo de las categorías de la aldea, con las piezas y las menas.
 
 ### Mejoras
 
-Lo que está en curso en todas las cuentas, ordenado por cuándo termina, por cuenta o por el coste de llegar al máximo del ayuntamiento actual. Ese coste es oro, elixir, oscuro, otros recursos y días de constructor. Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento ni el de las menas.
+Tres apartados: el plan de cada cuenta, el coste de llegar al máximo del ayuntamiento actual, y el equipamiento (la flota y cada cuenta). El coste es oro, elixir, oscuro, otros recursos y días de constructor. Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento ni el de las menas. Lo que está en curso, con hora, está en la Agenda.
 
 ### Análisis
 
@@ -97,11 +123,11 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 
 ### Agenda, plan y qué hacer ahora
 
-- El plan es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige maxear o rushear, y el ayuntamiento objetivo. Se pueden combinar ataque, defensa, muros, héroes, categoría, recurso y duración. El criterio se lee en viñetas.
-- Si el objetivo es un ayuntamiento superior, el nivel pedido es el máximo del anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados. No hay una lista oficial de requisitos de ayuntamiento, y la pantalla lo dice.
+- El plan está en Mejoras. Es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige maxear o rushear, y el ayuntamiento objetivo. Se pueden combinar ataque, defensa, muros, héroes, categoría, recurso y duración. El criterio está en el ⓘ.
+- Si el objetivo es maxear un ayuntamiento superior, el nivel pedido de la línea es el máximo del anterior. Rushear tiene dos modos por cuenta. Rush esencial se queda en los requisitos para poder mejorar el ayuntamiento. Rush estratégico añade sugerencias editables (laboratorio, campamento, castillo, héroes, fábricas, almacenes y caseta de animales si aplica). Cada modo muestra las estructuras, el coste total, el tiempo con los constructores de la cuenta y la fecha estimada. Los requisitos son provisionales: los datos no traen la tabla del juego.
 - Cada paso lleva coste, tiempo y fecha estimada en hora de Madrid, con los constructores de esa cuenta. Se pueden marcar las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Sin plan guardado, el criterio es maxear el ayuntamiento actual.
-- La agenda tiene tres vistas: próximas 24 horas, próximos 7 días y por cuenta. Varias cuentas en la misma hora forman una sesión. Una cuenta sin actualizar no sale ahí solo porque un temporizador viejo haya llegado a cero.
+- La agenda tiene cuatro vistas: 24 horas, 7 días, por cuenta y en curso. En curso se puede ver por cuándo termina o agrupado por cuenta. Varias cuentas en la misma hora forman una sesión. Una cuenta sin actualizar no sale ahí solo porque un temporizador viejo haya llegado a cero.
 - Los héroes de la cuenta de prueba no entran en el plan.
 - El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe, mena brillante, reluciente y estrellada, y el total de la flota.
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
@@ -153,7 +179,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v31` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v35` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -161,6 +187,10 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.16 | Cada pestaña tiene un solo trabajo. Las explicaciones largas pasan a un ⓘ. Tarjetas, cabeceras, filtros, barras y filas comparten el mismo espaciado. |
+| 3.1.15 | Rushear se elige por cuenta: esencial (solo los requisitos para subir el ayuntamiento) o estratégico (el mínimo más una lista de sugerencias que se puede quitar). Cada modo muestra estructuras, coste total, tiempo con los constructores de la cuenta y fecha estimada. |
+| 3.1.14 | Rushear reparte el tiempo entre los constructores de la cuenta (los del JSON, o 4, 5 o 6 si no vienen). El plan lista los requisitos para subir el ayuntamiento y los marca como provisionales. |
+| 3.1.13 | Inicio y Cuentas más compactos. Cada paso dice si es de la exportación, estimado, planificado, recomendado o provisional. Una cuenta sin actualizar no sale como cola libre. |
 | 3.1.12 | El plan de cada cuenta se calcula una vez por pintado. Un guardado abortado no se da por hecho. Las cinco pestañas tienen captura en claro y en oscuro. |
 | 3.1.11 | Inicio con las tres cifras de la flota, qué hacer ahora y las tres próximas finalizaciones. Actualizar todas sigue donde se quedó y cierra con un resumen de los datos pegados. La agenda separa 24 horas, 7 días y por cuenta, y agrupa la misma hora en una sesión. |
 | 3.1.10 | Un fallo en un botón no deja la pantalla pillada. Inicio y Cuentas usan el mismo recuento de constructores: libre en la exportación, estimado si el temporizador ya llegó a cero, o «Necesita actualización» si la cuenta es vieja. El porcentaje de cada cuenta es frente al máximo de su ayuntamiento. |

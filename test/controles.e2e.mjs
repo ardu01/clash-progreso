@@ -73,7 +73,7 @@ try {
   await paso("pestaña Inicio", ".tabbar a >> text=Inicio", "#/inicio", "Inicio");
 
   await en("#/roster", "Cuentas");
-  await paso("Qué hacer ahora en Cuentas", "#screen .link-row a >> text=Qué hacer ahora", "#/ahora", "Ahora");
+  check(!(await page.evaluate(() => !!document.querySelector("#screen .link-row"))), "Cuentas sigue mezclando otras pestañas");
   await en("#/roster", "Cuentas");
   await paso("tarjeta de Cuentas", "#screen a.row__main", /#\/progreso\/[^/]+$/, "Progreso");
   await en("#/roster", "Cuentas");
@@ -88,7 +88,7 @@ try {
   await paso("Qué hacer ahora con la sesión abierta", "#screen a.row--accion", "#/ahora", "Ahora");
   check(!(await page.evaluate(() => location.hash)).startsWith("#/actualizar"), "la sesión se llevó Ahora a Actualizar todas");
   await en("#/roster", "Cuentas");
-  await paso("Qué hacer ahora de Cuentas con la sesión", "#screen .link-row a >> text=Qué hacer ahora", "#/ahora", "Ahora");
+  check(!(await page.evaluate(() => !!document.querySelector("#screen .link-row"))), "Cuentas mezcla pestañas con la sesión abierta");
   await en("#/actualizar", "Actualizar todas");
   await paso("Inicio con la sesión abierta", ".tabbar a >> text=Inicio", "#/inicio", "Inicio");
   for (const tab of ["Cuentas", "Mejoras", "Análisis", "Agenda"]) {

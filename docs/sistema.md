@@ -2078,7 +2078,7 @@ Líneas, barras por categoría y el mapa de calor pintan juntas todas las cuenta
 
 `#/ahora` sale del plan de cada cuenta (objetivo, TH objetivo, filtros y marcas). Sin plan guardado, el criterio es Maxear TH actual. Se muestra el siguiente paso de la línea de tiempo cuando un constructor, el laboratorio o la casa de mascotas están libres. Esas marcas no entran en `#/agenda` ni en los avisos. La agenda sigue siendo la hora real de la exportación.
 
-El plan es la línea de tiempo aunque todos los constructores estén ocupados: se planifica desde que queden libres, y solo si el temporizador es un número finito. Se combinan Maxear o Rushear, un TH objetivo (el actual o uno superior) y filtros de ataque, defensa, muros, héroes, categoría, recurso y duración. Para un TH objetivo superior, el nivel pedido es el máximo del TH anterior. Rushear usa almacenes, edificios de ejército y laboratorio que están en los topes y en los costes; no hay una tabla oficial de requisitos de ayuntamiento. Los héroes de `#28PLGP0G2` no entran. El equipamiento no entra en el plan, la media, el ranking, los gráficos de aldea, el coste de aldea ni la agenda. Dentro de `#/equipo` se ven niveles por héroe y el coste en menas brillante, resplandeciente y estelar cuando el libro lo trae.
+El plan es la línea de tiempo aunque todos los constructores estén ocupados: se planifica desde que queden libres, y solo si el temporizador es un número finito. Se combinan Maxear o Rushear, un TH objetivo (el actual o uno superior) y filtros de ataque, defensa, muros, héroes, categoría, recurso y duración. Para maxear un TH objetivo superior, el nivel pedido es el máximo del TH anterior. Rushear esencial solo programa los requisitos para poder mejorar el ayuntamiento. Rushear estratégico suma sugerencias editables hasta el máximo del TH anterior. No hay una tabla oficial de requisitos de ayuntamiento: esas filas van como provisionales. Los héroes de `#28PLGP0G2` no entran. El equipamiento no entra en el plan, la media, el ranking, los gráficos de aldea, el coste de aldea ni la agenda. Dentro de `#/equipo` se ven niveles por héroe y el coste en menas brillante, resplandeciente y estelar cuando el libro lo trae.
 
 La media es la media de las categorías de aldea. Con el equipamiento dentro, C1 estaba en 64,1 y C2 en 49,2 (ofensiva 34,5). Sin él, y con el laboratorio identificado, C1 queda en 64,2 (laboratorio 62,3, equipamiento 61,4, ofensiva 54,1) y C2 en 47,7 / siguiente 44,5 (laboratorio 44,9 / 40,9, equipamiento 58,9 / 58,9, ofensiva 34,2). 90000016 es Flecha monolítica y 90000059 es Colmillos eléctricos. Portal portátil (90000061) está identificado y sin PNG. Stun Blaster sigue en inglés.
 
@@ -2159,6 +2159,32 @@ Actualizar todas está en Inicio y en Cuentas. Abre una sesión con todas las cu
 Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando Inicio está marcado porque la pantalla es Actualizar todas, Ahora o Copia. Antes ese toque solo subía arriba y la pantalla no cambiaba. Si la ruta ya es `#/inicio`, el toque sigue subiendo al inicio de la lista. Abrir `#/inicio` no devuelve a la sesión de Actualizar todas.
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.16)
+
+`APP_VERSION` es `3.1.16` y `SHELL_CACHE` es `cp-shell-v35`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+`baseTab` manda el plan y el equipamiento a Mejoras. Historial, perfil y el progreso de la aldea siguen en Cuentas. Agenda ya no resalta el plan. Inicio deja la lista larga en Cuentas y conserva una fila `row--inicio` con la siguiente cuenta. Cuentas quita la fila de enlaces a otras pestañas. Mejoras tiene tres modos (`plan`, `costes`, `equipo`); un valor viejo de `cp-mejoras` (`fin` o `cuenta`) cae en Plan. Esas listas de mejoras en curso pasan a Agenda con `data-agenda="curso"` y, dentro, `data-curso` (`fin` o `cuenta`). El texto largo de las pantallas va en `infoBtn`: el nodo sigue en el DOM, oculto hasta el toque. El margen de sección y el relleno de fila de Inicio y Cuentas vuelven al común; la rejilla de tres columnas de `.row--account` se queda. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.15)
+
+`APP_VERSION` es `3.1.15` y `SHELL_CACHE` es `cp-shell-v34`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+El plan Rushear guarda `rush`: `esencial` o `estrategico`, y `sugerenciasOff` con los ids que la cuenta ha quitado. Esencial solo genera pasos hasta el nivel de `requisitosAyuntamiento` (colocar la estructura, Consejo heroico al máximo de cada paso y Artillería infernal al 5 al pasar a TH18). Estratégico sube, además, el laboratorio, el campamento, el castillo del clan, los héroes, las fábricas, los almacenes y la caseta de animales cuando el TH anterior tiene cupo. Cada sugerencia lleva una razón y se puede quitar; si el edificio también era requisito, se queda en ese mínimo. Quitar los héroes o el castillo los saca del todo. En `#28PLGP0G2` la sugerencia de héroes no aplica. `road.rush` trae la lista, el coste, `calendarioSeg` y la fecha. `placeStep` elige el hueco que antes puede empezar y, si varios empatan, el que ya estaba ocupado hasta más tarde, para no dejar un constructor parado. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.14)
+
+`APP_VERSION` es `3.1.14` y `SHELL_CACHE` es `cp-shell-v33`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+En un plan Rushear, `constructoresParaPlan` usa las chozas de la exportación y suma uno si está la cabaña de B.O.B (`1000064`). Si no hay chozas, el ajuste guardado en el plan solo vale 4, 5 o 6. `makeLanes` abre ese número de carriles y `placeStep` asigna cada paso al que antes queda libre. `trabajoSeg` es la suma de los segundos de constructor y `calendarioSeg` es el tramo desde el primer inicio hasta el último fin. Un ajuste no se etiqueta como dato de la exportación: la clase del hueco es `ajuste`. Maxear no cambia de carriles.
+
+`requisitosAyuntamiento` lista, para cada paso hasta el TH objetivo, las estructuras con cupo en el TH anterior. El nivel pedido es 1, salvo el Consejo heroico (`1000071`), que pide su máximo, y la Artillería infernal al pasar a TH18, que pide el 5. No entran las chozas, el castillo del clan ni B.O.B. El coste y el tiempo salen de `data/costes.json`, y los de la artillería de `town-hall.json` de clash-of-clans-data 0.18.0. Cada fila va con `provisional: true`. Si el JSON no trae el nivel del arma, no se inventa el coste. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.13)
+
+`APP_VERSION` es `3.1.13` y `SHELL_CACHE` es `cp-shell-v32`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+Inicio y Cuentas usan el mismo `fleetSnapshot`: la cifra de constructores libres es `libresReales` y la frase es `fraseConstructores`. Con las 11 exportaciones del 7 oct, a última hora del 11 oct, las dos pantallas dicen 0 libres en la exportación, 44 ocupados y los temporizadores ya vencidos como estimados. `textoCola` y `pasoAhora` nombran el hueco (`estimado` o `en la exportación`) y el paso (`planificado`, `recomendado` o `provisional`). `ahoraDe` copia `lane.clase` y `step.origen`. Si `estadoColas` marca la cuenta `desactualizada`, Qué hacer ahora no lista esos huecos como trabajo: dice «Necesita actualización. Se conserva el último plan.» En Cuentas, Perfil y Editar van en `.row__tools` para que el texto use el ancho que queda. Las notas del resumen de flota ocupan todo el ancho. El % de las 11 cuentas no cambia.
 
 ## Nota de cambios (11 oct 2026, 3.1.12)
 

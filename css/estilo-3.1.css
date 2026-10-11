@@ -62,13 +62,16 @@ html[data-theme="dark"] {
 
 /* Cabecera de sección = tablón de madera con texto dorado (sobre la escena) */
 .screen > .section > .section-header,
-.screen > .section > h2.section-header {
+.screen > .section > h2.section-header,
+.screen > .section > .section-head > .section-header,
+.screen > .section > .section-head > h2.section-header {
   display: inline-flex; gap: 10px; margin: 0 0 6px 2px; padding: 4px 12px;
   border: 2px solid #1A120C; border-radius: 8px;
   background: linear-gradient(180deg, #6A4B30, #3E2918); box-shadow: inset 0 2px 0 rgba(255,255,255,.14), 0 2px 0 #1A120C;
   color: var(--gold); font: 800 .765rem/1.3 var(--font-ui); letter-spacing: .04em;     /* #F6C744 sobre #3E2918: 8,6:1 */
 }
-.screen > .section > .section-header .num { color: #F4E6CC; }
+.screen > .section > .section-header .num,
+.screen > .section > .section-head > .section-header .num { color: #F4E6CC; }
 
 /* Enlaces sobre la escena: dorado, objetivo de 44 px */
 .section-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--gold); font-weight: 700; text-underline-offset: 3px; }
@@ -278,9 +281,10 @@ a.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 var(-
 .row--tile > :is([data-compare], [data-edit]) { margin-left: auto; }
 
 /* ── 2. Cuentas: panel multicuenta (.fleet-card) ── */
-.fleet-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.fleet-card > h2, .fleet-card > .t-body, .fleet-card > .link-row { grid-column: 1 / -1; margin: 0; }
-.fleet-card > .t-body { font: 900 1.647rem/1.1 var(--font-ui); font-variant-numeric: tabular-nums; }
+.fleet-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.fleet-card > h2, .fleet-card > .t-body, .fleet-card > .link-row,
+.fleet-card > .section-head, .fleet-card > .t-title2 { grid-column: 1 / -1; margin: 0; }
+.fleet-card > .t-body, .fleet-card > .t-title2 { font: 900 1.647rem/1.1 var(--font-ui); font-variant-numeric: tabular-nums; }
 .fleet-card > .t-footnote {                      /* contadores: losetas en relieve */
   margin: 0; padding: 8px 10px; border-radius: 10px; color: var(--ink);
   background: var(--panel-2); border: 2px solid var(--panel-3); box-shadow: 0 2px 0 var(--panel-3);
@@ -387,7 +391,8 @@ html[data-theme="dark"] .chip--goal-ok {
 .screen:has([data-sueno]) .list .row { padding-left: 14px; }
 .screen:has([data-sueno]) .list .row__title { font: 800 .941rem/1.25 var(--font-ui); }
 /* En el plan, cada línea de «Días y constructores» es una cola: canto izquierdo azul (info) */
-.screen:has([data-sueno]) .section-header + .list > li > .row { border-left: 6px solid var(--blue); }
+.screen:has([data-sueno]) .section-header + .list > li > .row,
+.screen:has([data-sueno]) .section-head + .list > li > .row { border-left: 6px solid var(--blue); }
 /* Criterio (pauta Clash 4): una frase por línea con viñeta dorada (rombo CSS, sin emoji ni icono) */
 .criterio { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .criterio > li { position: relative; padding-left: 22px; font: 500 .941rem/1.35 var(--font-text, var(--font)); color: var(--ink); }
@@ -550,3 +555,62 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   font: 600 13px/18px var(--font); letter-spacing: -0.01em;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
 }
+
+/* 3.1.13: Inicio y Cuentas más densos. Mismos datos, menos hueco. */
+.screen:has(.stat-tiles) > .section,
+.screen:has(.fleet-card) > .section { margin-bottom: 16px; }
+.screen:has(.stat-tiles) .list--tiles,
+.screen:has(.fleet-card) .list--tiles { gap: 6px; }
+.screen:has(.stat-tiles) .row--tile,
+.screen:has(.fleet-card) .row--account { padding: 8px; gap: 8px; row-gap: 4px; }
+.screen:has(.stat-tiles) .meter,
+.screen:has(.fleet-card) .meter { margin-top: 4px; }
+.fleet-card > .t-footnote { grid-column: 1 / -1; padding: 6px 8px; }
+.row--account {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+.row--account > .thumb { grid-column: 1; }
+.row--account > .row__main { grid-column: 2; min-width: 0; }
+.row--account > .row__tools {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.row--account .row__tools .btn-text { margin-left: 0; }
+
+/* 3.1.16: un solo espaciado y el aviso ⓘ. La rejilla de la fila de cuenta se queda. */
+.screen:has(.stat-tiles) > .section,
+.screen:has(.fleet-card) > .section { margin-bottom: var(--sp-8); }
+.screen:has(.stat-tiles) .list--tiles,
+.screen:has(.fleet-card) .list--tiles { gap: 10px; }
+.screen:has(.stat-tiles) .row--tile,
+.screen:has(.fleet-card) .row--account { padding: var(--sp-2) var(--sp-4); gap: var(--sp-3); row-gap: 8px; }
+.screen:has(.stat-tiles) .meter,
+.screen:has(.fleet-card) .meter { margin-top: 0; }
+.section-head, .title-line {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px;
+}
+.section-head > .section-header { flex: 1 1 auto; margin: 0; }
+.section-head > :is(h2, .t-headline) { flex: 1 1 auto; margin: 0; }
+.title-line { margin: -4px var(--margin-r) var(--sp-4) var(--margin-l); }
+.title-line > .large-sub { margin: 0; flex: 1 1 auto; }
+.section-head > .info-pop, .title-line > .info-pop { flex: 1 0 100%; margin: 4px 0 0; }
+.info {
+  flex: none; width: 44px; height: 44px; margin: 0; padding: 0;
+  border: 2px solid var(--gold-edge); border-radius: 999px;
+  background: linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot));
+  color: #24211C; font: 800 1.15rem/1 var(--font-ui);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 2px 0 var(--gold-edge);
+}
+.info[aria-expanded="true"] { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 0 0 var(--gold-edge); }
+.info-pop {
+  margin: 6px 0 0; padding: 8px 12px; border-radius: 12px;
+  background: var(--panel); color: var(--ink); border: 2px solid var(--panel-edge);
+  font: 500 .82rem/1.35 var(--font);
+}
+.info-pop[hidden] { display: none; }
+.chip-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+.card > .section-head { margin-bottom: 8px; }

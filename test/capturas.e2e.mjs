@@ -50,7 +50,7 @@ try {
       const box = await page.evaluate(() => ({ w: innerWidth, h: innerHeight }));
       if (box.w !== 375 || box.h !== 812) fails.push(`${theme} ${name} ${box.w}x${box.h}`);
       const shot = theme === "dark" ? "oscuro" : "claro";
-      await page.screenshot({ path: `${dir}312-${name}-${shot}.png` });
+      await page.screenshot({ path: `${dir}313-${name}-${shot}.png` });
     }
     await page.close();
   }
