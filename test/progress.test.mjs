@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, upgradesOf, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES, VILLAGE_KEYS } from "../js/progress.js";
@@ -266,10 +266,10 @@ test("Artillería infernal solo en el detalle, sin id inventado", () => {
   }
 });
 
-test("617 sha256 coinciden con el manifiesto v3.1.4", () => {
-  assert.equal(manifest.version_set_imagenes, "v3.1.4");
-  assert.equal(manifest.peso_imagenes.total_archivos, 617);
-  assert.equal(manifest.peso_imagenes.total_bytes, 100781043);
+test("642 sha256 coinciden con el manifiesto v3.1.7", () => {
+  assert.equal(manifest.version_set_imagenes, "v3.1.7");
+  assert.equal(manifest.peso_imagenes.total_archivos, 642);
+  assert.equal(manifest.peso_imagenes.total_bytes, 104167680);
   assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 220);
   assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 21579962);
   assert.equal(manifest.peso_imagenes.umbral_pesado_bytes, 3000000);
@@ -283,7 +283,7 @@ test("617 sha256 coinciden con el manifiesto v3.1.4", () => {
       if (im && im.ruta) want.set(im.ruta, im);
     }
   }
-  assert.equal(want.size, 617);
+  assert.equal(want.size, 642);
   const dir = join(root, "assets/images");
   const files = [];
   const walk = (rel) => {
@@ -294,7 +294,7 @@ test("617 sha256 coinciden con el manifiesto v3.1.4", () => {
     }
   };
   walk("");
-  assert.equal(files.length, 617);
+  assert.equal(files.length, 642);
   for (const rel of files) {
     const im = want.get(rel);
     assert.ok(im, rel);
@@ -442,10 +442,10 @@ test("missing.json coincide con el archivo publicado", () => {
   assert.equal(createHash("sha256").update(buf).digest("hex"), "42d7be7c0ad7df5499170a251c9b092d10cdfba6ba0d1ebd268a6a9ad983af70");
 });
 
-test("manifest.json coincide con la v3.1.4", () => {
+test("manifest.json coincide con la v3.1.7", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "30f078a8d5a407a5cf3b871978676293756041420906d0bc5285bf04b342592c");
-  assert.equal(manifest.version_set_imagenes, "v3.1.4");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "16e95904ddbaf5c66d2d608f265fd6bb890abd64443ced4e0e1e68f6e052cdfb");
+  assert.equal(manifest.version_set_imagenes, "v3.1.7");
 });
 
 /** Una función real de js/app.js, sin ejecutar el arranque del navegador. */
@@ -951,10 +951,10 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 3.1.6 y cachés cp-shell-v24 / cp-img-v8", () => {
-  assert.equal(APP_VERSION, "3.1.6");
-  assert.equal(SHELL_CACHE, "cp-shell-v24");
-  assert.equal(IMAGE_CACHE, "cp-img-v8");
+test("versión 3.1.7 y cachés cp-shell-v25 / cp-img-v9", () => {
+  assert.equal(APP_VERSION, "3.1.7");
+  assert.equal(SHELL_CACHE, "cp-shell-v25");
+  assert.equal(IMAGE_CACHE, "cp-img-v9");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
@@ -981,20 +981,24 @@ test("versión 3.1.6 y cachés cp-shell-v24 / cp-img-v8", () => {
   assert.equal(sw.includes("cp-shell-v21"), false);
   assert.equal(sw.includes("cp-shell-v22"), false);
   assert.equal(sw.includes("cp-shell-v23"), false);
+  assert.equal(sw.includes("cp-shell-v24"), false);
+  assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v24/);
+  assert.match(caches, /cp-shell-v25/);
   assert.equal(caches.includes("cp-shell-v21"), false);
   assert.equal(caches.includes("cp-shell-v22"), false);
   assert.equal(caches.includes("cp-shell-v23"), false);
+  assert.equal(caches.includes("cp-shell-v24"), false);
   assert.match(sw, /estilo-3\.1\.css/);
   assert.match(sw, /js\/equipo\.js/);
   assert.match(sw, /js\/perfil\.js/);
-  assert.match(caches, /cp-img-v8/);
+  assert.match(caches, /cp-img-v9/);
   assert.equal(caches.includes("cp-img-v7"), false);
+  assert.equal(caches.includes("cp-img-v8"), false);
   assert.equal(caches.includes("cp-shell-v11"), false);
   assert.equal(caches.includes("cp-shell-v12"), false);
   assert.equal(caches.includes("cp-shell-v13"), false);
@@ -1102,7 +1106,7 @@ test("el Logger se muestra entero, sin recortar la caja; los niveles 2 a 5 usan 
   assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
-  assert.equal(IMAGE_CACHE, "cp-img-v8");
+  assert.equal(IMAGE_CACHE, "cp-img-v9");
 });
 
 test("la media sin cambio no repite el valor ni pone flecha", () => {
@@ -2202,6 +2206,12 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   let borrowed = 0;
   for (const item of Object.values(manifest.items)) {
     for (const [lvl, im] of Object.entries(item.imagenes_por_nivel || {})) {
+      if (!/^\d+$/.test(lvl)) {
+        assert.equal(im.es_inferior, false, item.id + " " + lvl);
+        assert.equal(im.marca, null, item.id + " " + lvl);
+        assert.equal(im.official, false, item.id + " " + lvl);
+        continue;
+      }
       if (!im.es_inferior) {
         assert.equal(im.marca, null, item.id + " " + lvl);
         assert.equal(im.nivel_mostrado, Number(lvl), item.id + " " + lvl);
@@ -2218,15 +2228,20 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
       assert.equal(own.ruta, im.ruta, item.id + " " + lvl);
     }
   }
-  assert.equal(borrowed, 58);
+  assert.equal(borrowed, 35);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].marca, null);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].es_inferior, false);
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["12"].ruta, "images/levels/x-bow_12.png");
   assert.equal(manifest.items["1000021"].imagenes_por_nivel["11"].es_inferior, false);
-  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].marca, "Imagen del nivel 7 (no hay oficial del 8)");
+  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].marca, null);
+  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].es_inferior, false);
+  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].official, false);
+  assert.equal(manifest.items["1000020"].imagenes_por_nivel["8"].ruta, "images/levels/spell-factory_8.png");
   assert.equal(manifest.items["1000067"].imagenes_por_nivel["6"].marca, null);
   assert.equal(manifest.items["1000067"].imagenes_por_nivel["6"].ruta, "images/levels/scattershot_6.png");
-  assert.equal(manifest.items["1000077"].imagenes_por_nivel["5"].marca, "Imagen del nivel 4 (no hay oficial del 5)");
+  assert.equal(manifest.items["1000077"].imagenes_por_nivel["5"].marca, null);
+  assert.equal(manifest.items["1000077"].imagenes_por_nivel["5"].official, false);
+  assert.equal(manifest.items["1000077"].imagenes_por_nivel["5"].ruta, "images/levels/monolith_5.png");
   assert.equal(manifest.items["1000001"].imagenes_por_nivel["1"].es_inferior, false);
   assert.equal(manifest.items["1000001"].imagenes_por_nivel["1"].nivel_mostrado, 1);
   assert.equal(manifest.items["1000001"].imagenes_por_nivel["18"].es_inferior, false);
@@ -2238,9 +2253,14 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["1000000"].imagenes_por_nivel["1"].marca, "Imagen del nivel 7 (no hay oficial del 1)");
   {
     const item = manifest.items["1000079"];
-    assert.equal(item.imagen, null);
-    assert.equal(item.imagenes_por_nivel, undefined);
     assert.equal(item.estado, "faltante");
+    assert.equal(item.imagen.official, false);
+    assert.equal(item.imagen.ruta, "images/levels/multi-gear-tower_1_long-range.png");
+    assert.equal(item.imagenes_por_nivel["1"].es_inferior, false);
+    assert.equal(item.imagenes_por_nivel["2"].ruta, "images/levels/multi-gear-tower_2_long-range.png");
+    assert.equal(item.imagenes_por_nivel["2"].marca, null);
+    assert.equal(item.imagenes_por_nivel["1-fast-attack"].ruta, "images/levels/multi-gear-tower_1_fast-attack.png");
+    assert.equal(item.imagenes_por_nivel["2-fast-attack"].official, false);
   }
   {
     const wiz = manifest.items["1000102"];
@@ -2275,9 +2295,85 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["90000060"].nombre, "Mazo de la venganza");
   assert.equal(manifest.items["90000061"].nombre, "Portal portátil");
   assert.equal(manifest.items["90000061"].estado, "faltante");
-  assert.equal(manifest.items["90000061"].imagen, null);
+  assert.equal(manifest.items["90000061"].imagen.ruta, "images/levels/portal-pendant.png");
+  assert.equal(manifest.items["90000061"].imagen.official, false);
   assert.equal(manifest.items["93000003"].nombre, "Picador");
   assert.equal(manifest.items["93000003"].estado, "ok");
+});
+
+test("3.1.7: imágenes no oficiales solo donde no hay oficial", () => {
+  assert.equal(manifest.unofficial_images.length, 73);
+  assert.equal(manifest.unofficial_images.every((row) => row.official === false), true);
+  assert.equal(manifest.unofficial_images.filter((row) => row.publicado).length, 29);
+  assert.equal(manifest.unofficial_images.filter((row) => row.village === "builderBase" && row.publicado).length, 0);
+  for (const row of manifest.unofficial_images) {
+    assert.equal(typeof row.source_url, "string");
+    assert.equal(typeof row.license_note, "string");
+    assert.equal(typeof row.sha256, "string");
+    if (row.publicado) {
+      assert.equal(row.ruta.startsWith("images/"), true, row.file);
+      assert.equal(row.ruta.includes("builder-base"), false, row.file);
+      assert.equal(existsSync(join(root, "assets", row.ruta)), true, row.ruta);
+      assert.equal(typeof row.sha256_copia, "string");
+    } else {
+      assert.equal(row.ruta, null, row.file);
+    }
+  }
+  const air = manifest.items["12000005"].imagenes_por_nivel;
+  assert.equal(air["12"].ruta, "images/levels/air-bomb_11.png");
+  assert.equal(air["12"].official, true);
+  assert.equal(air["12"].es_inferior, true);
+  assert.equal(air["12"].nivel_mostrado, 11);
+  assert.equal(air["13"].official, false);
+  assert.equal(air["13"].es_inferior, false);
+  assert.equal(air["13"].ruta, "images/levels/air-bomb_13.png");
+  assert.equal(existsSync(join(root, "assets/images/levels/air-bomb_12.png")), false);
+  const bomb = manifest.items["12000000"].imagenes_por_nivel["12"];
+  assert.equal(bomb.ruta, "images/traps/bomb.png");
+  assert.equal(bomb.official, true);
+  assert.equal(bomb.es_inferior, true);
+  assert.equal(existsSync(join(root, "assets/images/levels/bomb_12.png")), false);
+  const smith = manifest.items["1000070"].imagenes_por_nivel["10"];
+  assert.equal(smith.ruta, "images/buildings/blacksmith.png");
+  assert.equal(smith.official, true);
+  assert.equal(smith.nivel_mostrado, 9);
+  const seek = manifest.items["12000006"].imagenes_por_nivel;
+  assert.equal(seek["7"].official, false);
+  assert.equal(seek["7"].low_res, true);
+  assert.equal(seek["7"].es_inferior, false);
+  assert.equal(seek["8"].ruta, seek["7"].ruta);
+  assert.equal(seek["8"].es_inferior, false);
+  assert.equal(seek["8"].nivel_mostrado, 8);
+  for (const lvl of ["6", "7", "8", "9", "10", "11", "12", "13"]) {
+    const im = manifest.items["12000001"].imagenes_por_nivel[lvl];
+    assert.equal(im.official, false, lvl);
+    assert.equal(im.es_inferior, false, lvl);
+    assert.equal(im.low_res, true, lvl);
+    assert.equal(im.precarga, false, lvl);
+  }
+  assert.equal(manifest.items["1000097"].estado, "faltante");
+  assert.equal(manifest.items["1000097"].imagen.official, false);
+  assert.equal(manifest.items["1000097"].imagen.ruta, "images/levels/crafting-station.png");
+  assert.ok(manifest.items["1000097"].imagen.bytes < 3000000);
+  assert.equal(manifest.items["102000033"].imagen.ruta, "images/crafting/hot-candle-1.png");
+  assert.equal(manifest.items["102000036"].imagen.ruta, "images/crafting/hero-hunter-1.png");
+  assert.equal(manifest.items["102000039"].imagen.ruta, "images/crafting/cake-a-pult-1.png");
+  assert.equal(manifest.items["103000011"].imagen.ruta, "images/crafting/hot-candle-1.png");
+  assert.match(manifest.unofficial_notes.builder_base, /base del constructor/);
+  assert.match(manifest.unofficial_notes.crafting_modules, /oficial/);
+  const urls = precacheUrls(manifest);
+  assert.equal(urls.length, 220);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const copia = app.slice(app.indexOf("function renderCopia("), app.indexOf("function lastImportLabel("));
+  assert.match(copia, /Arte © Supercell bajo la Fan Content Policy/);
+  assert.match(copia, /imágenes no oficiales: ClashKing y Fandom \(autores en el manifiesto\)/);
+  assert.match(app, /Imagen no oficial/);
+  assert.match(app, /Ataque rápido/);
+  assert.match(app, /Largo alcance/);
+  const gear = imageChoice(manifest.items["1000079"], 2);
+  assert.equal(gear.im.ruta, "images/levels/multi-gear-tower_2_long-range.png");
+  assert.equal(gear.im.official, false);
+  assert.equal(gear.marca, null);
 });
 
 test("2.1.0: sin entrada de nivel se usa el PNG base; Tiradora no tiene niveles publicados", () => {
@@ -2435,8 +2531,8 @@ test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", 
   assert.equal(new Set(urls).size, 220);
   assert.equal(urls.length, manifest.peso_imagenes.precache_instalacion_archivos);
   const list = catalog(manifest);
-  assert.equal(list.length, 617);
-  assert.equal(new Set(list.map((im) => im.url)).size, 617);
+  assert.equal(list.length, 642);
+  assert.equal(new Set(list.map((im) => im.url)).size, 642);
   assert.equal(list.reduce((s, im) => s + im.bytes, 0), manifest.peso_imagenes.total_bytes);
   assert.equal(list.filter((im) => im.precache).length, 220);
   for (const id of ["107000000", "107000001", "107000008"]) {
