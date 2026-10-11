@@ -33,6 +33,7 @@ import {
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
 import { exportFacts } from "./perfil.js";
+import { accionTab } from "./nav.js";
 import {
   blankSession, clearSession, compareOrden, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
@@ -2032,7 +2033,7 @@ function navbar(r) {
   const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil", actualizar: "Actualizar" };
   let lead = "";
   let trail = "";
-  let title = titles[r.name] || titles[tab] || "";
+  let title = titles[r.name] || "";
   let collapsed = "false";
   if (r.name === "inicio") {
     trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
@@ -4506,7 +4507,14 @@ function render() {
   const keep = rememberSheetFocus();
   const root = document.getElementById("app");
   root.dataset.sheetKeep = String(keep);
-  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screenFor(r)}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  let screen = "";
+  try {
+    screen = screenFor(r);
+  } catch (err) {
+    console.error(err);
+    screen = `<h1 class="large-title">Inicio</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
+  }
+  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   bind(r);
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
@@ -4530,6 +4538,21 @@ function render() {
 
 function bind(r) {
   document.getElementById("app").onclick = async (ev) => {
+    const tabLink = ev.target.closest(".tabbar a");
+    if (tabLink) {
+      const href = tabLink.getAttribute("href") || "#/inicio";
+      const act = accionTab(location.hash, href);
+      ev.preventDefault();
+      if (act.type === "scroll") {
+        document.getElementById("screen")?.scrollTo?.({ top: 0 });
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+        return;
+      }
+      if (location.hash !== act.hash) location.hash = act.hash;
+      else render();
+      return;
+    }
     const eqVista = ev.target.closest("[data-eq-vista]");
     if (eqVista) {
       state.eqVista = eqVista.dataset.eqVista === "flota" ? "flota" : "cuenta";
@@ -4911,8 +4934,6 @@ function bind(r) {
       }
       if (name === "add-account") { await addNewAccount(); return; }
     }
-    const tab = ev.target.closest(".tabbar a[aria-current='page']");
-    if (tab) { ev.preventDefault(); document.getElementById("screen")?.scrollTo?.({ top: 0 }); window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   };
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => {
@@ -5179,7 +5200,8 @@ async function boot() {
     }
   } else {
     const sesion = readSession(localStorage);
-    if (sesion && route().name !== "actualizar") location.hash = "#/actualizar";
+    const abierta = route().name;
+    if (sesion && abierta !== "actualizar" && abierta !== "inicio") location.hash = "#/actualizar";
   }
   render();
   if ("serviceWorker" in navigator) {
