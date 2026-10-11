@@ -47,6 +47,11 @@ Datos de prueba del 7 de octubre de 2026.
 | <img src="docs/capturas/314-plan-oscuro.png" width="200" alt="Plan en oscuro: rushear a TH17 y los constructores de la exportación"> | <img src="docs/capturas/314-requisitos-oscuro.png" width="200" alt="Requisitos provisionales para subir el ayuntamiento, en oscuro"> |
 | <img src="docs/capturas/314-plan-claro.png" width="200" alt="Plan con el tema claro"> | <img src="docs/capturas/314-requisitos-claro.png" width="200" alt="Requisitos provisionales con el tema claro"> |
 
+| Rush esencial | Rush estratégico |
+| --- | --- |
+| <img src="docs/capturas/315-esencial-oscuro.png" width="200" alt="Rush esencial en oscuro: coste, tiempo con los constructores y fecha estimada"> | <img src="docs/capturas/315-estrategico-oscuro.png" width="200" alt="Rush estratégico en oscuro: sugerencias que se pueden quitar"> |
+| <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
+
 ## En esta versión
 
 Inicio y Cuentas ocupan menos alto. Las cuentas dejan el nombre y el porcentaje con sitio, y Perfil y Editar siguen al lado. El resumen de constructores usa el ancho entero, así que no queda una loseta vacía al lado de la frase larga.

@@ -1412,7 +1412,9 @@ function sugerenciasHtml(road) {
 
 function filasRushHtml(filas) {
   return (filas || []).map((fila) => {
-    const nivel = fila.sinDato ? "sin nivel en la exportación" : `Nv ${fila.actual} → ${fila.requerido}`;
+    const nivel = fila.sinDato
+      ? "sin nivel en la exportación"
+      : (fila.actual < fila.requerido ? `Nv ${fila.actual} → ${fila.requerido}` : `Nv ${fila.actual} · pedido ${fila.requerido}`);
     const cuenta = fila.cantidad > 1 ? ` · ${fila.tienen}/${fila.cantidad}` : "";
     const estado = fila.hecho ? "Ya está" : fila.enCurso ? "En curso" : "Falta";
     const aviso = fila.clase === "sugerencia" ? "Sugerencia" : "provisional";
@@ -1440,6 +1442,7 @@ function rushPanel(road) {
       <p class="t-body">${esc(cifras.tiempo)}</p>
       <p class="t-body">${esc(cifras.fecha)}</p>
       <p class="t-footnote c-2">${esc(road.rush.nota)}</p>
+      ${road.rush.calendarioSeg != null && road.rush.trabajoSeg > road.rush.calendarioSeg ? `<p class="t-footnote c-2">El tiempo es el calendario, con esos constructores a la vez. Los días de constructor del coste son la suma del trabajo.</p>` : ""}
     </div></div>
     ${sugerenciasHtml(road)}
     ${lista}`;
