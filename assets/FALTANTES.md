@@ -47,7 +47,7 @@ No se ha sustituido ningún hueco por imágenes de wikis, Fandom, CDNs no oficia
 
 | ID | key | nombre | nombre_en | estado | niveles en export. | cuentas | motivo |
 |---|---|---|---|---|---|---|---|
-| 1000097 | `buildings/crafting-station` | Puesto de artesanía | Crafting Station | faltante | — | 11 | No está en el Fan Kit (búsqueda con navegador, ronda 3). |
+| 1000097 | `buildings/crafting-station` | Defensa artesanal | Crafting Station | faltante | — | 11 | No está en el Fan Kit (búsqueda con navegador, ronda 3). |
 
 ## Ayudantes (1)
 

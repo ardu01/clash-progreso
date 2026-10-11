@@ -1350,7 +1350,7 @@
    "official": false,
    "id": 1000097,
    "name_en": "Crafting Station",
-   "name_es": "Puesto de artesanía",
+   "name_es": "Defensa artesanal",
    "village": "home",
    "level": null,
    "variant": null,
@@ -2420,7 +2420,7 @@
   "blacksmith_10": "Fandom (página Blacksmith) agrupa «Level 9-10» con la misma imagen: usar la oficial del nivel 9 (Fan Kit 66882 Building_HV_Blacksmith_level_9). Sin archivo nuevo.",
   "same_look": "Según Fandom, Bomba 12 = aspecto del 11 y Bomba aérea 12 = aspecto del 11 (existe oficial: levels/air-bomb_11.png, Fan Kit 64173); Mina aérea buscadora 8 = aspecto del 7.",
   "guardians": "Fandom y ClashKing solo tienen una imagen por guardián (Longshot1, Smasher1, Logger1 / guardians/*/icon.webp); no hay arte por nivel. No se descarga nada.",
-  "crafting_modules": "Los módulos de artesanía no tienen icono propio en el juego, en Fandom ni en ClashKing (son mejoras de estadística). Los tipos (vela, cazahéroes, catapulta explosiva) ya tienen PNG oficiales.",
+  "crafting_modules": "Los módulos de la defensa artesanal no tienen icono propio en el juego, en Fandom ni en ClashKing (son mejoras de estadística). Los tipos (vela, cazahéroes, catapulta explosiva) ya tienen PNG oficiales.",
   "air_bomb_12": "El nivel 12 de la bomba aérea usa la oficial images/levels/air-bomb_11.png. No se publica unofficial/levels/air-bomb_12.png (100×140, low_res).",
   "bomb_12": "El nivel 12 de la bomba sigue con la oficial del 11 (images/traps/bomb.png). No se publica unofficial/levels/bomb_12.png (75×76, low_res).",
   "builder_base": "Las 42 imágenes de la base del constructor que trae el lote no se publican. La app no añade edificios de la base del constructor.",
@@ -25509,7 +25509,7 @@
    "niveles_en_exportaciones": [],
    "cuentas": 11,
    "key": "buildings/crafting-station",
-   "nombre": "Puesto de artesanía",
+   "nombre": "Defensa artesanal",
    "nombre_en": "Crafting Station",
    "nombre_pendiente": false,
    "nombre_propuesto": null,
@@ -25558,7 +25558,7 @@
     "precarga": false
    },
    "motivo": "No está en el Fan Kit (búsqueda con navegador, ronda 3).",
-   "nota_interna": "v3.1.7: imagen no oficial (Fandom) del puesto. Los módulos siguen con el render oficial de su defensa."
+   "nota_interna": "v3.1.7: imagen no oficial (Fandom) de la defensa artesanal. Los módulos siguen con el render oficial de su defensa. Nombre en español corregido por Miguel, vía Jeff (11 oct 2026)."
   },
   "1000102": {
    "id": 1000102,
