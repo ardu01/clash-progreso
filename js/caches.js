@@ -1,3 +1,3 @@
-export const APP_VERSION = "2.1.4";
-export const SHELL_CACHE = "cp-shell-v16";
+export const APP_VERSION = "3.0.0";
+export const SHELL_CACHE = "cp-shell-v17";
 export const IMAGE_CACHE = "cp-img-v5";

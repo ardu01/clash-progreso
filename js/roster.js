@@ -14,6 +14,18 @@ function seedByTag(tag) {
   return SEED_CATALOG.find((r) => r.tag === tag) || null;
 }
 
+export function cleanGrupos(raw) {
+  const list = Array.isArray(raw) ? raw : [];
+  const out = [];
+  for (const item of list) {
+    const text = String(item || "").trim().slice(0, 16);
+    if (!text || out.includes(text)) continue;
+    out.push(text);
+    if (out.length >= 6) break;
+  }
+  return out;
+}
+
 export function normalizeAccount(raw) {
   const tag = raw && typeof raw.tag === "string" ? raw.tag : "";
   if (!tag.startsWith("#")) return null;
@@ -26,6 +38,7 @@ export function normalizeAccount(raw) {
     addedAt,
     chip: raw.chip || (seedByTag(tag) && seedByTag(tag).chip) || chipFromTag(tag),
     objetivo: raw.objetivo == null ? (seedByTag(tag) ? seedByTag(tag).objetivo : null) : raw.objetivo,
+    grupos: cleanGrupos(raw.grupos),
   };
 }
 
@@ -151,6 +164,11 @@ export function addAccount(accounts, raw) {
   if (!acc) return accounts.slice();
   if (accounts.some((a) => a.tag === acc.tag)) return accounts.slice();
   return accounts.concat(acc);
+}
+
+export function setGrupos(accounts, tag, grupos) {
+  const next = cleanGrupos(grupos);
+  return accounts.map((a) => (a.tag === tag ? { ...a, grupos: next } : a));
 }
 
 export function renameAccount(accounts, tag, alias) {

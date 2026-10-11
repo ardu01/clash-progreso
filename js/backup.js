@@ -4,7 +4,7 @@ export function backupFilename(now = Date.now()) {
   return `clash-progreso-copia-${madridDayKey(now)}.json`;
 }
 
-export function buildBackup({ accounts, exports, now = Date.now(), version = "2.1.4" }) {
+export function buildBackup({ accounts, exports, now = Date.now(), version = "3.0.0" }) {
   return {
     app: "clash-progreso",
     version,
@@ -16,6 +16,7 @@ export function buildBackup({ accounts, exports, now = Date.now(), version = "2.
       addedAt: a.addedAt || 0,
       chip: a.chip || "",
       objetivo: a.objetivo == null ? null : a.objetivo,
+      grupos: Array.isArray(a.grupos) ? a.grupos : [],
     })),
     exports: (exports || []).map((exp) => ({ ...exp })),
   };
@@ -44,7 +45,7 @@ export function mergeBackup(current, incoming) {
     exports.push(exp);
     addedExports += 1;
     if (!byTag.has(exp.tag)) {
-      const acc = { tag: exp.tag, alias: exp.tag, principal: false, addedAt: 0, chip: "", objetivo: null };
+      const acc = { tag: exp.tag, alias: exp.tag, principal: false, addedAt: 0, chip: "", objetivo: null, grupos: [] };
       accounts.push(acc);
       byTag.set(exp.tag, acc);
       addedAccounts += 1;
@@ -61,6 +62,7 @@ export function mergeBackup(current, incoming) {
         addedAt: Number(raw.addedAt) || 0,
         chip: raw.chip || "",
         objetivo: raw.objetivo == null ? null : raw.objetivo,
+        grupos: Array.isArray(raw.grupos) ? raw.grupos : [],
       };
       accounts.push(acc);
       byTag.set(raw.tag, acc);
@@ -73,6 +75,7 @@ export function mergeBackup(current, incoming) {
     if (raw.principal === true) cur.principal = true;
     if (!cur.chip && raw.chip) cur.chip = raw.chip;
     if (cur.objetivo == null && raw.objetivo != null) cur.objetivo = raw.objetivo;
+    if (!(cur.grupos && cur.grupos.length) && Array.isArray(raw.grupos) && raw.grupos.length) cur.grupos = raw.grupos.slice();
   }
   return { accounts, exports, addedExports, addedAccounts };
 }
