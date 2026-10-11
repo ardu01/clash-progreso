@@ -1,0 +1,284 @@
+/* Temas Clash Progreso 1.0.0 · base.css (común a todos los temas). Solo modo oscuro. Paquete estético aparte de la app.
+   Lo carga el cargador (js/temas-paquete.js) antes que temas/<id>.css. Tokens comunes, componentes del tema, botones, motivos y
+   efectos comunes, más las reglas de movimiento reducido y alto contraste. Nada aquí enumera temas: todo va bajo :root[data-tema]
+   o bajo :root[data-tema-figura="img"|"sin"], que pone el cargador según paquete.json. Generado por herramientas/construir.py. */
+/* Texturas propias en CSS (inspiradas, no copiadas), de bajo contraste y SOLO en la escena: nunca detrás del texto de un panel. */
+:root {
+  --tx-piedra:  repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, transparent 2px 46px), repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 92px);
+  --tx-azulejo: repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 1px, transparent 1px 22px), repeating-linear-gradient(-45deg, rgba(255,255,255,.035) 0 1px, transparent 1px 22px);
+  --tx-runa:    repeating-linear-gradient(60deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px), repeating-linear-gradient(-60deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px);
+  --tx-forja:   repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 7px, rgba(0,0,0,.14) 7px 8px, transparent 8px 36px);
+  --tx-escamas: radial-gradient(circle at 50% 0, transparent 0 12px, rgba(0,0,0,.30) 12px 14px, transparent 14px);
+}
+:root[data-tema] { color-scheme: dark; }
+:root[data-tema] body {
+  background-color: var(--scene);
+  background-image:
+    radial-gradient(120% 50% at 50% -6%, color-mix(in srgb, var(--scene-glow) 26%, transparent), transparent 70%),
+    var(--tema-textura),
+    linear-gradient(180deg, var(--scene), var(--scene-2));
+  background-size: auto, var(--tema-textura-size, auto), auto;
+  background-attachment: fixed;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-tema] body { background-image: none; }
+}
+/* Marco (HUD, tab bar y tablones): la «madera» fija #6A4B30→#3E2918 pasa a --wood-* del tema; filete de acento */
+:root[data-tema] :is(.navbar, .navbar[data-collapsed="true"], .navbar[data-collapsed="false"]) {
+  background: linear-gradient(180deg, var(--wood-top), var(--wood-bot)); border-bottom-color: var(--wood-edge);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.14), inset 0 -3px 0 color-mix(in srgb, var(--acc) 60%, transparent), 0 4px 10px rgba(0,0,0,.45);
+}
+:root[data-tema] .tabbar {
+  background: linear-gradient(180deg, var(--wood-top), var(--wood-bot)); border-top-color: var(--wood-edge);
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--acc) 60%, transparent), 0 -4px 12px rgba(0,0,0,.45);
+}
+:root[data-tema] .screen > .section > :is(.section-header, h2.section-header) {
+  border-color: var(--wood-edge); background: linear-gradient(180deg, var(--wood-top), var(--wood-bot));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.14), 0 2px 0 var(--wood-edge); color: var(--gold);
+}
+:root[data-tema] .navbar__trail .btn-text { border-color: var(--wood-edge); }
+/* Paneles y losetas: canto superior con el acento del tema (filete de 3 px; ningún texto encima) */
+:root[data-tema] :is(.card, .list:not(.list--tiles), .row--tile, .stat-tiles > div) {
+  border-color: var(--panel-edge);
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--acc) 70%, transparent), inset 0 -2px 0 var(--panel-lo), 0 4px 0 rgba(0,0,0,.45);
+}
+/* Barras de cuenta: relleno con el acento (el % va en la pastilla pergamino: 15,6:1 siempre) */
+:root[data-tema] .meter .bar { --cat: var(--acc); }
+/* Chip TH bajo la miniatura: acento oscuro con blanco (≥ 4,5:1, ver LEEME). Solo marco/fondo de .thumb; .thumb > img intacto. */
+:root[data-tema] .th-tile__n { background: var(--acc-strong); border-color: var(--acc-edge); }
+:root[data-tema] :is(.th-tile, .row--tile, .acct-tile, .tema-hero) > .thumb {
+  background: var(--panel-3); box-shadow: inset 0 0 0 2px var(--panel-edge), inset 0 2px 0 color-mix(in srgb, var(--acc) 50%, transparent);
+}
+:root[data-tema] .tabbar a[aria-current="page"] { border-color: var(--gold-edge); }
+/* Cabecera de Inicio del tema: miniatura vía thumb() + nombre del tema. La imagen nunca va detrás de texto. */
+.tema-hero { display: none; }
+:root[data-tema] .tema-hero {
+  display: flex; align-items: center; gap: 12px; margin: var(--sp-3) var(--margin-r) 0 var(--margin-l); padding: 8px 12px 10px;
+  border: 3px solid var(--panel-edge); border-radius: 14px; color: var(--ink);
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--acc) 70%, transparent), 0 4px 0 rgba(0,0,0,.45);
+}
+.tema-hero__txt { min-width: 0; }
+.tema-hero b { display: block; font: 900 1.059rem/1.15 var(--font-ui); overflow-wrap: anywhere; }
+.tema-hero span.c-2 { color: var(--ink-2); font: 600 .765rem/1.3 var(--font-text, var(--font)); }
+.tema-hero > .swatch { flex: none; width: 52px; height: 52px; }
+/* Selector de tema (Copia/Ajustes): rejilla de botones ≥ 44 px con miniatura (thumb) o muestra de color */
+.temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.4em, 1fr)); gap: 8px; margin: 10px 0 4px; padding: 0; list-style: none; }
+.temas button {
+  width: 100%; display: grid; justify-items: center; gap: 4px; min-height: 64px; padding: 6px 4px 8px; border-radius: 12px;
+  border: 2px solid var(--cf-edge); background: linear-gradient(180deg, var(--cf-top), var(--cf-bot)); color: var(--ink);
+  box-shadow: 0 3px 0 var(--cf-edge); font: 800 .765rem/1.1 var(--font-ui); overflow-wrap: anywhere;
+}
+.temas button[aria-pressed="true"] { border-color: var(--gold-edge); color: #24211C; background: linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot)); box-shadow: 0 3px 0 var(--gold-edge); }
+.swatch { display: block; width: 40px; height: 40px; border-radius: 10px; border: 2px solid rgba(0,0,0,.6); background: linear-gradient(135deg, #6A4B30 0 45%, #2E66AE 45% 72%, #F6C744 72%); }
+/* 1. Escena: capa de motivo propia (tenue) bajo el resplandor del tema */
+:root[data-tema] body {
+  background-image:
+    radial-gradient(120% 50% at 50% -6%, color-mix(in srgb, var(--scene-glow) 26%, transparent), transparent 70%),
+    var(--m-scene, linear-gradient(transparent, transparent)),
+    var(--tema-textura),
+    linear-gradient(180deg, var(--scene), var(--scene-2));
+  background-size: auto, auto, var(--tema-textura-size, auto), auto;
+}
+/* 2. HUD: tira de motivo en el borde inferior de la cabecera (fuera de la zona del título y de los botones) */
+:root[data-tema] { --navbar-h: 66px; }
+:root[data-tema] :is(.navbar, .navbar[data-collapsed="true"], .navbar[data-collapsed="false"]) {
+  background:
+    var(--m-hud, linear-gradient(transparent, transparent)) repeat-x left 0 bottom 2px / auto 9px,
+    linear-gradient(180deg, var(--wood-top), var(--wood-bot));
+}
+/* 3. Separadores de sección: ornamento centrado entre dos filetes (o tira repetida: cadena, cordón, greca) */
+:root[data-tema] :is(.screen > .section:has(> .section-header), .inicio-h2)::before {
+  content: ""; display: block; height: 22px; margin: 0 0 8px; pointer-events: none;
+  background:
+    var(--m-sep, linear-gradient(transparent, transparent)) center / auto 22px no-repeat,
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 55%, transparent) 12%, color-mix(in srgb, var(--gold) 55%, transparent) 88%, transparent) center / 100% 2px no-repeat;
+}
+:root[data-tema] .inicio-h2::before { margin-bottom: 10px; }
+/* 4. Botones 3D: tira de motivo sobre el canto superior (zona de brillo, nunca sobre la etiqueta) */
+:root[data-tema] :is(.btn--primary, .navbar__lead .btn-text, .navbar__trail .btn-text, [data-edit], .accion__ico) { position: relative; }
+:root[data-tema] :is(.btn--primary, .navbar__lead .btn-text, .navbar__trail .btn-text, [data-edit], .accion__ico)::before {
+  content: ""; position: absolute; left: 7px; right: 7px; top: -6px; height: 9px; pointer-events: none;
+  background: var(--m-btn, none) repeat-x center / auto 9px;
+}
+/* 5. Pestaña activa: emblema en la esquina superior derecha (fuera del icono y de la etiqueta) */
+:root[data-tema] .tabbar a { position: relative; }
+:root[data-tema] .tabbar a[aria-current="page"]::after {
+  content: ""; position: absolute; top: -10px; right: -6px; width: 24px; height: 24px; pointer-events: none;
+  background: var(--m-tab, none) center / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
+}
+/* 6. Cabecera de Inicio del tema: emblema grande a la derecha (flex, el texto nunca queda debajo) */
+:root[data-tema] .tema-hero::after {
+  content: ""; flex: none; width: 46px; height: 46px; margin-left: auto; pointer-events: none;
+  background: var(--m-emb, var(--m-tab, none)) center / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(0,0,0,.5));
+}
+/* 7. Barras: brillo propio sobre el relleno y punta al final (la pastilla del % queda encima, opaca) */
+:root[data-tema] .meter .bar__fill::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--m-fill, none); pointer-events: none; }
+:root[data-tema] .meter .bar__fill::before {
+  content: ""; position: absolute; right: -4px; top: 50%; width: 14px; height: 22px; transform: translateY(-58%); pointer-events: none;
+  background: var(--m-tip, none) center / contain no-repeat;
+}
+/* 8. Chip activo (filtros) y tema elegido: aura del acento del tema (sin cambiar el dorado = activo) */
+:root[data-tema] :is(.chip-row button[aria-pressed="true"], .temas button[aria-pressed="true"]) {
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 3px 0 var(--gold-edge), 0 0 0 3px color-mix(in srgb, var(--acc) 45%, transparent);
+}
+@media (prefers-contrast: more) {
+  :root[data-tema] body { background-image: none; }
+  :root[data-tema] :is(.btn--primary, [data-edit], .accion__ico)::before, :root[data-tema] .meter .bar__fill::after { display: none; }
+}
+/* 1. BOTONES: cuerpo con color semántico + remate propio en cada extremo (pseudo-elementos, dentro del relleno lateral:
+      nunca detrás de la etiqueta) + franja de motivo en el canto superior (zona de brillo, por encima de la etiqueta) */
+:root[data-tema] { --cap-w: 40px; --cap-h: 44px; --cap-out: 12px; --btn-pad: 40px; }
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive) {
+  position: relative; isolation: isolate; min-height: 54px;
+  padding: 13px var(--btn-pad) 11px; border-radius: var(--btn-r);
+  font: 800 1rem/1.25 var(--font-ui); letter-spacing: 0; opacity: 1;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35); transition: transform 80ms;
+}
+/* Principal = VERDE (confirmar) con el ribete y la franja del tema */
+:root[data-tema] .btn.btn--primary {
+  color: #FFFFFF; border: 3px solid var(--go-edge);
+  background: var(--btn-top) repeat-x left 0 top 0 / auto 8px,
+              linear-gradient(180deg, var(--go-top) 0 5px, var(--go) 5px, var(--go) 70%, var(--go-bot));
+  box-shadow: 0 0 0 2px var(--btn-trim), var(--btn-glow), inset 0 2px 0 rgba(255,255,255,.45), 0 5px 0 var(--go-edge);
+}
+/* Secundario = madera/metal del tema (neutro, ni verde ni dorado); también «Añadir cuenta» de Cuentas */
+:root[data-tema] .btn.btn--secondary,
+:root[data-tema] .card .btn.btn--secondary,
+:root[data-tema] .screen:has(.fleet-card) > .section > .btn.btn--primary[data-go="#/importar"] {
+  color: #FFFFFF; border: 3px solid var(--wood-edge);
+  background: var(--btn-top) repeat-x left 0 top 0 / auto 8px,
+              linear-gradient(180deg, color-mix(in srgb, var(--wood-top) 70%, #FFFFFF) 0 4px, var(--wood-top) 4px, var(--wood-bot));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--btn-trim) 75%, transparent), inset 0 2px 0 rgba(255,255,255,.18), 0 5px 0 var(--wood-edge);
+}
+/* Borrar = ROJO con el mismo remate (forma del tema, significado intacto) */
+:root[data-tema] .btn.btn--destructive {
+  color: #FFFFFF; border: 3px solid #3E0A06;
+  background: linear-gradient(180deg, #C83A2E 0 5px, #B02A20 5px, #B02A20 70%, #8A1C14);
+  box-shadow: 0 0 0 2px var(--btn-trim), inset 0 2px 0 rgba(255,255,255,.35), 0 5px 0 #3E0A06;
+}
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::before,
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::after {
+  content: ""; position: absolute; top: 50%; bottom: auto; width: var(--cap-w); height: var(--cap-h); z-index: 1; pointer-events: none;
+  background: var(--cap-l) center / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(0,0,0,.45));
+}
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::before { left: calc(-1 * var(--cap-out)); right: auto; transform: translateY(-50%); }
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::after  { right: calc(-1 * var(--cap-out)); left: auto; background-image: var(--cap-r); transform: translateY(-50%) var(--cap-flip); }
+/* Pulsado: el canto se hunde (sin cambiar colores → mismo contraste) */
+:root[data-tema] .btn.btn--primary:active { transform: translateY(4px); box-shadow: 0 0 0 2px var(--btn-trim), inset 0 2px 0 rgba(255,255,255,.45), 0 1px 0 var(--go-edge); }
+:root[data-tema] .btn.btn--secondary:active,
+:root[data-tema] .screen:has(.fleet-card) > .section > .btn.btn--primary[data-go="#/importar"]:active { transform: translateY(4px); box-shadow: 0 0 0 2px var(--btn-trim), 0 1px 0 var(--wood-edge); }
+:root[data-tema] .btn.btn--destructive:active { transform: translateY(4px); box-shadow: 0 0 0 2px var(--btn-trim), 0 1px 0 #3E0A06; }
+/* Deshabilitado: pizarra gris, texto claro ≥ 7:1, remates apagados */
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive):is([disabled], [aria-disabled="true"]) {
+  color: #ECEAE4; text-shadow: none; border-color: #1A1B1F; cursor: default; transform: none;
+  background: linear-gradient(180deg, #5B5E67 0 4px, #474A52 4px);
+  box-shadow: 0 0 0 2px #6B6E76, 0 3px 0 #1A1B1F;
+}
+:root[data-tema] .btn:is([disabled], [aria-disabled="true"])::before,
+:root[data-tema] .btn:is([disabled], [aria-disabled="true"])::after { filter: grayscale(1) brightness(.8); opacity: .6; }
+/* Foco visible: anillo blanco + halo del acento, separado del ribete */
+:root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive):focus-visible {
+  outline: 3px solid #FFFFFF; outline-offset: 5px;
+}
+/* 2. TARJETAS: escuadras de metal del tema en las dos esquinas superiores (sobre el borde, dentro del relleno) */
+:root[data-tema] .card { position: relative; }
+:root[data-tema] .card::before, :root[data-tema] .card::after {
+  content: ""; position: absolute; top: 0; width: 20px; height: 20px; z-index: 1; pointer-events: none;
+  background: var(--card-c) center / contain no-repeat; filter: drop-shadow(0 1px 0 rgba(0,0,0,.5));
+}
+:root[data-tema] .card::before { left: 0; }
+:root[data-tema] .card::after  { right: 0; transform: scaleX(-1); }
+/* 3. BARRA DE PESTAÑAS: franja del tema sobre el canto, pestañas con la silueta del tema y filete interior */
+:root[data-tema] .tabbar {
+  background: var(--btn-top) repeat-x left 0 top 0 / auto 8px, linear-gradient(180deg, var(--wood-top), var(--wood-bot));
+  padding-top: 12px;
+}
+:root[data-tema] .tabbar a {
+  border-radius: var(--tab-r);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--btn-trim) 40%, transparent), inset 0 3px 0 rgba(255,255,255,.22), 0 3px 0 var(--grey-edge);
+}
+:root[data-tema] .tabbar a[aria-current="page"] {
+  box-shadow: 0 0 0 2px var(--gold), inset 0 2px 0 var(--panel-hi), 0 4px 0 var(--panel-edge), 0 8px 12px rgba(0,0,0,.35);
+}
+/* 4. CHIPS: silueta del tema; el activo (dorado) lleva el emblema del tema delante del texto, en su propio hueco */
+:root[data-tema] :is(.chip-row button, .chip:not(.chip--account)) { border-radius: var(--chip-r); }
+:root[data-tema] .chip-row button { display: inline-flex; align-items: center; }
+:root[data-tema] .chip-row button[aria-pressed="true"]::before {
+  content: ""; flex: none; width: var(--chip-ico-w); height: 18px; margin-right: var(--chip-ico-gap); pointer-events: none;
+  background: var(--chip-ico) center / contain no-repeat;
+}
+/* 5. SEPARADOR: el ornamento central va sobre la franja del motivo (no sobre un filete liso) y se desvanece en los extremos */
+:root[data-tema] :is(.screen > .section:has(> .section-header), .inicio-h2)::before {
+  height: 24px;
+  background: var(--m-sep, linear-gradient(transparent, transparent)) center / auto 24px no-repeat, var(--sep-line) left 0 center / auto 8px repeat-x;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+/* 6. CASILLAS E INTERRUPTORES (la app no tiene ahora; queda listo): casilla de 26 px dentro de un objetivo de 44 px; marcada = dorado (activo) */
+:root[data-tema] input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; flex: none; width: 26px; height: 26px; margin: 9px; border-radius: min(var(--chip-r), 8px);
+  border: 3px solid var(--wood-edge); background: var(--panel-3); box-shadow: 0 0 0 2px color-mix(in srgb, var(--btn-trim) 60%, transparent), inset 0 2px 0 rgba(0,0,0,.4);
+}
+:root[data-tema] input[type="checkbox"]:checked {
+  border-color: var(--gold-edge);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5 8.5 15 16 5.5' fill='none' stroke='%2324211C' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat,
+              linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot));
+}
+:root[data-tema] input[type="checkbox"][role="switch"] { width: 52px; border-radius: 999px; background: radial-gradient(circle at 12px 50%, #ECEAE4 0 8px, transparent 9px), var(--panel-3); }
+:root[data-tema] input[type="checkbox"][role="switch"]:checked { background: radial-gradient(circle at calc(100% - 12px) 50%, #FFFFFF 0 8px, transparent 9px), linear-gradient(180deg, var(--gold-top), var(--gold-bot)); }
+:root[data-tema] input[type="checkbox"]:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive), :root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive):active { transition: none; transform: none; }
+}
+@media (prefers-contrast: more) {
+  :root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::before,
+    :root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive)::after,
+    :root[data-tema] .card::before, :root[data-tema] .card::after,
+    :root[data-tema] .chip-row button[aria-pressed="true"]::before { display: none; }
+  :root[data-tema] .btn:is(.btn--primary, .btn--secondary, .btn--destructive) { --btn-pad: 20px; text-shadow: none; box-shadow: none; }
+  :root[data-tema] .btn.btn--primary { background: #7BC02C; color: #1B3A06; border-color: #FFFFFF; }
+  :root[data-tema] .btn.btn--secondary, :root[data-tema] .card .btn.btn--secondary,
+    :root[data-tema] .screen:has(.fleet-card) > .section > .btn.btn--primary[data-go="#/importar"] { background: #000000; color: #FFFFFF; border-color: #FFFFFF; }
+  :root[data-tema] .btn.btn--destructive { background: #FFB4AB; color: #3E0A06; border-color: #FFFFFF; }
+  :root[data-tema] .tabbar { background: var(--wood-bot); }
+  :root[data-tema] :is(.screen > .section:has(> .section-header), .inicio-h2)::before { -webkit-mask-image: none; mask-image: none; background: var(--m-sep, none) center / auto 24px no-repeat; }
+}
+/* 8. «Editar» de cada cuenta: silueta de chip del tema */
+:root[data-tema] [data-edit] { border-radius: var(--chip-r); }
+:root:is([data-tema-figura="img"]) { --fx-w: 116px; --fx-zoom: 1.8; }
+:root:is([data-tema-figura="sin"]) { --fx-w: 66px; }
+:root:is([data-tema]) .tema-hero { position: relative; isolation: isolate; overflow: hidden; }
+:root:is([data-tema-figura="img"]) .tema-hero { min-height: 122px; padding-left: 12px; }
+:root:is([data-tema-figura="sin"]) .tema-hero { min-height: 100px; }
+:root:is([data-tema-figura="sin"]) .tema-hero__txt { position: relative; z-index: 1; }
+:root:is([data-tema-figura="img"]) .tema-hero__txt { position: static; }
+:root:is([data-tema-figura="img"]) .tema-hero > .thumb {
+  z-index: 1; box-shadow: none;
+  background: var(--fx-resplandor) center / 100% 100% no-repeat;
+  transform: scale(var(--fx-zoom)); transform-origin: left center;
+  margin-right: calc(52px * (var(--fx-zoom) - 1) + 2px);
+}
+:root:is([data-tema]) .tema-hero::before {
+  content: ""; position: absolute; top: 0; bottom: 0; width: var(--fx-w); pointer-events: none;
+  background: var(--fx-escena) center / var(--fx-w) 120px no-repeat;
+  clip-path: inset(0); contain: paint;
+}
+:root:is([data-tema-figura="img"]) .tema-hero::before { left: 0; z-index: 0; }
+:root:is([data-tema-figura="img"]) .tema-hero__txt::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--fx-w); z-index: 2; pointer-events: none;
+  background: var(--fx-frente, none) center / var(--fx-w) 120px no-repeat;
+  clip-path: inset(0); contain: paint;
+}
+:root:is([data-tema-figura="sin"]) .tema-hero::before { right: 0; z-index: 0; }
+:root:is([data-tema-figura="sin"]) .tema-hero::after { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  :root:is([data-tema]) .tema-hero::before { background-image: var(--fx-escena-estatica); }
+  :root:is([data-tema-figura="img"]) .tema-hero > .thumb { background-image: var(--fx-resplandor-estatico); }
+  :root:is([data-tema-figura="img"]) .tema-hero__txt::before { background-image: var(--fx-frente-estatico, none); }
+}
+@media (prefers-contrast: more) {
+  :root:is([data-tema]) .tema-hero::before, :root:is([data-tema-figura="img"]) .tema-hero__txt::before { display: none; }
+  :root:is([data-tema-figura="img"]) .tema-hero > .thumb { background: transparent; }
+}
+.swatch[style*="--sw1"] { background: linear-gradient(135deg, var(--sw1) 0 45%, var(--sw2) 45% 72%, var(--sw3) 72%); }

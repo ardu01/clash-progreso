@@ -48,6 +48,7 @@ import { htmlAtencion, htmlMotor } from "./ui-atencion.js";
 import { htmlEstrategias } from "./ui-evolucion.js";
 import { empaquetarCuentas, empezarExploracion, pararExploracion } from "./evolucion/control.js";
 import { cargarFuentes, costeSubirTh } from "./fuentes.js";
+import { aplicarTema, cargarPaquete, elegirTema, gruposDelPaquete, hayPaquete, muestra, temaActivo, temaElegido, temasDelPaquete } from "./temas-paquete.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
@@ -285,6 +286,39 @@ const ICON = {
   objetivo: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="5.5"/><circle cx="14" cy="14" r="1.5"/></svg>`,
 };
 const BACK = `<svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Paquete estético (temas, aparte de la app): js/temas-paquete.js lo carga si existe. Solo en oscuro.
+function oscuroEfectivo() {
+  const t = state.theme || "sistema";
+  return t === "dark" || (t === "sistema" && !!window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function temaDeAhora() {
+  if (temaElegido() !== "auto") return temaActivo(null);
+  const tag = route().tag || null;
+  const meta = (tag && allAccounts().find((m) => m.tag === tag)) || allAccounts().find((m) => m.principal);
+  const exp = meta && state.index ? expOf(meta.tag) : null;
+  return temaActivo(exp ? townHallLevel(exp) : null);
+}
+let temaMq = null;
+function aplicarTemaApp() {
+  if (!temaMq && window.matchMedia) { temaMq = window.matchMedia("(prefers-color-scheme: dark)"); temaMq.addEventListener?.("change", () => render()); }
+  aplicarTema(temaDeAhora(), oscuroEfectivo());
+}
+const temaImg = (t, size) => (t && t.thumb && state.index && state.index.items[String(t.thumb.item)] ? thumb(t.thumb.item, { th: t.thumb.nivel ?? undefined, size }) : `<span class="swatch" data-sw="${t ? t.id : ""}"${muestra(t)} aria-hidden="true"></span>`);
+function temaHero() {
+  const t = oscuroEfectivo() ? temaDeAhora() : null;
+  return t ? `<div class="tema-hero">${temaImg(t, 52)}<span class="tema-hero__txt"><b>Tema ${esc(t.nombre)}</b><span class="c-2">${temaElegido() === "auto" ? "Automático · TH de la cuenta" : "Elegido en Ajustes"}</span></span></div>` : "";
+}
+function temasHtml() {
+  if (!hayPaquete()) return "";
+  const cur = temaElegido();
+  const btn = (id, nombre, img) => `<li><button type="button" data-tema-set="${id}" aria-pressed="${cur === id}">${img}<span>${esc(nombre)}</span></button></li>`;
+  const grupos = gruposDelPaquete().map((g) => [g, temasDelPaquete().filter((t) => t.grupo === g.id)]).filter(([, ts]) => ts.length)
+    .map(([g, ts]) => `<h3 class="t-subhead c-2">${esc(g.nombre)}</h3><ul class="temas">${ts.map((t) => btn(t.id, t.nombre, temaImg(t, 40))).join("")}</ul>`).join("");
+  return `<div class="section"><div class="card"><h2 class="t-headline">Tema del juego</h2>
+      <ul class="temas">${btn("", "Ninguno", `<span class="swatch" aria-hidden="true"></span>`)}${btn("auto", "Automático", temaImg(temaDeAhora(), 40))}</ul>${grupos}
+      <p class="t-footnote c-2">Solo se ve en modo oscuro. Automático usa el TH de la cuenta abierta o, si no, el de la principal. Se guarda en este iPhone. Los temas son de fans, inspirados en el juego.</p></div></div>`;
+}
 
 const ADDED_KEY = "cp-added";
 
@@ -1225,7 +1259,7 @@ function renderInicio() {
   const conObj = list.filter((m) => m.objetivo != null).length;
   const hoyKey = madridDayKey(state.now);
   const terminanHoy = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
-  const tiles = `<div class="section"><div class="stat-tiles">
+  const tiles = `${temaHero()}<div class="section"><div class="stat-tiles">
       <div><b class="num">${nCuentas ? nCuentas : "—"}</b><span>Cuentas</span></div>
       <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
       <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
@@ -4728,6 +4762,7 @@ function renderCopia() {
         <input data-stale-days type="number" min="1" max="90" value="${state.staleDays}" aria-label="Días sin actualizar">
       </label>
     </div></div>
+    ${temasHtml()}
     <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
       <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
       <div class="bar" style="--p:${Math.min(100, p)};--cat:var(--tint)" role="img" aria-label="${esc(status)}"><span class="bar__fill"></span></div>
@@ -5039,6 +5074,7 @@ function abrirFuera(ev, enlace) {
 
 function render() {
   const r = route();
+  aplicarTemaApp();
   if (r.name === "importar") {
     if (!state.importUi.active) {
       state.importUi = freshImport();
@@ -5461,6 +5497,8 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-close-editor]")) { state.editor = null; render(); return; }
+    const temaSet = origen.closest("[data-tema-set]");
+    if (temaSet) { elegirTema(temaSet.dataset.temaSet); render(); return; }
     const principal = origen.closest("[data-principal]");
     if (principal) {
       const tag = principal.dataset.principal;
@@ -6162,6 +6200,7 @@ async function aplicarMigracion() {
 
 async function boot() {
   applyTheme(state.theme);
+  cargarPaquete().then((p) => { if (p) render(); });
   state.added = loadAdded();
   announce("");
   render();
