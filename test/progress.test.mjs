@@ -954,9 +954,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 3.1.10 y cachés cp-shell-v29 / cp-img-v9", () => {
-  assert.equal(APP_VERSION, "3.1.10");
-  assert.equal(SHELL_CACHE, "cp-shell-v29");
+test("versión 3.1.11 y cachés cp-shell-v30 / cp-img-v9", () => {
+  assert.equal(APP_VERSION, "3.1.11");
+  assert.equal(SHELL_CACHE, "cp-shell-v30");
   assert.equal(IMAGE_CACHE, "cp-img-v9");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -989,13 +989,15 @@ test("versión 3.1.10 y cachés cp-shell-v29 / cp-img-v9", () => {
   assert.equal(sw.includes("cp-shell-v26"), false);
   assert.equal(sw.includes("cp-shell-v27"), false);
   assert.equal(sw.includes("cp-shell-v28"), false);
+  assert.equal(sw.includes("cp-shell-v29"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v29/);
+  assert.match(caches, /cp-shell-v30/);
+  assert.equal(caches.includes("cp-shell-v29"), false);
   assert.equal(caches.includes("cp-shell-v21"), false);
   assert.equal(caches.includes("cp-shell-v22"), false);
   assert.equal(caches.includes("cp-shell-v23"), false);

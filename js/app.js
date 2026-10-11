@@ -10,7 +10,7 @@ import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
   duplicateMsg, foreignMsg, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
-  planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
+  diffExports, planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, latestCopyAt, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
@@ -24,7 +24,7 @@ import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
-import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
+import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import {
@@ -36,7 +36,7 @@ import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from ".
 import { exportFacts } from "./perfil.js";
 import { accionTab } from "./nav.js";
 import {
-  blankSession, clearSession, compareOrden, isStandalone, mensajePegado, nextOf, ordenDeSesion,
+  anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
 } from "./actualizar.js";
 
@@ -95,6 +95,7 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
+  agendaVista: ["24h", "7d", "cuenta"].includes(localStorage.getItem("cp-agenda")) ? localStorage.getItem("cp-agenda") : "24h",
   actualizarManual: false,
   actualizarFocus: false,
   actualizarBorrador: "",
@@ -1120,33 +1121,42 @@ function renderInicio() {
   const withData = list.filter((m) => expOf(m.tag));
   const rows = fleetRows(list);
   const snap = fleetSnapshot(rows);
-  const principal = list.find((m) => m.principal) || null;
-  const pv = principal && expOf(principal.tag) ? viewOf(principal.tag) : null;
-  const objs = new Map();
-  for (const m of list) if (m.objetivo != null) objs.set(m.objetivo, (objs.get(m.objetivo) || 0) + 1);
-  const objTxt = [...objs.entries()].sort((a, b) => b[0] - a[0]).map(([th, n]) => (n === 1 ? `TH${th}` : `${n}×TH${th}`)).join(" + ") || "—";
+  const nCuentas = list.length;
+  const cabecera = `Clash Progreso · Centro de mando · ${nCuentas === 1 ? "1 cuenta" : `${nCuentas} cuentas`}`;
+  const hayDatos = withData.length > 0;
   const thOf = (m) => (expOf(m.tag) ? viewOf(m.tag).th : null);
   const enObjetivo = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) >= m.objetivo).length;
   const conObj = list.filter((m) => m.objetivo != null).length;
+  const hoyKey = madridDayKey(state.now);
+  const terminanHoy = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
   const tiles = `<div class="section"><div class="stat-tiles">
-      <div><b class="num">${withData.length}</b><span>${withData.length === list.length ? "cuentas" : `de ${list.length} cuentas con datos`}</span></div>
-      <div><b class="num">${pv ? `TH${pv.th}` : "—"}</b><span>${principal ? esc(principal.nombre) : "Sin principal"}</span></div>
-      <div><b class="num obj">${esc(objTxt)}</b><span>Objetivo · ${enObjetivo} de ${conObj} ya</span></div>
+      <div><b class="num">${nCuentas ? nCuentas : "—"}</b><span>Cuentas</span></div>
+      <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
+      <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
     </div></div>`;
   const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
   const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
-  const hoyKey = madridDayKey(state.now);
-  const deHoyN = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
   const deHoy = ordenadas.filter((p) => p.tier === 0 && p.when != null && madridDayKey(p.when) === hoyKey);
   const accion = (href, icon, cls, title, sub) => `<li><a class="row row--tile row--accion" href="${href}"><span class="accion__ico ${cls}" aria-hidden="true">${icon}</span><span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
   const acciones = [
-    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores", `${snap.frase} · ${deHoy.length} ${deHoy.length === 1 ? "cuenta" : "cuentas"} para abrir hoy`),
+    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores disponibles", hayDatos ? snap.frase : "—"),
     objMas
-      ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
-      : accion("#/roster", ICON.objetivo, "is-gold", "Objetivos cumplidos", `${enObjetivo} de ${conObj} cuentas en su objetivo`),
-    accion("#/agenda", ICON.agenda, "is-blue", "Organizar las mejoras de hoy", `${deHoyN} ${deHoyN === 1 ? "termina" : "terminan"} hoy${snap.proxima ? ` · próxima ${fmtFin(snap.proxima.fin)}` : ""}`),
+      ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos de TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
+      : accion("#/roster", ICON.objetivo, "is-gold", "Preparar objetivos de TH", conObj ? `${enObjetivo} de ${conObj} en su objetivo` : "—"),
   ].join("");
+  const proximas = [];
+  for (const row of rows) {
+    for (const u of row.mejoras || []) {
+      if (u.extra || u.done || !(u.end > state.now)) continue;
+      proximas.push({ nombre: row.nombre, tag: row.tag, end: u.end, title: nameOf(u.id) || "Mejora" });
+    }
+  }
+  proximas.sort((a, b) => a.end - b.end || String(a.nombre).localeCompare(String(b.nombre), "es"));
+  const tres = proximas.slice(0, 3);
+  const proxBlock = tres.length
+    ? `<ul class="list list--tiles">${tres.map((u) => `<li><a class="row row--tile" href="#/progreso/${u.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(u.title)}</span><span class="row__sub">${esc(u.nombre)} · ${esc(fmtFin(u.end))}</span></span>${CHEV}</a></li>`).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">—</p></div>`;
   const sinHora = ordenadas.filter((p) => p.tier === 1);
   const hoyRows = deHoy.map((p, i) => `<li><a class="row row--tile" href="#/progreso/${p.meta.tag.slice(1)}/plan"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(p.meta.nombre)}</span><span class="row__sub">${esc(textoCola(p))}</span></span>${CHEV}</a></li>`).join("");
   const hoyBlock = deHoy.length
@@ -1167,11 +1177,12 @@ function renderInicio() {
         <span class="row__sub">${esc(sub)}</span>
         ${v ? meterHtml(v.media, `Media ${fmtPct(v.media)}`) : ""}</span>${CHEV}</a></li>`;
   };
-  return `<h1 class="large-title">Inicio</h1>
-    <p class="large-sub">Centro de mando · ${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`}</p>
+  return `<h1 class="large-title">${esc(cabecera)}</h1>
+    <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
     ${tiles}
     <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
+    <div class="section"><div class="section-header"><span>Próximas finalizaciones</span></div>${proxBlock}</div>
     <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
       <p class="t-footnote c-2">Orden según el plan de cada cuenta y la cola que queda libre antes. Si el temporizador no es un número, no se inventa la hora.</p>
       ${hoyBlock}${sinHoraNote}</div>
@@ -1463,36 +1474,33 @@ function renderAgenda() {
     }
     return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, desactualizada: colas.desactualizada, lineas: tl.lineas };
   }).filter(Boolean);
-  const agenda = fleetAgenda(cuentas, { now: state.now, dias: 21 });
-  const days = agenda.dias.map((day) => {
-    const rows = day.eventos.map((ev) => {
-      const cuando = ev.desactualizada && ev.ahora
-        ? "Necesita actualización"
-        : ev.ahora && ev.clase === "estimado"
-          ? "Libre según la exportación (estimado)"
-          : ev.ahora
-            ? "Libre en la exportación"
-            : fmtFin(ev.fin);
-      const sueno = ev.enSueno ? " · en horas de sueño; la siguiente espera a despertar" : "";
-      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(cuando)}${esc(sueno)}</span></span></div></li>`;
+  const modo = state.agendaVista === "7d" || state.agendaVista === "cuenta" ? state.agendaVista : "24h";
+  const eventos = finalesEn(cuentas, { now: state.now, modo });
+  const filaEv = (ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(fmtFin(ev.fin))}</span></span></div></li>`;
+  let cuerpo = "";
+  if (!eventos.length) {
+    cuerpo = `<div class="section"><div class="card empty"><p class="t-title3">—</p></div></div>`;
+  } else if (modo === "cuenta") {
+    const por = new Map();
+    for (const ev of eventos) {
+      if (!por.has(ev.tag)) por.set(ev.tag, []);
+      por.get(ev.tag).push(ev);
+    }
+    cuerpo = [...por.values()].map((list) => `<div class="section"><div class="section-header"><span>${esc(list[0].nombre)}</span></div><ul class="list">${list.map(filaEv).join("")}</ul></div>`).join("");
+  } else {
+    cuerpo = franjasDe(eventos).map((g) => {
+      const titulo = g.cuentas > 1 ? fraseFranja(g) : dayHeading(g.ms, state.now);
+      return `<div class="section"><div class="section-header"><span>${esc(titulo)}</span></div><ul class="list">${g.eventos.map(filaEv).join("")}</ul></div>`;
     }).join("");
-    return `<div class="section"><div class="section-header"><span>${esc(dayHeading(day.ms, state.now))}</span></div><ul class="list">${rows}</ul></div>`;
-  }).join("");
-  const sin = agenda.sinHora.length
-    ? `<div class="section"><div class="section-header"><span>Sin hora exacta</span></div><ul class="list">${agenda.sinHora.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.actual || "Mejora en curso")}. La exportación no trae la hora. No se inventa.</span></span></div></li>`).join("")}</ul></div>`
-    : "";
-  const later = agenda.masAdelante.length
-    ? `<div class="section"><div class="section-header"><span>Más adelante</span></div><ul class="list">${agenda.masAdelante.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(fmtFin(ev.fin))}</span></span></div></li>`).join("")}</ul></div>`
-    : "";
-  const empty = !days && !sin && !later
-    ? `<div class="section"><div class="card empty"><p class="t-title3">Nada que agendar</p><p class="t-subhead c-2">No hay colas libres ni mejoras con hora en este filtro.</p></div></div>`
-    : "";
+  }
+  const nav = `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Agenda"><button type="button" role="tab" data-agenda="24h" aria-selected="${modo === "24h"}">Próximas 24 h</button><button type="button" role="tab" data-agenda="7d" aria-selected="${modo === "7d"}">Próximos 7 días</button><button type="button" role="tab" data-agenda="cuenta" aria-selected="${modo === "cuenta"}">Por cuenta</button></nav></div>`;
   return `<h1 class="large-title">Agenda</h1>
-    <p class="large-sub">Cuándo queda libre cada constructor, el laboratorio y la casa de mascotas.</p>
+    <p class="large-sub">Finalizaciones con hora, de la exportación. Una cuenta sin actualizar no entra.</p>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    ${nav}
     ${sleepCard()}
-    ${days}${later}${sin}${empty}
-    <p class="section-footer">La hora es la de Madrid y sale de la exportación. Un día sin libres no se lista.</p>`;
+    ${cuerpo}
+    <p class="section-footer">La hora es la de Madrid. Si varias cuentas caen en la misma hora, es una sola sesión.</p>`;
 }
 
 function renderHistorial(tag) {
@@ -1793,12 +1801,15 @@ function nombreCuenta(tag) {
 function filaSesion(ses, tag, i, next) {
   const row = ses.done[tag];
   let estado = "Pendiente";
-  if (row && row.kind === "ready") estado = "Cambió";
+  if (row && row.kind === "ready") estado = "Completada";
   else if (row && row.kind === "older") estado = "Al histórico";
-  else if (row) estado = "Sin cambios";
+  else if (row) estado = "Completada";
   else if (tag === next) estado = "Siguiente";
   const cls = tag === next && !row ? " chip--main" : " chip--muted";
-  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
+  const exp = expOf(tag);
+  const ts = row && row.timestamp ? row.timestamp : (exp && exp.timestamp);
+  const fecha = ts ? `Última actualización ${fmtWhen(ts * 1000)}` : "Sin datos";
+  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span><span class="row__sub">${esc(fecha)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
 }
 
 function campoPegado(ses) {
@@ -1837,11 +1848,10 @@ function renderActualizar() {
     return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
       <p class="large-sub">Lista terminada</p>
       ${barra}
+      <div class="section"><div class="card"><p class="t-body">${esc(fraseResumen(ses))}</p></div></div>
       ${ses.pending ? `<div class="section act-actions">${campoPegado(ses)}</div>` : ""}
-      ${bloque("Cambiaron", sum.changed)}
-      ${bloque("Sin cambios", sum.same)}
-      ${bloque("Al histórico", sum.history)}
-      ${bloque("Sin pegar", sum.missing)}
+      ${bloque("Completadas", sum.changed.concat(sum.same, sum.history))}
+      ${bloque("Pendientes", sum.missing)}
       <div class="section"><button type="button" class="btn btn--primary btn--block" data-actualizar-listo>Listo</button></div></div>`;
   }
   const next = nextOf(ses);
@@ -1856,9 +1866,14 @@ function renderActualizar() {
       <p class="section-footer">${esc(hint)}</p>`
     : `<div class="section"><div class="card empty"><p class="t-title3">No hay cuentas en la lista</p></div></div>`;
   const manual = state.actualizarManual || !!ses.pending;
-  const lista = ses.order.map((tag, i) => filaSesion(ses, tag, i, next)).join("");
+  const listaDe = (tags) => tags.map((tag) => filaSesion(ses, tag, ses.order.indexOf(tag), next)).join("");
+  const hechas = ses.order.filter((tag) => ses.done[tag]);
+  const pendientes = ses.order.filter((tag) => !ses.done[tag]);
+  const bloqueLista = (titulo, tags) => tags.length
+    ? `<div class="section"><div class="section-header"><span>${titulo}</span></div><ul class="list list--tiles orden-list">${listaDe(tags)}</ul></div>`
+    : "";
   return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
-    <p class="large-sub">El orden queda fijo al empezar. ${esc(prog.label)}</p>
+    <p class="large-sub">El orden queda fijo al empezar. Se sigue por la primera pendiente. ${esc(prog.label)}</p>
     ${barra}
     ${siguiente}
     <div class="section act-actions">
@@ -1867,7 +1882,8 @@ function renderActualizar() {
       ${campoPegado(ses)}
       <button type="button" class="btn btn--secondary btn--block" data-go="#/inicio">Dejar para luego</button>
     </div>
-    <div class="section"><div class="section-header"><span>Cuentas</span></div><ul class="list list--tiles orden-list">${lista}</ul></div></div>`;
+    ${bloqueLista("Completadas", hechas)}
+    ${bloqueLista("Pendientes", pendientes)}</div>`;
 }
 
 async function pegarCuenta() {
@@ -1902,8 +1918,9 @@ async function aplicarPegado(text) {
     render();
     return;
   }
+  let stats = new Map();
   try {
-    if (result.save.length) await persistirPegado(result.save);
+    if (result.save.length) stats = await persistirPegado(result.save);
   } catch {
     state.actualizarManual = true;
     state.actualizarFocus = true;
@@ -1911,11 +1928,33 @@ async function aplicarPegado(text) {
     render();
     return;
   }
-  writeSession(localStorage, { ...result.session, pending: "" });
+  let ses = { ...result.session, pending: "" };
+  for (const [tag, dato] of stats) ses = anotarResultado(ses, tag, dato);
+  writeSession(localStorage, ses);
   state.actualizarManual = false;
   state.actualizarBorrador = "";
   showToast("ok", mensajePegado(result.notes, nombreCuenta));
   render();
+}
+
+function resultadoDePegado(before, after) {
+  if (!before || !after || !state.index) {
+    return { niveles: 0, mejoras: 0, ctorAntes: null, ctorDespues: null, mediaAntes: null, mediaDespues: null };
+  }
+  const diff = diffExports(before, after, state.index, after.timestamp * 1000);
+  const mejoras = upgradesOf(before).filter((u) => !u.extra && u.end <= after.timestamp * 1000).length;
+  const thAntes = townHallLevel(before);
+  const thDespues = townHallLevel(after);
+  const c0 = estadoColas(before, after.timestamp * 1000, { th: thAntes });
+  const c1 = estadoColas(after, after.timestamp * 1000, { th: thDespues });
+  return {
+    niveles: Math.max(0, diff.levelDelta || 0),
+    mejoras,
+    ctorAntes: c0.builders.libresReales,
+    ctorDespues: c1.builders.libresReales,
+    mediaAntes: diff.mediaFrom,
+    mediaDespues: diff.mediaTo,
+  };
 }
 
 async function persistirPegado(save) {
@@ -1944,6 +1983,14 @@ async function persistirPegado(save) {
     state.copyAt = Date.now();
   } catch { /* la copia automática no bloquea el guardado */ }
   armFlash(save.map((it) => it.value.tag));
+  const stats = new Map();
+  for (const it of save) {
+    if (it.kind !== "ready" || stats.has(it.value.tag)) continue;
+    const after = state.latest.get(it.value.tag);
+    if (!after || after.timestamp !== it.value.timestamp) continue;
+    stats.set(it.value.tag, resultadoDePegado(before.get(it.value.tag), after));
+  }
+  return stats;
 }
 
 async function savePlan(plan, opts = {}) {
@@ -4855,6 +4902,14 @@ function bind(r) {
     if (mej) {
       state.mejorasMode = mej.dataset.mej;
       localStorage.setItem("cp-mejoras", state.mejorasMode);
+      render();
+      return;
+    }
+    const agendaVista = origen.closest("[data-agenda]");
+    if (agendaVista) {
+      const id = agendaVista.dataset.agenda;
+      state.agendaVista = id === "7d" || id === "cuenta" ? id : "24h";
+      localStorage.setItem("cp-agenda", state.agendaVista);
       render();
       return;
     }

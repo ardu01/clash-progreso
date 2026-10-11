@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 3.1.11)
+
+`APP_VERSION` es `3.1.11` y `SHELL_CACHE` es `cp-shell-v30`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2.
+
+Inicio pinta la cabecera «Clash Progreso · Centro de mando · N cuentas» y tres cifras de `fleetSnapshot` y de las mejoras aún en curso: cuentas, `constructoresLibres` (reales) y las que terminan hoy. Sin exportaciones, las dos últimas son «—». Qué hacer ahora enlaza a revisar constructores y a preparar objetivos de TH. Próximas finalizaciones son las tres mejoras con `end` posterior a `state.now`, con cuenta y hora. La agenda usa `finalesEn` (24 h, 7 días o por cuenta) y `franjasDe`: varias cuentas en la misma hora de Madrid salen como una sesión. Una cuenta con `desactualizada` no entra. Actualizar todas guarda en la sesión `niveles`, `mejoras`, el cambio de constructores libres y el de la media, calculados al pegar con `diffExports` y `estadoColas`. `fraseResumen` solo suma esos campos. `nextOf` sigue en la primera cuenta sin `done`. La barra es más baja (`--navbar-h: 52px`, `--tabbar-h: 56px`) con los mismos colores. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.10)
 
 `APP_VERSION` es `3.1.10`, `SHELL_CACHE` es `cp-shell-v29` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.

@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.10</strong><br>
+  <strong>Versión 3.1.11</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -40,9 +40,11 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-Si un botón falla, la app avisa en una línea y se puede seguir usando. Los enlaces de la fuente de costes y de la política de Supercell se abren fuera, y la app se queda donde estaba. Inicio, Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cada cuenta siguen respondiendo al toque, también con Actualizar todas abierta.
+La cabecera de Inicio dice cuántas cuentas hay. Debajo, tres cifras: cuentas, constructores libres en la exportación y mejoras que terminan hoy. Si no hay datos, sale un guion. Qué hacer ahora lleva a revisar los constructores disponibles y a preparar los objetivos de ayuntamiento. Próximas finalizaciones lista las tres mejoras de la flota que acaban antes, con la cuenta y la hora.
 
-Inicio y Cuentas cuentan los constructores con el mismo cálculo. Un hueco libre en la exportación es un dato real, con su fecha. Si el temporizador ya llegó a cero, es una estimación: no es un constructor confirmado. Una cuenta sin actualizar desde hace días dice «Necesita actualización» y conserva el último plan. No sale como urgente solo porque esos temporizadores viejos estén a cero. El porcentaje de cada cuenta se compara con el máximo de su ayuntamiento, y la media de la flota es la media de esos porcentajes.
+Actualizar todas muestra la última actualización de cada cuenta y separa completadas y pendientes. Al volver, sigue por la primera que falta y no vuelve a pedir las ya hechas. Al terminar, el resumen usa los números del pegado: cuentas recorridas, niveles nuevos, mejoras finalizadas y, si cambiaron, constructores libres y progreso.
+
+La agenda tiene tres vistas: las próximas 24 horas, los próximos 7 días y por cuenta. Si varias cuentas acaban en la misma hora, se agrupan en una sesión. Una cuenta sin actualizar no entra en esa lista.
 
 ## Funciones
 
@@ -52,8 +54,9 @@ La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, *
 
 El centro de mando de la flota.
 
-- Cuántas cuentas hay, el ayuntamiento de la principal y el objetivo del grupo, con cuántas cuentas ya lo han alcanzado.
-- **Qué hacer ahora**: constructores libres, el objetivo que más cuentas tienen por debajo y las mejoras que acaban hoy. Al tocarlo se abre el siguiente paso de cada cuenta.
+- La cabecera y tres cifras: cuentas, constructores libres en la exportación y cuántas mejoras terminan hoy. Si no hay datos, un guion.
+- **Qué hacer ahora**: revisar constructores disponibles y preparar objetivos de ayuntamiento.
+- **Próximas finalizaciones**: las tres mejoras de la flota que acaban antes, con la cuenta y la hora. Si no hay ninguna, un guion.
 - **Abrir hoy**: en qué orden abrir las cuentas, según el plan y la hora en que queda libre un constructor, el laboratorio o la casa de mascotas. Si el temporizador no es un número, esa cuenta no entra en el orden y no se inventa la hora.
 - **Objetivos de flota**: las cuentas que comparten objetivo, cuántas ya están y una fecha estimada. Esa fecha es el fin del plan hasta el máximo del ayuntamiento anterior, no el día de subir el ayuntamiento. Si la cuenta no tiene un plan guardado para ese objetivo, el criterio es maxear.
 - Tus cuentas, con la miniatura del ayuntamiento, en ese mismo orden. Al tocar una se abre su progreso.
@@ -61,7 +64,7 @@ El centro de mando de la flota.
 ### Cuentas
 
 - La lista de las aldeas de prueba y de las que importes después. Se puede marcar una como Principal y ordenar por ayuntamiento, nombre o porcentaje.
-- **Actualizar todas**, también en Inicio. Abre la lista en el orden de Abrir hoy. En el juego copias la aldea, vuelves y tocas **Pegar esta cuenta**: lee el portapapeles con ese toque. Si el iPhone no deja, hay un campo para pegar a mano. La app reconoce la cuenta por su etiqueta, la marca y la guarda al momento. El progreso (por ejemplo 4 de 11) y la lista siguen si iOS cierra la app.
+- **Actualizar todas**, también en Inicio. Abre la lista en el orden de Abrir hoy. En el juego copias la aldea, vuelves y tocas **Pegar esta cuenta**: lee el portapapeles con ese toque. Si el iPhone no deja, hay un campo para pegar a mano. La app reconoce la cuenta por su etiqueta, la marca y la guarda al momento. Cada fila lleva la fecha de la última actualización. Completadas y pendientes se ven aparte. Al volver se sigue por la primera pendiente, sin repetir las hechas. Al cerrar la lista, el resumen cuenta cuentas, niveles nuevos, mejoras finalizadas y los cambios de constructores y de progreso que salgan del pegado. El progreso (por ejemplo 4 de 11) y la lista siguen si iOS cierra la app.
 - **Pegar exportación** lee el portapapeles, detecta una o varias aldeas por la etiqueta y las añade o actualiza. Si no puede leerlo, se abre el campo de pegado. También se puede elegir el archivo guardado.
 - Búsqueda por el nombre de la cuenta.
 - Grupos opcionales, para filtrar en Cuentas, en Análisis y en la agenda.
@@ -94,6 +97,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - Si el objetivo es un ayuntamiento superior, el nivel pedido es el máximo del anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados. No hay una lista oficial de requisitos de ayuntamiento, y la pantalla lo dice.
 - Cada paso lleva coste, tiempo y fecha estimada en hora de Madrid, con los constructores de esa cuenta. Se pueden marcar las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Sin plan guardado, el criterio es maxear el ayuntamiento actual.
+- La agenda tiene tres vistas: próximas 24 horas, próximos 7 días y por cuenta. Varias cuentas en la misma hora forman una sesión. Una cuenta sin actualizar no sale ahí solo porque un temporizador viejo haya llegado a cero.
 - Los héroes de la cuenta de prueba no entran en el plan.
 - El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe, mena brillante, reluciente y estrellada, y el total de la flota.
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
@@ -145,7 +149,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v29` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v30` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -153,6 +157,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.11 | Inicio con las tres cifras de la flota, qué hacer ahora y las tres próximas finalizaciones. Actualizar todas sigue donde se quedó y cierra con un resumen de los datos pegados. La agenda separa 24 horas, 7 días y por cuenta, y agrupa la misma hora en una sesión. |
 | 3.1.10 | Un fallo en un botón no deja la pantalla pillada. Inicio y Cuentas usan el mismo recuento de constructores: libre en la exportación, estimado si el temporizador ya llegó a cero, o «Necesita actualización» si la cuenta es vieja. El porcentaje de cada cuenta es frente al máximo de su ayuntamiento. |
 | 3.1.9 | Inicio vuelve a abrirse desde las otras pestañas, también con Actualizar todas abierta. Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cuenta los abre el toque. |
 | 3.1.8 | Actualizar todas, dentro de la app: la lista sigue el orden de Abrir hoy, Pegar esta cuenta lee el portapapeles con el toque y, si falla, un campo. Cada cuenta se reconoce por la etiqueta, se marca y se guarda al momento. El progreso y la sesión siguen si iOS cierra la app. Ya no hace falta Atajos. |

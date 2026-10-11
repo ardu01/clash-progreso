@@ -5,7 +5,7 @@ import { ACCOUNT_PALETTE, accountColor, groupedByCategory, lineSeries } from "..
 import { IMAGE_CACHE } from "../js/caches.js";
 import { HEROES_FUERA, planQueue, upgradePlan } from "../js/plan.js";
 import {
-  accountTimeline, finDe, fleetAgenda, inSleep, nextAwake, scheduleNext, segundosDe, sleepFromClocks,
+  accountTimeline, finalesEn, finDe, fleetAgenda, fraseFranja, franjasDe, inSleep, nextAwake, scheduleNext, segundosDe, sleepFromClocks,
 } from "../js/schedule.js";
 
 test("la caché de imágenes está en cp-img-v9", () => {
@@ -142,4 +142,27 @@ test("la agenda separa lo libre, lo fechado y lo que no tiene hora", () => {
   assert.equal(agenda.sinHora.length, 1);
   assert.equal(agenda.sinHora[0].titulo, "Laboratorio");
   assert.equal(agenda.dias.some((day) => day.eventos.some((ev) => ev.fin == null && !ev.ahora)), false);
+});
+
+test("la agenda agrupa la misma hora de Madrid en una sesión", () => {
+  const now = Date.parse("2026-10-11T15:00:00Z");
+  const dentro = Date.parse("2026-10-11T16:30:00Z");
+  const cuentas = ["A", "B", "C", "D", "E"].map((nombre) => ({
+    tag: "#" + nombre,
+    nombre,
+    chip: nombre,
+    desactualizada: false,
+    lineas: [{ titulo: "Constructor 1", clase: "real", libreYa: false, libreExacta: true, libreEn: dentro }],
+  }));
+  cuentas.push({
+    tag: "#V",
+    nombre: "Vieja",
+    desactualizada: true,
+    lineas: [{ titulo: "Constructor 1", clase: "estimado", libreYa: true, libreExacta: true, libreEn: now }],
+  });
+  const eventos = finalesEn(cuentas, { now, modo: "24h" });
+  assert.equal(eventos.length, 5);
+  const franja = franjasDe(eventos)[0];
+  assert.equal(franja.cuentas, 5);
+  assert.equal(fraseFranja(franja), "5 cuentas entre 18:00 y 19:00: una sesión");
 });

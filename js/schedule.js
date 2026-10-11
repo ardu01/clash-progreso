@@ -251,3 +251,65 @@ export function fleetAgenda(cuentas, opts = {}) {
   masAdelante.sort((a, b) => a.fin - b.fin);
   return { dias: dias.filter((row) => row.eventos.length), sinHora, masAdelante };
 }
+
+function horaFranja(ms) {
+  const p = parts(ms);
+  const h = String(p.hour).padStart(2, "0");
+  const next = String((p.hour + 1) % 24).padStart(2, "0");
+  return { hour: p.hour, desde: `${h}:00`, hasta: `${next}:00`, day: madridDayKey(ms) };
+}
+
+/**
+ * Finalizaciones con hora real, todavía en curso.
+ * Una cuenta desactualizada o un temporizador ya vencido no entra: no es una hora confirmada.
+ */
+export function finalesEn(cuentas, opts = {}) {
+  const now = opts.now || Date.now();
+  const modo = opts.modo || "24h";
+  const limite = modo === "24h" ? now + 86400000 : now + 7 * 86400000;
+  const eventos = [];
+  for (const cuenta of cuentas || []) {
+    if (cuenta.desactualizada) continue;
+    for (const line of cuenta.lineas || []) {
+      if (line.clase === "estimado" || line.libreYa || !line.libreExacta || line.libreEn == null) continue;
+      if (line.libreEn <= now || line.libreEn > limite) continue;
+      eventos.push({
+        tag: cuenta.tag,
+        nombre: cuenta.nombre,
+        chip: cuenta.chip || "",
+        titulo: line.titulo,
+        fin: line.libreEn,
+        clase: "real",
+      });
+    }
+  }
+  eventos.sort((a, b) => a.fin - b.fin || String(a.nombre).localeCompare(String(b.nombre), "es"));
+  return eventos;
+}
+
+export function franjasDe(eventos) {
+  const map = new Map();
+  for (const ev of eventos || []) {
+    const f = horaFranja(ev.fin);
+    const key = `${f.day}-${f.hour}`;
+    if (!map.has(key)) map.set(key, { key, day: f.day, desde: f.desde, hasta: f.hasta, ms: ev.fin, eventos: [], tags: new Set() });
+    const g = map.get(key);
+    g.eventos.push(ev);
+    g.tags.add(ev.tag);
+  }
+  return [...map.values()].map((g) => ({
+    key: g.key,
+    day: g.day,
+    desde: g.desde,
+    hasta: g.hasta,
+    ms: g.ms,
+    eventos: g.eventos,
+    cuentas: g.tags.size,
+  }));
+}
+
+export function fraseFranja(g) {
+  const n = g.cuentas;
+  const cuentas = n === 1 ? "1 cuenta" : `${n} cuentas`;
+  return `${cuentas} entre ${g.desde} y ${g.hasta}: una sesión`;
+}
