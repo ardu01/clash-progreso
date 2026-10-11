@@ -3,12 +3,15 @@ const STORE = "exports";
 
 function openDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 1);
+    const req = indexedDB.open(DB, 2);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
         const os = db.createObjectStore(STORE, { keyPath: ["tag", "timestamp"] });
         os.createIndex("tag", "tag");
+      }
+      if (!db.objectStoreNames.contains("copies")) {
+        db.createObjectStore("copies", { keyPath: "id", autoIncrement: true });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -57,6 +60,30 @@ export async function clearExports() {
     tx.objectStore(STORE).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+export async function putCopy(copy) {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("copies", "readwrite");
+    tx.objectStore("copies").add({ at: Date.now(), copy });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+export async function latestCopyAt() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("copies", "readonly");
+    const req = tx.objectStore("copies").getAll();
+    req.onsuccess = () => {
+      const rows = req.result || [];
+      const last = rows.reduce((m, row) => Math.max(m, row.at || 0), 0);
+      resolve(last || null);
+    };
+    req.onerror = () => reject(req.error);
   });
 }
 

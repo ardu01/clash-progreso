@@ -1,10 +1,12 @@
 import { madridDayKey } from "./format.js";
+import { mergePlanes } from "./roadmap.js";
+import { mergeProvisionals } from "./provisional.js";
 
 export function backupFilename(now = Date.now()) {
   return `clash-progreso-copia-${madridDayKey(now)}.json`;
 }
 
-export function buildBackup({ accounts, exports, now = Date.now(), version = "3.0.0" }) {
+export function buildBackup({ accounts, exports, planes, provisionales, now = Date.now(), version = "3.0.0" }) {
   return {
     app: "clash-progreso",
     version,
@@ -17,8 +19,11 @@ export function buildBackup({ accounts, exports, now = Date.now(), version = "3.
       chip: a.chip || "",
       objetivo: a.objetivo == null ? null : a.objetivo,
       grupos: Array.isArray(a.grupos) ? a.grupos : [],
+      meta: a.meta && a.meta.clave ? { clave: a.meta.clave, pct: a.meta.pct } : null,
     })),
     exports: (exports || []).map((exp) => ({ ...exp })),
+    planes: planes || {},
+    provisionales: (provisionales || []).map((p) => ({ ...p })),
   };
 }
 
@@ -63,6 +68,7 @@ export function mergeBackup(current, incoming) {
         chip: raw.chip || "",
         objetivo: raw.objetivo == null ? null : raw.objetivo,
         grupos: Array.isArray(raw.grupos) ? raw.grupos : [],
+        meta: raw.meta && raw.meta.clave ? { clave: raw.meta.clave, pct: raw.meta.pct } : null,
       };
       accounts.push(acc);
       byTag.set(raw.tag, acc);
@@ -76,8 +82,16 @@ export function mergeBackup(current, incoming) {
     if (!cur.chip && raw.chip) cur.chip = raw.chip;
     if (cur.objetivo == null && raw.objetivo != null) cur.objetivo = raw.objetivo;
     if (!(cur.grupos && cur.grupos.length) && Array.isArray(raw.grupos) && raw.grupos.length) cur.grupos = raw.grupos.slice();
+    if (cur.meta == null && raw.meta && raw.meta.clave) cur.meta = { clave: raw.meta.clave, pct: raw.meta.pct };
   }
-  return { accounts, exports, addedExports, addedAccounts };
+  return {
+    accounts,
+    exports,
+    addedExports,
+    addedAccounts,
+    planes: mergePlanes(current.planes, incoming && incoming.planes),
+    provisionales: mergeProvisionals(current.provisionales, incoming && incoming.provisionales),
+  };
 }
 
 /** Cancelar la hoja de compartir (AbortError) no es un error que haya que anunciar. */

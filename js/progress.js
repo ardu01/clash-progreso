@@ -44,6 +44,11 @@ export const CATEGORIES = [
   { key: "muros", label: "Muros", cat: "muros" },
 ];
 
+/** La media de la aldea no incluye el equipamiento: ese apartado va aparte. */
+export const VILLAGE_KEYS = [
+  "defensas", "laboratorio", "ejercito_edif", "mascotas", "heroes", "trampas", "recursos", "muros",
+];
+
 export const HERO_ORDER = ["28000000", "28000001", "28000002", "28000004", "28000006", "28000007"];
 
 const SKIP_WORDS = new Set(["de", "del", "la", "el", "los", "las"]);
@@ -487,6 +492,17 @@ function scoreAll(exp, index, th) {
   };
 }
 
+/** Porcentajes de la aldea en un TH concreto. Sin equipamiento. */
+export function pctAt(exp, index, th) {
+  const cur = scoreAll(exp, index, th);
+  const out = {};
+  for (const key of VILLAGE_KEYS) {
+    const c = cur && cur[key];
+    out[key] = c && c.den ? pct(c.num, c.den) : null;
+  }
+  return out;
+}
+
 export function townHallLevel(exp) {
   for (const b of exp.buildings || []) {
     if (String(b.data) === TH_ID) return b.lvl;
@@ -515,8 +531,8 @@ export function analyze(exp, index) {
       pend: has && hasSig ? Math.max(0, c.den - c.num) : has ? Math.max(0, c.den - c.num) : null,
     };
   }
-  const mediaVals = CATEGORIES.map(({ key }) => cats[key].pct);
-  const sigVals = CATEGORIES.map(({ key }) => cats[key].sigPct);
+  const mediaVals = VILLAGE_KEYS.map((key) => cats[key].pct);
+  const sigVals = VILLAGE_KEYS.map((key) => cats[key].sigPct);
   const walls = cur.muros;
   const offense = offenseOf(cats.laboratorio.pct, cats.heroes.pct);
   const sigOffense = sig ? offenseOf(cats.laboratorio.sigPct, cats.heroes.sigPct) : null;

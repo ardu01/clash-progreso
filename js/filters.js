@@ -9,6 +9,7 @@ export function progressRows(exp, index) {
   const th = view.th;
   const rows = [];
   for (const cat of CATEGORIES) {
+    if (cat.key === "equipamiento") continue;
     if (cat.key === "muros") {
       const hist = (view.walls && view.walls.hist) || [];
       const max = view.walls ? view.walls.max : null;

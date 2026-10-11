@@ -32,6 +32,8 @@ const APP = [
   "./js/costs.js",
   "./js/charts.js",
   "./js/schedule.js",
+  "./js/roadmap.js",
+  "./js/provisional.js",
   "./data/costes.json",
   "./assets/manifest.json",
   "./assets/cajas-alfa.json",

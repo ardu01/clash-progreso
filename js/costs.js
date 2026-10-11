@@ -84,7 +84,7 @@ function capRow(index, id, th) {
   return table ? table.get(th) || null : null;
 }
 
-/** Piezas propias más las que faltan para el cupo del TH. Sin aldea del constructor. */
+/** Piezas de la aldea más las que faltan para el cupo del TH. Sin aldea del constructor ni equipamiento. */
 export function piecesOf(exp, index, th) {
   const owned = new Map();
   const take = (id, lvl, cnt) => {
@@ -93,7 +93,7 @@ export function piecesOf(exp, index, th) {
     if (!owned.has(key)) owned.set(key, []);
     owned.get(key).push({ lvl: lvl || 0, cnt: cnt || 1 });
   };
-  for (const sec of ["buildings", "traps", "heroes", "guardians", "units", "spells", "siege_machines", "pets", "equipment"]) {
+  for (const sec of ["buildings", "traps", "heroes", "guardians", "units", "spells", "siege_machines", "pets"]) {
     for (const it of exp[sec] || []) take(it && it.data, it && it.lvl, it && (it.cnt || 1));
   }
   const pieces = [];
@@ -115,7 +115,6 @@ export function piecesOf(exp, index, th) {
       pieces.push({ id: key, lvl: 0, max, cnt: row.count - have });
     }
   };
-  for (const it of exp.equipment || []) consider(it.data, false);
   for (const id of index.byId ? index.byId.keys() : []) {
     const item = index.items[id];
     if (!item || item.categoria === "hero_equipment") continue;
@@ -143,6 +142,19 @@ export function remainingCost(pieces) {
   }
   total.diasConstructor = Math.round((total.segConstructor / 86400) * 10) / 10;
   return { total, porCategoria };
+}
+
+/** Solo menas del equipamiento, si la fuente trae el coste. */
+export function equipmentPieces(exp, index, th) {
+  const pieces = [];
+  for (const it of (exp && exp.equipment) || []) {
+    if (!it || it.data == null) continue;
+    const id = String(it.data);
+    const max = capsMaxFor(index, id, th);
+    if (max == null) continue;
+    pieces.push({ id, lvl: it.lvl || 0, max, cnt: 1, categoryKey: "equipamiento" });
+  }
+  return pieces;
 }
 
 export function categoryUses(pieces, filtro) {

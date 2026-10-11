@@ -200,10 +200,16 @@ function mediaDelta(from, to) {
   return { text: "sin cambio", dir: "flat" };
 }
 
+function isEquipmentId(index, id) {
+  const item = index.items[String(id)];
+  return !!(item && item.categoria === "hero_equipment");
+}
+
 function countUnknown(exp, index, th) {
   let n = 0;
   const { map } = levelsOf(exp);
   for (const bag of map.values()) {
+    if (isEquipmentId(index, bag.id)) continue;
     if (outsidePct(index, bag.id, th)) n += bag.cnt;
   }
   return n;
@@ -213,6 +219,7 @@ function countOverMax(exp, index, th) {
   let n = 0;
   const { map, walls } = levelsOf(exp);
   const add = (id, parts) => {
+    if (isEquipmentId(index, id)) return;
     const max = capsMaxFor(index, id, th);
     if (max == null) return;
     for (const p of parts) if (p.lvl > max) n += p.cnt;
@@ -239,6 +246,7 @@ export function diffExports(prev, next, index, now = Date.now()) {
       const src = nb || pb;
       levelDelta += (nb ? nb.sum : 0) - (pb ? pb.sum : 0);
       const cat = categoryKeyFor(index, src.id, src.section);
+      if (cat === "equipamiento") continue;
       const pres = presentItem(index, src.id);
       rows.push({
         id: src.id,

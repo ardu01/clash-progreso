@@ -1,9 +1,9 @@
 /** Los héroes de esta cuenta no entran en el plan: Miguel los sube con pociones. */
 export const HEROES_FUERA = "#28PLGP0G2";
 
-export const PLAN_CRITERIO = "Orden: laboratorio, edificios de ejército, héroes, defensas, trampas, recursos, muros, mascotas y equipamiento. Dentro de cada grupo va primero lo más atrasado. Se proponen tantas obras de constructor como constructores libres; si no hay ninguno, se apunta la siguiente para cuando se libere uno. Laboratorio y mascotas se proponen solo si su cola está libre. Los héroes de #28PLGP0G2 no entran en el plan.";
+export const PLAN_CRITERIO = "Línea de tiempo: laboratorio, edificios de ejército, héroes, defensas, trampas, recursos, muros y mascotas. Dentro de cada grupo va primero lo más atrasado. Cada paso lleva la fecha estimada de cuando queda libre un constructor, el laboratorio o la casa de mascotas; si no hay ninguno libre, se sigue a partir de ese momento. Si el temporizador no es un número, no se inventa la hora. Los héroes de #28PLGP0G2 no entran. El equipamiento no entra en este plan.";
 
-const ORDER = ["laboratorio", "ejercito_edif", "heroes", "defensas", "trampas", "recursos", "muros", "mascotas", "equipamiento"];
+const ORDER = ["laboratorio", "ejercito_edif", "heroes", "defensas", "trampas", "recursos", "muros", "mascotas"];
 
 function rank(item) {
   const group = ORDER.indexOf(item.categoryKey);
@@ -29,6 +29,7 @@ export function planQueue(candidatos, opts = {}) {
     if (!item || item.max == null || item.lvl >= item.max) return false;
     if (item.upgrading) return false;
     if (heroesFuera && item.categoryKey === "heroes") return false;
+    if (item.queue === "herreria" || item.categoryKey === "equipamiento") return false;
     return true;
   }).slice().sort(byRank);
 }
@@ -43,13 +44,12 @@ export function upgradePlan(candidatos, opts = {}) {
   const espera = free === 0 && obras.length ? [{ ...obras[0], espera: true }] : [];
   const lab = opts.labLibre ? list.find((item) => item.queue === "laboratorio") || null : null;
   const mascotas = opts.mascotasLibres ? list.find((item) => item.queue === "mascotas") || null : null;
-  const equipamiento = list.find((item) => item.queue === "herreria") || null;
   return {
     criterio: PLAN_CRITERIO,
     heroesFuera,
     constructor: enCurso.concat(espera),
     laboratorio: lab,
     mascotas,
-    equipamiento,
+    equipamiento: null,
   };
 }
