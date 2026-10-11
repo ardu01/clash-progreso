@@ -175,7 +175,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=3.1.14"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=3.1.14")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=3.1.15"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=3.1.15")).join(" "));
 
 for (const hash of ["#/inicio", "#/roster", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/ahora", "#/copia", "#/actualizar"]) {
   await ir(page, hash);

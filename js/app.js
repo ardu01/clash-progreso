@@ -29,7 +29,7 @@ import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import {
   DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, defaultPlan, effectivePlan,
-  maxTownHall, planIsConfigured, planLabel, requisitosAyuntamiento, rushGaps, timelineRows,
+  maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
@@ -1304,6 +1304,11 @@ function planControls(meta, road) {
   const rec = ["todos", "oro", "elixir", "oscuro"].map((id) => `<option value="${id}"${plan.recurso === id ? " selected" : ""}>${id === "todos" ? "Cualquier recurso" : id}</option>`);
   const durs = DURATIONS.map((d) => `<option value="${d.id}"${plan.duracion === d.id ? " selected" : ""}>${esc(d.label)}</option>`);
   const modo = (id, label) => `<button type="button" role="tab" data-plan-modo="${id}" aria-selected="${plan.modo === id}">${label}</button>`;
+  const rushId = plan.rush === "estrategico" ? "estrategico" : "esencial";
+  const rushBtn = (id, label) => `<button type="button" role="tab" data-rush="${id}" aria-selected="${rushId === id}" aria-pressed="${rushId === id}">${label}</button>`;
+  const rushTabs = plan.modo === "rushear"
+    ? `<div class="seg-wrap"><div class="seg" role="tablist" aria-label="Modo de rushear">${rushBtn("esencial", "Rush esencial")}${rushBtn("estrategico", "Rush estratégico")}</div></div>`
+    : "";
   return `<div class="section"><div class="card">
       <h2 class="t-headline">${esc(planLabel(plan, current))}</h2>
       <p class="t-footnote c-2">${road.configured ? "Planificado: el plan guardado en esta cuenta." : "Recomendado: no hay plan guardado, se usa Maxear TH actual."}</p>
@@ -1311,6 +1316,7 @@ function planControls(meta, road) {
       <label class="sort-label">TH objetivo
         <select data-plan-th="${esc(meta.tag)}" aria-label="TH objetivo">${thOpts.join("")}</select>
       </label>
+      ${rushTabs}
       <div class="chip-row" role="toolbar" aria-label="Filtros del plan">${flag("ataque", "Ataque")}${flag("defensa", "Defensa")}${flag("muros", "Muros")}${flag("heroes", "Héroes")}</div>
       <label class="sort-label">Categoría
         <select data-plan-cat="${esc(meta.tag)}" aria-label="Categoría del plan">${cats.join("")}</select>
@@ -1365,26 +1371,78 @@ function textoSegundos(seg) {
   return `${s} s`;
 }
 
-function requisitosHtml(meta) {
-  const exp = expOf(meta.tag);
-  const plan = state.planes[meta.tag] ? effectivePlan(state.planes[meta.tag]) : null;
-  if (!exp || !plan || plan.modo !== "rushear" || plan.th == null || plan.th <= townHallLevel(exp)) return "";
-  const req = requisitosAyuntamiento(exp, state.index, plan.th);
-  const blocks = req.pasos.map((paso) => {
-    if (paso.sinTopes) {
-      return `<div class="section"><div class="section-header"><span>Para subir a TH${paso.hacia}</span></div><p class="section-footer">Sin topes de TH${paso.desde} en los datos. No se inventa la lista.</p></div>`;
-    }
-    const lis = paso.filas.map((fila) => {
-      const nivel = fila.sinDato ? "sin nivel en la exportación" : `Nv ${fila.actual} → ${fila.requerido}`;
-      const cuenta = fila.cantidad > 1 ? ` · ${fila.tienen}/${fila.cantidad}` : "";
-      const marca = fila.hecho ? "Ya está" : fila.enCurso ? "En curso" : "Falta";
-      const extra = fila.hecho ? "" : ` · ${textoCosteReq(fila.coste)}`;
-      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(fila.title)} <span class="num">${esc(nivel)}${cuenta}</span></span><span class="row__sub">${marca}${esc(extra)} · provisional</span></span><span class="chip${fila.hecho ? "" : " chip--warn"}">${marca}</span></div></li>`;
-    }).join("");
-    const pendientes = paso.filas.filter((f) => !f.hecho).length;
-    return `<div class="section"><div class="section-header"><span>Para subir a TH${paso.hacia}</span></div><ul class="list">${lis}</ul><p class="section-footer">${pendientes ? `${pendientes} pendientes` : "Todo lo pedido ya está"} · provisional</p></div>`;
+function rushCifras(road) {
+  const rush = road.rush;
+  const n = road.constructores && road.constructores.total;
+  const coste = costBits(rush.coste);
+  const costeTxt = coste ? `Coste total: ${coste}` : "Coste total: nada pendiente";
+  const enCurso = (rush.filas || []).some((f) => !f.hecho && f.enCurso);
+  let tiempo;
+  let fecha;
+  if (road.targetTh <= road.currentTh) {
+    tiempo = "Tiempo: elige un ayuntamiento superior";
+    fecha = "Fecha estimada: elige un ayuntamiento superior";
+  } else if (n == null) {
+    tiempo = "Tiempo: elige 4, 5 o 6 constructores para estimarlo";
+    fecha = "Fecha estimada: faltan los constructores de la cuenta";
+  } else if (rush.calendarioSeg != null) {
+    tiempo = `Tiempo con ${n} constructores: ${textoSegundos(rush.calendarioSeg)}`;
+    fecha = rush.fin ? `Fecha estimada: ${fmtFin(rush.fin)}` : "Fecha estimada: sin hora exacta";
+  } else if (enCurso) {
+    tiempo = `Tiempo con ${n} constructores: lo que falta ya está en curso`;
+    fecha = "Fecha estimada: lo que falta ya está en curso";
+  } else {
+    tiempo = `Tiempo con ${n} constructores: nada pendiente`;
+    fecha = "Fecha estimada: nada pendiente";
+  }
+  return { costeTxt, tiempo, fecha };
+}
+
+function sugerenciasHtml(road) {
+  if (!road.rush || road.rush.modo !== "estrategico" || !road.rush.sugerencias.length) return "";
+  const lis = road.rush.sugerencias.map((sug) => {
+    const btn = sug.aplica
+      ? `<button type="button" class="btn-text" data-sugerencia="${esc(sug.id)}" aria-pressed="${sug.activa ? "true" : "false"}" aria-label="${sug.activa ? "Quitar" : "Incluir"} ${esc(sug.title)}">${sug.activa ? "Quitar" : "Incluir"}</button>`
+      : `<button type="button" class="btn-text" disabled aria-pressed="false">No aplica</button>`;
+    const sub = sug.aplica ? sug.razon : `${sug.razon} ${sug.motivo}`.trim();
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(sug.title)} <span class="chip">Sugerencia</span></span><span class="row__sub">${esc(sub)}</span></span>${btn}</div></li>`;
   }).join("");
-  return `<div class="section"><div class="card"><h2 class="t-headline">Requisitos del ayuntamiento</h2><p class="t-footnote c-2">${esc(req.nota)}</p></div></div>${blocks}`;
+  return `<div class="section"><div class="section-header"><span>Sugerencias</span></div><ul class="list">${lis}</ul><p class="section-footer">Lista editable. Quitar una sugerencia deja el requisito del juego, si lo había.</p></div>`;
+}
+
+function filasRushHtml(filas) {
+  return (filas || []).map((fila) => {
+    const nivel = fila.sinDato ? "sin nivel en la exportación" : `Nv ${fila.actual} → ${fila.requerido}`;
+    const cuenta = fila.cantidad > 1 ? ` · ${fila.tienen}/${fila.cantidad}` : "";
+    const estado = fila.hecho ? "Ya está" : fila.enCurso ? "En curso" : "Falta";
+    const aviso = fila.clase === "sugerencia" ? "Sugerencia" : "provisional";
+    const chip = fila.clase === "sugerencia" && !fila.hecho ? "Sugerencia" : estado;
+    let extra = "";
+    if (fila.sinDato) extra = " · Sin coste: el nivel no viene en la exportación";
+    else if (!fila.hecho && fila.coste && (fila.coste.oro || fila.coste.elixir || fila.coste.oscuro || fila.coste.muros || fila.coste.segundos || fila.coste.sinCoste)) {
+      extra = ` · ${textoCosteReq(fila.coste)}`;
+    }
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(fila.title)} <span class="num">${esc(nivel)}${cuenta}</span></span><span class="row__sub">${estado}${esc(extra)} · ${aviso}</span></span><span class="chip${fila.hecho ? "" : " chip--warn"}">${chip}</span></div></li>`;
+  }).join("");
+}
+
+function rushPanel(road) {
+  if (!road.rush) return "";
+  const cifras = rushCifras(road);
+  const titulo = road.rush.modo === "estrategico" ? "Rush estratégico" : "Rush esencial";
+  const pendientes = (road.rush.filas || []).filter((f) => !f.hecho).length;
+  const lista = road.targetTh <= road.currentTh
+    ? `<p class="section-footer">Elige un ayuntamiento superior. Este modo no añade mejoras al TH actual.</p>`
+    : `<div class="section"><div class="section-header"><span>Estructuras</span></div><ul class="list">${filasRushHtml(road.rush.filas)}</ul><p class="section-footer">${pendientes ? `${pendientes} pendientes` : "Todo lo pedido ya está"} · ${road.rush.filas.length} en la lista</p></div>`;
+  return `<div class="section" data-rush-resumen><div class="card">
+      <h2 class="t-headline">${titulo}</h2>
+      <p class="t-body">${esc(cifras.costeTxt)}</p>
+      <p class="t-body">${esc(cifras.tiempo)}</p>
+      <p class="t-body">${esc(cifras.fecha)}</p>
+      <p class="t-footnote c-2">${esc(road.rush.nota)}</p>
+    </div></div>
+    ${sugerenciasHtml(road)}
+    ${lista}`;
 }
 
 function roadmapList(road) {
@@ -1398,7 +1456,7 @@ function roadmapList(road) {
     if (row.sinDuracion) when = "Sin tiempo en la fuente";
     else if (row.sinHora || row.fin == null) when = "Sin hora exacta: el temporizador en curso no es un número";
     else when = `Empieza ${fmtFin(row.inicio)} · acaba ${fmtFin(row.fin)}`;
-    const mark = row.provisional ? " · provisional" : "";
+    const mark = row.rushClase === "sugerencia" ? " · Sugerencia" : (row.provisional ? " · provisional" : "");
     const pressed = row.provisional ? "true" : "false";
     const keys = encodeURIComponent(JSON.stringify(row.keys));
     return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(row.title)} <span class="num">Nv ${row.fromLvl} → ${row.toLvl}${times}</span></span><span class="row__sub">${esc(when)}${esc(mark)}</span></span><button type="button" class="btn-text" data-prov="${keys}" data-prov-tag="${esc(road.tag)}" aria-pressed="${pressed}">${row.provisional ? "Quitar" : "Marcar"}</button></div></li>`;
@@ -1420,7 +1478,7 @@ function renderPlan(tag) {
   const road = accountRoadmap(meta);
   const fuera = road.heroesFuera ? `<p class="t-footnote c-2">En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan.</p>` : "";
   const rush = road.plan.modo === "rushear" ? `<p class="t-footnote c-2">${esc(RUSH_NOTE)}</p>` : "";
-  const capNote = road.targetTh > road.currentTh
+  const capNote = road.plan.modo !== "rushear" && road.targetTh > road.currentTh
     ? `<p class="t-footnote c-2">Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.</p>`
     : "";
   const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
@@ -1434,11 +1492,12 @@ function renderPlan(tag) {
     ? `<p class="t-footnote c-2">Necesita actualización. Se conserva el último plan, del ${esc(fmtWhen(exp.timestamp * 1000))}.</p>`
     : "";
   const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
+  const cifras = road.rush ? "" : `${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>`;
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${paralelo}${desconocido}${vieja}</div></div>
-    ${road.plan.modo === "rushear" ? requisitosHtml(meta) : ""}
+    ${road.rush ? rushPanel(road) : ""}
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${cifras}${rush}${capNote}${hora}${paralelo}${desconocido}${vieja}</div></div>
     ${sleepCard()}
     ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
@@ -4902,6 +4961,29 @@ function bind(r) {
       const tag = ctor.dataset.ctorTag;
       const n = Number(ctor.dataset.ctor);
       if (tag && (n === 4 || n === 5 || n === 6)) setAccountPlan(tag, { constructores: n });
+      render();
+      return;
+    }
+    const rushModo = origen.closest("[data-rush]");
+    if (rushModo) {
+      const tag = route().tag;
+      const rush = rushModo.dataset.rush === "estrategico" ? "estrategico" : "esencial";
+      if (tag) setAccountPlan(tag, { modo: "rushear", rush });
+      render();
+      return;
+    }
+    const sug = origen.closest("[data-sugerencia]");
+    if (sug && !sug.disabled) {
+      const tag = route().tag;
+      const id = sug.dataset.sugerencia;
+      if (tag && id) {
+        if (state.planes[tag] == null) setAccountPlan(tag, { modo: "rushear", rush: "estrategico" });
+        const plan = effectivePlan(state.planes[tag]);
+        const off = new Set(plan.sugerenciasOff);
+        if (off.has(id)) off.delete(id);
+        else off.add(id);
+        setAccountPlan(tag, { modo: "rushear", rush: "estrategico", sugerenciasOff: [...off] });
+      }
       render();
       return;
     }

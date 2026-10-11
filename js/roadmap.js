@@ -1,19 +1,37 @@
-import { levelCost, sumLevels, usesResource } from "./costs.js";
+import { addBags, levelCost, sumLevels, usesResource } from "./costs.js";
 import { HEROES_FUERA } from "./plan.js";
 import { provisionalKey } from "./provisional.js";
 import {
-  capsMaxFor, categoryKeyFor, itemName, townHallLevel, builderStatus, VILLAGE_KEYS, pctAt,
+  HERO_ORDER, capsMaxFor, categoryKeyFor, itemName, townHallLevel, builderStatus, VILLAGE_KEYS, pctAt,
 } from "./progress.js";
 import { clasificarHueco, repartirColas } from "./colas.js";
 import { finDe, scheduleNext } from "./schedule.js";
 
-const STORAGES = new Set(["1000005", "1000003", "1000024"]);
-const ARMY = new Set(["1000000", "1000006", "1000026", "1000007", "1000020", "1000029", "1000059", "1000014", "1000071", "1000068", "1000070"]);
 const ORDER = ["laboratorio", "ejercito_edif", "heroes", "defensas", "trampas", "recursos", "muros", "mascotas"];
 const SKIP_CAT = new Set(["equipamiento", "aldea", "ayuntamiento"]);
 const HOME_SECTIONS = ["buildings", "traps", "heroes", "guardians", "units", "spells", "siege_machines", "pets"];
 
-export const RUSH_NOTE = "Rushear ordena almacenes, edificios de ejército y laboratorio hasta el máximo publicado, y reparte ese tiempo entre los constructores de la cuenta. La lista para subir el ayuntamiento es provisional: clash-of-clans-data no trae esa tabla.";
+export const RUSH_NOTE = "Rush esencial pide solo lo obligatorio para poder mejorar el ayuntamiento. Rush estratégico suma sugerencias editables: laboratorio, campamento, castillo, héroes, fábricas, almacenes y la caseta de animales si ese ayuntamiento la tiene. El tiempo se reparte entre los constructores de la cuenta. Los requisitos son provisionales.";
+export const ESENCIAL_NOTA = "Solo el mínimo obligatorio para poder mejorar el ayuntamiento: los requisitos del juego y nada más. Provisional, porque los datos no traen esa tabla.";
+export const ESTRATEGICO_NOTA = "El mínimo obligatorio más las sugerencias que sigan activas. Cada una se puede quitar. La sugerencia no es un requisito del juego.";
+
+/** Sugerencias del rush estratégico. El id «heroes» agrupa a todos los héroes. */
+export const SUGERENCIAS_RUSH = [
+  { id: "1000007", razon: "Abre las tropas del ayuntamiento nuevo. Conviene llevar el edificio al máximo del anterior, no cada tropa." },
+  { id: "1000000", razon: "El tamaño del ejército. Un campamento corto limita el ataque aunque el ayuntamiento ya pueda subir." },
+  { id: "1000014", razon: "No hace falta para mejorar el ayuntamiento, pero el espacio de refuerzos no debería quedarse atrás." },
+  { id: "heroes", razon: "El ataque depende de ellos. La sugerencia sube cada héroe al máximo del ayuntamiento anterior." },
+  { id: "1000006", razon: "Fábrica de tropas. Sin el cuartel al día, el laboratorio nuevo no se aprovecha." },
+  { id: "1000026", razon: "Fábrica de tropas oscuras. Mismo criterio que el cuartel." },
+  { id: "1000020", razon: "Fábrica de hechizos. Conviene no dejarla en el mínimo." },
+  { id: "1000029", razon: "Fábrica de hechizos oscuros. Solo entra si ese ayuntamiento ya la tiene." },
+  { id: "1000059", razon: "Fábrica de máquinas de asedio. Solo entra si ese ayuntamiento ya tiene taller." },
+  { id: "1000005", razon: "Sin sitio para el oro, las mejoras largas se paran aunque haya constructores libres." },
+  { id: "1000003", razon: "Sin sitio para el elixir, pasa lo mismo que con el oro." },
+  { id: "1000024", razon: "Héroes y tropas oscuras lo gastan. Conviene no dejar el almacén oscuro en el mínimo." },
+  { id: "1000068", razon: "Caseta de animales. Solo entra si ese ayuntamiento ya la tiene; si no, no se inventa." },
+];
+const IDS_SUGERENCIA = new Set(SUGERENCIAS_RUSH.map((s) => s.id));
 export const REQUISITOS_NOTA = "Provisional. clash-of-clans-data 0.18.0 no trae los requisitos para mejorar el ayuntamiento. Esta lista coloca cada estructura del ayuntamiento anterior, salvo las chozas, el castillo del clan y la cabaña de B.O.B, y pide el Consejo heroico a su máximo. No está comprobada en el cliente.";
 
 const HERO_HALL = "1000071";
@@ -56,6 +74,8 @@ export function defaultPlan() {
     recurso: "todos",
     duracion: "",
     constructores: null,
+    rush: "esencial",
+    sugerenciasOff: [],
   };
 }
 
@@ -73,6 +93,15 @@ export function normalizePlan(raw) {
   const constructores = raw.constructores === 4 || raw.constructores === 5 || raw.constructores === 6
     ? raw.constructores
     : null;
+  const rush = raw.rush === "estrategico" ? "estrategico" : "esencial";
+  const sugerenciasOff = [];
+  const vistas = new Set();
+  for (const id of Array.isArray(raw.sugerenciasOff) ? raw.sugerenciasOff : []) {
+    const key = String(id);
+    if (!IDS_SUGERENCIA.has(key) || vistas.has(key)) continue;
+    vistas.add(key);
+    sugerenciasOff.push(key);
+  }
   return {
     modo,
     th,
@@ -84,6 +113,8 @@ export function normalizePlan(raw) {
     recurso,
     duracion: dur,
     constructores,
+    rush,
+    sugerenciasOff,
   };
 }
 
@@ -144,9 +175,13 @@ export function capTownHall(currentTh, targetTh, maxTh) {
 }
 
 export function planLabel(plan, currentTh) {
-  const modo = plan && plan.modo === "rushear" ? "Rushear" : "Maxear";
-  if (!plan || plan.th == null || plan.th === currentTh) return `${modo} TH actual`;
-  return `${modo} → TH${plan.th}`;
+  if (plan && plan.modo === "rushear") {
+    const nombre = plan.rush === "estrategico" ? "Rush estratégico" : "Rush esencial";
+    if (plan.th == null || plan.th === currentTh) return `${nombre} · TH actual`;
+    return `${nombre} → TH${plan.th}`;
+  }
+  if (!plan || plan.th == null || plan.th === currentTh) return "Maxear TH actual";
+  return `Maxear → TH${plan.th}`;
 }
 
 export function mergePlanes(local, incoming) {
@@ -167,13 +202,6 @@ function queueOf(categoryKey) {
   if (categoryKey === "laboratorio") return "laboratorio";
   if (categoryKey === "mascotas") return "mascotas";
   return "constructor";
-}
-
-function rushKeeps(id, categoryKey) {
-  if (categoryKey === "laboratorio") return true;
-  if (STORAGES.has(String(id))) return true;
-  if (categoryKey === "ejercito_edif" || ARMY.has(String(id))) return true;
-  return false;
 }
 
 function focusKeeps(step, plan) {
@@ -212,9 +240,245 @@ function ownedInstances(exp) {
   return byId;
 }
 
+function topeEdificio(index, id, th) {
+  const cap = capRow(index, id, th);
+  if (!cap || !(cap.count > 0) || cap.max == null) return null;
+  return cap;
+}
+
+function catalogoSugerencias(index, capTh, tag, off) {
+  return SUGERENCIAS_RUSH.map((sug) => {
+    let aplica = false;
+    let motivo = "Ese ayuntamiento no tiene este edificio.";
+    if (sug.id === "heroes") {
+      if (tag === HEROES_FUERA) motivo = `En ${HEROES_FUERA} los héroes quedan fuera del plan.`;
+      else {
+        aplica = HERO_ORDER.some((hid) => {
+          const cap = capRow(index, hid, capTh);
+          return cap && cap.max != null && cap.count !== 0;
+        });
+        if (aplica) motivo = "";
+        else motivo = "Ese ayuntamiento no publica héroes en los datos.";
+      }
+    } else if (topeEdificio(index, sug.id, capTh)) {
+      aplica = true;
+      motivo = "";
+    }
+    const title = sug.id === "heroes" ? "Héroes" : (itemName(index.items && index.items[sug.id]) || "Estructura");
+    return {
+      id: sug.id,
+      title,
+      razon: sug.razon,
+      aplica,
+      motivo,
+      activa: aplica && !off.has(sug.id),
+    };
+  });
+}
+
+function pasosDeObjetivo(exp, index, obj, owned) {
+  const id = String(obj.id);
+  const item = index.items && index.items[id];
+  const sec = (item && item.seccion_exportacion) || "buildings";
+  const categoryKey = categoryKeyFor(index, id, sec);
+  const steps = [];
+  let list = (owned.get(id) || []).slice();
+  let want = obj.cantidad;
+  if (want == null || want === 0) want = list.length || 1;
+  while (list.length < want) list.push({ lvl: 0, timer: null });
+  list.forEach((inst, i) => {
+    let from = inst.lvl || 0;
+    let notBefore = null;
+    let blocked = false;
+    if (inst.timer != null) {
+      const hora = finDe(exp.timestamp, inst.timer);
+      from += 1;
+      if (hora.exacta) notBefore = hora.fin;
+      else blocked = true;
+    }
+    const instance = `${id}#${i}`;
+    for (let lv = from; lv < obj.nivel; lv += 1) {
+      const cost = levelCost(id, lv + 1);
+      const seconds = cost && typeof cost.s === "number" && Number.isFinite(cost.s) ? cost.s : null;
+      const toLvl = lv + 1;
+      const rushClase = obj.esencial != null && toLvl <= obj.esencial ? "requisito" : (obj.clase === "requisito" ? "requisito" : "sugerencia");
+      steps.push({
+        id,
+        fromLvl: lv,
+        toLvl,
+        goal: obj.nivel,
+        instance,
+        categoryKey,
+        queue: queueOf(categoryKey),
+        title: titleOf(index, id, categoryKey),
+        seconds,
+        notBefore,
+        blocked,
+        provisional: false,
+        markedAt: 0,
+        rushClase,
+        rushRazon: obj.razon,
+      });
+    }
+  });
+  return steps;
+}
+
+function pasosArma(exp, obj) {
+  const hall = armaTh(exp);
+  const actual = hall && typeof hall.weapon === "number" && Number.isFinite(hall.weapon) ? hall.weapon : null;
+  if (actual == null || actual >= ARMA_TH17.max) return [];
+  const steps = [];
+  for (let lv = actual; lv < ARMA_TH17.max; lv += 1) {
+    const row = ARMA_TH17.levels[lv + 1];
+    steps.push({
+      id: "inferno-artillery",
+      fromLvl: lv,
+      toLvl: lv + 1,
+      goal: ARMA_TH17.max,
+      instance: "inferno-artillery#0",
+      categoryKey: "defensas",
+      queue: "constructor",
+      title: ARMA_TH17.title,
+      seconds: row ? row.s : null,
+      notBefore: null,
+      blocked: false,
+      provisional: false,
+      markedAt: 0,
+      rushClase: "requisito",
+      rushRazon: obj.razon,
+    });
+  }
+  return steps;
+}
+
+function bolsaVisible(bag) {
+  return {
+    oro: bag.oro,
+    elixir: bag.elixir,
+    oscuro: bag.oscuro,
+    muros: bag.muros,
+    segundos: bag.segConstructor + bag.segLaboratorio + bag.segMascotas,
+    sinCoste: bag.sinCoste > 0,
+  };
+}
+
+function costePorId(steps) {
+  const map = new Map();
+  for (const step of steps) {
+    const part = partePaso(step);
+    map.set(step.id, map.has(step.id) ? addBags(map.get(step.id), part) : part);
+  }
+  return map;
+}
+
+function filasDeObjetivos(exp, index, objetivos, steps) {
+  const costes = costePorId(steps);
+  const filas = [];
+  for (const obj of objetivos.values()) {
+    let fila;
+    if (obj.id === "inferno-artillery") fila = filaArma(exp);
+    else fila = filaEstructura(exp, index, obj.id, { count: obj.cantidad, max: obj.nivel }, obj.nivel);
+    if (!fila.sinDato) {
+      const bag = costes.get(String(fila.id));
+      fila = { ...fila, coste: bag ? bolsaVisible(bag) : bolsaVacia() };
+    }
+    filas.push({
+      ...fila,
+      clase: obj.clase,
+      razon: obj.razon,
+      sugerenciaId: obj.sugerenciaId,
+    });
+  }
+  filas.sort((a, b) => Number(a.hecho) - Number(b.hecho) || a.title.localeCompare(b.title, "es"));
+  return filas;
+}
+
+const RAZON_REQUISITO = "Requisito para poder mejorar el ayuntamiento. Provisional: los datos no traen esta tabla.";
+
+function pasosRush(exp, index, plan, tag, goal, current) {
+  const vacio = { steps: [], objetivos: new Map(), sugerencias: [], filas: [] };
+  if (!Number.isInteger(current) || goal.target <= current) return vacio;
+  const objetivos = new Map();
+  for (let th = current; th < goal.target; th += 1) {
+    const paso = requisitosDe(exp, index, th);
+    if (paso.sinTopes) continue;
+    for (const fila of paso.filas) {
+      const prev = objetivos.get(fila.id);
+      objetivos.set(fila.id, {
+        id: fila.id,
+        nivel: Math.max(prev ? prev.nivel : 0, fila.requerido),
+        cantidad: Math.max(prev ? prev.cantidad : 0, fila.cantidad || 0),
+        esencial: Math.max(prev ? prev.esencial : 0, fila.requerido),
+        clase: "requisito",
+        razon: RAZON_REQUISITO,
+        sugerenciaId: null,
+        sinDato: !!(fila.sinDato || (prev && prev.sinDato)),
+      });
+    }
+  }
+  const off = new Set(plan.sugerenciasOff || []);
+  const sugerencias = plan.rush === "estrategico" ? catalogoSugerencias(index, goal.capTh, tag, off) : [];
+  if (plan.rush === "estrategico") {
+    for (const sug of sugerencias) {
+      if (!sug.activa) continue;
+      if (sug.id === "heroes") {
+        for (const hid of HERO_ORDER) {
+          const cap = capRow(index, hid, goal.capTh);
+          if (!cap || cap.max == null || cap.count === 0) continue;
+          const prev = objetivos.get(hid);
+          const ownedCount = instanciasDe(exp, hid).length;
+          const cantidad = cap.count == null ? Math.max(1, ownedCount) : cap.count;
+          objetivos.set(hid, {
+            id: hid,
+            nivel: Math.max(prev ? prev.nivel : 0, cap.max),
+            cantidad: Math.max(prev ? prev.cantidad : 0, cantidad),
+            esencial: prev ? prev.esencial : null,
+            clase: "sugerencia",
+            razon: sug.razon,
+            sugerenciaId: "heroes",
+            sinDato: false,
+          });
+        }
+        continue;
+      }
+      const cap = topeEdificio(index, sug.id, goal.capTh);
+      if (!cap) continue;
+      const prev = objetivos.get(sug.id);
+      const nivel = Math.max(prev ? prev.nivel : 0, cap.max);
+      const esencial = prev ? prev.esencial : null;
+      const sube = esencial == null || nivel > esencial;
+      objetivos.set(sug.id, {
+        id: sug.id,
+        nivel,
+        cantidad: Math.max(prev ? prev.cantidad : 0, cap.count),
+        esencial,
+        clase: sube ? "sugerencia" : "requisito",
+        razon: sube && esencial != null
+          ? `${sug.razon} El requisito del juego queda en el nivel ${esencial}; el resto es sugerencia.`
+          : sug.razon,
+        sugerenciaId: sug.id,
+        sinDato: false,
+      });
+    }
+  }
+  const owned = ownedInstances(exp);
+  const steps = [];
+  for (const obj of objetivos.values()) {
+    if (obj.sinDato) continue;
+    if (obj.id === "inferno-artillery") steps.push(...pasosArma(exp, obj));
+    else steps.push(...pasosDeObjetivo(exp, index, obj, owned));
+  }
+  return { steps, objetivos, sugerencias, filas: filasDeObjetivos(exp, index, objetivos, steps) };
+}
+
 function collectSteps(exp, index, plan, tag) {
   const current = townHallLevel(exp);
   const goal = capTownHall(current, plan.th, maxTownHall(index));
+  if (plan.modo === "rushear") {
+    const packed = pasosRush(exp, index, plan, tag, goal, current);
+    return { steps: packed.steps, goal, current, filas: packed.filas, sugerencias: packed.sugerencias };
+  }
   const owned = ownedInstances(exp);
   const steps = [];
   const seen = new Set();
@@ -228,7 +492,6 @@ function collectSteps(exp, index, plan, tag) {
     const categoryKey = categoryKeyFor(index, id, sec || "buildings");
     if (SKIP_CAT.has(categoryKey) || !VILLAGE_KEYS.includes(categoryKey)) continue;
     if (tag === HEROES_FUERA && categoryKey === "heroes") continue;
-    if (plan.modo === "rushear" && !rushKeeps(id, categoryKey)) continue;
     const row = capRow(index, id, goal.capTh);
     const max = row && row.max != null ? row.max : capsMaxFor(index, id, goal.capTh);
     if (max == null) continue;
@@ -273,7 +536,7 @@ function collectSteps(exp, index, plan, tag) {
       }
     });
   }
-  return { steps, goal, current };
+  return { steps, goal, current, filas: null, sugerencias: null };
 }
 
 function applyFilters(steps, plan) {
@@ -284,7 +547,11 @@ function applyFilters(steps, plan) {
   for (const step of steps) {
     if (plan.categoria && step.categoryKey !== plan.categoria) continue;
     if (!focusKeeps(step, plan)) continue;
-    if (plan.recurso && plan.recurso !== "todos" && !usesResource(step.id, step.toLvl, plan.recurso)) continue;
+    if (plan.recurso && plan.recurso !== "todos") {
+      if (step.id === "inferno-artillery") {
+        if (plan.recurso !== "oro") continue;
+      } else if (!usesResource(step.id, step.toLvl, plan.recurso)) continue;
+    }
     if (limit != null) {
       if (step.seconds == null) {
         sinTiempo.push(step);
@@ -384,13 +651,20 @@ function placeStep(step, lanes, sleep, now, cursor) {
     cursor.set(step.instance, { blocked: true, at: null });
     return { ...base, sinHora: true };
   }
-  const open = pool.slice().sort((a, b) => Number(a.blocked) - Number(b.blocked) || a.freeAt - b.freeAt);
-  const lane = open[0];
-  if (lane.blocked) {
+  const open = pool.filter((lane) => !lane.blocked);
+  if (!open.length) {
+    const lane = pool[0];
     cursor.set(step.instance, { blocked: true, at: null });
-    return { ...base, sinHora: true, laneId: lane.id };
+    return { ...base, sinHora: true, laneId: lane ? lane.id : null };
   }
-  const earliest = Math.max(lane.freeAt, step.notBefore || 0, chain && chain.at ? chain.at : 0, now);
+  let elegido = null;
+  for (const lane of open) {
+    const candidato = Math.max(lane.freeAt, step.notBefore || 0, chain && chain.at ? chain.at : 0, now);
+    const mejorHueco = elegido && candidato === elegido.inicio && lane.freeAt > elegido.lane.freeAt;
+    if (!elegido || candidato < elegido.inicio || mejorHueco) elegido = { lane, inicio: candidato };
+  }
+  const lane = elegido.lane;
+  const earliest = elegido.inicio;
   const plan = scheduleNext(earliest, step.seconds, sleep);
   if (plan.fin == null) {
     lane.blocked = true;
@@ -402,10 +676,25 @@ function placeStep(step, lanes, sleep, now, cursor) {
   return { ...base, ...plan, sinHora: false, laneId: lane.id };
 }
 
+function partePaso(step) {
+  if (step.id !== "inferno-artillery") return sumLevels(step.id, step.fromLvl, step.toLvl, 1);
+  const row = ARMA_TH17.levels[step.toLvl];
+  const bag = {
+    oro: 0, elixir: 0, oscuro: 0, muros: 0, brillante: 0, resplandeciente: 0, estelar: 0,
+    segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, sinCoste: 0,
+  };
+  if (!row) bag.sinCoste = 1;
+  else {
+    bag.oro = row.n;
+    bag.segConstructor = row.s;
+  }
+  return bag;
+}
+
 function bagOf(steps) {
   let total = null;
   for (const step of steps) {
-    const part = sumLevels(step.id, step.fromLvl, step.toLvl, 1);
+    const part = partePaso(step);
     total = total ? {
       oro: total.oro + part.oro,
       elixir: total.elixir + part.elixir,
@@ -434,7 +723,7 @@ function bagOf(steps) {
 export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }) {
   const chosen = effectivePlan(plan);
   const nowMs = now || Date.now();
-  const { steps, goal, current } = collectSteps(exp, index, chosen, tag);
+  const { steps, goal, current, filas, sugerencias } = collectSteps(exp, index, chosen, tag);
   const marks = new Map();
   for (const raw of provisionals || []) {
     if (!raw || raw.tag !== tag) continue;
@@ -460,6 +749,20 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
       if (lane.cola === "constructor" && lane.libreYa && lane.clase === "real") lane.clase = "ajuste";
     }
   }
+  let rush = null;
+  if (chosen.modo === "rushear") {
+    const resumen = programar(steps.slice().sort(byRank), lanes.map((lane) => ({ ...lane })), sleep, nowMs);
+    rush = {
+      modo: chosen.rush,
+      filas: filas || [],
+      sugerencias: sugerencias || [],
+      coste: resumen.coste,
+      trabajoSeg: resumen.trabajoSeg,
+      calendarioSeg: resumen.calendarioSeg,
+      fin: resumen.fin,
+      nota: chosen.rush === "estrategico" ? ESTRATEGICO_NOTA : ESENCIAL_NOTA,
+    };
+  }
   const cursor = new Map();
   const orden = filtered.kept.map((step) => placeStep(step, lanes, sleep, nowMs, cursor));
   const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
@@ -483,6 +786,21 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
     heroesFuera: tag === HEROES_FUERA,
     fin: lastFin || null,
     now: nowMs,
+    rush,
+  };
+}
+
+function programar(steps, lanes, sleep, now) {
+  const cursor = new Map();
+  const orden = steps.map((step) => placeStep(step, lanes, sleep, now, cursor));
+  const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
+  const tiempos = tiemposConstructor(orden);
+  return {
+    orden,
+    coste: bagOf(orden),
+    fin: lastFin || null,
+    trabajoSeg: tiempos.trabajoSeg,
+    calendarioSeg: tiempos.calendarioSeg,
   };
 }
 
