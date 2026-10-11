@@ -1,4 +1,5 @@
 import { averagePct } from "./progress.js";
+import { fraseConstructores, resumenFlota } from "./colas.js";
 
 /**
  * Panel de todas las cuentas. Los números salen de las exportaciones ya
@@ -6,21 +7,9 @@ import { averagePct } from "./progress.js";
  */
 export function fleetSnapshot(rows) {
   const medias = rows.map((r) => r.media).filter((v) => v != null);
-  let libres = 0;
-  let ocupados = 0;
-  let conConstructores = 0;
-  let labLibres = 0;
-  let mascotasLibres = 0;
+  const resumen = resumenFlota(rows.map((r) => r.colas).filter(Boolean));
   let proxima = null;
   for (const row of rows) {
-    const b = row.builders;
-    if (b && b.known && !b.over) {
-      conConstructores += 1;
-      libres += b.free || 0;
-      ocupados += b.occupied || 0;
-    }
-    if (row.labLibre) labLibres += 1;
-    if (row.mascotasLibres) mascotasLibres += 1;
     if (row.proxima && (proxima == null || row.proxima < proxima.fin)) {
       proxima = { tag: row.tag, nombre: row.nombre, fin: row.proxima };
     }
@@ -28,11 +17,16 @@ export function fleetSnapshot(rows) {
   return {
     cuentas: rows.length,
     media: averagePct(medias),
-    constructoresLibres: libres,
-    constructoresOcupados: ocupados,
-    cuentasConConstructores: conConstructores,
-    laboratoriosLibres: labLibres,
-    mascotasLibres,
+    constructoresLibres: resumen.libresReales,
+    constructoresOcupados: resumen.ocupadosReales,
+    constructoresEstimados: resumen.vencidos,
+    cuentasConConstructores: resumen.cuentas - resumen.sinDato - resumen.over,
+    laboratoriosLibres: resumen.labReales,
+    laboratoriosEstimados: resumen.labEstimados,
+    mascotasLibres: resumen.petReales,
+    mascotasEstimadas: resumen.petEstimados,
+    desactualizadas: resumen.desactualizadas,
+    frase: fraseConstructores(resumen),
     proxima,
   };
 }
@@ -42,15 +36,22 @@ export function whatNow(rows, now = Date.now()) {
   const out = [];
   for (const row of rows) {
     const motivos = [];
+    const colas = row.colas;
+    if (colas && colas.desactualizada) continue;
     const b = row.builders;
     if (b && b.known && !b.over && b.free > 0) {
-      motivos.push(b.free === 1 ? "1 constructor libre" : `${b.free} constructores libres`);
+      motivos.push(b.free === 1 ? "1 constructor libre en la exportación" : `${b.free} constructores libres en la exportación`);
     }
-    if (row.labLibre) motivos.push("Laboratorio libre");
-    if (row.mascotasLibres) motivos.push("Casa de mascotas libre");
+    if (b && b.vencidos > 0) {
+      motivos.push(b.vencidos === 1 ? "1 constructor estimado" : `${b.vencidos} constructores estimados`);
+    }
+    if (row.labLibre) motivos.push("Laboratorio libre en la exportación");
+    else if (colas && colas.laboratorio.libreEstimado && colas.laboratorio.vencidos) motivos.push("Laboratorio estimado");
+    if (row.mascotasLibres) motivos.push("Casa de mascotas libre en la exportación");
+    else if (colas && colas.mascotas.libreEstimado && colas.mascotas.vencidos) motivos.push("Casa de mascotas estimada");
     const terminadas = (row.mejoras || []).filter((u) => u.end <= now && !u.extra);
     if (terminadas.length) {
-      motivos.push(terminadas.length === 1 ? "1 mejora terminada" : `${terminadas.length} mejoras terminadas`);
+      motivos.push(terminadas.length === 1 ? "1 mejora estimada como terminada" : `${terminadas.length} mejoras estimadas como terminadas`);
     }
     if (!motivos.length) continue;
     out.push({ tag: row.tag, nombre: row.nombre, chip: row.chip, th: row.th, motivos });

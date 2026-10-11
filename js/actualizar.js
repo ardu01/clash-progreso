@@ -44,6 +44,12 @@ export function parseSession(raw) {
       kind: row.kind,
       changed: row.kind === "ready",
       timestamp: row.timestamp == null ? null : Number(row.timestamp),
+      niveles: Number(row.niveles) || 0,
+      mejoras: Number(row.mejoras) || 0,
+      ctorAntes: numeroONull(row.ctorAntes),
+      ctorDespues: numeroONull(row.ctorDespues),
+      mediaAntes: numeroONull(row.mediaAntes),
+      mediaDespues: numeroONull(row.mediaDespues),
     };
   }
   return {
@@ -121,6 +127,12 @@ export function recordPaste(session, items, now = Date.now()) {
         kind: it.kind,
         changed: it.kind === "ready",
         timestamp: it.value.timestamp,
+        niveles: prev && prev.niveles || 0,
+        mejoras: prev && prev.mejoras || 0,
+        ctorAntes: prev ? prev.ctorAntes : null,
+        ctorDespues: prev ? prev.ctorDespues : null,
+        mediaAntes: prev ? prev.mediaAntes : null,
+        mediaDespues: prev ? prev.mediaDespues : null,
       };
     }
     notes.push({ tag, kind: it.kind });
@@ -142,6 +154,75 @@ export function recordPaste(session, items, now = Date.now()) {
   };
   if (next.order.length && next.order.every((tag) => next.done[tag])) next.status = "done";
   return { session: next, save, notes };
+}
+
+function numeroONull(v) {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+/** Anota el resultado real de un pegado. No inventa niveles ni constructores. */
+export function anotarResultado(session, tag, stats) {
+  const row = session.done[tag];
+  if (!row || !stats) return session;
+  const done = {
+    ...session.done,
+    [tag]: {
+      ...row,
+      niveles: Number(stats.niveles) || 0,
+      mejoras: Number(stats.mejoras) || 0,
+      ctorAntes: numeroONull(stats.ctorAntes),
+      ctorDespues: numeroONull(stats.ctorDespues),
+      mediaAntes: numeroONull(stats.mediaAntes),
+      mediaDespues: numeroONull(stats.mediaDespues),
+    },
+  };
+  return { ...session, done };
+}
+
+/**
+ * Resumen de la sesión con los números guardados en cada pegado.
+ * «Cuentas actualizadas» son las ya recorridas, no un total inventado.
+ */
+export function fraseResumen(session) {
+  let niveles = 0;
+  let mejoras = 0;
+  let ctor = 0;
+  let ctorN = 0;
+  let mediaSum = 0;
+  let mediaN = 0;
+  let cuentas = 0;
+  for (const tag of session.order) {
+    const row = session.done[tag];
+    if (!row) continue;
+    cuentas += 1;
+    niveles += row.niveles || 0;
+    mejoras += row.mejoras || 0;
+    if (typeof row.ctorAntes === "number" && typeof row.ctorDespues === "number") {
+      ctor += row.ctorDespues - row.ctorAntes;
+      ctorN += 1;
+    }
+    if (typeof row.mediaAntes === "number" && typeof row.mediaDespues === "number") {
+      mediaSum += row.mediaDespues - row.mediaAntes;
+      mediaN += 1;
+    }
+  }
+  const bits = [
+    cuentas === 1 ? "1 cuenta actualizada" : `${cuentas} cuentas actualizadas`,
+    niveles === 1 ? "1 nivel nuevo detectado" : `${niveles} niveles nuevos detectados`,
+    mejoras === 1 ? "1 mejora finalizada" : `${mejoras} mejoras finalizadas`,
+  ];
+  if (ctorN) {
+    const n = Math.abs(ctor);
+    if (ctor > 0) bits.push(n === 1 ? "1 constructor más libre" : `${n} constructores más libres`);
+    else if (ctor < 0) bits.push(n === 1 ? "1 constructor menos libre" : `${n} constructores menos libres`);
+  }
+  if (mediaN) {
+    const avg = Math.round((mediaSum / mediaN) * 10) / 10;
+    const texto = String(Math.abs(avg)).replace(".", ",");
+    if (avg > 0) bits.push(`el progreso medio sube ${texto}`);
+    else if (avg < 0) bits.push(`el progreso medio baja ${texto}`);
+  }
+  return bits.join(", ");
 }
 
 export function summaryOf(session) {

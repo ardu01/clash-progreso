@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js";
-import { precacheUrls } from "./js/images.js";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=3.1.12";
+import { precacheUrls } from "./js/images.js?v=3.1.12";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -36,6 +36,7 @@ const APP = [
   "./js/actualizar.js",
   "./js/nav.js",
   "./js/charts.js",
+  "./js/colas.js",
   "./js/schedule.js",
   "./js/roadmap.js",
   "./js/provisional.js",
@@ -99,12 +100,14 @@ async function networkFirst(request) {
     clearTimeout(timer);
     if (res.ok && request.method === "GET") {
       const cache = await caches.open(SHELL);
-      cache.put(request, res.clone());
+      const bare = new URL(request.url);
+      bare.search = "";
+      cache.put(bare.toString(), res.clone());
     }
     return res;
   } catch {
     clearTimeout(timer);
-    const hit = await caches.match(request);
+    const hit = await caches.match(request, { ignoreSearch: true });
     if (hit) return hit;
     if (request.mode === "navigate") {
       const shell = await caches.match("./index.html");

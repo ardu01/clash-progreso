@@ -146,7 +146,7 @@ html[data-theme="dark"] {
 
 /* Cabecera = HUD de madera (pauta Clash 1, Arte v2 .panel__hdr/.hud). Sustituye Large Title + barra iOS.
    Antes: la barra plegada era material claro con «‹ Cuentas» dorado = 1,07:1. Ahora siempre madera, título en display. */
-:root { --navbar-h: 60px; }
+:root { --navbar-h: 52px; --tabbar-h: 56px; }
 .navbar, .navbar[data-collapsed="true"], .navbar[data-collapsed="false"] {
   background: linear-gradient(180deg, #6A4B30, #3E2918);
   border-bottom: 3px solid #1A120C;
@@ -155,7 +155,7 @@ html[data-theme="dark"] {
 }
 .navbar__inner { height: var(--navbar-h); }
 .navbar__title {                                   /* blanco sobre #6A4B30 ≥ 8:1; la sombra no cuenta */
-  opacity: 1 !important; color: #FFFFFF; font: 900 20px/1.1 var(--font-ui); letter-spacing: .01em;
+  opacity: 1 !important; color: #FFFFFF; font: 900 17px/1.1 var(--font-ui); letter-spacing: .01em;
   text-shadow: 0 2px 0 rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw;
 }
 /* El título grande queda solo para VoiceOver (sigue siendo el h1 de la pantalla) */
@@ -203,19 +203,19 @@ html[data-theme="dark"] .row.row--destructive {
 /* Tab bar = pestañas 3D (Arte v2 components.css .tabbar): activa en panel claro, sube 3 px, borde oscuro;
    el resto, gris con canto. Etiquetas blancas sobre --grey (5,1:1) y tinta sobre --panel (13,7:1). */
 .tabbar {
-  gap: 5px; padding: 7px calc(6px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 5px) calc(6px + env(safe-area-inset-left));
+  gap: 4px; padding: 4px calc(4px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) calc(4px + env(safe-area-inset-left));
   background: linear-gradient(180deg, #6A4B30, #3E2918); border-top: 3px solid #1A120C;
   box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 -4px 12px rgba(0,0,0,.35);
 }
 .tabbar a {
-  justify-content: center; gap: 2px; min-height: 52px; padding: 4px 1px 5px;
+  justify-content: center; gap: 1px; min-height: 44px; padding: 2px 1px 3px;
   border: 2.5px solid var(--grey-edge); border-radius: 12px; color: #FFFFFF;
   background: linear-gradient(180deg, var(--grey-top) 0 4px, var(--grey) 4px);
   box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 3px 0 var(--grey-edge);
   font-family: var(--font-ui); font-weight: 800; transition: transform 80ms;
 }
-.tabbar a span { font-weight: 800; }
-.tabbar svg { width: 24px; height: 24px; stroke-width: 2.4; pointer-events: none; }
+.tabbar a span { font-weight: 800; font-size: 10px; line-height: 1.05; }
+.tabbar svg { width: 20px; height: 20px; stroke-width: 2.4; pointer-events: none; }
 .tabbar a span { pointer-events: none; }
 /* El icono (trazo, sin relleno) y el texto no se comen el toque: en el iPhone el golpe llega al enlace. */
 a[href^="#"] :is(svg, span, img, b),
@@ -540,4 +540,13 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   width: 100%; min-height: 8rem; box-sizing: border-box; resize: vertical;
   padding: 10px 12px; border-radius: 12px; border: 2px solid var(--panel-edge);
   background: var(--panel); color: var(--ink); font: 500 .85rem/1.4 ui-monospace, monospace;
+}
+.aviso-discreto {
+  position: fixed; z-index: 80; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  max-width: calc(100vw - 32px); margin: 0; pointer-events: none;
+  padding: 10px 14px; border-radius: 999px;
+  background: var(--panel-2); color: var(--label);
+  font: 600 13px/18px var(--font); letter-spacing: -0.01em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
 }

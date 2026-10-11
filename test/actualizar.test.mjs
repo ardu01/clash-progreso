@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { clipboardImportPlan } from "../js/paste.js";
 import {
-  SESSION_KEY, blankSession, clearSession, isStandalone, mensajePegado, nextOf, ordenDeSesion,
+  SESSION_KEY, anotarResultado, blankSession, clearSession, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
 } from "../js/actualizar.js";
 
@@ -154,4 +154,20 @@ test("Safari y el icono usan la misma detección, y la app no pide Atajos para p
   assert.match(doc, /Ajustes → Más ajustes → Exportar datos → Copiar/);
   assert.match(doc, /no comparten/);
   assert.match(doc, /No hace falta la app Atajos/);
+});
+
+test("el resumen sale de los pegados y la siguiente no repite una cuenta hecha", () => {
+  let ses = blankSession(["#A", "#B"], 1);
+  ses = recordPaste(ses, [{ kind: "ready", value: { tag: "#A", timestamp: 9 } }], 2).session;
+  ses = anotarResultado(ses, "#A", {
+    niveles: 23, mejoras: 4, ctorAntes: 0, ctorDespues: 1, mediaAntes: 40, mediaDespues: 40.5,
+  });
+  assert.equal(nextOf(ses), "#B");
+  assert.equal(
+    fraseResumen(ses),
+    "1 cuenta actualizada, 23 niveles nuevos detectados, 4 mejoras finalizadas, 1 constructor más libre, el progreso medio sube 0,5",
+  );
+  const otra = recordPaste(ses, [{ kind: "duplicate", value: { tag: "#A", timestamp: 9 } }], 3).session;
+  assert.equal(nextOf(otra), "#B");
+  assert.equal(otra.done["#A"].niveles, 23);
 });

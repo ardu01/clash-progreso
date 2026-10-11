@@ -1,5 +1,6 @@
 import { madridDayKey } from "./format.js";
 import { levelCost } from "./costs.js";
+import { clasificarHueco, repartirColas } from "./colas.js";
 
 const ZONE = "Europe/Madrid";
 
@@ -114,8 +115,12 @@ export function scheduleNext(freeAt, durationSec, sleep) {
 }
 
 function lineFrom(cola, titulo, cur, nowMs, sleep) {
-  if (!cur) {
-    return { cola, titulo, actual: null, libreYa: true, libreEn: nowMs, libreExacta: true, enSueno: false, siguiente: null };
+  const cls = clasificarHueco(cur, nowMs);
+  if (!cur || (cur.done && !cur.nombre)) {
+    return {
+      cola, titulo, actual: null, libreYa: true, libreEn: nowMs, libreExacta: true,
+      enSueno: false, siguiente: null, clase: cls.clase,
+    };
   }
   if (!cur.exacta) {
     return {
@@ -127,18 +132,19 @@ function lineFrom(cola, titulo, cur, nowMs, sleep) {
       libreExacta: false,
       enSueno: false,
       siguiente: null,
+      clase: "real",
     };
   }
-  const libreYa = cur.fin <= nowMs;
   return {
     cola,
     titulo,
     actual: { nombre: cur.nombre, exacta: true, fin: cur.fin },
-    libreYa,
-    libreEn: libreYa ? nowMs : cur.fin,
+    libreYa: cls.libreYa,
+    libreEn: cls.libreYa ? nowMs : cur.fin,
     libreExacta: true,
-    enSueno: !libreYa && inSleep(cur.fin, sleep),
+    enSueno: !cls.libreYa && inSleep(cur.fin, sleep),
     siguiente: null,
+    clase: cls.clase,
   };
 }
 
@@ -148,24 +154,17 @@ function lineFrom(cola, titulo, cur, nowMs, sleep) {
  */
 export function accountTimeline({ builders, actuales, siguientes, sleep, now, mascotas }) {
   const nowMs = now || Date.now();
-  const ctor = (actuales || []).filter((u) => u.queue === "constructor" && !u.extra && !u.done);
   const extras = (actuales || []).filter((u) => u.queue === "constructor" && u.extra && !u.done);
-  const lab = (actuales || []).find((u) => u.queue === "laboratorio" && !u.done) || null;
-  const pets = (actuales || []).find((u) => u.queue === "mascotas" && !u.done) || null;
-  ctor.sort((a, b) => (a.exacta ? a.fin : Infinity) - (b.exacta ? b.fin : Infinity));
-
-  const known = !!(builders && builders.known && typeof builders.total === "number");
-  const total = known ? builders.total : ctor.length;
+  const partes = repartirColas(actuales, { builders, now: nowMs, mascotas: !!mascotas });
   const lineas = [];
-  for (let i = 0; i < total; i += 1) {
-    lineas.push(lineFrom("constructor", `Constructor ${i + 1}`, ctor[i] || null, nowMs, sleep));
-  }
-  for (const cur of ctor.slice(Math.max(0, total))) {
-    lineas.push(lineFrom("constructor", "Mejora sin constructor conocido", cur, nowMs, sleep));
+  for (const slot of partes.constructores) {
+    lineas.push(lineFrom(slot.cola, slot.titulo, slot.cur, nowMs, sleep));
   }
   for (const cur of extras) lineas.push(lineFrom("extra", "Constructor extra", cur, nowMs, sleep));
-  lineas.push(lineFrom("laboratorio", "Laboratorio", lab, nowMs, sleep));
-  if (mascotas) lineas.push(lineFrom("mascotas", "Casa de mascotas", pets, nowMs, sleep));
+  lineas.push(lineFrom(partes.laboratorio.cola, partes.laboratorio.titulo, partes.laboratorio.cur, nowMs, sleep));
+  if (partes.mascotas) {
+    lineas.push(lineFrom(partes.mascotas.cola, partes.mascotas.titulo, partes.mascotas.cur, nowMs, sleep));
+  }
 
   const queues = {
     constructor: (siguientes || []).filter((s) => s.queue === "constructor"),
@@ -195,8 +194,8 @@ export function accountTimeline({ builders, actuales, siguientes, sleep, now, ma
   }
   return {
     lineas,
-    avisoHora: (actuales || []).some((u) => !u.done && !u.exacta),
-    totalConocido: known,
+    avisoHora: partes.avisoHora,
+    totalConocido: partes.known,
   };
 }
 
@@ -222,7 +221,14 @@ export function fleetAgenda(cuentas, opts = {}) {
   const lastKey = dias.length ? dias[dias.length - 1].key : today;
   for (const cuenta of cuentas || []) {
     for (const line of cuenta.lineas || []) {
-      const base = { tag: cuenta.tag, nombre: cuenta.nombre, chip: cuenta.chip || "", titulo: line.titulo };
+      const base = {
+        tag: cuenta.tag,
+        nombre: cuenta.nombre,
+        chip: cuenta.chip || "",
+        titulo: line.titulo,
+        clase: line.clase || "real",
+        desactualizada: !!cuenta.desactualizada,
+      };
       if (line.libreYa) {
         const row = index.get(today);
         if (row) row.eventos.push({ ...base, exacta: true, fin: now, ahora: true, enSueno: false });
@@ -244,4 +250,66 @@ export function fleetAgenda(cuentas, opts = {}) {
   }
   masAdelante.sort((a, b) => a.fin - b.fin);
   return { dias: dias.filter((row) => row.eventos.length), sinHora, masAdelante };
+}
+
+function horaFranja(ms) {
+  const p = parts(ms);
+  const h = String(p.hour).padStart(2, "0");
+  const next = String((p.hour + 1) % 24).padStart(2, "0");
+  return { hour: p.hour, desde: `${h}:00`, hasta: `${next}:00`, day: madridDayKey(ms) };
+}
+
+/**
+ * Finalizaciones con hora real, todavía en curso.
+ * Una cuenta desactualizada o un temporizador ya vencido no entra: no es una hora confirmada.
+ */
+export function finalesEn(cuentas, opts = {}) {
+  const now = opts.now || Date.now();
+  const modo = opts.modo || "24h";
+  const limite = modo === "24h" ? now + 86400000 : now + 7 * 86400000;
+  const eventos = [];
+  for (const cuenta of cuentas || []) {
+    if (cuenta.desactualizada) continue;
+    for (const line of cuenta.lineas || []) {
+      if (line.clase === "estimado" || line.libreYa || !line.libreExacta || line.libreEn == null) continue;
+      if (line.libreEn <= now || line.libreEn > limite) continue;
+      eventos.push({
+        tag: cuenta.tag,
+        nombre: cuenta.nombre,
+        chip: cuenta.chip || "",
+        titulo: line.titulo,
+        fin: line.libreEn,
+        clase: "real",
+      });
+    }
+  }
+  eventos.sort((a, b) => a.fin - b.fin || String(a.nombre).localeCompare(String(b.nombre), "es"));
+  return eventos;
+}
+
+export function franjasDe(eventos) {
+  const map = new Map();
+  for (const ev of eventos || []) {
+    const f = horaFranja(ev.fin);
+    const key = `${f.day}-${f.hour}`;
+    if (!map.has(key)) map.set(key, { key, day: f.day, desde: f.desde, hasta: f.hasta, ms: ev.fin, eventos: [], tags: new Set() });
+    const g = map.get(key);
+    g.eventos.push(ev);
+    g.tags.add(ev.tag);
+  }
+  return [...map.values()].map((g) => ({
+    key: g.key,
+    day: g.day,
+    desde: g.desde,
+    hasta: g.hasta,
+    ms: g.ms,
+    eventos: g.eventos,
+    cuentas: g.tags.size,
+  }));
+}
+
+export function fraseFranja(g) {
+  const n = g.cuentas;
+  const cuentas = n === 1 ? "1 cuenta" : `${n} cuentas`;
+  return `${cuentas} entre ${g.desde} y ${g.hasta}: una sesión`;
 }

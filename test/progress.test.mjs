@@ -14,7 +14,10 @@ import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, 
 import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
 import { buildBackup, mergeBackup, backupFilename, isShareCancel } from "../js/backup.js";
 import { averagePct } from "../js/progress.js";
-import { levelCost } from "../js/costs.js";
+import { levelCost, sumLevels } from "../js/costs.js";
+import { estadoColas, fraseConstructores, resumenFlota } from "../js/colas.js";
+import { rankAccounts } from "../js/fleet.js";
+import { buildRoadmap, defaultPlan } from "../js/roadmap.js";
 import { addOre, applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "../js/equipo.js";
 import { casaConstructorOf, clanOf, exportFacts } from "../js/perfil.js";
 
@@ -951,9 +954,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
-  assert.equal(APP_VERSION, "3.1.9");
-  assert.equal(SHELL_CACHE, "cp-shell-v28");
+test("versión 3.1.12 y cachés cp-shell-v31 / cp-img-v9", () => {
+  assert.equal(APP_VERSION, "3.1.12");
+  assert.equal(SHELL_CACHE, "cp-shell-v31");
   assert.equal(IMAGE_CACHE, "cp-img-v9");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -985,13 +988,18 @@ test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
   assert.equal(sw.includes("cp-shell-v25"), false);
   assert.equal(sw.includes("cp-shell-v26"), false);
   assert.equal(sw.includes("cp-shell-v27"), false);
+  assert.equal(sw.includes("cp-shell-v28"), false);
+  assert.equal(sw.includes("cp-shell-v29"), false);
+  assert.equal(sw.includes("cp-shell-v30"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v28/);
+  assert.match(caches, /cp-shell-v31/);
+  assert.equal(caches.includes("cp-shell-v29"), false);
+  assert.equal(caches.includes("cp-shell-v30"), false);
   assert.equal(caches.includes("cp-shell-v21"), false);
   assert.equal(caches.includes("cp-shell-v22"), false);
   assert.equal(caches.includes("cp-shell-v23"), false);
@@ -999,6 +1007,7 @@ test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
   assert.equal(caches.includes("cp-shell-v25"), false);
   assert.equal(caches.includes("cp-shell-v26"), false);
   assert.equal(caches.includes("cp-shell-v27"), false);
+  assert.equal(caches.includes("cp-shell-v28"), false);
   assert.match(sw, /estilo-3\.1\.css/);
   assert.match(sw, /js\/equipo\.js/);
   assert.match(sw, /js\/perfil\.js/);
@@ -2588,4 +2597,103 @@ test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", 
   assert.match(app, /data-fallback/);
   assert.match(app, /applyFallback/);
   assert.equal(app.includes("1000001") && app.includes("imagenes_por_nivel[String(th)]"), false);
+});
+
+test("3.1.10: módulos versionados, aviso si un toque falla y enlaces externos fuera", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const v = APP_VERSION;
+  assert.match(html, new RegExp("js/app.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(html, /type="importmap"/);
+  assert.match(html, new RegExp("js/nav.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(sw, new RegExp("js/caches.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(sw, /ignoreSearch: true/);
+  assert.match(app, /unhandledrejection/);
+  assert.match(app, /aviso-discreto/);
+  assert.match(app, /tituloObserver/);
+  assert.match(app, /sw\.js\?v=/);
+  assert.match(app, /window\.open\(enlace\.href, "_blank", "noopener,noreferrer"\)/);
+  assert.equal(app.includes("target=\"_blank\""), true);
+});
+
+test("3.1.10: Inicio y Cuentas usan el mismo cálculo y no tratan un temporizador vencido como libre confirmado", () => {
+  const now = Date.parse("2026-10-11T12:00:00Z");
+  const estados = [];
+  for (const roster of ROSTER) {
+    const exp = exportsByTag.get(roster.tag);
+    estados.push(estadoColas(exp, now, { staleMs: 7 * 86400000, th: townHallLevel(exp) }));
+  }
+  const resumen = resumenFlota(estados);
+  assert.equal(resumen.libresReales, 0);
+  assert.equal(resumen.ocupadosReales, 44);
+  assert.equal(resumen.vencidos, 31);
+  assert.equal(resumen.over, 1);
+  const frase = fraseConstructores(resumen);
+  assert.match(frase, /0 libres en la exportación/);
+  assert.match(frase, /44 ocupados en la exportación/);
+  assert.match(frase, /31 ya habrían acabado \(estimado\)/);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.equal(app.includes("ctorLibres"), false);
+  assert.match(app, /snap\.frase/);
+  const vieja = {
+    timestamp: Math.floor((now - 10 * 86400000) / 1000),
+    buildings: [
+      { data: "1000015", cnt: 1, lvl: 1 },
+      { data: "1000008", lvl: 2, timer: 60, cnt: 1 },
+    ],
+  };
+  const stale = estadoColas(vieja, now, { staleMs: 7 * 86400000 });
+  assert.equal(stale.desactualizada, true);
+  assert.equal(stale.builders.libresReales, 0);
+  assert.equal(stale.builders.vencidos, 1);
+  assert.equal(stale.builders.libresAccion, 0);
+  assert.equal(stale.builders.confianza, "baja");
+  const fresca = estadoColas({
+    timestamp: Math.floor(now / 1000) - 60,
+    buildings: [{ data: "1000015", cnt: 1, lvl: 1 }],
+  }, now, { staleMs: 7 * 86400000 });
+  assert.equal(fresca.builders.libresReales, 1);
+  assert.equal(fresca.builders.libresAccion, 1);
+  assert.equal(fresca.builders.confianza, "alta");
+  const road = buildRoadmap({
+    exp: vieja, index, tag: "#TEST", plan: defaultPlan(), provisionals: [], sleep: null, now,
+  });
+  assert.equal(road.lanes.find((l) => l.cola === "constructor").clase, "estimado");
+  assert.equal(road.lanes.find((l) => l.cola === "laboratorio").clase, "real");
+  const conLab = {
+    ...vieja,
+    units: [{ data: 4000000, lvl: 2, timer: 60 }],
+    pets: [{ data: 73000000, lvl: 1, timer: 60 }],
+  };
+  const roadLab = buildRoadmap({
+    exp: conLab, index, tag: "#TEST", plan: defaultPlan(), provisionals: [], sleep: null, now,
+  });
+  assert.equal(roadLab.lanes.find((l) => l.cola === "laboratorio").clase, "estimado");
+  const roadLibre = buildRoadmap({
+    exp: {
+      timestamp: Math.floor(now / 1000) - 60,
+      buildings: [{ data: 1000015, cnt: 1, lvl: 1 }],
+    },
+    index, tag: "#TEST", plan: defaultPlan(), provisionals: [], sleep: null, now,
+  });
+  const libre = roadLibre.lanes.find((l) => l.cola === "constructor");
+  assert.equal(libre.clase, "real");
+  assert.equal(libre.libreYa, true);
+  assert.ok(road.orden.every((s) => s.origen === "recomendado" || s.origen === "provisional"));
+});
+
+test("3.1.10: el porcentaje compara cada cuenta con el máximo de su TH", () => {
+  const rows = [
+    { tag: "#A", nombre: "Alta", th: 18, media: 50, builders: { free: 0 }, cats: { defensas: 50 } },
+    { tag: "#B", nombre: "Baja", th: 11, media: 50, builders: { free: 0 }, cats: { defensas: 40 } },
+  ];
+  assert.equal(averagePct(rows.map((r) => r.media)), 50);
+  const ranked = rankAccounts(rows, "media");
+  assert.equal(ranked[0].media, ranked[1].media);
+  const cost = levelCost("1000008", 2);
+  assert.ok(cost && typeof cost.s === "number");
+  const bag = sumLevels("1000008", 1, 2, 1);
+  const recurso = cost.r === "oro" ? bag.oro : cost.r === "elixir" ? bag.elixir : cost.r === "oscuro" ? bag.oscuro : bag.muros;
+  assert.equal(recurso, cost.n || 0);
 });

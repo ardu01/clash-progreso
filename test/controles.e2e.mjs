@@ -47,14 +47,16 @@ try {
   await waitServer(base);
   await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => document.querySelector("h1.large-title")?.textContent?.trim() === "Inicio");
+  const inicio = await page.evaluate(() => document.querySelector("#screen")?.textContent || "");
+  check(inicio.includes("Centro de mando"), "falta la cabecera");
+  check(inicio.includes("Constructores libres"), "falta la cifra de constructores");
+  check(inicio.includes("Próximas finalizaciones"), "faltan las próximas finalizaciones");
 
   await paso("Qué hacer ahora", "#screen a.row--accion", "#/ahora", "Ahora");
   await en("#/inicio", "Inicio");
   await paso("icono de Qué hacer ahora", "#screen a.row--accion .accion__ico", "#/ahora", "Ahora", { punto: true });
   await en("#/inicio", "Inicio");
   await paso("objetivos", "#screen a.row--accion >> nth=1", "#/roster", "Cuentas");
-  await en("#/inicio", "Inicio");
-  await paso("organizar hoy", "#screen a.row--accion >> nth=2", "#/agenda", "Agenda");
   await en("#/inicio", "Inicio");
   await paso("Abrir hoy", "#screen .orden-list a", /#\/progreso\/[^/]+\/plan$/, "Plan");
   await en("#/inicio", "Inicio");

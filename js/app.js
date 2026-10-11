@@ -10,7 +10,7 @@ import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
   PASTE_DENIED, STRUCTURE_HELP, addedToast, batchSummary, classifyEntries,
   duplicateMsg, foreignMsg, mediaLine, olderHelp, olderWarning, omitReason, omitSubtitle, overMaxMsg,
-  planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
+  diffExports, planBatch, sortBatch, statusText, successToast, trailingLabel, unknownMsg,
 } from "./import.js";
 import { allExports, clearExports, deleteTag, latestByTag, latestCopyAt, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
@@ -19,11 +19,12 @@ import {
 import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
 import { compareAccounts, fleetSnapshot, rankAccounts } from "./fleet.js";
+import { estadoColas } from "./colas.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
-import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
+import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import {
@@ -35,7 +36,7 @@ import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from ".
 import { exportFacts } from "./perfil.js";
 import { accionTab } from "./nav.js";
 import {
-  blankSession, clearSession, compareOrden, isStandalone, mensajePegado, nextOf, ordenDeSesion,
+  anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
 } from "./actualizar.js";
 
@@ -94,6 +95,7 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
+  agendaVista: ["24h", "7d", "cuenta"].includes(localStorage.getItem("cp-agenda")) ? localStorage.getItem("cp-agenda") : "24h",
   actualizarManual: false,
   actualizarFocus: false,
   actualizarBorrador: "",
@@ -688,11 +690,21 @@ function saveProvisionals() {
   localStorage.setItem("cp-provisional", JSON.stringify(state.provisionales));
 }
 
+let roadsThisPaint = null;
+
+function cachedRoad(key, make) {
+  if (!roadsThisPaint) return make();
+  if (roadsThisPaint.has(key)) return roadsThisPaint.get(key);
+  const road = make();
+  roadsThisPaint.set(key, road);
+  return road;
+}
+
 function accountRoadmap(meta) {
   const exp = expOf(meta.tag);
   if (!exp || !state.index) return null;
   const raw = state.planes[meta.tag];
-  return buildRoadmap({
+  return cachedRoad(meta.tag + "\0" + state.now, () => buildRoadmap({
     exp,
     index: state.index,
     tag: meta.tag,
@@ -700,7 +712,7 @@ function accountRoadmap(meta) {
     provisionals: state.provisionales,
     sleep: activeSleep(),
     now: state.now,
-  });
+  }));
 }
 
 const CAT_COLOR = {
@@ -734,15 +746,27 @@ function fleetRow(meta) {
   const active = ups.filter((u) => !u.done && !u.extra);
   const cats = {};
   for (const c of CATEGORIES) cats[c.key] = view.cats[c.key] ? view.cats[c.key].pct : null;
+  const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: view.th });
+  const b = colas.builders;
   return {
     tag: meta.tag,
     nombre: meta.nombre,
     chip: meta.chip,
     th: view.th,
     media: view.media,
-    builders: builderStatus(exp),
-    labLibre: !ups.some((u) => u.queue === "laboratorio" && !u.done),
-    mascotasLibres: !ups.some((u) => u.queue === "mascotas" && !u.done),
+    colas,
+    builders: {
+      known: b.known,
+      total: b.total,
+      occupied: b.ocupadosReales,
+      free: b.libresReales,
+      over: b.over,
+      vencidos: b.vencidos,
+      libresEstimados: b.libresEstimados,
+      confianza: b.confianza,
+    },
+    labLibre: colas.laboratorio.libreAccion,
+    mascotasLibres: colas.mascotas.libreAccion,
     proxima: active.length ? active[0].end : null,
     mejoras: ups,
     cats,
@@ -875,8 +899,8 @@ function rosterTools(shown) {
     <div class="section"><div class="card fleet-card">
       <h2 class="t-headline">Todas las cuentas</h2>
       <p class="t-body">Media ${media}</p>
-      <p class="t-footnote c-2">Constructores: ${snap.constructoresLibres} libres · ${snap.constructoresOcupados} ocupados</p>
-      <p class="t-footnote c-2">Laboratorios libres: ${snap.laboratoriosLibres} · Casas de mascotas libres: ${snap.mascotasLibres}</p>
+      <p class="t-footnote c-2">Constructores: ${esc(snap.frase)}</p>
+      <p class="t-footnote c-2">Laboratorios: ${snap.laboratoriosLibres} libres en la exportación${snap.laboratoriosEstimados ? ` · ${snap.laboratoriosEstimados} estimados` : ""} · Casas de mascotas: ${snap.mascotasLibres} libres en la exportación${snap.mascotasEstimadas ? ` · ${snap.mascotasEstimadas} estimadas` : ""}</p>
       <p class="t-footnote c-2">Próxima mejora: ${prox}</p>
       <p class="link-row"><a href="#/ahora">Qué hacer ahora</a><a href="#/ranking">Ranking</a><a href="#/agenda">Agenda</a></p>
     </div></div>`;
@@ -940,7 +964,7 @@ function costCard(exp, th, full) {
   const bag = cost.total;
   const line = costBits(bag) || "Nada pendiente con coste conocido";
   const miss = bag.sinCoste ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 paso" : `${bag.sinCoste} pasos`} sin coste en la fuente: no se ha sumado.</p>` : "";
-  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
+  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
   if (!full) {
     return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo</h2>
@@ -974,7 +998,9 @@ function pasoAhora(paso) {
 
 function prioridadDe(meta) {
   const road = accountRoadmap(meta);
-  const vacio = { meta, road, when: null, exact: false, lane: null, step: null, tier: 3, sortWhen: Infinity, libreYa: false };
+  const exp = expOf(meta.tag);
+  const colas = exp ? estadoColas(exp, state.now, { staleMs: staleLimit() }) : null;
+  const vacio = { meta, road, when: null, exact: false, lane: null, step: null, tier: 3, sortWhen: Infinity, libreYa: false, desactualizada: !!(colas && colas.desactualizada), clase: "real" };
   if (!road) return vacio;
   let best = null;
   for (const lane of road.lanes || []) {
@@ -983,8 +1009,9 @@ function prioridadDe(meta) {
     if (!step) continue;
     const sinHora = !!lane.blocked || !!step.sinHora;
     const when = lane.libreYa ? road.now : (sinHora ? null : lane.freeAt);
-    const tier = when == null ? 1 : 0;
-    const cand = { meta, road, when, exact: when != null, lane, step, tier, sortWhen: when == null ? Infinity : when, libreYa: !!lane.libreYa };
+    let tier = when == null ? 1 : 0;
+    if (colas && colas.desactualizada && lane.libreYa) tier = 2;
+    const cand = { meta, road, when, exact: when != null, lane, step, tier, sortWhen: when == null ? Infinity : when, libreYa: !!lane.libreYa, desactualizada: !!(colas && colas.desactualizada), clase: lane.clase || "real" };
     if (!best || cand.tier < best.tier || (cand.tier === best.tier && cand.sortWhen < best.sortWhen)) best = cand;
   }
   return best || vacio;
@@ -1001,7 +1028,9 @@ function textoCola(item) {
   const lane = item.lane;
   const step = item.step;
   let cuando = `${lane.titulo} sin hora exacta`;
-  if (item.libreYa) cuando = `${lane.titulo} libre ahora`;
+  if (item.desactualizada) cuando = "Necesita actualización. Se conserva el último plan.";
+  else if (item.clase === "estimado" && item.libreYa) cuando = `${lane.titulo} libre según la exportación (estimado)`;
+  else if (item.libreYa) cuando = `${lane.titulo} libre en la exportación`;
   else if (item.exact && item.when != null) cuando = `${lane.titulo} libre ${fmtFin(item.when)}`;
   let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl}`;
   if (step.provisional) paso += " · provisional";
@@ -1102,39 +1131,42 @@ function renderInicio() {
   const withData = list.filter((m) => expOf(m.tag));
   const rows = fleetRows(list);
   const snap = fleetSnapshot(rows);
-  const principal = list.find((m) => m.principal) || null;
-  const pv = principal && expOf(principal.tag) ? viewOf(principal.tag) : null;
-  const objs = new Map();
-  for (const m of list) if (m.objetivo != null) objs.set(m.objetivo, (objs.get(m.objetivo) || 0) + 1);
-  const objTxt = [...objs.entries()].sort((a, b) => b[0] - a[0]).map(([th, n]) => (n === 1 ? `TH${th}` : `${n}×TH${th}`)).join(" + ") || "—";
+  const nCuentas = list.length;
+  const cabecera = `Clash Progreso · Centro de mando · ${nCuentas === 1 ? "1 cuenta" : `${nCuentas} cuentas`}`;
+  const hayDatos = withData.length > 0;
   const thOf = (m) => (expOf(m.tag) ? viewOf(m.tag).th : null);
   const enObjetivo = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) >= m.objetivo).length;
   const conObj = list.filter((m) => m.objetivo != null).length;
+  const hoyKey = madridDayKey(state.now);
+  const terminanHoy = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
   const tiles = `<div class="section"><div class="stat-tiles">
-      <div><b class="num">${withData.length}</b><span>${withData.length === list.length ? "cuentas" : `de ${list.length} cuentas con datos`}</span></div>
-      <div><b class="num">${pv ? `TH${pv.th}` : "—"}</b><span>${principal ? esc(principal.nombre) : "Sin principal"}</span></div>
-      <div><b class="num obj">${esc(objTxt)}</b><span>Objetivo · ${enObjetivo} de ${conObj} ya</span></div>
+      <div><b class="num">${nCuentas ? nCuentas : "—"}</b><span>Cuentas</span></div>
+      <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
+      <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
     </div></div>`;
   const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
   const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
-  const hoyKey = madridDayKey(state.now);
-  const deHoyN = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
   const deHoy = ordenadas.filter((p) => p.tier === 0 && p.when != null && madridDayKey(p.when) === hoyKey);
-  let ctorLibres = 0;
-  for (const p of ordenadas) {
-    for (const lane of (p.road && p.road.lanes) || []) {
-      if (lane.cola === "constructor" && lane.libreYa) ctorLibres += 1;
-    }
-  }
   const accion = (href, icon, cls, title, sub) => `<li><a class="row row--tile row--accion" href="${href}"><span class="accion__ico ${cls}" aria-hidden="true">${icon}</span><span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
   const acciones = [
-    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores libres", `${ctorLibres} ${ctorLibres === 1 ? "constructor libre" : "constructores libres"} ahora · ${deHoy.length} ${deHoy.length === 1 ? "cuenta" : "cuentas"} para abrir hoy`),
+    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores disponibles", hayDatos ? snap.frase : "—"),
     objMas
-      ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
-      : accion("#/roster", ICON.objetivo, "is-gold", "Objetivos cumplidos", `${enObjetivo} de ${conObj} cuentas en su objetivo`),
-    accion("#/agenda", ICON.agenda, "is-blue", "Organizar las mejoras de hoy", `${deHoyN} ${deHoyN === 1 ? "termina" : "terminan"} hoy${snap.proxima ? ` · próxima ${fmtFin(snap.proxima.fin)}` : ""}`),
+      ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos de TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
+      : accion("#/roster", ICON.objetivo, "is-gold", "Preparar objetivos de TH", conObj ? `${enObjetivo} de ${conObj} en su objetivo` : "—"),
   ].join("");
+  const proximas = [];
+  for (const row of rows) {
+    for (const u of row.mejoras || []) {
+      if (u.extra || u.done || !(u.end > state.now)) continue;
+      proximas.push({ nombre: row.nombre, tag: row.tag, end: u.end, title: nameOf(u.id) || "Mejora" });
+    }
+  }
+  proximas.sort((a, b) => a.end - b.end || String(a.nombre).localeCompare(String(b.nombre), "es"));
+  const tres = proximas.slice(0, 3);
+  const proxBlock = tres.length
+    ? `<ul class="list list--tiles">${tres.map((u) => `<li><a class="row row--tile" href="#/progreso/${u.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(u.title)}</span><span class="row__sub">${esc(u.nombre)} · ${esc(fmtFin(u.end))}</span></span>${CHEV}</a></li>`).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">—</p></div>`;
   const sinHora = ordenadas.filter((p) => p.tier === 1);
   const hoyRows = deHoy.map((p, i) => `<li><a class="row row--tile" href="#/progreso/${p.meta.tag.slice(1)}/plan"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(p.meta.nombre)}</span><span class="row__sub">${esc(textoCola(p))}</span></span>${CHEV}</a></li>`).join("");
   const hoyBlock = deHoy.length
@@ -1156,10 +1188,11 @@ function renderInicio() {
         ${v ? meterHtml(v.media, `Media ${fmtPct(v.media)}`) : ""}</span>${CHEV}</a></li>`;
   };
   return `<h1 class="large-title">Inicio</h1>
-    <p class="large-sub">Centro de mando · ${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`}</p>
+    <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
     ${tiles}
     <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
+    <div class="section"><div class="section-header"><span>Próximas finalizaciones</span></div>${proxBlock}</div>
     <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
       <p class="t-footnote c-2">Orden según el plan de cada cuenta y la cola que queda libre antes. Si el temporizador no es un número, no se inventa la hora.</p>
       ${hoyBlock}${sinHoraNote}</div>
@@ -1212,7 +1245,9 @@ function renderRanking() {
   const chips = keys.map(([id, label]) => filterChip("data-rank", id, label, state.rankKey === id)).join("");
   const list = ranked.map((row) => {
     const on = state.compareTags.includes(row.tag);
-    const libres = row.builders && row.builders.free != null ? `${row.builders.free} libres` : "constructores ?";
+    const libres = row.builders && row.builders.free != null
+      ? `${row.builders.free} libres${row.builders.vencidos ? ` · ${row.builders.vencidos} estimados` : ""}`
+      : "constructores ?";
     return `<li><div class="row row--tile"><span class="hex hex--sm${row.puesto <= 3 ? " hex--gold" : ""}" aria-hidden="true"><b>${row.puesto}</b></span>${row.th == null ? "" : thumb(1000001, { size: 44, th: row.th })}<span class="row__main"><span class="row__title"><span class="sr-only">${row.puesto}. </span>${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${esc(libres)}</span>${meterHtml(row.media, `Media ${fmtPct(row.media)}`)}</span><button type="button" class="btn-text" data-compare="${esc(row.tag)}" aria-pressed="${on ? "true" : "false"}">${on ? "Quitar" : "Comparar"}</button></div></li>`;
   }).join("");
   const picked = compareAccounts(rows, state.compareTags);
@@ -1257,7 +1292,7 @@ function planControls(meta, road) {
   const modo = (id, label) => `<button type="button" role="tab" data-plan-modo="${id}" aria-selected="${plan.modo === id}">${label}</button>`;
   return `<div class="section"><div class="card">
       <h2 class="t-headline">${esc(planLabel(plan, current))}</h2>
-      <p class="t-footnote c-2">${road.configured ? "Plan guardado en esta cuenta." : "Esta cuenta no tiene plan guardado: se usa Maxear TH actual."}</p>
+      <p class="t-footnote c-2">${road.configured ? "Planificado: el plan guardado en esta cuenta." : "Recomendado: no hay plan guardado, se usa Maxear TH actual."}</p>
       <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Objetivo">${modo("maxear", "Maxear")}${modo("rushear", "Rushear")}</div></div>
       <label class="sort-label">TH objetivo
         <select data-plan-th="${esc(meta.tag)}" aria-label="TH objetivo">${thOpts.join("")}</select>
@@ -1313,11 +1348,14 @@ function renderPlan(tag) {
     : "";
   const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
   const desconocido = road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`;
+  const vieja = estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada
+    ? `<p class="t-footnote c-2">Necesita actualización. Se conserva el último plan, del ${esc(fmtWhen(exp.timestamp * 1000))}.</p>`
+    : "";
   const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}</div></div>
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}${vieja}</div></div>
     ${sleepCard()}
     ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
@@ -1354,7 +1392,7 @@ function sleepCard() {
         <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
         <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
       </div>
-      <button type="button" class="btn btn--plain btn--block" data-sueno-clear>Sin horario de sueño</button>
+      ${(s.desde || s.hasta) ? `<button type="button" class="btn btn--plain btn--block" data-sueno-clear>Quitar horario de sueño</button>` : ""}
       <p class="t-footnote c-2">${esc(nota)}</p>
     </div></div>`;
 }
@@ -1398,9 +1436,12 @@ function timelineOf(meta, exp, view) {
 }
 
 function lineaTexto(line) {
-  let actual = "Libre ahora";
-  if (line.actual && !line.actual.exacta) actual = `${line.actual.nombre}. Sin hora exacta en la exportación.`;
-  else if (line.actual && line.actual.exacta) {
+  let actual = line.clase === "estimado" ? "Libre según la exportación (estimado)" : "Libre en la exportación";
+  if (line.desactualizada && line.libreYa) actual = "Necesita actualización. Se conserva el último plan.";
+  else if (line.actual && !line.actual.exacta) actual = `${line.actual.nombre}. Sin hora exacta en la exportación.`;
+  else if (line.actual && line.actual.exacta && line.clase === "estimado" && line.libreYa) {
+    actual = `${line.actual.nombre} · libre según la exportación (estimado)`;
+  } else if (line.actual && line.actual.exacta) {
     actual = `${line.actual.nombre} · libre ${fmtFin(line.actual.fin)}`;
     if (line.enSueno) actual += " · cae en horas de sueño";
   }
@@ -1436,32 +1477,40 @@ function renderAgenda() {
     const exp = expOf(meta.tag);
     const view = viewOf(meta.tag);
     if (!exp || !view) return null;
-    return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, lineas: timelineOf(meta, exp, view).lineas };
+    const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: view.th });
+    const tl = timelineOf(meta, exp, view);
+    if (colas.desactualizada) {
+      for (const line of tl.lineas) if (line.libreYa) line.desactualizada = true;
+    }
+    return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, desactualizada: colas.desactualizada, lineas: tl.lineas };
   }).filter(Boolean);
-  const agenda = fleetAgenda(cuentas, { now: state.now, dias: 21 });
-  const days = agenda.dias.map((day) => {
-    const rows = day.eventos.map((ev) => {
-      const cuando = ev.ahora ? "Libre ahora" : fmtFin(ev.fin);
-      const sueno = ev.enSueno ? " · en horas de sueño; la siguiente espera a despertar" : "";
-      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(cuando)}${esc(sueno)}</span></span></div></li>`;
+  const modo = state.agendaVista === "7d" || state.agendaVista === "cuenta" ? state.agendaVista : "24h";
+  const eventos = finalesEn(cuentas, { now: state.now, modo });
+  const filaEv = (ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(fmtFin(ev.fin))}</span></span></div></li>`;
+  let cuerpo = "";
+  if (!eventos.length) {
+    cuerpo = `<div class="section"><div class="card empty"><p class="t-title3">—</p></div></div>`;
+  } else if (modo === "cuenta") {
+    const por = new Map();
+    for (const ev of eventos) {
+      if (!por.has(ev.tag)) por.set(ev.tag, []);
+      por.get(ev.tag).push(ev);
+    }
+    cuerpo = [...por.values()].map((list) => `<div class="section"><div class="section-header"><span>${esc(list[0].nombre)}</span></div><ul class="list">${list.map(filaEv).join("")}</ul></div>`).join("");
+  } else {
+    cuerpo = franjasDe(eventos).map((g) => {
+      const titulo = g.cuentas > 1 ? fraseFranja(g) : dayHeading(g.ms, state.now);
+      return `<div class="section"><div class="section-header"><span>${esc(titulo)}</span></div><ul class="list">${g.eventos.map(filaEv).join("")}</ul></div>`;
     }).join("");
-    return `<div class="section"><div class="section-header"><span>${esc(dayHeading(day.ms, state.now))}</span></div><ul class="list">${rows}</ul></div>`;
-  }).join("");
-  const sin = agenda.sinHora.length
-    ? `<div class="section"><div class="section-header"><span>Sin hora exacta</span></div><ul class="list">${agenda.sinHora.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.actual || "Mejora en curso")}. La exportación no trae la hora. No se inventa.</span></span></div></li>`).join("")}</ul></div>`
-    : "";
-  const later = agenda.masAdelante.length
-    ? `<div class="section"><div class="section-header"><span>Más adelante</span></div><ul class="list">${agenda.masAdelante.map((ev) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(fmtFin(ev.fin))}</span></span></div></li>`).join("")}</ul></div>`
-    : "";
-  const empty = !days && !sin && !later
-    ? `<div class="section"><div class="card empty"><p class="t-title3">Nada que agendar</p><p class="t-subhead c-2">No hay colas libres ni mejoras con hora en este filtro.</p></div></div>`
-    : "";
+  }
+  const nav = `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Agenda"><button type="button" role="tab" data-agenda="24h" aria-selected="${modo === "24h"}">Próximas 24 h</button><button type="button" role="tab" data-agenda="7d" aria-selected="${modo === "7d"}">Próximos 7 días</button><button type="button" role="tab" data-agenda="cuenta" aria-selected="${modo === "cuenta"}">Por cuenta</button></nav></div>`;
   return `<h1 class="large-title">Agenda</h1>
-    <p class="large-sub">Cuándo queda libre cada constructor, el laboratorio y la casa de mascotas.</p>
+    <p class="large-sub">Finalizaciones con hora, de la exportación. Una cuenta sin actualizar no entra.</p>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+    ${nav}
     ${sleepCard()}
-    ${days}${later}${sin}${empty}
-    <p class="section-footer">La hora es la de Madrid y sale de la exportación. Un día sin libres no se lista.</p>`;
+    ${cuerpo}
+    <p class="section-footer">La hora es la de Madrid. Si varias cuentas caen en la misma hora, es una sola sesión.</p>`;
 }
 
 function renderHistorial(tag) {
@@ -1762,12 +1811,15 @@ function nombreCuenta(tag) {
 function filaSesion(ses, tag, i, next) {
   const row = ses.done[tag];
   let estado = "Pendiente";
-  if (row && row.kind === "ready") estado = "Cambió";
+  if (row && row.kind === "ready") estado = "Completada";
   else if (row && row.kind === "older") estado = "Al histórico";
-  else if (row) estado = "Sin cambios";
+  else if (row) estado = "Completada";
   else if (tag === next) estado = "Siguiente";
   const cls = tag === next && !row ? " chip--main" : " chip--muted";
-  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
+  const exp = expOf(tag);
+  const ts = row && row.timestamp ? row.timestamp : (exp && exp.timestamp);
+  const fecha = ts ? `Última actualización ${fmtWhen(ts * 1000)}` : "Sin datos";
+  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span><span class="row__sub">${esc(fecha)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
 }
 
 function campoPegado(ses) {
@@ -1806,11 +1858,10 @@ function renderActualizar() {
     return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
       <p class="large-sub">Lista terminada</p>
       ${barra}
+      <div class="section"><div class="card"><p class="t-body">${esc(fraseResumen(ses))}</p></div></div>
       ${ses.pending ? `<div class="section act-actions">${campoPegado(ses)}</div>` : ""}
-      ${bloque("Cambiaron", sum.changed)}
-      ${bloque("Sin cambios", sum.same)}
-      ${bloque("Al histórico", sum.history)}
-      ${bloque("Sin pegar", sum.missing)}
+      ${bloque("Completadas", sum.changed.concat(sum.same, sum.history))}
+      ${bloque("Pendientes", sum.missing)}
       <div class="section"><button type="button" class="btn btn--primary btn--block" data-actualizar-listo>Listo</button></div></div>`;
   }
   const next = nextOf(ses);
@@ -1825,9 +1876,14 @@ function renderActualizar() {
       <p class="section-footer">${esc(hint)}</p>`
     : `<div class="section"><div class="card empty"><p class="t-title3">No hay cuentas en la lista</p></div></div>`;
   const manual = state.actualizarManual || !!ses.pending;
-  const lista = ses.order.map((tag, i) => filaSesion(ses, tag, i, next)).join("");
+  const listaDe = (tags) => tags.map((tag) => filaSesion(ses, tag, ses.order.indexOf(tag), next)).join("");
+  const hechas = ses.order.filter((tag) => ses.done[tag]);
+  const pendientes = ses.order.filter((tag) => !ses.done[tag]);
+  const bloqueLista = (titulo, tags) => tags.length
+    ? `<div class="section"><div class="section-header"><span>${titulo}</span></div><ul class="list list--tiles orden-list">${listaDe(tags)}</ul></div>`
+    : "";
   return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
-    <p class="large-sub">El orden queda fijo al empezar. ${esc(prog.label)}</p>
+    <p class="large-sub">El orden queda fijo al empezar. Se sigue por la primera pendiente. ${esc(prog.label)}</p>
     ${barra}
     ${siguiente}
     <div class="section act-actions">
@@ -1836,7 +1892,8 @@ function renderActualizar() {
       ${campoPegado(ses)}
       <button type="button" class="btn btn--secondary btn--block" data-go="#/inicio">Dejar para luego</button>
     </div>
-    <div class="section"><div class="section-header"><span>Cuentas</span></div><ul class="list list--tiles orden-list">${lista}</ul></div></div>`;
+    ${bloqueLista("Completadas", hechas)}
+    ${bloqueLista("Pendientes", pendientes)}</div>`;
 }
 
 async function pegarCuenta() {
@@ -1871,8 +1928,9 @@ async function aplicarPegado(text) {
     render();
     return;
   }
+  let stats = new Map();
   try {
-    if (result.save.length) await persistirPegado(result.save);
+    if (result.save.length) stats = await persistirPegado(result.save);
   } catch {
     state.actualizarManual = true;
     state.actualizarFocus = true;
@@ -1880,11 +1938,33 @@ async function aplicarPegado(text) {
     render();
     return;
   }
-  writeSession(localStorage, { ...result.session, pending: "" });
+  let ses = { ...result.session, pending: "" };
+  for (const [tag, dato] of stats) ses = anotarResultado(ses, tag, dato);
+  writeSession(localStorage, ses);
   state.actualizarManual = false;
   state.actualizarBorrador = "";
   showToast("ok", mensajePegado(result.notes, nombreCuenta));
   render();
+}
+
+function resultadoDePegado(before, after) {
+  if (!before || !after || !state.index) {
+    return { niveles: 0, mejoras: 0, ctorAntes: null, ctorDespues: null, mediaAntes: null, mediaDespues: null };
+  }
+  const diff = diffExports(before, after, state.index, after.timestamp * 1000);
+  const mejoras = upgradesOf(before).filter((u) => !u.extra && u.end <= after.timestamp * 1000).length;
+  const thAntes = townHallLevel(before);
+  const thDespues = townHallLevel(after);
+  const c0 = estadoColas(before, after.timestamp * 1000, { th: thAntes });
+  const c1 = estadoColas(after, after.timestamp * 1000, { th: thDespues });
+  return {
+    niveles: Math.max(0, diff.levelDelta || 0),
+    mejoras,
+    ctorAntes: c0.builders.libresReales,
+    ctorDespues: c1.builders.libresReales,
+    mediaAntes: diff.mediaFrom,
+    mediaDespues: diff.mediaTo,
+  };
 }
 
 async function persistirPegado(save) {
@@ -1913,6 +1993,14 @@ async function persistirPegado(save) {
     state.copyAt = Date.now();
   } catch { /* la copia automática no bloquea el guardado */ }
   armFlash(save.map((it) => it.value.tag));
+  const stats = new Map();
+  for (const it of save) {
+    if (it.kind !== "ready" || stats.has(it.value.tag)) continue;
+    const after = state.latest.get(it.value.tag);
+    if (!after || after.timestamp !== it.value.timestamp) continue;
+    stats.set(it.value.tag, resultadoDePegado(before.get(it.value.tag), after));
+  }
+  return stats;
 }
 
 async function savePlan(plan, opts = {}) {
@@ -2166,7 +2254,7 @@ function rowCuenta(meta) {
     ${thumb(1000001, { size: 44, th: a.th })}
     <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
       <span class="row__title">${title} ${mark}</span>
-      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? " · sin actualizar" : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
+      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? ` · <span class="chip chip--warn">Necesita actualización</span>` : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
       ${goalBar(meta, a)}
       ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
@@ -2804,14 +2892,13 @@ function mejorasCostes() {
 
 function mejorasPorFin(all) {
   const free = [];
-  for (const meta of allAccounts()) {
-    const exp = expOf(meta.tag);
-    if (!exp) continue;
-    const b = builderStatus(exp);
-    if (b.known && b.free > 0) free.push({ meta, exp, b });
+  let vencidosCtor = 0;
+  for (const row of fleetRows()) {
+    vencidosCtor += row.builders.vencidos || 0;
+    if (row.builders.known && !row.builders.over && row.builders.free > 0) free.push({ meta: accountByTag(row.tag), b: row.builders });
   }
   const freeCard = free.length ? `<div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
+      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres en la exportación</p>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
         return `<span class="chip chip--account">${thumb(1000001, { size: 22, pad: 1, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
@@ -2819,7 +2906,7 @@ function mejorasPorFin(all) {
     </div></div>` : "";
   const done = all.filter((u) => u.done);
   const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end || rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag));
-  const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Terminadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
+  const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Estimadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
     const key = madridDayKey(u.end);
@@ -2828,7 +2915,10 @@ function mejorasPorFin(all) {
   }
   for (const list of byDay.values()) list.sort((a, b) => rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag) || a.end - b.end);
   const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><ul class="list">${list.map(upRow).join("")}</ul></div>`).join("");
-  return freeCard + doneBlock + days + helpersBlock();
+  const estimadoNote = vencidosCtor
+    ? `<p class="section-footer">${vencidosCtor === 1 ? "1 temporizador de constructor ya habría acabado" : `${vencidosCtor} temporizadores de constructor ya habrían acabado`}. Es una estimación de la última exportación, no un constructor confirmado.</p>`
+    : "";
+  return freeCard + estimadoNote + doneBlock + days + helpersBlock();
 }
 
 function mejorasPorCuenta() {
@@ -2837,6 +2927,7 @@ function mejorasPorCuenta() {
     if (!exp) return "";
     const a = viewOf(meta.tag);
     const b = builderStatus(exp);
+    const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: a.th });
     const list = upgrades(exp);
     const labN = list.filter((u) => u.queue === "laboratorio" && !u.done).length;
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
@@ -2848,7 +2939,9 @@ function mejorasPorCuenta() {
           ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
           ${builderHead(b, bob)}
           ${slots}
-          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
+          ${colas.desactualizada ? `<p class="t-footnote c-2" style="margin:8px 0 0">Necesita actualización. Se conserva el último plan.</p>` : ""}
+          ${colas.builders.vencidos ? `<p class="t-footnote c-2" style="margin:8px 0 0">${colas.builders.vencidos === 1 ? "1 temporizador ya habría acabado (estimado)" : `${colas.builders.vencidos} temporizadores ya habrían acabado (estimado)`}. No es un constructor confirmado.</p>` : ""}
+          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}.</p>
         </div>
       </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
   }).join("");
@@ -2887,7 +2980,7 @@ function upRow(u) {
   const title = nameOf(u.id) || (item ? "Sin identificar" : "Ítem");
   const unknown = !item || item.estado === "sin_identificar";
   const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
-  const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
+  const remain = u.done ? "Estimada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
@@ -3939,7 +4032,7 @@ function renderEquipoFlota(list) {
       </span>${CHEV}</button></li>`).join("");
   return `${oreCard(total, `${filas.length === 1 ? "1 cuenta" : `${filas.length} cuentas`}. Cada una usa el tope de su ayuntamiento.`)}
     <div class="section"><div class="section-header"><span>Por cuenta</span></div><ul class="list list--tiles">${rows}</ul>
-    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p></div>`;
+    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>.</p></div>`;
 }
 
 function renderEquipoCuenta(meta, list) {
@@ -3979,7 +4072,7 @@ function renderEquipoCuenta(meta, list) {
       <p class="section-footer">Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""}</p>
     </div>
     <div class="section stack">${cards || empty}</div>
-    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p>`;
+    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>.</p>`;
 }
 
 function renderEquipo(tag) {
@@ -4250,9 +4343,9 @@ function renderCopia() {
       <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
     </ul></div>
     <div class="section"><div class="card about">
-      <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
+      <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" target="_blank" rel="noopener noreferrer">www.supercell.com/fan-content-policy</a>.</p>
       <p class="t-body">Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.</p>
-      <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
+      <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Leer la Fan Content Policy</a></p>
     </div></div>
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
 }
@@ -4490,7 +4583,63 @@ function onSheetEscape(ev) {
   return false;
 }
 
+let tituloObserver = null;
+let enRecuperacion = false;
+
+function soltarPantalla() {
+  const app = document.getElementById("app");
+  if (!app) return;
+  if (!document.querySelector(".sheet, .alert")) {
+    app.querySelectorAll("[inert]").forEach((el) => el.removeAttribute("inert"));
+    app.querySelectorAll(".sheet-backdrop, .alert-backdrop").forEach((el) => el.remove());
+  }
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+function avisoDiscreto(texto) {
+  let el = document.getElementById("aviso-discreto");
+  if (!el) {
+    el = document.createElement("p");
+    el.id = "aviso-discreto";
+    el.className = "aviso-discreto";
+    el.setAttribute("role", "status");
+    document.body.appendChild(el);
+  }
+  el.textContent = texto;
+  clearTimeout(avisoDiscreto._t);
+  avisoDiscreto._t = setTimeout(() => { if (el) el.remove(); }, 3200);
+}
+
+function recuperar(err) {
+  console.error(err);
+  if (enRecuperacion) {
+    soltarPantalla();
+    avisoDiscreto("Algo no ha respondido. Puedes seguir.");
+    return;
+  }
+  enRecuperacion = true;
+  try {
+    soltarPantalla();
+    try { render(); } catch (err2) { console.error(err2); soltarPantalla(); }
+    avisoDiscreto("Algo no ha respondido. Puedes seguir.");
+  } finally {
+    enRecuperacion = false;
+  }
+}
+
+function abrirFuera(ev, enlace) {
+  ev.preventDefault();
+  try {
+    const abierta = window.open(enlace.href, "_blank", "noopener,noreferrer");
+    if (!abierta) avisoDiscreto("El enlace se abre en Safari.");
+  } catch {
+    avisoDiscreto("El enlace se abre en Safari.");
+  }
+}
+
 function render() {
+  roadsThisPaint = new Map();
   const r = route();
   if (r.name === "importar") {
     if (!state.importUi.active) {
@@ -4514,15 +4663,21 @@ function render() {
     console.error(err);
     screen = `<h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
   }
-  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  try {
+    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  } catch (err) {
+    console.error(err);
+    root.innerHTML = `<main class="screen" id="screen"><h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div></main>${tabbar(r)}`;
+  }
   bind(r);
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
+  if (tituloObserver) { tituloObserver.disconnect(); tituloObserver = null; }
   if (title && nav && nav.dataset.collapsed !== "true") {
-    const io = new IntersectionObserver(([e]) => { nav.dataset.collapsed = String(!e.isIntersecting); }, {
+    tituloObserver = new IntersectionObserver(([e]) => { nav.dataset.collapsed = String(!e.isIntersecting); }, {
       rootMargin: `-${nav.offsetHeight}px 0px 0px 0px`, threshold: 0,
     });
-    io.observe(title);
+    tituloObserver.observe(title);
   }
   paintOfflineThumbs();
   settleSheetFocus();
@@ -4534,6 +4689,7 @@ function render() {
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
   }
   armNotices();
+  roadsThisPaint = null;
 }
 
 function destinoDelToque(ev) {
@@ -4564,9 +4720,15 @@ function seguirEnlace(ev, href) {
 }
 
 function bind(r) {
-  document.getElementById("app").onclick = async (ev) => {
+  document.getElementById("app").onclick = (ev) => {
+    atenderToque(ev).catch((err) => recuperar(err));
+  };
+  async function atenderToque(ev) {
+  try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const externo = origen.closest("a[href^='http']");
+    if (externo) { abrirFuera(ev, externo); return; }
     const dest = destinoDelToque(ev);
     if (dest) {
       seguirEnlace(ev, dest);
@@ -4755,6 +4917,14 @@ function bind(r) {
       render();
       return;
     }
+    const agendaVista = origen.closest("[data-agenda]");
+    if (agendaVista) {
+      const id = agendaVista.dataset.agenda;
+      state.agendaVista = id === "7d" || id === "cuenta" ? id : "24h";
+      localStorage.setItem("cp-agenda", state.agendaVista);
+      render();
+      return;
+    }
     const pcat = origen.closest("[data-pcat]");
     if (pcat) {
       state.progFilter = { ...state.progFilter, cat: pcat.dataset.pcat };
@@ -4875,8 +5045,13 @@ function bind(r) {
     }
     const dl = origen.closest("[data-dl]");
     if (dl) {
-      if (dl.dataset.dl === "start") downloadAll();
-      if (dl.dataset.dl === "stop" && state.dlAbort) state.dlAbort.abort();
+      if (dl.dataset.dl === "start") downloadAll().catch((err) => recuperar(err));
+      if (dl.dataset.dl === "stop" && state.dlAbort) {
+        state.dlAbort.abort();
+        state.dl.phase = "idle";
+        state.dlAbort = null;
+        render();
+      }
       if (dl.dataset.dl === "purge") {
         rememberAlertOpener(dl, '[data-dl="purge"]');
         state.alert = {
@@ -4953,7 +5128,10 @@ function bind(r) {
       }
       if (name === "add-account") { await addNewAccount(); return; }
     }
-  };
+  } catch (err) {
+    recuperar(err);
+  }
+  }
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => {
     const tail = sel.value.slice(1);
@@ -5106,11 +5284,15 @@ async function measureCache() {
 
 async function downloadAll() {
   if (!navigator.onLine) { state.dl.phase = "offline"; render(); return; }
-  try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
   const ctrl = new AbortController();
   state.dlAbort = ctrl;
   state.dl = { phase: "downloading", doneBytes: state.cacheBytes, doneCount: state.cacheCount, errors: 0, note: "" };
   render();
+  try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
+  if (ctrl.signal.aborted) {
+    if (state.dl.phase === "downloading") { state.dl.phase = "idle"; render(); }
+    return;
+  }
   const cache = await caches.open(IMAGE_CACHE);
   let errors = 0;
   let bytes = 0;
@@ -5181,9 +5363,9 @@ async function boot() {
   announce("");
   render();
   const [manifest, caps, bundle] = await Promise.all([
-    fetch("./assets/manifest.json").then((r) => r.json()),
-    fetch("./data/caps_clashrecord.json").then((r) => r.json()),
-    fetch("./data/bundle.json").then((r) => r.json()),
+    fetch("./assets/manifest.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/caps_clashrecord.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/bundle.json?v=" + APP_VERSION).then((r) => r.json()),
   ]);
   state.manifest = manifest;
   state.caps = caps;
@@ -5224,7 +5406,7 @@ async function boot() {
   }
   render();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js", { type: "module" })
+    navigator.serviceWorker.register("./sw.js?v=" + APP_VERSION, { type: "module" })
       .then(() => navigator.serviceWorker.ready)
       .then(() => measureCache())
       .catch(() => measureCache());
@@ -5234,8 +5416,20 @@ async function boot() {
 }
 
 window.addEventListener("hashchange", () => {
-  render();
-  if (route().name === "ajustes" || route().name === "copia") measureCache();
+  try {
+    render();
+    if (route().name === "ajustes" || route().name === "copia") measureCache();
+  } catch (err) {
+    recuperar(err);
+  }
+});
+window.addEventListener("error", (ev) => {
+  if (ev.target && ev.target !== window) return;
+  recuperar(ev.error || ev.message || "error");
+});
+window.addEventListener("unhandledrejection", (ev) => {
+  ev.preventDefault();
+  recuperar(ev.reason || "error");
 });
 document.addEventListener("keydown", (ev) => { if (!onAlertKey(ev)) onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {
