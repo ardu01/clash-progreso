@@ -5,7 +5,7 @@ const STORE = "exports";
 
 function openDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 2);
+    const req = indexedDB.open(DB, 3);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
@@ -14,6 +14,17 @@ function openDb() {
       }
       if (!db.objectStoreNames.contains("copies")) {
         db.createObjectStore("copies", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("documentos")) {
+        const docs = db.createObjectStore("documentos", { keyPath: "id" });
+        docs.createIndex("tipo", "tipo");
+        docs.createIndex("tag", "tag");
+      }
+      if (!db.objectStoreNames.contains("recuperacion")) {
+        db.createObjectStore("recuperacion", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("schema")) {
+        db.createObjectStore("schema", { keyPath: "id" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -89,6 +100,58 @@ export async function latestCopyAt() {
       const last = rows.reduce((m, row) => Math.max(m, row.at || 0), 0);
       resolve(last || null);
     };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function txDone(tx) {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error || new Error("No se pudo guardar"));
+  });
+}
+
+export async function leerSchema() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("schema", "readonly");
+    const req = tx.objectStore("schema").get("actual");
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function guardarSchema(schema) {
+  const db = await openDb();
+  const tx = db.transaction("schema", "readwrite");
+  tx.objectStore("schema").put({ ...schema, id: "actual" });
+  await txDone(tx);
+}
+
+export async function guardarRecuperacion(volcado) {
+  const db = await openDb();
+  const tx = db.transaction("recuperacion", "readwrite");
+  tx.objectStore("recuperacion").put(volcado);
+  await txDone(tx);
+}
+
+export async function guardarDocumentos(docs) {
+  const db = await openDb();
+  const tx = db.transaction("documentos", "readwrite");
+  const os = tx.objectStore("documentos");
+  for (const doc of docs || []) {
+    if (doc && doc.id) os.put(doc);
+  }
+  await txDone(tx);
+}
+
+export async function leerDocumentos() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("documentos", "readonly");
+    const req = tx.objectStore("documentos").getAll();
+    req.onsuccess = () => resolve(req.result || []);
     req.onerror = () => reject(req.error);
   });
 }

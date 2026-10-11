@@ -1,0 +1,10 @@
+/* Seis pestañas en 375 px. La palabra Operaciones cabe sin recortar el resto. */
+.tabbar a {
+  min-width: 0;
+  padding-left: 1px;
+  padding-right: 1px;
+}
+.tabbar a span {
+  font-size: 8.5px;
+  letter-spacing: -0.04em;
+}
