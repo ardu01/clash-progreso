@@ -22,19 +22,22 @@ export function sleepFromClocks(desde, hasta) {
   return { desde: a, hasta: b };
 }
 
+let relojMadrid = null;
 function parts(ms) {
-  const fmt = new Intl.DateTimeFormat("en-GB", {
-    timeZone: ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  });
+  if (!relojMadrid) {
+    relojMadrid = new Intl.DateTimeFormat("en-GB", {
+      timeZone: ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
+  }
   const o = {};
-  for (const p of fmt.formatToParts(new Date(ms))) {
+  for (const p of relojMadrid.formatToParts(new Date(ms))) {
     if (p.type !== "literal") o[p.type] = Number(p.value);
   }
   return o;
