@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.4</strong><br>
+  <strong>Versión 4.1.5</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -24,7 +24,11 @@ La primera visita con red guarda la interfaz. Las imágenes se pueden descargar 
 
 ## Capturas
 
-Datos de prueba del 7 de octubre de 2026.
+Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operaciones no está entre ellas. Se abre desde Agenda, y desde ahí también Explorar estrategias.
+
+| Barra | Agenda |
+| --- | --- |
+| <img src="docs/capturas/412-barra-oscuro.png" width="200" alt="Barra inferior en oscuro, una sola fila: Inicio, Cuentas, Mejoras, Análisis y Agenda. Sin Operaciones."> | <img src="docs/capturas/412-agenda-oscuro.png" width="200" alt="Agenda en oscuro: la entrada Operaciones abre la sesión, Explorar estrategias y el resto de vistas"> |
 
 | Inicio | Cuentas | Mejoras |
 | --- | --- | --- |
@@ -92,13 +96,17 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
+La barra tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no está en la barra. Está dentro de Agenda, y **Explorar estrategias** también: se abre desde esa misma entrada.
+
+La entrada de Operaciones abre la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras, el diario, las plantillas, las prioridades y Explorar estrategias. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
+
 Treinta y un niveles que mostraban el dibujo de otro nivel pasan al dibujo de ese nivel, sacado del Fan Kit. La herrería 10, la bomba 12, la bomba aérea 12 y el Destructor 5 siguen con el dibujo de otro nivel: el Fan Kit no tiene el suyo. La Torre multiusos, la Defensa artesanal y el Portal portátil tampoco tienen dibujo oficial de la aldea principal.
 
 En Agenda, **Añadir al calendario** guarda los fines de las mejoras de la exportación en el Calendario del iPhone. No se hace solo y no pide avisos. Con la app cerrada no hay notificación: en el iPhone eso necesita un servidor, y esta app no tiene.
 
 ## Funciones
 
-La barra de abajo tiene seis pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis**, **Agenda** y **Operaciones**. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
+La barra de abajo tiene cinco pestañas en una sola fila: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no es una de ellas. Operaciones y Explorar estrategias se abren desde Agenda. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
 
 ### Inicio
 
@@ -153,6 +161,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
 - Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
 - La agenda junta las horas reales de la exportación. Las marcas del plan no entran en la agenda ni en los avisos.
+- **Operaciones** está en Agenda, no en la barra. La entrada abre la sesión, el simulador, los gemelos y el resto. **Explorar estrategias** está en esa misma entrada.
 
 ### Progreso, historial y avisos
 
@@ -171,16 +180,16 @@ En Inicio, la tarjeta **Motor de atención multicuenta** abre siete vistas. Sigu
 - **Ventanas**, en Agenda. Junta en la misma sesión a quien tiene una cola libre confirmada. Una exportación vieja no tiene hora.
 - **Hibernación**, en Cuentas. 7, 14 o 30 días, indefinida, o los días que se escriban.
 - **Cuellos de botella**, en Cuentas. Categorías por debajo del 50 %. En C1 los héroes no se señalan.
-- **Prioridades**, en Operaciones. Si no caben en los minutos, C1 conserva su sitio.
+- **Prioridades**, en Operaciones (dentro de Agenda). Si no caben en los minutos, C1 conserva su sitio. El mismo enlace sigue en la tarjeta del motor, en Inicio.
 - **Rescatar flota.** Quita la hibernación. No toca temporizadores.
 
 La sesión inteligente ejecuta esas recomendaciones.
 
-**Explorar estrategias**, en Operaciones, busca varias formas de repartir las cuentas dentro de las sesiones que escribas (por defecto, 19:00–21:00 cada día). No usa el sueño como límite. Es una simulación: el plan de la cuenta solo cambia si tocas **Pasar al plan**. Con horizonte de 180 o 365 días no afirma una fecha, solo compara.
+**Explorar estrategias** está dentro de Agenda, en Operaciones. Busca varias formas de repartir las cuentas dentro de las sesiones que escribas (por defecto, 19:00–21:00 cada día). No usa el sueño como límite. Es una simulación: el plan de la cuenta solo cambia si tocas **Pasar al plan**. Con horizonte de 180 o 365 días no afirma una fecha, solo compara.
 
 ### Operaciones
 
-La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
+Dentro de Agenda, no en la barra. Una entrada abre todas las vistas, Explorar estrategias incluida. Las rutas `#/operaciones` siguen igual. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
 
 - **Sesión inteligente.** Guía cuenta por cuenta. Dentro de cada aldea, el constructor libre va antes. Los minutos van de 10 a 120, y el día de juego cabe entre 1 y 2 horas. Marcar un paso no lo confirma: eso solo lo hace una exportación posterior.
 - **Mantenimiento.** Lo justo para que un constructor no quede parado.
@@ -191,6 +200,7 @@ La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como 
 - **Guerras y CWL.** Lo anotado a mano. Un campo vacío dice «Sin anotar», no un cero.
 - **Diario.** Importaciones, lo visto al importar, subidas de ayuntamiento y apuntes. No afirma el minuto de una mejora.
 - **Plantillas.** Subir de ayuntamiento, héroes al máximo, guerra, rush esencial, muros y laboratorio. En C1 la de héroes no entra.
+- **Explorar estrategias.** Dentro de la misma entrada de Agenda. Simulación: el plan solo cambia con **Pasar al plan**.
 
 Al importar, si la sesión tenía pasos marcados, Operaciones avisa que el plan se recalculó y que esos pasos siguen sin confirmar.
 
@@ -232,7 +242,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v41` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v42` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -240,6 +250,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.5 | La barra vuelve a cinco pestañas, sin Operaciones. Operaciones y Explorar estrategias se abren desde Agenda. Los apuntes y las rutas se quedan. |
 | 4.1.4 | 31 niveles usan el dibujo de su nivel en el Fan Kit. Agenda puede guardar un calendario con los fines de las mejoras. No hay avisos con la app cerrada. |
 | 4.1.3 | Recursos manuales por cuenta, con fecha. El plan y el coste hasta el máximo incluyen subir el ayuntamiento y, si hay cifras, dicen si alcanzan. |
 | 4.1.1 | Explorar estrategias: varias cuentas a la vez, con sesiones (por defecto 19:00–21:00) y sin usar el sueño como límite. El resultado es simulación. Pasarla al plan es un paso aparte. A 180 y 365 días solo se compara. |

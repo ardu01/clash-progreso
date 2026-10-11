@@ -10,8 +10,8 @@ Cada pestaña de la barra hace una cosa. Ajustes y Copia no están en la barra: 
 | Cuentas | Lista y detalle de cada cuenta | `#/roster`, `#/progreso/TAG`, `#/progreso/TAG/CATEGORÍA`, `#/perfil/TAG`, `#/progreso/TAG/historial`, `#/importar` |
 | Mejoras | Plan, rush, costes y equipamiento | `#/mejoras`, `#/progreso/TAG/plan`, `#/equipo`, `#/equipo/TAG` |
 | Análisis | Gráficos, ranking y comparativa | `#/ranking`, `#/graficos` |
-| Agenda | El tiempo | `#/agenda` |
-| Operaciones | Sesión, mantenimiento, simulación, gemelos, equilibrio, predicción, guerras, diario y prioridades | `#/operaciones` |
+| Agenda | El tiempo, y la entrada a Operaciones | `#/agenda`, `#/operaciones` |
+| Operaciones | Dentro de Agenda: sesión, mantenimiento, simulación, gemelos, equilibrio, predicción, guerras, diario, plantillas, estrategias y prioridades | `#/operaciones` |
 | Atención | Bandeja, excepciones, presupuesto, ventanas, hibernación, detector y rescate. Sin pestaña nueva | `#/inicio`, `#/agenda`, `#/roster` |
 | Aparte | Copia, tema, acerca de | `#/copia` (engranaje de Inicio) |
 
@@ -25,7 +25,7 @@ Cada pestaña de la barra hace una cosa. Ajustes y Copia no están en la barra: 
 
 **Análisis.** Ranking, con la comparativa de dos o tres cuentas, y los gráficos.
 
-**Agenda.** Finalizaciones en 24 h, en 7 días o por cuenta, más lo que está en curso (por fin o por cuenta) y las horas de sueño. La hora es la de Madrid.
+**Agenda.** Finalizaciones en 24 h, en 7 días o por cuenta, más lo que está en curso (por fin o por cuenta) y las horas de sueño. La hora es la de Madrid. La entrada Operaciones abre el resto de vistas; no es una pestaña de la barra.
 
 ## Qué se movió
 

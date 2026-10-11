@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 4.1.5)
+
+`APP_VERSION` es `4.1.5`, `SHELL_CACHE` es `cp-shell-v42` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. Las skins no se tocan.
+
+La barra vuelve a cinco pestañas: Inicio, Cuentas, Mejoras, Análisis y Agenda. Operaciones no es una pestaña. En Agenda hay una entrada que abre el hub `#/operaciones` (sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras, diario, plantillas, prioridades y explorar estrategias). `baseTab` trata `#/operaciones` como Agenda. El botón del motor que abre prioridades sigue en `#/operaciones/prioridades`. El calendario de la 4.1.4 sigue en Agenda. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 4.1.4)
 
 `APP_VERSION` es `4.1.4`, `SHELL_CACHE` es `cp-shell-v41` e `IMAGE_CACHE` es `cp-img-v10`. `ROSTER_VERSION` sigue en 2. La precarga de instalación sigue en 220 archivos. Operaciones, el motor de atención y explorar estrategias no se tocan. Las skins no se tocan. La 4.1.2 y `cp-shell-v39` quedan para otro cambio.
