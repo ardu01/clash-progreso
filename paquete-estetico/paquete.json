@@ -1,0 +1,757 @@
+{
+ "nombre": "Temas Clash Progreso",
+ "version": "1.0.0",
+ "formato": 1,
+ "descripcion": "Paquete estético aparte de la app: temas solo para modo oscuro. La app solo trae el cargador (js/temas-paquete.js).",
+ "requisitos": {
+  "modo": "oscuro",
+  "app_min": "4.1.1",
+  "cargador": 1
+ },
+ "base": "base.css",
+ "temas": [
+  {
+   "id": "th8",
+   "nombre": "TH8",
+   "grupo": "ayuntamiento",
+   "th_auto": 8,
+   "thumb": null,
+   "imagen": null,
+   "css": "temas/th8.css",
+   "bytes": 10197,
+   "muestra": [
+    "#513F2B",
+    "#AC7441",
+    "#F4BE28"
+   ],
+   "efecto": "Resplandor cálido, destellos de madera y piedra y motas (sin símbolo).",
+   "motivos": [
+    {
+     "pieza": "cabecera",
+     "motivo": "tablón de madera ocre de las aldeas clásicas (sin símbolo)",
+     "fuente": "confirmado por Miguel: estilo clásico TH1–TH8"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "sillares de piedra clara clásica",
+     "fuente": "confirmado por Miguel"
+    }
+   ]
+  },
+  {
+   "id": "th9",
+   "nombre": "TH9",
+   "grupo": "ayuntamiento",
+   "th_auto": 9,
+   "thumb": null,
+   "imagen": null,
+   "css": "temas/th9.css",
+   "bytes": 19717,
+   "muestra": [
+    "#444248",
+    "#AA907B",
+    "#F4BE28"
+   ],
+   "efecto": "Calaveritas y huesos cruzados que aparecen y se desvanecen.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "calavera estilizada (esqueletos)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "calavera sobre huesos cruzados",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "huesos cruzados (centro del separador)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "fila de calaveritas hueso sobre la piedra negra",
+     "fuente": "confirmado por Miguel"
+    }
+   ]
+  },
+  {
+   "id": "th10",
+   "nombre": "TH10",
+   "grupo": "ayuntamiento",
+   "th_auto": 10,
+   "thumb": null,
+   "imagen": null,
+   "css": "temas/th10.css",
+   "bytes": 10763,
+   "muestra": [
+    "#702D28",
+    "#C8452D",
+    "#EEBE69"
+   ],
+   "efecto": "Burbujas de lava que suben y estallan y gotas que caen.",
+   "motivos": [
+    {
+     "pieza": "fondo",
+     "motivo": "grietas de lava",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "roca con gotas de lava",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "barra",
+     "motivo": "brillo de lava en la barra",
+     "fuente": "confirmado por Miguel"
+    }
+   ]
+  },
+  {
+   "id": "th11",
+   "nombre": "TH11",
+   "grupo": "ayuntamiento",
+   "th_auto": 11,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 11
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66724
+   },
+   "css": "temas/th11.css",
+   "bytes": 14911,
+   "muestra": [
+    "#69341D",
+    "#C67431",
+    "#F8BC30"
+   ],
+   "efecto": "Águila que cruza arriba aleteando y resplandor de foso de lava con brasas.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "águila (Artillería Águila)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "águila (centro del separador)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "almenas de piedra blanca",
+     "fuente": "imagen oficial del Fan Kit (townhall_11)"
+    },
+    {
+     "pieza": "fondo",
+     "motivo": "fosos de lava incandescente de las torres",
+     "fuente": "imagen oficial del Fan Kit (townhall_11)"
+    }
+   ]
+  },
+  {
+   "id": "th12",
+   "nombre": "TH12",
+   "grupo": "ayuntamiento",
+   "th_auto": 12,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 12
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66725
+   },
+   "css": "temas/th12.css",
+   "bytes": 16689,
+   "muestra": [
+    "#1C446E",
+    "#338AD6",
+    "#EEBE69"
+   ],
+   "efecto": "Arcos eléctricos de la Tesla y chispas.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "rayo Tesla (Giga Tesla, arma del TH12)",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "arco eléctrico azul de la Tesla",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "bloques cobalto con filetes dorados",
+     "fuente": "imagen oficial del Fan Kit (townhall_12)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "pernos de hierro oscuro",
+     "fuente": "imagen oficial del Fan Kit (townhall_12)"
+    }
+   ]
+  },
+  {
+   "id": "th13",
+   "nombre": "TH13",
+   "grupo": "ayuntamiento",
+   "th_auto": 13,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 13
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66728
+   },
+   "css": "temas/th13.css",
+   "bytes": 39645,
+   "muestra": [
+    "#3D3F66",
+    "#459FC3",
+    "#F4BE28"
+   ],
+   "efecto": "Cristales de hielo que giran, destellos y escarcha que cae.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "cristal de hielo (tema oficial «Dark Elixir and Ice»)",
+     "fuente": "Clash (clash-temas-motivos.md) + blog Supercell"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "losas de hielo escarchado del tejado",
+     "fuente": "imagen oficial del Fan Kit (townhall_13)"
+    },
+    {
+     "pieza": "fondo",
+     "motivo": "resplandor azul de la base",
+     "fuente": "imagen oficial del Fan Kit (townhall_13)"
+    }
+   ]
+  },
+  {
+   "id": "th14",
+   "nombre": "TH14",
+   "grupo": "ayuntamiento",
+   "th_auto": 14,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 14
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66732
+   },
+   "css": "temas/th14.css",
+   "bytes": 15190,
+   "muestra": [
+    "#52385E",
+    "#34A86B",
+    "#F0C014"
+   ],
+   "efecto": "Burbujas y gotas de veneno con glifo (no es el verde de confirmar).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "gota de veneno con glifo (Giga Inferno con veneno; selva con jeroglíficos)",
+     "fuente": "Clash (clash-temas-motivos.md) + blog Supercell"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "greca/pictograma dorado de las almenas",
+     "fuente": "imagen oficial del Fan Kit (townhall_14) + blog Supercell"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "greca dorada (separador)",
+     "fuente": "imagen oficial del Fan Kit (townhall_14)"
+    },
+    {
+     "pieza": "barra",
+     "motivo": "brillo del líquido verde",
+     "fuente": "imagen oficial del Fan Kit (townhall_14)"
+    }
+   ]
+  },
+  {
+   "id": "th15",
+   "nombre": "TH15",
+   "grupo": "ayuntamiento",
+   "th_auto": 15,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 15
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66735
+   },
+   "css": "temas/th15.css",
+   "bytes": 17905,
+   "muestra": [
+    "#443C65",
+    "#7260C3",
+    "#FCBA2A"
+   ],
+   "efecto": "Runas en triángulo dorado que laten y sello arcano que gira.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "runa arcana sobre el triángulo dorado invertido",
+     "fuente": "Clash (clash-temas-motivos.md) (tema «arcano», blog Supercell) + imagen oficial del Fan Kit (triángulo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "sello arcano (círculo con triángulo)",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "barras doradas sobre piedra violeta",
+     "fuente": "imagen oficial del Fan Kit (townhall_15)"
+    }
+   ]
+  },
+  {
+   "id": "th16",
+   "nombre": "TH16",
+   "grupo": "ayuntamiento",
+   "th_auto": 16,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 16
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66738
+   },
+   "css": "temas/th16.css",
+   "bytes": 16319,
+   "muestra": [
+    "#65361D",
+    "#B8652B",
+    "#ECC144"
+   ],
+   "efecto": "Hojas que caen con vaivén.",
+   "motivos": [
+    {
+     "pieza": "separador",
+     "motivo": "ramas tejidas con hoja (druidas)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "medallón de piedra con hoja",
+     "fuente": "imagen oficial del Fan Kit (townhall_16)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "bastón de druida con hojas",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "bloques dorados tallados",
+     "fuente": "imagen oficial del Fan Kit (townhall_16)"
+    }
+   ]
+  },
+  {
+   "id": "th17",
+   "nombre": "TH17",
+   "grupo": "ayuntamiento",
+   "th_auto": 17,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 17
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 85792
+   },
+   "css": "temas/th17.css",
+   "bytes": 22782,
+   "muestra": [
+    "#24363C",
+    "#3C849F",
+    "#EDBF59"
+   ],
+   "efecto": "Destello que recorre tres puntas de lanza.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "lanzas cruzadas (lanceros)",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "fila de puntas de lanza",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "lanza (centro del separador)",
+     "fuente": "confirmado por Miguel"
+    }
+   ]
+  },
+  {
+   "id": "th18",
+   "nombre": "TH18",
+   "grupo": "ayuntamiento",
+   "th_auto": 18,
+   "thumb": {
+    "item": 1000001,
+    "nivel": 18
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 123234
+   },
+   "css": "temas/th18.css",
+   "bytes": 17746,
+   "muestra": [
+    "#3D3F66",
+    "#5169C8",
+    "#EEBE69"
+   ],
+   "efecto": "Meteoritos con estela y chispas.",
+   "motivos": [
+    {
+     "pieza": "fondo",
+     "motivo": "lluvia de meteoritos",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "meteorito con estela",
+     "fuente": "confirmado por Miguel"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "cadenas doradas del puente levadizo",
+     "fuente": "imagen oficial del Fan Kit (townhall_18)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "chapitel de pizarra con punta dorada",
+     "fuente": "imagen oficial del Fan Kit (townhall_18)"
+    }
+   ]
+  },
+  {
+   "id": "dragones",
+   "nombre": "Dragones",
+   "grupo": "especial",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000008,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 65719
+   },
+   "css": "temas/dragones.css",
+   "bytes": 20356,
+   "muestra": [
+    "#483581",
+    "#867EE8",
+    "#ECC055"
+   ],
+   "efecto": "Islas flotantes (una con castillo) que se balancean, nubes que cruzan y destellos dorados; sin dragones.",
+   "motivos": [
+    {
+     "pieza": "emblema",
+     "motivo": "castillo blanco perla y oro sobre isla flotante (paisaje Clash of Dragons)",
+     "fuente": "Clash (clash-temas-motivos.md) (texto oficial del juego en la wiki)"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "castillo sobre isla flotante",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "fondo",
+     "motivo": "islas flotantes lejanas",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "murallas de piedra gris",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    }
+   ]
+  },
+  {
+   "id": "rey",
+   "nombre": "Rey Bárbaro",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000000,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 48583
+   },
+   "css": "temas/rey.css",
+   "bytes": 20672,
+   "muestra": [
+    "#643621",
+    "#D07A3B",
+    "#EEBE69"
+   ],
+   "efecto": "Destello que recorre la espada de hierro.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "corona dorada con tachones",
+     "fuente": "imagen oficial del Fan Kit (hero_barbarian_king) + Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "espada de hierro",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki) + pedido por Miguel"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "correa de cuero cruzada al pecho",
+     "fuente": "imagen oficial del Fan Kit (hero_barbarian_king)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "hebilla redonda dorada",
+     "fuente": "imagen oficial del Fan Kit (hero_barbarian_king)"
+    }
+   ]
+  },
+  {
+   "id": "reina",
+   "nombre": "Reina Arquera",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000001,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 48579
+   },
+   "css": "temas/reina.css",
+   "bytes": 19946,
+   "muestra": [
+    "#39425E",
+    "#9575DA",
+    "#EEBE69"
+   ],
+   "efecto": "Destello que recorre el virote de la ballesta; sin plumas.",
+   "motivos": [
+    {
+     "pieza": "separador",
+     "motivo": "ballesta («modified X-Bow»); sin plumas",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "ballesta",
+     "fuente": "Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "corona dorada con tachones",
+     "fuente": "imagen oficial del Fan Kit (hero_archer_queen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "tela verde de la capucha (tono apagado, no es el verde de confirmar)",
+     "fuente": "imagen oficial del Fan Kit (hero_archer_queen)"
+    }
+   ]
+  },
+  {
+   "id": "centinela",
+   "nombre": "Gran Centinela",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000002,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 65739
+   },
+   "css": "temas/centinela.css",
+   "bytes": 19191,
+   "muestra": [
+    "#6E2757",
+    "#D467C4",
+    "#F0BD67"
+   ],
+   "efecto": "Gema de vida que late y páginas del Tomo eterno que se desvanecen.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "Tomo eterno: libro con gema morada y cantos dorados",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "bastón con la Gema de vida",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "cordón dorado trenzado del broche",
+     "fuente": "imagen oficial del Fan Kit (hero_grand_warden)"
+    }
+   ]
+  },
+  {
+   "id": "campeona",
+   "nombre": "Campeona Real",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000004,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 48561
+   },
+   "css": "temas/campeona.css",
+   "bytes": 18368,
+   "muestra": [
+    "#5F3922",
+    "#4279C7",
+    "#EEBE67"
+   ],
+   "efecto": "Brillo que recorre el escudo octogonal y la punta de lanza.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "escudo octogonal (Escudo buscador)",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "lanza con punta de hierro en rombo",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "diadema dorada en V",
+     "fuente": "imagen oficial del Fan Kit (hero_royal_champion)"
+    }
+   ]
+  },
+  {
+   "id": "principe",
+   "nombre": "Príncipe Esbirro",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000006,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 85744
+   },
+   "css": "temas/principe.css",
+   "bytes": 17009,
+   "muestra": [
+    "#1A456A",
+    "#1C9DDF",
+    "#ECC144"
+   ],
+   "efecto": "Orbe oscuro de la varita que late y destellos.",
+   "motivos": [
+    {
+     "pieza": "separador",
+     "motivo": "varita dorada con orbe negro",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki)"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "Corona oscura",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki); se ven las puntas plateadas en imagen oficial del Fan Kit"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "alas azules de esbirro",
+     "fuente": "imagen oficial del Fan Kit (hero_minion_prince)"
+    }
+   ]
+  },
+  {
+   "id": "duque",
+   "nombre": "Duque Dragón",
+   "grupo": "heroe",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000007,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 135982
+   },
+   "css": "temas/duque.css",
+   "bytes": 25703,
+   "muestra": [
+    "#7C1F35",
+    "#E0334F",
+    "#EEBD68"
+   ],
+   "efecto": "Llamas en las esquinas, brasas por detrás y candado que brilla.",
+   "motivos": [
+    {
+     "pieza": "botones",
+     "motivo": "cadenas de metal",
+     "fuente": "imagen oficial del Fan Kit (hero_dragon_duke_render) + Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "cadenas (separador)",
+     "fuente": "imagen oficial del Fan Kit + Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "pestaña",
+     "motivo": "candado dorado",
+     "fuente": "imagen oficial del Fan Kit (hero_dragon_duke_render) + Clash (clash-temas-motivos.md)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "grillete con candado dorado",
+     "fuente": "Clash (clash-temas-motivos.md) (wiki: esposas, cadenas y candado)"
+    }
+   ]
+  }
+ ],
+ "grupos": [
+  {
+   "id": "ayuntamiento",
+   "nombre": "Ayuntamientos"
+  },
+  {
+   "id": "especial",
+   "nombre": "Especiales"
+  },
+  {
+   "id": "heroe",
+   "nombre": "Héroes"
+  }
+ ]
+}

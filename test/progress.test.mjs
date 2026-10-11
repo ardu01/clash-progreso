@@ -956,9 +956,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.1.6 y cachés cp-shell-v43 / cp-img-v10", () => {
-  assert.equal(APP_VERSION, "4.1.6");
-  assert.equal(SHELL_CACHE, "cp-shell-v43");
+test("versión 4.1.7 y cachés cp-shell-v44 / cp-img-v10", () => {
+  assert.equal(APP_VERSION, "4.1.7");
+  assert.equal(SHELL_CACHE, "cp-shell-v44");
   assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1005,6 +1005,7 @@ test("versión 4.1.6 y cachés cp-shell-v43 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-shell-v40"), false);
   assert.equal(sw.includes("cp-shell-v41"), false);
   assert.equal(sw.includes("cp-shell-v42"), false);
+  assert.equal(sw.includes("cp-shell-v43"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1012,7 +1013,8 @@ test("versión 4.1.6 y cachés cp-shell-v43 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v43/);
+  assert.match(caches, /cp-shell-v44/);
+  assert.equal(caches.includes("cp-shell-v43"), false);
   assert.equal(caches.includes("cp-shell-v42"), false);
   assert.equal(caches.includes("cp-shell-v41"), false);
   assert.equal(caches.includes("cp-shell-v40"), false);
@@ -2766,4 +2768,31 @@ test("4.1.6: el águila no tiene máximo en TH17 ni TH18 y el muro de TH18 sigue
   assert.equal(index.byId.get("1000031").has(17), false);
   assert.equal(index.byId.get("1000031").has(18), false);
   assert.equal(index.byId.get("1000031").get(16).max, 7);
+});
+
+test("4.1.7: cargador del paquete de temas, «Ninguno» por defecto y caché propia", () => {
+  const leer = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
+  const cargador = leer("../js/temas-paquete.js");
+  const sw = leer("../sw.js");
+  const html = leer("../index.html");
+  const app = leer("../js/app.js");
+  assert.match(cargador, /localStorage\.getItem\(CLAVE\) \|\| ""/);
+  assert.match(cargador, /\.\/paquete-estetico\//);
+  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.1\.7"/);
+  assert.match(sw, /"\.\/js\/temas-paquete\.js"/);
+  assert.match(sw, /const TEMAS_CACHE = "cp-temas-"/);
+  assert.match(sw, /!key\.startsWith\(TEMAS_CACHE\)/);
+  assert.match(app, /btn\("", "Ninguno"/);
+  assert.match(app, /btn\("auto", "Automático"/);
+  const p = JSON.parse(leer("../paquete-estetico/paquete.json"));
+  assert.match(p.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(p.formato, 1);
+  assert.equal(p.requisitos.modo, "oscuro");
+  const base = leer("../paquete-estetico/" + p.base).replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.equal(/\.thumb\s*>\s*img/.test(base), false);
+  for (const t of p.temas) {
+    const css = leer("../paquete-estetico/" + t.css).replace(/\/\*[\s\S]*?\*\//g, "");
+    assert.equal(css.includes("/assets/wiki/"), false, t.id);
+    assert.equal(/\.thumb\s*>\s*img/.test(css), false, t.id);
+  }
 });

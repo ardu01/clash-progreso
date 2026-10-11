@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.1.6";
-import { precacheUrls } from "./js/images.js?v=4.1.6";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.1.7";
+import { precacheUrls } from "./js/images.js?v=4.1.7";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -55,6 +55,7 @@ const APP = [
   "./js/plantillas.js",
   "./js/replan.js",
   "./js/fuentes.js",
+  "./js/temas-paquete.js",
   "./js/operaciones.js",
   "./js/ui-operaciones.js",
   "./js/atencion.js",
@@ -103,7 +104,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keep = new Set([SHELL, IMAGES]);
     for (const key of await caches.keys()) {
-      if (!keep.has(key)) await caches.delete(key);
+      if (!keep.has(key) && !key.startsWith(TEMAS_CACHE)) await caches.delete(key);
     }
     await self.clients.claim();
   })());
@@ -149,10 +150,40 @@ async function networkFirst(request) {
   }
 }
 
+// Paquete estético (temas): caché propia por versión del paquete, cp-temas-<versión>; no depende de SHELL_CACHE.
+// paquete.json: red primero (trae la versión) y copia sin conexión. CSS (?v=<versión>): caché primero en cp-temas-<versión>.
+const TEMAS_CACHE = "cp-temas-";
+async function paqueteEstetico(request, url) {
+  const v = url.searchParams.get("v");
+  if (!v) {
+    try {
+      const res = await fetch(request, { cache: "no-cache" });
+      const p = res.ok ? await res.clone().json() : null;
+      if (p && p.version) {
+        await (await caches.open(TEMAS_CACHE + p.version)).put(url.origin + url.pathname, res.clone());
+        for (const key of await caches.keys()) if (key.startsWith(TEMAS_CACHE) && key !== TEMAS_CACHE + p.version) await caches.delete(key);
+      }
+      return res;
+    } catch {
+      return (await caches.match(url.origin + url.pathname)) || new Response("", { status: 503, statusText: "offline" });
+    }
+  }
+  const cache = await caches.open(TEMAS_CACHE + v);
+  const hit = await cache.match(request);
+  if (hit) return hit;
+  const res = await fetch(request);
+  if (res.ok) await cache.put(request, res.clone());
+  return res;
+}
+
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
   if (event.request.method !== "GET") return;
+  if (url.pathname.includes("/paquete-estetico/")) {
+    event.respondWith(paqueteEstetico(event.request, url));
+    return;
+  }
   if (url.pathname.includes("/assets/images/")) {
     event.respondWith(cacheFirst(event.request));
     return;
