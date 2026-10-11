@@ -2518,5 +2518,1097 @@
   "y": 224,
   "w": 740,
   "h": 655
+ },
+ "images/levels/army-camp_2.png": {
+  "x": 66,
+  "y": 97,
+  "w": 136,
+  "h": 120
+ },
+ "images/levels/army-camp_3.png": {
+  "x": 62,
+  "y": 99,
+  "w": 138,
+  "h": 123
+ },
+ "images/levels/army-camp_4.png": {
+  "x": 60,
+  "y": 99,
+  "w": 143,
+  "h": 122
+ },
+ "images/levels/army-camp_5.png": {
+  "x": 71,
+  "y": 92,
+  "w": 131,
+  "h": 138
+ },
+ "images/levels/army-camp_10.png": {
+  "x": 0,
+  "y": 1,
+  "w": 100,
+  "h": 84
+ },
+ "images/levels/army-camp_12.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 80
+ },
+ "images/levels/army-camp_14.png": {
+  "x": 123,
+  "y": 175,
+  "w": 267,
+  "h": 199
+ },
+ "images/levels/town-hall_1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 512,
+  "h": 447
+ },
+ "images/levels/town-hall_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 512,
+  "h": 469
+ },
+ "images/levels/town-hall_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 512,
+  "h": 507
+ },
+ "images/levels/town-hall_4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 477,
+  "h": 512
+ },
+ "images/levels/town-hall_5.png": {
+  "x": 2,
+  "y": 0,
+  "w": 480,
+  "h": 512
+ },
+ "images/levels/town-hall_6.png": {
+  "x": 2,
+  "y": 0,
+  "w": 474,
+  "h": 511
+ },
+ "images/levels/town-hall_7.png": {
+  "x": 2,
+  "y": 0,
+  "w": 462,
+  "h": 511
+ },
+ "images/levels/town-hall_8.png": {
+  "x": 2,
+  "y": 0,
+  "w": 442,
+  "h": 512
+ },
+ "images/levels/town-hall_9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 457,
+  "h": 511
+ },
+ "images/levels/town-hall_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 499,
+  "h": 511
+ },
+ "images/levels/elixir-collector_1.png": {
+  "x": 95,
+  "y": 92,
+  "w": 100,
+  "h": 120
+ },
+ "images/levels/elixir-collector_2.png": {
+  "x": 85,
+  "y": 90,
+  "w": 108,
+  "h": 123
+ },
+ "images/levels/elixir-collector_3.png": {
+  "x": 89,
+  "y": 90,
+  "w": 103,
+  "h": 125
+ },
+ "images/levels/elixir-collector_16.png": {
+  "x": 64,
+  "y": 54,
+  "w": 215,
+  "h": 274
+ },
+ "images/levels/elixir-collector_17.png": {
+  "x": 0,
+  "y": 0,
+  "w": 226,
+  "h": 284
+ },
+ "images/levels/elixir-storage_1.png": {
+  "x": 113,
+  "y": 136,
+  "w": 57,
+  "h": 58
+ },
+ "images/levels/elixir-storage_2.png": {
+  "x": 94,
+  "y": 136,
+  "w": 110,
+  "h": 57
+ },
+ "images/levels/elixir-storage_3.png": {
+  "x": 89,
+  "y": 118,
+  "w": 107,
+  "h": 93
+ },
+ "images/levels/elixir-storage_8.png": {
+  "x": 66,
+  "y": 72,
+  "w": 155,
+  "h": 164
+ },
+ "images/levels/elixir-storage_10.png": {
+  "x": 49,
+  "y": 59,
+  "w": 192,
+  "h": 189
+ },
+ "images/levels/elixir-storage_12.png": {
+  "x": 38,
+  "y": 45,
+  "w": 211,
+  "h": 205
+ },
+ "images/levels/elixir-storage_19.png": {
+  "x": 25,
+  "y": 27,
+  "w": 462,
+  "h": 474
+ },
+ "images/levels/gold-mine_1.png": {
+  "x": 60,
+  "y": 102,
+  "w": 159,
+  "h": 105
+ },
+ "images/levels/gold-mine_2.png": {
+  "x": 65,
+  "y": 98,
+  "w": 159,
+  "h": 116
+ },
+ "images/levels/gold-mine_3.png": {
+  "x": 65,
+  "y": 101,
+  "w": 157,
+  "h": 107
+ },
+ "images/levels/gold-mine_4.png": {
+  "x": 63,
+  "y": 98,
+  "w": 158,
+  "h": 115
+ },
+ "images/levels/gold-mine_16.png": {
+  "x": 196,
+  "y": 242,
+  "w": 122,
+  "h": 123
+ },
+ "images/levels/gold-storage_1.png": {
+  "x": 73,
+  "y": 94,
+  "w": 134,
+  "h": 113
+ },
+ "images/levels/gold-storage_2.png": {
+  "x": 75,
+  "y": 86,
+  "w": 140,
+  "h": 128
+ },
+ "images/levels/gold-storage_3.png": {
+  "x": 72,
+  "y": 80,
+  "w": 144,
+  "h": 140
+ },
+ "images/levels/gold-storage_8.png": {
+  "x": 54,
+  "y": 58,
+  "w": 180,
+  "h": 167
+ },
+ "images/levels/gold-storage_13.png": {
+  "x": 3,
+  "y": 19,
+  "w": 213,
+  "h": 216
+ },
+ "images/levels/gold-storage_15.png": {
+  "x": 4,
+  "y": 9,
+  "w": 215,
+  "h": 226
+ },
+ "images/levels/gold-storage_16.png": {
+  "x": 0,
+  "y": 0,
+  "w": 253,
+  "h": 264
+ },
+ "images/levels/gold-storage_18.png": {
+  "x": 188,
+  "y": 228,
+  "w": 129,
+  "h": 140
+ },
+ "images/levels/gold-storage_19.png": {
+  "x": 46,
+  "y": 23,
+  "w": 421,
+  "h": 467
+ },
+ "images/levels/barracks_1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 186,
+  "h": 208
+ },
+ "images/levels/barracks_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 232,
+  "h": 216
+ },
+ "images/levels/barracks_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 220,
+  "h": 201
+ },
+ "images/levels/barracks_4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 232,
+  "h": 211
+ },
+ "images/levels/barracks_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 231,
+  "h": 235
+ },
+ "images/levels/barracks_6.png": {
+  "x": 0,
+  "y": 0,
+  "w": 245,
+  "h": 233
+ },
+ "images/levels/barracks_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 232,
+  "h": 233
+ },
+ "images/levels/barracks_8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 217,
+  "h": 228
+ },
+ "images/levels/barracks_9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 217,
+  "h": 220
+ },
+ "images/levels/barracks_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 225,
+  "h": 248
+ },
+ "images/levels/barracks_15.png": {
+  "x": 1,
+  "y": 2,
+  "w": 202,
+  "h": 240
+ },
+ "images/levels/barracks_16.png": {
+  "x": 2,
+  "y": 20,
+  "w": 196,
+  "h": 234
+ },
+ "images/levels/barracks_18.png": {
+  "x": 191,
+  "y": 219,
+  "w": 129,
+  "h": 156
+ },
+ "images/levels/laboratory_1.png": {
+  "x": 83,
+  "y": 114,
+  "w": 117,
+  "h": 114
+ },
+ "images/levels/laboratory_2.png": {
+  "x": 81,
+  "y": 99,
+  "w": 132,
+  "h": 120
+ },
+ "images/levels/laboratory_3.png": {
+  "x": 82,
+  "y": 105,
+  "w": 133,
+  "h": 120
+ },
+ "images/levels/laboratory_4.png": {
+  "x": 75,
+  "y": 107,
+  "w": 133,
+  "h": 120
+ },
+ "images/levels/laboratory_5.png": {
+  "x": 68,
+  "y": 103,
+  "w": 144,
+  "h": 127
+ },
+ "images/levels/laboratory_6.png": {
+  "x": 71,
+  "y": 70,
+  "w": 145,
+  "h": 163
+ },
+ "images/levels/laboratory_7.png": {
+  "x": 61,
+  "y": 82,
+  "w": 155,
+  "h": 129
+ },
+ "images/levels/laboratory_14.png": {
+  "x": 5,
+  "y": 28,
+  "w": 483,
+  "h": 439
+ },
+ "images/levels/laboratory_15.png": {
+  "x": 182,
+  "y": 228,
+  "w": 139,
+  "h": 138
+ },
+ "images/levels/cannon_3.png": {
+  "x": 168,
+  "y": 157,
+  "w": 163,
+  "h": 155
+ },
+ "images/levels/cannon_4.png": {
+  "x": 167,
+  "y": 171,
+  "w": 167,
+  "h": 159
+ },
+ "images/levels/cannon_5.png": {
+  "x": 167,
+  "y": 169,
+  "w": 166,
+  "h": 162
+ },
+ "images/levels/cannon_6.png": {
+  "x": 122,
+  "y": 29,
+  "w": 269,
+  "h": 125
+ },
+ "images/levels/cannon_16.png": {
+  "x": 3,
+  "y": 17,
+  "w": 203,
+  "h": 155
+ },
+ "images/levels/archer-tower_2.png": {
+  "x": 91,
+  "y": 70,
+  "w": 107,
+  "h": 150
+ },
+ "images/levels/archer-tower_5.png": {
+  "x": 93,
+  "y": 68,
+  "w": 104,
+  "h": 154
+ },
+ "images/levels/archer-tower_19.png": {
+  "x": 3,
+  "y": 7,
+  "w": 96,
+  "h": 120
+ },
+ "images/levels/wall_2.png": {
+  "x": 18,
+  "y": 12,
+  "w": 39,
+  "h": 46
+ },
+ "images/levels/wall_3.png": {
+  "x": 16,
+  "y": 9,
+  "w": 44,
+  "h": 51
+ },
+ "images/levels/wall_4.png": {
+  "x": 15,
+  "y": 5,
+  "w": 45,
+  "h": 60
+ },
+ "images/levels/wall_9.png": {
+  "x": 14,
+  "y": 5,
+  "w": 47,
+  "h": 60
+ },
+ "images/levels/wall_19.png": {
+  "x": 231,
+  "y": 235,
+  "w": 50,
+  "h": 63
+ },
+ "images/levels/wizard-tower_3.png": {
+  "x": 65,
+  "y": 64,
+  "w": 154,
+  "h": 174
+ },
+ "images/levels/wizard-tower_6.png": {
+  "x": 63,
+  "y": 61,
+  "w": 159,
+  "h": 177
+ },
+ "images/levels/wizard-tower_12.png": {
+  "x": 0,
+  "y": 1,
+  "w": 100,
+  "h": 117
+ },
+ "images/levels/wizard-tower_14.png": {
+  "x": 1,
+  "y": 0,
+  "w": 99,
+  "h": 119
+ },
+ "images/levels/wizard-tower_15.png": {
+  "x": 0,
+  "y": 1,
+  "w": 100,
+  "h": 117
+ },
+ "images/levels/wizard-tower_16.png": {
+  "x": 0,
+  "y": 0,
+  "w": 512,
+  "h": 512
+ },
+ "images/levels/air-defense_1.png": {
+  "x": 75,
+  "y": 78,
+  "w": 96,
+  "h": 139
+ },
+ "images/levels/air-defense_2.png": {
+  "x": 72,
+  "y": 87,
+  "w": 102,
+  "h": 131
+ },
+ "images/levels/air-defense_3.png": {
+  "x": 65,
+  "y": 83,
+  "w": 116,
+  "h": 137
+ },
+ "images/levels/air-defense_5.png": {
+  "x": 57,
+  "y": 74,
+  "w": 131,
+  "h": 155
+ },
+ "images/levels/air-defense_6.png": {
+  "x": 58,
+  "y": 72,
+  "w": 128,
+  "h": 159
+ },
+ "images/levels/air-defense_14.png": {
+  "x": 101,
+  "y": 0,
+  "w": 355,
+  "h": 508
+ },
+ "images/levels/air-defense_16.png": {
+  "x": 104,
+  "y": 27,
+  "w": 305,
+  "h": 462
+ },
+ "images/levels/mortar_1.png": {
+  "x": 180,
+  "y": 173,
+  "w": 141,
+  "h": 155
+ },
+ "images/levels/mortar_2.png": {
+  "x": 178,
+  "y": 169,
+  "w": 145,
+  "h": 162
+ },
+ "images/levels/mortar_3.png": {
+  "x": 153,
+  "y": 155,
+  "w": 194,
+  "h": 191
+ },
+ "images/levels/mortar_4.png": {
+  "x": 153,
+  "y": 152,
+  "w": 194,
+  "h": 197
+ },
+ "images/levels/mortar_5.png": {
+  "x": 153,
+  "y": 152,
+  "w": 194,
+  "h": 197
+ },
+ "images/levels/mortar_6.png": {
+  "x": 153,
+  "y": 152,
+  "w": 195,
+  "h": 196
+ },
+ "images/levels/mortar_14.png": {
+  "x": 2,
+  "y": 4,
+  "w": 96,
+  "h": 96
+ },
+ "images/levels/mortar_15.png": {
+  "x": 4,
+  "y": 3,
+  "w": 91,
+  "h": 94
+ },
+ "images/levels/mortar_16.png": {
+  "x": 49,
+  "y": 30,
+  "w": 441,
+  "h": 434
+ },
+ "images/levels/clan-castle_1.png": {
+  "x": 40,
+  "y": 76,
+  "w": 214,
+  "h": 163
+ },
+ "images/levels/clan-castle_2.png": {
+  "x": 51,
+  "y": 66,
+  "w": 191,
+  "h": 162
+ },
+ "images/levels/clan-castle_3.png": {
+  "x": 56,
+  "y": 53,
+  "w": 178,
+  "h": 191
+ },
+ "images/levels/clan-castle_4.png": {
+  "x": 58,
+  "y": 59,
+  "w": 178,
+  "h": 173
+ },
+ "images/levels/clan-castle_5.png": {
+  "x": 54,
+  "y": 59,
+  "w": 180,
+  "h": 177
+ },
+ "images/levels/clan-castle_12.png": {
+  "x": 49,
+  "y": 11,
+  "w": 415,
+  "h": 498
+ },
+ "images/levels/clan-castle_14.png": {
+  "x": 15,
+  "y": 23,
+  "w": 476,
+  "h": 482
+ },
+ "images/levels/builder-s-hut_1.png": {
+  "x": 57,
+  "y": 27,
+  "w": 400,
+  "h": 128
+ },
+ "images/levels/builder-s-hut_2-4.png": {
+  "x": 0,
+  "y": 5,
+  "w": 512,
+  "h": 259
+ },
+ "images/levels/builder-s-hut_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 182,
+  "h": 223
+ },
+ "images/levels/builder-s-hut_7.png": {
+  "x": 208,
+  "y": 218,
+  "w": 99,
+  "h": 115
+ },
+ "images/levels/hidden-tesla_6.png": {
+  "x": 102,
+  "y": 87,
+  "w": 83,
+  "h": 137
+ },
+ "images/levels/hidden-tesla_11.png": {
+  "x": 107,
+  "y": 90,
+  "w": 75,
+  "h": 110
+ },
+ "images/levels/hidden-tesla_12.png": {
+  "x": 107,
+  "y": 91,
+  "w": 75,
+  "h": 109
+ },
+ "images/levels/hidden-tesla_13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 80,
+  "h": 119
+ },
+ "images/levels/hidden-tesla_15.png": {
+  "x": 69,
+  "y": 47,
+  "w": 212,
+  "h": 308
+ },
+ "images/levels/spell-factory_1.png": {
+  "x": 81,
+  "y": 74,
+  "w": 124,
+  "h": 147
+ },
+ "images/levels/spell-factory_2.png": {
+  "x": 84,
+  "y": 75,
+  "w": 124,
+  "h": 146
+ },
+ "images/levels/spell-factory_3.png": {
+  "x": 84,
+  "y": 74,
+  "w": 124,
+  "h": 147
+ },
+ "images/levels/x-bow_2.png": {
+  "x": 91,
+  "y": 89,
+  "w": 319,
+  "h": 322
+ },
+ "images/levels/x-bow_7.png": {
+  "x": 3,
+  "y": 3,
+  "w": 94,
+  "h": 92
+ },
+ "images/levels/x-bow_8.png": {
+  "x": 1,
+  "y": 3,
+  "w": 97,
+  "h": 94
+ },
+ "images/levels/dark-elixir-drill_1.png": {
+  "x": 79,
+  "y": 70,
+  "w": 131,
+  "h": 176
+ },
+ "images/levels/dark-elixir-drill_11.png": {
+  "x": 0,
+  "y": 0,
+  "w": 193,
+  "h": 250
+ },
+ "images/levels/dark-elixir-storage_1.png": {
+  "x": 78,
+  "y": 87,
+  "w": 127,
+  "h": 146
+ },
+ "images/levels/dark-elixir-storage_2.png": {
+  "x": 64,
+  "y": 74,
+  "w": 142,
+  "h": 160
+ },
+ "images/levels/dark-elixir-storage_3.png": {
+  "x": 41,
+  "y": 56,
+  "w": 185,
+  "h": 194
+ },
+ "images/levels/dark-elixir-storage_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 247,
+  "h": 247
+ },
+ "images/levels/dark-elixir-storage_12.png": {
+  "x": 177,
+  "y": 222,
+  "w": 157,
+  "h": 153
+ },
+ "images/levels/dark-elixir-storage_13.png": {
+  "x": 49,
+  "y": 24,
+  "w": 414,
+  "h": 460
+ },
+ "images/levels/dark-barracks_1.png": {
+  "x": 68,
+  "y": 44,
+  "w": 226,
+  "h": 229
+ },
+ "images/levels/dark-barracks_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 250,
+  "h": 241
+ },
+ "images/levels/dark-barracks_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 265,
+  "h": 256
+ },
+ "images/levels/dark-barracks_4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 217,
+  "h": 267
+ },
+ "images/levels/dark-barracks_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 238,
+  "h": 255
+ },
+ "images/levels/dark-barracks_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 290,
+  "h": 308
+ },
+ "images/levels/inferno-tower_9.png": {
+  "x": 1,
+  "y": 13,
+  "w": 147,
+  "h": 202
+ },
+ "images/levels/inferno-tower_10.png": {
+  "x": 80,
+  "y": 57,
+  "w": 299,
+  "h": 398
+ },
+ "images/levels/air-sweeper_1.png": {
+  "x": 82,
+  "y": 87,
+  "w": 119,
+  "h": 134
+ },
+ "images/levels/air-sweeper_2.png": {
+  "x": 85,
+  "y": 86,
+  "w": 119,
+  "h": 136
+ },
+ "images/levels/dark-spell-factory_1.png": {
+  "x": 79,
+  "y": 90,
+  "w": 127,
+  "h": 129
+ },
+ "images/levels/dark-spell-factory_2.png": {
+  "x": 78,
+  "y": 88,
+  "w": 127,
+  "h": 128
+ },
+ "images/levels/bomb-tower_10.png": {
+  "x": 2,
+  "y": 0,
+  "w": 93,
+  "h": 130
+ },
+ "images/levels/bomb-tower_13.png": {
+  "x": 86,
+  "y": 25,
+  "w": 341,
+  "h": 465
+ },
+ "images/levels/workshop_4.png": {
+  "x": 88,
+  "y": 66,
+  "w": 117,
+  "h": 159
+ },
+ "images/levels/workshop_5.png": {
+  "x": 51,
+  "y": 15,
+  "w": 194,
+  "h": 260
+ },
+ "images/levels/workshop_7.png": {
+  "x": 0,
+  "y": 1,
+  "w": 120,
+  "h": 118
+ },
+ "images/levels/scattershot_3.png": {
+  "x": 2,
+  "y": 16,
+  "w": 198,
+  "h": 181
+ },
+ "images/levels/scattershot_4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 264,
+  "h": 241
+ },
+ "images/levels/pet-house_1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 201,
+  "h": 212
+ },
+ "images/levels/pet-house_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/levels/pet-house_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/levels/pet-house_4.png": {
+  "x": 0,
+  "y": 0,
+  "w": 201,
+  "h": 212
+ },
+ "images/levels/pet-house_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/levels/pet-house_6.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/levels/pet-house_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 99,
+  "h": 105
+ },
+ "images/levels/pet-house_9.png": {
+  "x": 0,
+  "y": 0,
+  "w": 199,
+  "h": 209
+ },
+ "images/levels/pet-house_10.png": {
+  "x": 191,
+  "y": 117,
+  "w": 115,
+  "h": 118
+ },
+ "images/levels/blacksmith_7-8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 110,
+  "h": 129
+ },
+ "images/levels/hero-hall_1.png": {
+  "x": 0,
+  "y": 0,
+  "w": 350,
+  "h": 332
+ },
+ "images/levels/hero-hall_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 350,
+  "h": 332
+ },
+ "images/levels/hero-hall_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 344
+ },
+ "images/levels/hero-hall_8.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 357
+ },
+ "images/levels/hero-hall_10.png": {
+  "x": 0,
+  "y": 0,
+  "w": 360,
+  "h": 357
+ },
+ "images/levels/spell-tower_2.png": {
+  "x": 2,
+  "y": 23,
+  "w": 338,
+  "h": 467
+ },
+ "images/levels/monolith_1.png": {
+  "x": 189,
+  "y": 56,
+  "w": 156,
+  "h": 288
+ },
+ "images/levels/monolith_3.png": {
+  "x": 188,
+  "y": 182,
+  "w": 136,
+  "h": 189
+ },
+ "images/levels/multi-archer-tower_2.png": {
+  "x": 68,
+  "y": 17,
+  "w": 384,
+  "h": 467
+ },
+ "images/levels/multi-archer-tower_4.png": {
+  "x": 83,
+  "y": 25,
+  "w": 341,
+  "h": 465
+ },
+ "images/levels/ricochet-cannon_3.png": {
+  "x": 185,
+  "y": 204,
+  "w": 142,
+  "h": 170
+ },
+ "images/levels/ricochet-cannon_4.png": {
+  "x": 25,
+  "y": 23,
+  "w": 446,
+  "h": 471
+ },
+ "images/levels/revenge-tower_1.png": {
+  "x": 96,
+  "y": 30,
+  "w": 315,
+  "h": 463
+ },
+ "images/levels/firespitter_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 250,
+  "h": 270
+ },
+ "images/levels/firespitter_3.png": {
+  "x": 12,
+  "y": 45,
+  "w": 495,
+  "h": 467
+ },
+ "images/levels/bomb_13-14.png": {
+  "x": 231,
+  "y": 234,
+  "w": 50,
+  "h": 54
+ },
+ "images/levels/giant-bomb_9-10.png": {
+  "x": 45,
+  "y": 56,
+  "w": 110,
+  "h": 88
+ },
+ "images/levels/giant-bomb_11-12.png": {
+  "x": 205,
+  "y": 242,
+  "w": 105,
+  "h": 84
+ },
+ "images/levels/air-bomb_5-6.png": {
+  "x": 84,
+  "y": 52,
+  "w": 121,
+  "h": 185
+ },
+ "images/levels/air-bomb_9-10.png": {
+  "x": 66,
+  "y": 55,
+  "w": 68,
+  "h": 90
+ },
+ "images/levels/air-bomb_11.png": {
+  "x": 135,
+  "y": 27,
+  "w": 257,
+  "h": 451
+ },
+ "images/levels/giga-bomb_4.png": {
+  "x": 63,
+  "y": 84,
+  "w": 394,
+  "h": 359
+ },
+ "images/pets/greedy-raven.png": {
+  "x": 88,
+  "y": 56,
+  "w": 332,
+  "h": 432
  }
 }
