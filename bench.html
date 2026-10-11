@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banco de estrategias</title>
+</head>
+<body>
+  <h1>Banco de estrategias</h1>
+  <p>Simulación. Semilla 41011, sesión 19:00–21:00, ahora 2026-10-11T12:00Z. El número gordo sale de <code>node test/bench-evolucion.mjs</code>.</p>
+  <button type="button" id="ir">Medir 200 pasadas</button>
+  <pre id="out">Sin medir.</pre>
+  <script type="module">
+    import { empaquetar } from "./js/evolucion/empaquetar.js";
+    import { evaluarFlota } from "./js/evolucion/evaluar.js";
+    import { materializar, semanaDefecto } from "./js/evolucion/sesiones.js";
+    import { indexCaps } from "./js/progress.js";
+    import { compilarPasos, defaultPlan } from "./js/roadmap.js";
+
+    document.getElementById("ir").onclick = async () => {
+      const out = document.getElementById("out");
+      out.textContent = "Midiendo…";
+      const now = Date.parse("2026-10-11T12:00:00Z");
+      const caps = await fetch("./data/caps_clashrecord.json").then((r) => r.json());
+      const manifest = await fetch("./assets/manifest.json").then((r) => r.json());
+      const index = indexCaps(caps, manifest);
+      const bundle = await fetch("./data/bundle.json").then((r) => r.json());
+      const packs = [];
+      for (const path of bundle.exportaciones) {
+        const exp = await fetch("./" + path).then((r) => r.json());
+        packs.push(empaquetar(compilarPasos({
+          exp, index, tag: exp.tag, plan: defaultPlan(), provisionals: [], now,
+        }), { botinPorAtaque: 400000, minutosPorAtaque: 3 }));
+      }
+      const ses = materializar(semanaDefecto(), now, 90, null, null);
+      const fin = now + 90 * 86400000;
+      const minutos = packs.map(() => 90 / packs.length);
+      const orden = packs.map((_, i) => i);
+      const buffers = {
+        orden: packs.map((p) => new Uint32Array(p.n)),
+        libre: packs.map((p) => new Float64Array(p.builders + 2)),
+        pesos: packs.map(() => [1, 1, 1, 1, 1, 1, 1, 1]),
+      };
+      const muestras = [];
+      for (let i = 0; i < 200; i += 1) {
+        const a = performance.now();
+        evaluarFlota(packs, minutos, orden, ses, now, fin, buffers);
+        muestras.push(performance.now() - a);
+      }
+      muestras.sort((a, b) => a - b);
+      const p50 = muestras[Math.floor(muestras.length * 0.5)];
+      const p95 = muestras[Math.floor(muestras.length * 0.95)];
+      out.textContent = `${packs.length} cuentas · 90 días · 200 pasadas\np50 ${p50.toFixed(2)} ms\np95 ${p95.toFixed(2)} ms`;
+    };
+  </script>
+</body>
+</html>

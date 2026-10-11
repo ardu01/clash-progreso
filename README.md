@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.0.0</strong><br>
+  <strong>Versión 4.1.1</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -63,6 +63,15 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
 
+| Estrategias | Resultado | Estrategias en claro |
+| --- | --- | --- |
+| <img src="docs/capturas/411-estrategias-oscuro.png" width="200" alt="Explorar estrategias en oscuro, con horizonte y minutos al día"> | <img src="docs/capturas/411-resultado-oscuro.png" width="200" alt="Resultado en oscuro: plan actual y estrategias con fechas probable, mejor y peor"> | <img src="docs/capturas/411-estrategias-claro.png" width="200" alt="Explorar estrategias con el tema claro"> |
+
+| Motor de atención | Bandeja | Detector |
+| --- | --- | --- |
+| <img src="docs/capturas/410-motor-oscuro.png" width="200" alt="Inicio en oscuro: la tarjeta del motor de atención, con siete botones"> | <img src="docs/capturas/410-bandeja-oscuro.png" width="200" alt="Bandeja en oscuro: cuentas que piden intervención"> | <img src="docs/capturas/410-detector-oscuro.png" width="200" alt="Detector en oscuro: categorías por debajo del peso, sin los héroes de C1"> |
+| <img src="docs/capturas/410-motor-claro.png" width="200" alt="Motor de atención con el tema claro"> | <img src="docs/capturas/410-excepciones-claro.png" width="200" alt="Excepciones en claro, mostrando todas las cuentas"> | <img src="docs/capturas/410-hibernar-oscuro.png" width="200" alt="Hibernación en oscuro, con plazos de 7, 14 y 30 días"> |
+
 | Operaciones | Sesión | Simulador |
 | --- | --- | --- |
 | <img src="docs/capturas/400-operaciones-oscuro.png" width="200" alt="Operaciones en oscuro: sesión inteligente y el resto de herramientas"> | <img src="docs/capturas/400-sesion-oscuro.png" width="200" alt="Sesión en oscuro, con el paso siguiente y los minutos"> | <img src="docs/capturas/400-simulador-oscuro.png" width="200" alt="Simulador en oscuro: el cálculo no cambia la aldea"> |
@@ -74,6 +83,8 @@ Datos de prueba del 7 de octubre de 2026.
 | <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
 
 ## En esta versión
+
+El motor de atención multicuenta decide qué cuenta necesita intervención y cuándo. Vive en Inicio, Agenda, Cuentas y Operaciones: no añade una pestaña. Separa lo confirmado en la exportación, lo anotado a mano y lo estimado. No da por acabada una mejora porque un temporizador viejo haya llegado a cero, y no mueve los temporizadores.
 
 Operaciones es la sexta pestaña. Ahí están la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras y el diario. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
 
@@ -148,6 +159,23 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - Historial de lo que subió entre importaciones, ritmo en niveles por semana y rachas: semanas seguidas mejorando, una categoría al máximo o el ayuntamiento completado.
 - Aviso cuando termina una mejora, solo con la app abierta y si el iPhone permite notificaciones de la app instalada. Con la app cerrada no hay aviso: eso exigiría un servidor, y esta app no tiene.
 
+### Atención multicuenta
+
+En Inicio, la tarjeta **Motor de atención multicuenta** abre siete vistas. Siguen en la pestaña de la que salen.
+
+- **Bandeja.** Lo que pide intervención, sin cuentas repetidas. Las hibernadas no entran.
+- **Excepciones.** «Solo requieren atención» o «Mostrar todas».
+- **Presupuesto semanal**, en Agenda. Minutos del día por siete. Es una estimación.
+- **Ventanas**, en Agenda. Junta en la misma sesión a quien tiene una cola libre confirmada. Una exportación vieja no tiene hora.
+- **Hibernación**, en Cuentas. 7, 14 o 30 días, indefinida, o los días que se escriban.
+- **Cuellos de botella**, en Cuentas. Categorías por debajo del 50 %. En C1 los héroes no se señalan.
+- **Prioridades**, en Operaciones. Si no caben en los minutos, C1 conserva su sitio.
+- **Rescatar flota.** Quita la hibernación. No toca temporizadores.
+
+La sesión inteligente ejecuta esas recomendaciones.
+
+**Explorar estrategias**, en Operaciones, busca varias formas de repartir las cuentas dentro de las sesiones que escribas (por defecto, 19:00–21:00 cada día). No usa el sueño como límite. Es una simulación: el plan de la cuenta solo cambia si tocas **Pasar al plan**. Con horizonte de 180 o 365 días no afirma una fecha, solo compara.
+
 ### Operaciones
 
 La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
@@ -202,7 +230,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v36` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v38` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -210,6 +238,8 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.1 | Explorar estrategias: varias cuentas a la vez, con sesiones (por defecto 19:00–21:00) y sin usar el sueño como límite. El resultado es simulación. Pasarla al plan es un paso aparte. A 180 y 365 días solo se compara. |
+| 4.1.0 | Motor de atención multicuenta, sin pestaña nueva: bandeja, excepciones, presupuesto semanal, ventanas, hibernación, detector y prioridades. Rescatar flota despierta sin tocar temporizadores. |
 | 4.0.0 | Operaciones, la sexta pestaña: sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras y diario. IndexedDB conserva los exports. Adoptar un gemelo o una plantilla pasa por el plan. |
 | 3.1.16 | Cada pestaña tiene un solo trabajo. Las explicaciones largas pasan a un ⓘ. Tarjetas, cabeceras, filtros, barras y filas comparten el mismo espaciado. |
 | 3.1.15 | Rushear se elige por cuenta: esencial (solo los requisitos para subir el ayuntamiento) o estratégico (el mínimo más una lista de sugerencias que se puede quitar). Cada modo muestra estructuras, coste total, tiempo con los constructores de la cuenta y fecha estimada. |

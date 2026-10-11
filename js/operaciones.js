@@ -1,3 +1,4 @@
+import { pasosRecomendados } from "./atencion.js";
 import { entradaImportacion, notaManual } from "./diario.js";
 import { crearEvento } from "./evento.js";
 import { convertirEnPlan, crearGemelo } from "./gemelo.js";
@@ -25,6 +26,8 @@ export function docVacio() {
     confirmar: null,
     tagFoco: "",
     aviso: null,
+    hibernadas: [],
+    mostrarTodas: false,
   };
 }
 
@@ -42,6 +45,8 @@ export function docDe(raw) {
     guerras: Array.isArray(raw.guerras) ? raw.guerras : [],
     gemelos: Array.isArray(raw.gemelos) ? raw.gemelos : [],
     diario: Array.isArray(raw.diario) ? raw.diario : [],
+    hibernadas: Array.isArray(raw.hibernadas) ? raw.hibernadas : [],
+    mostrarTodas: !!raw.mostrarTodas,
   };
 }
 
@@ -71,7 +76,34 @@ export function reducir(doc, op, arg, ctx) {
     const at = Math.max(0, tags.indexOf(actual.tagFoco));
     set({ tagFoco: tags.length ? tags[(at + 1) % tags.length] : "" });
   } else if (op === "sesion-empezar") {
-    set({ sesion: crearSesion({ cuentas, minutos: actual.minutos, ahora: now }) });
+    set({
+      sesion: crearSesion({
+        cuentas,
+        minutos: actual.minutos,
+        ahora: now,
+        recomendados: pasosRecomendados(cuentas, { minutos: actual.minutos, now, hibernadas: actual.hibernadas }),
+      }),
+    });
+  } else if (op === "hibernar") {
+    const [modo, tag] = String(arg || "").split("|");
+    const dias = modo === "indef" ? null : Number(modo);
+    if (!tag) out.toast = "Elige una cuenta.";
+    else if (modo !== "indef" && !(dias > 0)) out.toast = "Escribe los días.";
+    else {
+      const hasta = modo === "indef" ? null : now + dias * 86400000;
+      set({
+        hibernadas: actual.hibernadas.filter((item) => item.tag !== tag).concat([{
+          tag,
+          modo: modo === "indef" ? "indef" : String(dias),
+          hasta,
+          origen: "manual",
+        }]),
+      });
+    }
+  } else if (op === "despertar") {
+    set({ hibernadas: actual.hibernadas.filter((item) => item.tag !== arg) });
+  } else if (op === "excepciones") {
+    set({ mostrarTodas: arg === "todas" });
   } else if (op === "sesion-hecho" || op === "sesion-saltar" || op === "sesion-posponer") {
     const estado = op === "sesion-hecho" ? "hecho" : op === "sesion-saltar" ? "saltado" : "pospuesto";
     set({ sesion: marcarPaso(actual.sesion, arg, estado) });

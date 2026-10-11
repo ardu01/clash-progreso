@@ -5,7 +5,7 @@ const STORE = "exports";
 
 function openDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 3);
+    const req = indexedDB.open(DB, 4);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
@@ -25,6 +25,9 @@ function openDb() {
       }
       if (!db.objectStoreNames.contains("schema")) {
         db.createObjectStore("schema", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("evolucion")) {
+        db.createObjectStore("evolucion", { keyPath: "id" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -186,6 +189,23 @@ export async function seedBundled(paths) {
   await importMissing(paths);
   localStorage.setItem(SEED_KEY, "1");
   return allExports();
+}
+
+export async function guardarEvolucion(punto) {
+  const db = await openDb();
+  const tx = db.transaction("evolucion", "readwrite");
+  tx.objectStore("evolucion").put({ id: "actual", ...punto, guardado: Date.now() });
+  return txDone(tx);
+}
+
+export async function leerEvolucion() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("evolucion", "readonly");
+    const req = tx.objectStore("evolucion").get("actual");
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
 }
 
 export async function restoreBundled(paths) {
