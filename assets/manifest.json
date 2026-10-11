@@ -33193,9 +33193,10 @@
     "precarga": false
    },
    "motivo": null,
-   "nota_interna": "Corregido en 3.1.0: 90000016 es Flecha monolítica. Antes el manifiesto lo tenía como Colmillos eléctricos.",
+   "nota_interna": "Corregido en 3.1.0: 90000016 es Flecha monolítica. En 3.1.3 la tabla de mena pasa a ser la épica de 27 niveles (antes estaba en 90000059).",
    "heroe": "Archer Queen",
-   "heroe_fuente": "Fan Kit: título \"HG_DD_Electro_Fangs\" (asset 150906) + blog oficial 2026-04-27 \"The Sound of Clash Update\": \"NEW DRAGON DUKE COMMON EQUIPMENT: ELECTRO FANGS\""
+   "heroe_fuente": "ClashKing assets/static_data.json (b8f42a7): equipment 90000016, Monolith Arrow, Archer Queen, Epic.",
+   "rareza": "Epic"
   },
   "90000017": {
    "id": 90000017,
@@ -34645,9 +34646,9 @@
     "precarga": false
    },
    "heroe": "Dragon Duke",
-   "rareza": null,
-   "heroe_fuente": "chiefpansancolt/clash-of-clans-data 0.18.0 (campo dataId): data/home/hero-equipment/monolith-arrow.json dataId 90000059, hero archer-queen.",
-   "nota_interna": "Corregido en 3.1.0: 90000059 es Colmillos eléctricos. El PNG ya estaba en el repo, asignado al id equivocado.",
+   "rareza": "Common",
+   "heroe_fuente": "ClashKing assets/static_data.json (b8f42a7): equipment 90000059, Electro Fangs, Dragon Duke, Common.",
+   "nota_interna": "Corregido en 3.1.0: 90000059 es Colmillos eléctricos. En 3.1.3 la tabla de mena pasa a ser la común de 18 niveles (antes estaba en 90000016).",
    "motivo": null
   },
   "90000060": {

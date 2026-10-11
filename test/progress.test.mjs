@@ -14,6 +14,7 @@ import { migrateRoster, addAccount, removeAccount, renameAccount, setPrincipal, 
 import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js";
 import { buildBackup, mergeBackup, backupFilename, isShareCancel } from "../js/backup.js";
 import { averagePct } from "../js/progress.js";
+import { levelCost } from "../js/costs.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -434,7 +435,7 @@ test("missing.json coincide con el archivo publicado", () => {
 
 test("manifest.json coincide con la v3.1.1", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "1a978b217eb1899a7f06ca6d5a23afade03383118577b26b2bc1452e2a36feb5");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "d9e4cd63516bb441424ec994b6fc5c1e65ac2dd5be40d08e105fdd855bc79b08");
   assert.equal(manifest.version_set_imagenes, "v3.1.1");
 });
 
@@ -638,9 +639,159 @@ test("C2 no cuenta sin identificar fuera del porcentaje", () => {
   assert.equal(item.changes.unknownCount, 0);
 });
 
-test("versión 3.1.2 y cachés cp-shell-v20 / cp-img-v7", () => {
-  assert.equal(APP_VERSION, "3.1.2");
-  assert.equal(SHELL_CACHE, "cp-shell-v20");
+test("datos 3.1.3: menas, bomba aérea, supercargas y topes", () => {
+  const arrow = manifest.items["90000016"];
+  const fangs = manifest.items["90000059"];
+  assert.equal(arrow.nombre_en, "Monolith Arrow");
+  assert.equal(arrow.nombre, "Flecha monolítica");
+  assert.equal(arrow.heroe, "Archer Queen");
+  assert.equal(arrow.rareza, "Epic");
+  assert.equal(fangs.nombre_en, "Electro Fangs");
+  assert.equal(fangs.nombre, "Colmillos eléctricos");
+  assert.equal(fangs.heroe, "Dragon Duke");
+  assert.equal(fangs.rareza, "Common");
+  assert.equal(arrow.imagen.ruta, "images/hero-equipment/monolith-arrow.png");
+  assert.equal(fangs.imagen.ruta, "images/hero-equipment/electro-fangs.png");
+  assert.equal(manifest.indice_por_key["hero-equipment/monolith-arrow"], "90000016");
+  assert.equal(manifest.indice_por_key["hero-equipment/electro-fangs"], "90000059");
+
+  assert.equal(capsMaxFor(index, "90000016", 11), 15);
+  assert.equal(capsMaxFor(index, "90000016", 13), 18);
+  assert.equal(capsMaxFor(index, "90000016", 18), 27);
+  assert.equal(capsMaxFor(index, "90000059", 15), null);
+  assert.equal(capsMaxFor(index, "90000059", 16), null);
+  assert.equal(capsMaxFor(index, "90000059", 17), 18);
+  assert.equal(capsMaxFor(index, "90000059", 18), 18);
+  const gone = [
+    [11, "90000020"], [11, "90000047"], [11, "90000034"],
+    [12, "90000034"],
+    [13, "90000009"], [13, "90000012"],
+    [14, "90000012"],
+    [15, "90000056"], [15, "90000059"],
+    [16, "90000059"],
+  ];
+  for (const [th, id] of gone) assert.equal(capsMaxFor(index, id, th), null, id + " TH" + th);
+  assert.equal(capsMaxFor(index, "90000020", 12), 15);
+  assert.equal(capsMaxFor(index, "90000047", 12), 15);
+  assert.equal(capsMaxFor(index, "90000034", 13), 15);
+  assert.equal(capsMaxFor(index, "90000009", 14), 18);
+  assert.equal(capsMaxFor(index, "90000012", 15), 18);
+  assert.equal(capsMaxFor(index, "90000056", 16), 18);
+
+  assert.deepEqual(caps["18"]["Air Bomb"], { max: 13, count: 8 });
+  assert.equal(caps["11"]["Air Bomb"].count, 5);
+  assert.equal(caps["13"]["Air Bomb"].count, 6);
+  assert.equal(caps["16"]["Air Bomb"].count, 7);
+  assert.equal(caps["17"]["Air Bomb"].count, 7);
+
+  const book = JSON.parse(readFileSync(new URL("../data/costes.json", import.meta.url)));
+  const epic = book.items["90000016"];
+  const common = book.items["90000059"];
+  assert.deepEqual(Object.keys(epic).map(Number).sort((a, b) => a - b), Array.from({ length: 26 }, (_, i) => i + 2));
+  assert.deepEqual(Object.keys(common).map(Number).sort((a, b) => a - b), Array.from({ length: 17 }, (_, i) => i + 2));
+  assert.equal(epic["9"].e, 10);
+  assert.equal(epic["18"].b, 2700);
+  assert.equal(epic["18"].e, 50);
+  assert.equal(epic["27"].b, 3600);
+  assert.equal(epic["27"].g, 600);
+  assert.equal(epic["27"].e, 150);
+  for (const row of Object.values(common)) assert.equal(row.e, 0);
+  assert.equal(common["18"].b, 2700);
+  assert.equal(common["18"].g, 600);
+
+  const fixed = [
+    ["1000002", "1", "n", 150], ["1000002", "1", "s", 5],
+    ["1000002", "2", "n", 300], ["1000002", "2", "s", 15],
+    ["1000002", "3", "n", 700], ["1000002", "3", "s", 60],
+    ["1000004", "1", "n", 150], ["1000004", "1", "s", 5],
+    ["1000004", "2", "n", 300], ["1000004", "2", "s", 15],
+    ["1000004", "3", "n", 700], ["1000004", "3", "s", 60],
+    ["1000012", "1", "n", 22000], ["1000012", "1", "s", 3600],
+    ["1000012", "2", "n", 90000], ["1000012", "2", "s", 7200],
+    ["1000013", "1", "n", 5000], ["1000013", "1", "s", 1800],
+    ["1000013", "2", "n", 25000], ["1000013", "2", "s", 3600],
+    ["1000015", "1", "n", 0], ["1000015", "1", "s", 0],
+    ["1000015", "2", "n", 3000000], ["1000015", "2", "s", 172800],
+    ["1000019", "1", "n", 250000], ["1000019", "1", "s", 7200],
+    ["1000019", "2", "n", 350000], ["1000019", "2", "s", 10800],
+    ["1000021", "1", "n", 1000000], ["1000021", "1", "s", 43200],
+    ["1000021", "2", "n", 1200000], ["1000021", "2", "s", 86400],
+    ["1000023", "1", "n", 180000], ["1000023", "1", "s", 14400],
+    ["1000023", "2", "n", 270000], ["1000023", "2", "s", 21600],
+    ["1000023", "3", "n", 540000], ["1000023", "3", "s", 43200],
+    ["1000027", "1", "n", 1000000], ["1000027", "1", "s", 43200],
+    ["1000027", "2", "n", 1200000], ["1000027", "2", "s", 86400],
+    ["1000032", "1", "n", 700000], ["1000032", "1", "s", 43200],
+    ["1000032", "2", "n", 1000000], ["1000032", "2", "s", 64800],
+    ["1000067", "1", "n", 8000000],
+    ["1000067", "2", "n", 9000000],
+    ["1000077", "1", "n", 200000], ["1000077", "1", "s", 604800],
+    ["1000077", "2", "n", 250000], ["1000077", "2", "s", 691200],
+    ["1000079", "1", "n", 17000000], ["1000079", "1", "s", 691200],
+    ["1000079", "2", "n", 18000000], ["1000079", "2", "s", 777600],
+    ["1000084", "1", "s", 604800],
+    ["1000084", "2", "n", 13000000], ["1000084", "2", "s", 691200],
+    ["1000085", "1", "s", 604800],
+    ["1000085", "2", "n", 13000000], ["1000085", "2", "s", 691200],
+    ["1000086", "1", "n", 430000], ["1000086", "1", "s", 1123205],
+    ["1000086", "2", "n", 460000], ["1000086", "2", "s", 1209600],
+    ["1000089", "1", "n", 17000000], ["1000089", "1", "s", 734400],
+    ["1000089", "2", "n", 18000000], ["1000089", "2", "s", 864000],
+    ["1000102", "1", "n", 29000000], ["1000102", "1", "s", 1123200],
+    ["1000102", "2", "n", 30000000], ["1000102", "2", "s", 1209600],
+    ["1000071", "1", "n", 30000], ["1000071", "1", "s", 3600],
+    ["4000135", "3", "s", 691200],
+  ];
+  assert.equal(fixed.length, 77);
+  for (const [id, lv, field, val] of fixed) {
+    assert.equal(levelCost(id, Number(lv))[field], val, id + " Nv" + lv + " " + field);
+  }
+  assert.equal(levelCost("1000002", 1).r, "oro");
+  assert.equal(levelCost("1000004", 1).r, "elixir");
+  assert.equal(levelCost("1000023", 1).r, "elixir");
+  assert.equal(levelCost("1000071", 1).r, "elixir");
+  assert.equal(levelCost("1000077", 1).r, "oscuro");
+  assert.equal(levelCost("1000086", 1).r, "oscuro");
+  assert.equal(levelCost("1000015", 1).r, "oro");
+  assert.equal(levelCost("1000067", 1).s, 432000);
+  assert.equal(levelCost("1000067", 2).s, 604800);
+  assert.equal(levelCost("1000084", 1).n, 12000000);
+  assert.equal(levelCost("1000085", 1).n, 12000000);
+  assert.equal(levelCost("4000135", 3).n, 10000000);
+  assert.equal(levelCost("1000027", 5).n, 4200000);
+  assert.equal(levelCost("4000000", 2).s, 1800);
+  assert.equal(levelCost("12000000", 4).s, 2400);
+  assert.equal(levelCost("12000006", 3).s, 86400);
+  assert.equal(levelCost("12000016", 1).n, 1800000);
+  assert.equal(levelCost("28000000", 83).n, 195000);
+  assert.equal(levelCost("28000000", 84).n, 205000);
+  assert.equal(levelCost("28000000", 85).n, 215000);
+  assert.equal(levelCost("28000000", 86).n, 220000);
+  assert.equal(levelCost("28000000", 87).n, 230000);
+  assert.equal(levelCost("28000000", 88).n, 240000);
+  assert.equal(levelCost("28000000", 89).n, 250000);
+  assert.equal(levelCost("28000002", 76).n, 23500000);
+  assert.equal(levelCost("28000002", 77).n, 24500000);
+  assert.equal(levelCost("28000002", 78).n, 25500000);
+  assert.equal(levelCost("28000002", 79).n, 26500000);
+  assert.equal(levelCost("28000002", 80).n, 27500000);
+  assert.equal(levelCost("90000056", 6).b, 940);
+  assert.equal(levelCost("90000056", 6).g, 100);
+  assert.equal(levelCost("90000056", 6).e, 0);
+
+  const c1 = analyze(exportsByTag.get("#28PLGP0G2"), index);
+  assert.equal(c1.media, 64.2);
+  assert.equal(c1.cats.trampas.pct, 39.8);
+  assert.equal(c1.cats.equipamiento.pct, 61.4);
+  const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
+  assert.equal(c2.media, 47.7);
+  assert.equal(c2.sigMedia, 44.5);
+  assert.equal(c2.cats.equipamiento.pct, 58.9);
+});
+
+test("versión 3.1.3 y cachés cp-shell-v21 / cp-img-v7", () => {
+  assert.equal(APP_VERSION, "3.1.3");
+  assert.equal(SHELL_CACHE, "cp-shell-v21");
   assert.equal(IMAGE_CACHE, "cp-img-v7");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -664,11 +815,13 @@ test("versión 3.1.2 y cachés cp-shell-v20 / cp-img-v7", () => {
   assert.equal(sw.includes("cp-shell-v17"), false);
   assert.equal(sw.includes("cp-shell-v18"), false);
   assert.equal(sw.includes("cp-shell-v19"), false);
+  assert.equal(sw.includes("cp-shell-v20"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v20/);
+  assert.match(caches, /cp-shell-v21/);
+  assert.equal(caches.includes("cp-shell-v20"), false);
   assert.match(sw, /estilo-3\.1\.css/);
   assert.match(caches, /cp-img-v7/);
   assert.equal(caches.includes("cp-shell-v11"), false);
