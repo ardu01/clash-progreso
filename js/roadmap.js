@@ -13,7 +13,25 @@ const ORDER = ["laboratorio", "ejercito_edif", "heroes", "defensas", "trampas", 
 const SKIP_CAT = new Set(["equipamiento", "aldea", "ayuntamiento"]);
 const HOME_SECTIONS = ["buildings", "traps", "heroes", "guardians", "units", "spells", "siege_machines", "pets"];
 
-export const RUSH_NOTE = "No hay una lista oficial de requisitos de ayuntamiento en los datos. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados.";
+export const RUSH_NOTE = "Rushear ordena almacenes, edificios de ejército y laboratorio hasta el máximo publicado, y reparte ese tiempo entre los constructores de la cuenta. La lista para subir el ayuntamiento es provisional: clash-of-clans-data no trae esa tabla.";
+export const REQUISITOS_NOTA = "Provisional. clash-of-clans-data 0.18.0 no trae los requisitos para mejorar el ayuntamiento. Esta lista coloca cada estructura del ayuntamiento anterior, salvo las chozas, el castillo del clan y la cabaña de B.O.B, y pide el Consejo heroico a su máximo. No está comprobada en el cliente.";
+
+const HERO_HALL = "1000071";
+const BOB_HUT = "1000064";
+const NO_REQUISITO = new Set(["1000015", "1000014", BOB_HUT, "1000001"]);
+const ESTRUCTURA = new Set(["defensas", "trampas", "recursos", "ejercito_edif", "muros"]);
+/** Artillería infernal del TH17. Niveles 2 a 5 de town-hall.json en clash-of-clans-data 0.18.0. El 1 viene con el ayuntamiento. */
+const ARMA_TH17 = {
+  fromTh: 17,
+  title: "Artillería infernal",
+  max: 5,
+  levels: {
+    2: { n: 10000000, s: 518400 },
+    3: { n: 12000000, s: 604800 },
+    4: { n: 14000000, s: 691200 },
+    5: { n: 18000000, s: 864000 },
+  },
+};
 export const PLAN_TIMELINE = "Línea de tiempo de la cuenta: cada paso lleva la fecha estimada del constructor, el laboratorio o la casa de mascotas que queda libre. Si el temporizador no es un número finito, no se inventa la hora. Los héroes de #28PLGP0G2 no entran. El equipamiento no entra en este plan.";
 
 export const DURATIONS = [
@@ -37,6 +55,7 @@ export function defaultPlan() {
     categoria: "",
     recurso: "todos",
     duracion: "",
+    constructores: null,
   };
 }
 
@@ -51,6 +70,9 @@ export function normalizePlan(raw) {
   }
   const dur = DURATIONS.some((d) => d.id === raw.duracion) ? raw.duracion : "";
   const recurso = ["todos", "oro", "elixir", "oscuro"].includes(raw.recurso) ? raw.recurso : "todos";
+  const constructores = raw.constructores === 4 || raw.constructores === 5 || raw.constructores === 6
+    ? raw.constructores
+    : null;
   return {
     modo,
     th,
@@ -61,6 +83,39 @@ export function normalizePlan(raw) {
     categoria: typeof raw.categoria === "string" ? raw.categoria : "",
     recurso,
     duracion: dur,
+    constructores,
+  };
+}
+
+/** 4, 5 o 6 si el JSON no trae chozas. Si las trae, manda el JSON, y B.O.B suma uno. */
+export function constructoresParaPlan(exp, ajuste) {
+  const snap = builderStatus(exp || {});
+  if (snap.known) {
+    const bob = tieneBob(exp);
+    return {
+      total: snap.total + (bob ? 1 : 0),
+      origen: "json",
+      chozas: snap.total,
+      bob,
+      ajuste: null,
+    };
+  }
+  const n = ajuste === 4 || ajuste === 5 || ajuste === 6 ? ajuste : null;
+  return { total: n, origen: n == null ? null : "ajuste", chozas: null, bob: false, ajuste: n };
+}
+
+function tieneBob(exp) {
+  return (exp && exp.buildings || []).some((b) => b && String(b.data) === BOB_HUT);
+}
+
+function buildersDe(exp, info) {
+  if (!info || info.total == null) return null;
+  const snap = builderStatus(exp || {});
+  return {
+    known: true,
+    total: info.total,
+    free: Math.max(0, info.total - snap.occupied),
+    over: snap.occupied > info.total,
   };
 }
 
@@ -295,10 +350,10 @@ function laneFrom(id, cola, titulo, cur, now) {
   return { id, cola, titulo, ...clasificarHueco(cur, now) };
 }
 
-function makeLanes(exp, now, th) {
+function makeLanes(exp, now, th, builders) {
   const actuales = actualesFrom(exp, now);
   const partes = repartirColas(actuales, {
-    builders: builderStatus(exp),
+    builders: builders || builderStatus(exp),
     now,
     mascotas: th >= 14,
   });
@@ -398,10 +453,17 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
   for (const step of steps) step.origen = step.provisional ? "provisional" : origenBase;
   const filtered = applyFilters(steps, chosen);
   filtered.kept.sort(byRank);
-  const { lanes, avisoHora, conocidos } = makeLanes(exp, nowMs, current || 0);
+  const info = chosen.modo === "rushear" ? constructoresParaPlan(exp, chosen.constructores) : null;
+  const { lanes, avisoHora, conocidos } = makeLanes(exp, nowMs, current || 0, buildersDe(exp, info));
+  if (info && info.origen === "ajuste") {
+    for (const lane of lanes) {
+      if (lane.cola === "constructor" && lane.libreYa && lane.clase === "real") lane.clase = "ajuste";
+    }
+  }
   const cursor = new Map();
   const orden = filtered.kept.map((step) => placeStep(step, lanes, sleep, nowMs, cursor));
   const lastFin = orden.reduce((m, s) => (s.fin != null && s.fin > m ? s.fin : m), 0);
+  const tiempos = tiemposConstructor(orden);
   return {
     tag,
     plan: chosen,
@@ -414,7 +476,10 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
     sinTiempo: filtered.sinTiempo,
     coste: bagOf(orden),
     avisoHora,
-    conocidos,
+    conocidos: info ? info.origen === "json" : conocidos,
+    constructores: info,
+    trabajoSeg: tiempos.trabajoSeg,
+    calendarioSeg: tiempos.calendarioSeg,
     heroesFuera: tag === HEROES_FUERA,
     fin: lastFin || null,
     now: nowMs,
@@ -485,6 +550,173 @@ const CAT_LABEL = {
   recursos: "Recursos",
   muros: "Muros",
 };
+
+function tiemposConstructor(orden) {
+  let trabajoSeg = 0;
+  let minI = null;
+  let maxF = null;
+  for (const step of orden || []) {
+    if (step.queue !== "constructor") continue;
+    if (typeof step.seconds === "number" && Number.isFinite(step.seconds)) trabajoSeg += step.seconds;
+    if (step.inicio == null || step.fin == null) continue;
+    if (minI == null || step.inicio < minI) minI = step.inicio;
+    if (maxF == null || step.fin > maxF) maxF = step.fin;
+  }
+  return { trabajoSeg, calendarioSeg: minI == null ? null : Math.max(0, (maxF - minI) / 1000) };
+}
+
+function instanciasDe(exp, id) {
+  const out = [];
+  for (const sec of HOME_SECTIONS) {
+    for (const it of (exp && exp[sec]) || []) {
+      if (!it || String(it.data) !== String(id)) continue;
+      const n = Math.max(1, it.cnt || 1);
+      const timed = it.timer != null && n === 1;
+      for (let i = 0; i < n; i += 1) out.push({ lvl: it.lvl || 0, timer: timed ? it.timer : null });
+    }
+  }
+  return out;
+}
+
+function bolsaVacia() {
+  return { oro: 0, elixir: 0, oscuro: 0, muros: 0, segundos: 0, sinCoste: false };
+}
+
+function sumarBolsa(id, from, to, times) {
+  const part = sumLevels(id, from, to, times);
+  return {
+    oro: part.oro,
+    elixir: part.elixir,
+    oscuro: part.oscuro,
+    muros: part.muros,
+    segundos: part.segConstructor + part.segLaboratorio + part.segMascotas,
+    sinCoste: part.sinCoste > 0,
+  };
+}
+
+function filaEstructura(exp, index, id, cap, nivel) {
+  const list = instanciasDe(exp, id);
+  const tienen = list.filter((it) => it.lvl >= nivel).length;
+  const faltan = Math.max(0, cap.count - tienen);
+  const hecho = faltan === 0;
+  const actual = !list.length ? 0 : Math.min(...list.map((it) => it.lvl));
+  const enCurso = list.some((it) => it.timer != null && it.lvl < nivel);
+  let coste = bolsaVacia();
+  if (!hecho) {
+    if (String(id) === HERO_HALL) {
+      const cur = list.length ? Math.max(...list.map((it) => it.lvl)) : 0;
+      coste = sumarBolsa(id, cur, nivel, 1);
+    } else {
+      coste = sumarBolsa(id, 0, nivel, faltan);
+    }
+  }
+  const item = index.items[String(id)];
+  return {
+    id: String(id),
+    title: itemName(item) || "Estructura",
+    actual: String(id) === HERO_HALL && list.length ? Math.max(...list.map((it) => it.lvl)) : actual,
+    requerido: nivel,
+    cantidad: cap.count,
+    tienen,
+    hecho,
+    enCurso,
+    sinDato: false,
+    provisional: true,
+    coste,
+  };
+}
+
+function armaTh(exp) {
+  for (const b of (exp && exp.buildings) || []) {
+    if (b && (b.data === 1000001 || String(b.data) === "1000001")) return b;
+  }
+  return null;
+}
+
+function filaArma(exp) {
+  const hall = armaTh(exp);
+  const actual = hall && typeof hall.weapon === "number" && Number.isFinite(hall.weapon) ? hall.weapon : null;
+  const coste = bolsaVacia();
+  if (actual == null) {
+    return {
+      id: "inferno-artillery",
+      title: ARMA_TH17.title,
+      actual: null,
+      requerido: ARMA_TH17.max,
+      cantidad: 1,
+      tienen: 0,
+      hecho: false,
+      enCurso: false,
+      sinDato: true,
+      provisional: true,
+      coste: null,
+    };
+  }
+  const hecho = actual >= ARMA_TH17.max;
+  if (!hecho) {
+    for (let lv = actual + 1; lv <= ARMA_TH17.max; lv += 1) {
+      const row = ARMA_TH17.levels[lv];
+      if (!row) coste.sinCoste = true;
+      else {
+        coste.oro += row.n;
+        coste.segundos += row.s;
+      }
+    }
+  }
+  return {
+    id: "inferno-artillery",
+    title: ARMA_TH17.title,
+    actual,
+    requerido: ARMA_TH17.max,
+    cantidad: 1,
+    tienen: hecho ? 1 : 0,
+    hecho,
+    enCurso: false,
+    sinDato: false,
+    provisional: true,
+    coste: hecho ? bolsaVacia() : coste,
+  };
+}
+
+function requisitosDe(exp, index, fromTh) {
+  const table = index && index.raw && index.raw[String(fromTh)];
+  if (!table) return { desde: fromTh, hacia: fromTh + 1, sinTopes: true, filas: [] };
+  const filas = [];
+  for (const [id, caps] of index.byId || []) {
+    const cap = caps.get(fromTh);
+    if (!cap || !cap.count || cap.max == null) continue;
+    if (NO_REQUISITO.has(String(id))) continue;
+    const item = index.items[String(id)];
+    const sec = (item && item.seccion_exportacion) || "";
+    if (sec.endsWith("2") || sec.includes("builder")) continue;
+    const categoryKey = categoryKeyFor(index, id, sec || "buildings");
+    if (!ESTRUCTURA.has(categoryKey)) continue;
+    const nivel = String(id) === HERO_HALL ? cap.max : 1;
+    filas.push(filaEstructura(exp, index, id, cap, nivel));
+  }
+  const inferno = index.inferno && index.inferno.get(fromTh);
+  if (fromTh === ARMA_TH17.fromTh && inferno && inferno.count) filas.push(filaArma(exp));
+  filas.sort((a, b) => Number(a.hecho) - Number(b.hecho) || a.title.localeCompare(b.title, "es"));
+  return { desde: fromTh, hacia: fromTh + 1, sinTopes: false, filas };
+}
+
+/** Requisitos para poder mejorar el ayuntamiento hasta `targetTh`. Provisionales. */
+export function requisitosAyuntamiento(exp, index, targetTh) {
+  const current = townHallLevel(exp);
+  const top = maxTownHall(index);
+  const goal = capTownHall(current, targetTh, top);
+  const pasos = [];
+  if (Number.isInteger(current) && goal.target > current) {
+    for (let th = current; th < goal.target; th += 1) pasos.push(requisitosDe(exp, index, th));
+  }
+  return {
+    currentTh: current,
+    targetTh: goal.target,
+    provisional: true,
+    nota: REQUISITOS_NOTA,
+    pasos,
+  };
+}
 
 /** Aviso al subir de TH: categorías por debajo del 50 % del máximo del TH anterior. */
 export function rushGaps(rows, index, tag) {

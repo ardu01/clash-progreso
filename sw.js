@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=3.1.13";
-import { precacheUrls } from "./js/images.js?v=3.1.13";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=3.1.14";
+import { precacheUrls } from "./js/images.js?v=3.1.14";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;

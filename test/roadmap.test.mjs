@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { analyze, indexCaps } from "../js/progress.js";
+import { levelCost, sumLevels } from "../js/costs.js";
+import { analyze, builderStatus, indexCaps } from "../js/progress.js";
 import { HEROES_FUERA } from "../js/plan.js";
 import { reconcileMessage, reconcileProvisionals, toggleProvisional } from "../js/provisional.js";
 import {
-  ahoraDe, buildRoadmap, capTownHall, effectivePlan, planIsConfigured, planLabel, rushGaps,
+  ahoraDe, buildRoadmap, capTownHall, constructoresParaPlan, effectivePlan, planIsConfigured, planLabel,
+  requisitosAyuntamiento, rushGaps,
 } from "../js/roadmap.js";
 
 const caps = JSON.parse(readFileSync(new URL("../data/caps_clashrecord.json", import.meta.url)));
@@ -123,4 +125,115 @@ test("Qué hacer ahora sale del plan y no de una cola ocupada", () => {
   const freeCtor = busy.lanes.filter((l) => l.cola === "constructor" && l.libreYa);
   const shown = ahoraDe(busy).filter((p) => p.cola === "constructor");
   assert.equal(shown.length, freeCtor.length);
+});
+
+function sinChozas(exp) {
+  const copy = structuredClone(exp);
+  copy.buildings = (copy.buildings || []).filter((b) => String(b.data) !== "1000015" && String(b.data) !== "1000064");
+  for (const sec of ["buildings", "traps", "heroes", "guardians"]) {
+    for (const it of copy[sec] || []) delete it.timer;
+  }
+  return copy;
+}
+
+test("rushear usa las chozas del JSON y suma B.O.B; si no vienen, el ajuste es 4, 5 o 6", () => {
+  const deJson = constructoresParaPlan(c2, 4);
+  assert.equal(deJson.origen, "json");
+  assert.equal(deJson.chozas, builderStatus(c2).total);
+  assert.equal(deJson.bob, false);
+  assert.equal(deJson.total, deJson.chozas);
+  assert.equal(deJson.ajuste, null);
+  const conBob = constructoresParaPlan(c1, null);
+  assert.equal(conBob.origen, "json");
+  assert.equal(conBob.bob, true);
+  assert.equal(conBob.total, builderStatus(c1).total + 1);
+  const vacia = sinChozas(c2);
+  assert.equal(constructoresParaPlan(vacia, 6).origen, "ajuste");
+  assert.equal(constructoresParaPlan(vacia, 6).total, 6);
+  assert.equal(constructoresParaPlan(vacia, 3).total, null);
+  assert.equal(constructoresParaPlan(vacia, null).origen, null);
+  const rush = road(c2, { modo: "rushear", th: 17 }, []);
+  assert.equal(rush.constructores.total, 5);
+  const max = road(c1, { modo: "maxear" }, []);
+  const numerados = max.lanes.filter((l) => l.cola === "constructor" && l.titulo.startsWith("Constructor"));
+  assert.equal(numerados.length, builderStatus(c1).total);
+});
+
+test("rushear reparte las mejoras entre los constructores y no las encadena en serie", () => {
+  const exp = sinChozas(c2);
+  const uno = road(exp, { modo: "rushear", th: 17, constructores: 4 }, []);
+  const lanes = uno.lanes.filter((l) => l.cola === "constructor" && l.titulo.startsWith("Constructor"));
+  assert.equal(lanes.length, 4);
+  assert.equal(lanes.every((l) => l.clase === "ajuste"), true);
+  const pasos = uno.orden.filter((s) => s.queue === "constructor" && s.fin != null && s.seconds != null);
+  assert.ok(pasos.length > 4);
+  const primeros = [];
+  const vistos = new Set();
+  for (const step of pasos) {
+    if (vistos.has(step.instance)) continue;
+    vistos.add(step.instance);
+    primeros.push(step);
+    if (primeros.length === 4) break;
+  }
+  assert.equal(new Set(primeros.map((s) => s.inicio)).size, 1);
+  const siguiente = pasos.find((s) => s.instance === primeros[0].instance && s.fromLvl === primeros[0].toLvl);
+  if (siguiente) assert.ok(siguiente.inicio >= primeros[0].fin);
+  assert.ok(uno.trabajoSeg > uno.calendarioSeg);
+  const suma = primeros.reduce((n, s) => n + s.seconds, 0);
+  const cal = (Math.max(...primeros.map((s) => s.fin)) - Math.min(...primeros.map((s) => s.inicio))) / 1000;
+  assert.ok(cal < suma);
+});
+
+test("los requisitos para subir de TH salen de los topes y se marcan provisionales", () => {
+  const req = requisitosAyuntamiento(c2, index, 17);
+  assert.equal(req.provisional, true);
+  assert.match(req.nota, /Provisional/);
+  assert.equal(req.pasos.length, 1);
+  const filas = req.pasos[0].filas;
+  assert.equal(req.pasos[0].desde, 16);
+  assert.equal(req.pasos[0].hacia, 17);
+  assert.equal(filas.some((f) => f.id === "1000015" || f.id === "1000014" || f.id === "1000064"), false);
+  const heroes = filas.find((f) => f.id === "1000071");
+  assert.ok(heroes);
+  assert.equal(heroes.requerido, 10);
+  assert.equal(heroes.actual, 9);
+  assert.equal(heroes.hecho, false);
+  assert.equal(heroes.provisional, true);
+  assert.equal(heroes.coste.segundos, sumLevels("1000071", 9, 10, 1).segConstructor);
+  const canon = filas.find((f) => f.id === "1000008");
+  assert.equal(canon.hecho, true);
+  assert.equal(canon.tienen, 3);
+  assert.equal(canon.requerido, 1);
+  const muro = filas.find((f) => f.id === "1000010");
+  assert.equal(muro.hecho, true);
+  const actual = requisitosAyuntamiento(c2, index, 16);
+  assert.equal(actual.pasos.length, 0);
+
+  const th17 = structuredClone(c2);
+  const hall = th17.buildings.find((b) => b.data === 1000001);
+  hall.lvl = 17;
+  hall.weapon = 1;
+  const subida = requisitosAyuntamiento(th17, index, 18);
+  const arma = subida.pasos.find((p) => p.desde === 17).filas.find((f) => f.id === "inferno-artillery");
+  assert.ok(arma);
+  assert.equal(arma.provisional, true);
+  assert.equal(arma.actual, 1);
+  assert.equal(arma.requerido, 5);
+  assert.equal(arma.hecho, false);
+  assert.equal(arma.coste.segundos, 518400 + 604800 + 691200 + 864000);
+  assert.equal(arma.coste.oro, 10000000 + 12000000 + 14000000 + 18000000);
+  delete hall.weapon;
+  const sinArma = requisitosAyuntamiento(th17, index, 18);
+  const hueco = sinArma.pasos.find((p) => p.desde === 17).filas.find((f) => f.id === "inferno-artillery");
+  assert.equal(hueco.sinDato, true);
+  assert.equal(hueco.coste, null);
+
+  const sinCanon = structuredClone(c2);
+  sinCanon.buildings = sinCanon.buildings.filter((b) => String(b.data) !== "1000008");
+  const falta = requisitosAyuntamiento(sinCanon, index, 17).pasos[0].filas.find((f) => f.id === "1000008");
+  assert.equal(falta.hecho, false);
+  assert.equal(falta.tienen, 0);
+  assert.equal(falta.cantidad, 3);
+  assert.equal(falta.coste.segundos, levelCost("1000008", 1).s * 3);
+  assert.equal(falta.coste.oro, levelCost("1000008", 1).n * 3);
 });

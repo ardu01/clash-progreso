@@ -28,8 +28,8 @@ import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClo
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import {
-  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, defaultPlan, effectivePlan,
-  maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
+  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, defaultPlan, effectivePlan,
+  maxTownHall, planIsConfigured, planLabel, requisitosAyuntamiento, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
 import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
@@ -995,7 +995,7 @@ function etiquetaPaso(paso) {
 
 function pasoAhora(paso) {
   const nv = `Nv ${paso.fromLvl} → ${paso.toLvl}`;
-  const hueco = paso.clase === "estimado" ? "estimado" : "en la exportación";
+  const hueco = paso.clase === "estimado" ? "estimado" : paso.clase === "ajuste" ? "ajuste" : "en la exportación";
   let when = "";
   if (paso.sinDuracion) when = " · sin tiempo en la fuente";
   else if (paso.sinHora || paso.fin == null) when = " · sin hora exacta";
@@ -1037,6 +1037,7 @@ function textoCola(item) {
   if (item.desactualizada) return "Necesita actualización. Se conserva el último plan.";
   let cuando = `${lane.titulo} sin hora exacta`;
   if (item.clase === "estimado" && item.libreYa) cuando = `${lane.titulo} estimado`;
+  else if (item.clase === "ajuste" && item.libreYa) cuando = `${lane.titulo} (ajuste de la cuenta)`;
   else if (item.libreYa) cuando = `${lane.titulo} en la exportación`;
   else if (item.exact && item.when != null) cuando = `${lane.titulo} libre ${fmtFin(item.when)}`;
   let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl} · ${etiquetaPaso(step)}`;
@@ -1320,7 +1321,70 @@ function planControls(meta, road) {
       <label class="sort-label">Duración
         <select data-plan-dur="${esc(meta.tag)}" aria-label="Duración del plan">${durs.join("")}</select>
       </label>
+      ${constructorControl(meta, expOf(meta.tag))}
     </div></div>`;
+}
+
+function constructorControl(meta, exp) {
+  const ajuste = state.planes[meta.tag] ? effectivePlan(state.planes[meta.tag]).constructores : null;
+  const info = constructoresParaPlan(exp, ajuste);
+  if (info.origen === "json") {
+    const bob = info.bob ? " y B.O.B" : "";
+    return `<p class="t-footnote c-2">Constructores del plan: ${info.total} en la exportación (${info.chozas} ${info.chozas === 1 ? "choza" : "chozas"}${bob}). Rushear los usa a la vez.</p>`;
+  }
+  const btn = (n) => `<button type="button" role="tab" data-ctor="${n}" data-ctor-tag="${esc(meta.tag)}" aria-selected="${ajuste === n}" aria-pressed="${ajuste === n}">${n}</button>`;
+  return `<p class="t-body">Constructores del plan</p>
+    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Constructores si la exportación no los trae">${btn(4)}${btn(5)}${btn(6)}</div></div>
+    <p class="t-footnote c-2">${ajuste ? `${ajuste} constructores, ajuste de la cuenta. ` : ""}La exportación no trae el número. Rushear reparte el tiempo entre 4, 5 o 6, no lo suma en serie.</p>`;
+}
+
+function textoCosteReq(coste) {
+  if (!coste) return "Sin coste: el nivel no viene en la exportación";
+  if (coste.sinCoste && !coste.oro && !coste.elixir && !coste.oscuro && !coste.muros && !coste.segundos) return "Sin coste en la fuente";
+  const bits = [];
+  if (coste.oro) bits.push(`${fmtRes(coste.oro)} oro`);
+  if (coste.elixir) bits.push(`${fmtRes(coste.elixir)} elixir`);
+  if (coste.oscuro) bits.push(`${fmtRes(coste.oscuro)} oscuro`);
+  if (coste.muros) bits.push(`${fmtRes(coste.muros)} oro o elixir`);
+  if (coste.segundos) bits.push(textoSegundos(coste.segundos));
+  if (coste.sinCoste) bits.push("falta algún coste en la fuente");
+  return bits.join(" · ") || "Ya está";
+}
+
+function textoSegundos(seg) {
+  const s = Math.round(seg);
+  if (s <= 0) return "sin espera";
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d && h) return `${d} d ${h} h`;
+  if (d) return d === 1 ? "1 día" : `${d} días`;
+  if (h && m) return `${h} h ${m} min`;
+  if (h) return h === 1 ? "1 h" : `${h} h`;
+  if (m) return m === 1 ? "1 min" : `${m} min`;
+  return `${s} s`;
+}
+
+function requisitosHtml(meta) {
+  const exp = expOf(meta.tag);
+  const plan = state.planes[meta.tag] ? effectivePlan(state.planes[meta.tag]) : null;
+  if (!exp || !plan || plan.modo !== "rushear" || plan.th == null || plan.th <= townHallLevel(exp)) return "";
+  const req = requisitosAyuntamiento(exp, state.index, plan.th);
+  const blocks = req.pasos.map((paso) => {
+    if (paso.sinTopes) {
+      return `<div class="section"><div class="section-header"><span>Para subir a TH${paso.hacia}</span></div><p class="section-footer">Sin topes de TH${paso.desde} en los datos. No se inventa la lista.</p></div>`;
+    }
+    const lis = paso.filas.map((fila) => {
+      const nivel = fila.sinDato ? "sin nivel en la exportación" : `Nv ${fila.actual} → ${fila.requerido}`;
+      const cuenta = fila.cantidad > 1 ? ` · ${fila.tienen}/${fila.cantidad}` : "";
+      const marca = fila.hecho ? "Ya está" : fila.enCurso ? "En curso" : "Falta";
+      const extra = fila.hecho ? "" : ` · ${textoCosteReq(fila.coste)}`;
+      return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(fila.title)} <span class="num">${esc(nivel)}${cuenta}</span></span><span class="row__sub">${marca}${esc(extra)} · provisional</span></span><span class="chip${fila.hecho ? "" : " chip--warn"}">${marca}</span></div></li>`;
+    }).join("");
+    const pendientes = paso.filas.filter((f) => !f.hecho).length;
+    return `<div class="section"><div class="section-header"><span>Para subir a TH${paso.hacia}</span></div><ul class="list">${lis}</ul><p class="section-footer">${pendientes ? `${pendientes} pendientes` : "Todo lo pedido ya está"} · provisional</p></div>`;
+  }).join("");
+  return `<div class="section"><div class="card"><h2 class="t-headline">Requisitos del ayuntamiento</h2><p class="t-footnote c-2">${esc(req.nota)}</p></div></div>${blocks}`;
 }
 
 function roadmapList(road) {
@@ -1360,7 +1424,12 @@ function renderPlan(tag) {
     ? `<p class="t-footnote c-2">Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.</p>`
     : "";
   const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
-  const desconocido = road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`;
+  const paralelo = road.plan.modo === "rushear" && road.calendarioSeg != null && road.trabajoSeg > road.calendarioSeg
+    ? `<p class="t-footnote c-2">El fin usa los constructores a la vez. Los días de constructor del coste son la suma del trabajo, no el calendario.</p>`
+    : "";
+  const desconocido = road.plan.modo === "rushear"
+    ? ""
+    : (road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`);
   const vieja = estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada
     ? `<p class="t-footnote c-2">Necesita actualización. Se conserva el último plan, del ${esc(fmtWhen(exp.timestamp * 1000))}.</p>`
     : "";
@@ -1368,7 +1437,8 @@ function renderPlan(tag) {
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}${vieja}</div></div>
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${paralelo}${desconocido}${vieja}</div></div>
+    ${road.plan.modo === "rushear" ? requisitosHtml(meta) : ""}
     ${sleepCard()}
     ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
@@ -2382,6 +2452,7 @@ function renderProgreso(tag) {
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     ${exp && inFleet ? summaryCard(a, meta) : ""}
+    ${exp && inFleet ? `<div class="section"><div class="card">${constructorControl(meta, exp)}</div></div>` : ""}
     ${exp && inFleet ? rushCard(meta) : ""}
     ${exp && inFleet ? costCard(exp, a.th, false) : ""}
     ${links}
@@ -4826,6 +4897,14 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-actualizar]")) { abrirActualizar(); return; }
+    const ctor = origen.closest("[data-ctor]");
+    if (ctor) {
+      const tag = ctor.dataset.ctorTag;
+      const n = Number(ctor.dataset.ctor);
+      if (tag && (n === 4 || n === 5 || n === 6)) setAccountPlan(tag, { constructores: n });
+      render();
+      return;
+    }
     const modo = origen.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;

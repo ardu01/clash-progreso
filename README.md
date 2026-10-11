@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.13</strong><br>
+  <strong>Versión 3.1.14</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -47,6 +47,8 @@ Datos de prueba del 7 de octubre de 2026.
 Inicio y Cuentas ocupan menos alto. Las cuentas dejan el nombre y el porcentaje con sitio, y Perfil y Editar siguen al lado. El resumen de constructores usa el ancho entero, así que no queda una loseta vacía al lado de la frase larga.
 
 Cada paso dice de dónde sale: en la exportación, estimado, planificado, recomendado o provisional. Si la cuenta necesita actualización, Qué hacer ahora no la presenta como una cola libre: pide actualizar y conserva el plan.
+
+Rushear a un ayuntamiento superior reparte el tiempo entre los constructores de esa cuenta. Si la exportación trae las chozas, se usa ese número, y la cabaña de B.O.B suma uno. Si no las trae, en la cuenta y en el plan se elige 4, 5 o 6. El fin es el de esas obras en paralelo. El plan también lista lo que hay que tener colocado para poder subir el ayuntamiento, con el nivel actual, el pedido, el coste y el tiempo. Esa lista es provisional.
 
 ## Funciones
 
@@ -96,7 +98,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 ### Agenda, plan y qué hacer ahora
 
 - El plan es la línea de tiempo de la cuenta, también cuando no queda ningún constructor libre. Se elige maxear o rushear, y el ayuntamiento objetivo. Se pueden combinar ataque, defensa, muros, héroes, categoría, recurso y duración. El criterio se lee en viñetas.
-- Si el objetivo es un ayuntamiento superior, el nivel pedido es el máximo del anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta los máximos publicados. No hay una lista oficial de requisitos de ayuntamiento, y la pantalla lo dice.
+- Si el objetivo es un ayuntamiento superior, el nivel pedido de la línea es el máximo del anterior. Rushear ordena almacenes, edificios de ejército y laboratorio hasta esos máximos, y reparte el tiempo entre los constructores de la cuenta. Aparte, el plan lista las estructuras que hay que tener para poder subir el ayuntamiento. Esa lista es provisional: los datos no traen la tabla del juego.
 - Cada paso lleva coste, tiempo y fecha estimada en hora de Madrid, con los constructores de esa cuenta. Se pueden marcar las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Sin plan guardado, el criterio es maxear el ayuntamiento actual.
 - La agenda tiene tres vistas: próximas 24 horas, próximos 7 días y por cuenta. Varias cuentas en la misma hora forman una sesión. Una cuenta sin actualizar no sale ahí solo porque un temporizador viejo haya llegado a cero.
@@ -151,7 +153,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v32` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v33` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -159,6 +161,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.14 | Rushear reparte el tiempo entre los constructores de la cuenta (los del JSON, o 4, 5 o 6 si no vienen). El plan lista los requisitos para subir el ayuntamiento y los marca como provisionales. |
 | 3.1.13 | Inicio y Cuentas más compactos. Cada paso dice si es de la exportación, estimado, planificado, recomendado o provisional. Una cuenta sin actualizar no sale como cola libre. |
 | 3.1.12 | El plan de cada cuenta se calcula una vez por pintado. Un guardado abortado no se da por hecho. Las cinco pestañas tienen captura en claro y en oscuro. |
 | 3.1.11 | Inicio con las tres cifras de la flota, qué hacer ahora y las tres próximas finalizaciones. Actualizar todas sigue donde se quedó y cierra con un resumen de los datos pegados. La agenda separa 24 horas, 7 días y por cuenta, y agrupa la misma hora en una sesión. |

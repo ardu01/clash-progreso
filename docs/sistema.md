@@ -2160,6 +2160,14 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 3.1.14)
+
+`APP_VERSION` es `3.1.14` y `SHELL_CACHE` es `cp-shell-v33`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
+
+En un plan Rushear, `constructoresParaPlan` usa las chozas de la exportación y suma uno si está la cabaña de B.O.B (`1000064`). Si no hay chozas, el ajuste guardado en el plan solo vale 4, 5 o 6. `makeLanes` abre ese número de carriles y `placeStep` asigna cada paso al que antes queda libre. `trabajoSeg` es la suma de los segundos de constructor y `calendarioSeg` es el tramo desde el primer inicio hasta el último fin. Un ajuste no se etiqueta como dato de la exportación: la clase del hueco es `ajuste`. Maxear no cambia de carriles.
+
+`requisitosAyuntamiento` lista, para cada paso hasta el TH objetivo, las estructuras con cupo en el TH anterior. El nivel pedido es 1, salvo el Consejo heroico (`1000071`), que pide su máximo, y la Artillería infernal al pasar a TH18, que pide el 5. No entran las chozas, el castillo del clan ni B.O.B. El coste y el tiempo salen de `data/costes.json`, y los de la artillería de `town-hall.json` de clash-of-clans-data 0.18.0. Cada fila va con `provisional: true`. Si el JSON no trae el nivel del arma, no se inventa el coste. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.13)
 
 `APP_VERSION` es `3.1.13` y `SHELL_CACHE` es `cp-shell-v32`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit.
