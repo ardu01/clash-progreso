@@ -170,6 +170,8 @@ En Inicio, la tarjeta **Motor de atención multicuenta** abre siete vistas. Sigu
 
 La sesión inteligente ejecuta esas recomendaciones.
 
+**Explorar estrategias**, en Operaciones, busca varias formas de repartir las cuentas dentro de las sesiones que escribas (por defecto, 19:00–21:00 cada día). No usa el sueño como límite. Es una simulación: el plan de la cuenta solo cambia si tocas **Pasar al plan**. Con horizonte de 180 o 365 días no afirma una fecha, solo compara.
+
 ### Operaciones
 
 La sexta pestaña. C1 (`#28PLGP0G2`) va primero y sus héroes no se tratan como retraso. El sueño, si no hay uno guardado, es de 23:00 a 07:00. Si se borra, se queda vacío.
