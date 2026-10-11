@@ -2099,3 +2099,13 @@ Siete etiquetas eran erróneas porque la imagen del rango ya era la oficial. Se 
 Nombres con fuente en el blog en español: Catapulta (1000067), Caseta de animales (1000068), Torre Tesla (1000019) y Arrojatroncos (107000008). Siguen en inglés Henchmen Puppet, Frost Flake, Stun Blaster, B.O.B's Hut y Dark Orb. Los héroes no cambian de grafía. 28000007, 90000052, 90000053 y 107000008 pasan a `estado: ok`. Flecha monolítica, Colmillos eléctricos, Portal portátil, Bruja caída, Aerovagón, Hechizo de cólera y Picador ya estaban en la 3.1.0.
 
 73000017 es el Cuervo avaricioso, mascota de TH18, máximo 10. El PNG es el render del Fan Kit con base de césped. En las exportaciones de prueba no aparece, así que C1 lo enseña como Nv 0 / 10. El denominador ya lo contaba; la media no se mueve (C1 64,2, C2 47,7 / 44,5). La Artillería infernal sigue sin ID ni imagen: la fila de topes dice «Artillería infernal» y la ficha solo añade «Sin imagen».
+
+## Nota de cambios (11 oct 2026, 3.1.2)
+
+`APP_VERSION` es `3.1.2`, `SHELL_CACHE` es `cp-shell-v20` e `IMAGE_CACHE` sigue en `cp-img-v7`. No hay PNG nuevos. `ROSTER_VERSION` sigue en 2: una cuenta borrada no vuelve a sembrarse, y la copia sigue fusionando por tag y fecha.
+
+La ruta por defecto es `#/inicio`. La barra tiene Inicio, Cuentas, Mejoras, Análisis y Agenda. Copia y Acerca de, con el aviso en inglés de la Fan Content Policy, se abren desde el botón de ajustes de Inicio. Equipamiento sigue en `#/equipo/:tag` y, en la ficha de la cuenta, es una sección debajo de las categorías. Mejoras añade «Costes», con el mismo `costCard` de la aldea. `#/ahora` sigue saliendo del plan de cada cuenta. Importar y Ajustes, al cerrarse, vuelven a `#/roster`.
+
+Inicio resume el número de cuentas, el TH de la principal y el objetivo del roster. «Abrir hoy» ordena las cuentas por la cola del plan que queda libre antes (constructor, laboratorio o casa de mascotas). Si el temporizador no es un número, no se inventa la hora y esa cuenta queda fuera del orden del día. «Objetivos de flota» agrupa por el objetivo del roster: cuántas cuentas ya lo tienen y la fecha más tardía del plan de las que faltan. Esa fecha es el máximo del TH anterior, no el momento de subir el ayuntamiento. Si no hay un plan guardado con ese TH, se estima con Maxear y se dice en la pantalla. No se escribe ese plan en los datos guardados.
+
+El ranking lleva el puesto en un hexágono. El mapa de calor usa la escala de menos de 50 %, 50–79 %, 80–99 % y 100 %, con el número entero dentro. El criterio del plan pasa a viñetas; el texto no cambia, y la frase de los héroes de `#28PLGP0G2` sigue como nota. El tema claro u oscuro forzado manda sobre el del sistema.
