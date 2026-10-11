@@ -190,6 +190,9 @@ test("4.1.6: el plan usa las sesiones y no el sueño de 23 a 07", () => {
   const larga = scheduleNext(Date.parse("2026-10-11T17:00:00Z"), 30 * 3600, semana);
   assert.equal(larga.pasaSesion, true);
   assert.equal(larga.inicio, Date.parse("2026-10-11T17:00:00Z"));
+  const otono = scheduleNext(Date.parse("2026-10-11T17:00:00Z"), 25 * 3600, semana);
+  assert.equal(otono.pasaSesion, false);
+  assert.equal(otono.inicio, Date.parse("2026-10-24T17:00:00Z"));
   const cabe = scheduleNext(Date.parse("2026-10-11T18:30:00Z"), 23 * 3600, semana);
   assert.equal(cabe.inicio, Date.parse("2026-10-12T17:00:00Z"));
   assert.equal(cabe.pasaSesion, false);

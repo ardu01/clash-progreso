@@ -23,7 +23,10 @@ export function sleepFromClocks(desde, hasta) {
 }
 
 let relojMadrid = null;
+const partsCache = new Map();
 function parts(ms) {
+  const hit = partsCache.get(ms);
+  if (hit) return hit;
   if (!relojMadrid) {
     relojMadrid = new Intl.DateTimeFormat("en-GB", {
       timeZone: ZONE,
@@ -40,6 +43,8 @@ function parts(ms) {
   for (const p of relojMadrid.formatToParts(new Date(ms))) {
     if (p.type !== "literal") o[p.type] = Number(p.value);
   }
+  if (partsCache.size > 12000) partsCache.clear();
+  partsCache.set(ms, o);
   return o;
 }
 
@@ -48,11 +53,17 @@ function offset(ms) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - ms;
 }
 
+const clockCache = new Map();
 function atClock(year, month, day, minutes) {
+  const key = (year * 10000 + month * 100 + day) * 10000 + minutes;
+  const hit = clockCache.get(key);
+  if (hit != null) return hit;
   const h = Math.floor(minutes / 60);
   const min = minutes % 60;
   let utc = Date.UTC(year, month - 1, day, h, min, 0) - offset(Date.UTC(year, month - 1, day, h, min, 0));
   utc = Date.UTC(year, month - 1, day, h, min, 0) - offset(utc);
+  if (clockCache.size > 12000) clockCache.clear();
+  clockCache.set(key, utc);
   return utc;
 }
 
@@ -119,17 +130,68 @@ function sesionesDelDia(semana, lunes) {
   }).filter((ses) => ses.minutos > 0);
 }
 
-/** Próximo tramo de sesión que aún no ha terminado. null si en 21 días no hay ninguno. */
-export function proximaSesion(ms, semana) {
+const tablasSesion = new WeakMap();
+
+function tablaDe(semana) {
+  let t = tablasSesion.get(semana);
+  if (!t) {
+    t = { dias: new Map(), hueco: null };
+    tablasSesion.set(semana, t);
+  }
+  return t;
+}
+
+/** Hueco máximo entre el inicio de una sesión y el inicio de la siguiente, más una hora por el cambio de otoño. */
+function huecoMaximoMs(semana) {
+  const t = tablaDe(semana);
+  if (t.hueco != null) return t.hueco;
+  const ancla = Date.parse("2026-01-05T12:00:00Z");
+  const lista = [];
+  for (let add = 0; add < 16; add += 1) {
+    const civil = diaCivil(ancla, add);
+    for (const ses of sesionesDelDia(semana, lunesDe(civil.dow))) {
+      const start = atClock(civil.year, civil.month, civil.day, ses.inicio);
+      lista.push({ start, end: start + ses.minutos * 60000 });
+    }
+  }
+  let max = 0;
+  let pares = 0;
+  for (let i = 0; i < lista.length; i += 1) {
+    let siguiente = null;
+    for (let j = 0; j < lista.length; j += 1) {
+      if (lista[j].end > lista[i].end) { siguiente = lista[j]; break; }
+    }
+    if (!siguiente) continue;
+    pares += 1;
+    max = Math.max(max, siguiente.start - lista[i].start);
+  }
+  t.hueco = pares ? max + 3600000 : Infinity;
+  return t.hueco;
+}
+
+function listaDesde(ms, semana) {
+  const t = tablaDe(semana);
+  const p = parts(ms);
+  const key = p.year * 10000 + p.month * 100 + p.day;
+  const hit = t.dias.get(key);
+  if (hit) return hit;
+  const lista = [];
   for (let add = 0; add < 21; add += 1) {
     const civil = diaCivil(ms, add);
-    const lista = sesionesDelDia(semana, lunesDe(civil.dow));
-    for (const ses of lista) {
+    for (const ses of sesionesDelDia(semana, lunesDe(civil.dow))) {
       const start = atClock(civil.year, civil.month, civil.day, ses.inicio);
-      const end = start + ses.minutos * 60000;
-      if (end <= ms) continue;
-      return { start, end };
+      lista.push({ start, end: start + ses.minutos * 60000 });
     }
+  }
+  t.dias.set(key, lista);
+  return lista;
+}
+
+/** Próximo tramo de sesión que aún no ha terminado. null si en 21 días no hay ninguno. */
+export function proximaSesion(ms, semana) {
+  const lista = listaDesde(ms, semana);
+  for (let i = 0; i < lista.length; i += 1) {
+    if (lista[i].end > ms) return lista[i];
   }
   return null;
 }
@@ -162,6 +224,9 @@ function scheduleNextSesion(freeAt, durationSec, semana) {
   const start0 = Math.max(freeAt, ses.start);
   if (dur == null) {
     return { inicio: start0, fin: null, sinDuracion: true, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
+  }
+  if (dur > huecoMaximoMs(semana)) {
+    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: true, ajustado: start0 !== freeAt };
   }
   if (cabeAntesDeLaSiguiente(start0, dur, semana)) {
     return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
