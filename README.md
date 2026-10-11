@@ -63,6 +63,11 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/316-despues-analisis-oscuro.png" width="200" alt="Análisis en oscuro, con el ranking"> | <img src="docs/capturas/316-despues-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las vistas de tiempo"> |
 
+| Motor de atención | Bandeja | Detector |
+| --- | --- | --- |
+| <img src="docs/capturas/410-motor-oscuro.png" width="200" alt="Inicio en oscuro: la tarjeta del motor de atención, con siete botones"> | <img src="docs/capturas/410-bandeja-oscuro.png" width="200" alt="Bandeja en oscuro: cuentas que piden intervención"> | <img src="docs/capturas/410-detector-oscuro.png" width="200" alt="Detector en oscuro: categorías por debajo del peso, sin los héroes de C1"> |
+| <img src="docs/capturas/410-motor-claro.png" width="200" alt="Motor de atención con el tema claro"> | <img src="docs/capturas/410-excepciones-claro.png" width="200" alt="Excepciones en claro, mostrando todas las cuentas"> | <img src="docs/capturas/410-hibernar-oscuro.png" width="200" alt="Hibernación en oscuro, con plazos de 7, 14 y 30 días"> |
+
 | Operaciones | Sesión | Simulador |
 | --- | --- | --- |
 | <img src="docs/capturas/400-operaciones-oscuro.png" width="200" alt="Operaciones en oscuro: sesión inteligente y el resto de herramientas"> | <img src="docs/capturas/400-sesion-oscuro.png" width="200" alt="Sesión en oscuro, con el paso siguiente y los minutos"> | <img src="docs/capturas/400-simulador-oscuro.png" width="200" alt="Simulador en oscuro: el cálculo no cambia la aldea"> |
