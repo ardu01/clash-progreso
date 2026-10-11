@@ -42,6 +42,11 @@ Datos de prueba del 7 de octubre de 2026.
 | --- | --- |
 | <img src="docs/capturas/313-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/313-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
 
+| Plan, rushear | Requisitos para subir |
+| --- | --- |
+| <img src="docs/capturas/314-plan-oscuro.png" width="200" alt="Plan en oscuro: rushear a TH17 y los constructores de la exportación"> | <img src="docs/capturas/314-requisitos-oscuro.png" width="200" alt="Requisitos provisionales para subir el ayuntamiento, en oscuro"> |
+| <img src="docs/capturas/314-plan-claro.png" width="200" alt="Plan con el tema claro"> | <img src="docs/capturas/314-requisitos-claro.png" width="200" alt="Requisitos provisionales con el tema claro"> |
+
 ## En esta versión
 
 Inicio y Cuentas ocupan menos alto. Las cuentas dejan el nombre y el porcentaje con sitio, y Perfil y Editar siguen al lado. El resumen de constructores usa el ancho entero, así que no queda una loseta vacía al lado de la frase larga.
