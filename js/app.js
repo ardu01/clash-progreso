@@ -1674,7 +1674,8 @@ function staleCard() {
   });
   if (!pending.length) return "";
   const lis = pending.map((meta) => `<li><a class="row" href="#/progreso/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${expOf(meta.tag) ? "Sin actualización reciente" : "Sin importar"}</span></span>${CHEV}</a></li>`).join("");
-  return `<div class="section"><div class="section-header"><span>Actualizar todas</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} días sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
+  const dia = days === 1 ? "día" : "días";
+  return `<div class="section"><div class="section-header"><span>Actualizar todas</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
 }
 
 function isSeedRoster(list) {
@@ -3562,7 +3563,8 @@ function copyWarning() {
   if (!at) return `<p class="t-footnote c-2">Aún no hay una copia automática en este iPhone. Se guarda al importar.</p>`;
   const days = Math.floor((state.now - at) / 86400000);
   if (days < 7) return `<p class="t-footnote c-2">Copia automática del ${esc(fmtWhen(at))}.</p>`;
-  return `<p class="t-footnote c-2">La última copia automática es del ${esc(fmtWhen(at))}. Llevas ${days} días sin una copia nueva.</p>`;
+  const dia = days === 1 ? "día" : "días";
+  return `<p class="t-footnote c-2">La última copia automática es del ${esc(fmtWhen(at))}. Llevas ${days} ${dia} sin una copia nueva.</p>`;
 }
 
 function lastImportLabel() {
@@ -3863,7 +3865,7 @@ function bind(r) {
       render();
       return;
     }
-    const themeBtn = ev.target.closest("[data-theme]");
+    const themeBtn = ev.target.closest("button[data-theme]");
     if (themeBtn) {
       state.theme = themeBtn.dataset.theme;
       localStorage.setItem("cp-theme", state.theme);
