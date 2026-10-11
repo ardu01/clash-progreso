@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 4.0.0)
+
+`APP_VERSION` es `4.0.0` y `SHELL_CACHE` es `cp-shell-v32`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay pantallas nuevas: Inicio sigue con las mismas filas.
+
+IndexedDB pasa a la versión 3. `exports` y `copies` no se recrean si ya están. Entran `documentos` (clave `id`, índices `tipo` y `tag`), `recuperacion` y `schema`. `prepararMigracion` vuelca las claves de `localStorage` antes de copiar roster, planes, provisionales y sueño. Si `cp-roster`, `cp-planes`, `cp-provisional` o `cp-sueno` no parsean, `migrado` queda en falso y no se sustituye el teléfono. Si el recuento leído no cuadra, igual. Con `schema.version === 3` y `migrado`, no se repite: la fuente es IndexedDB y `localStorage` se deja escrito con lo mismo. `js/origen.js` solo etiqueta (`importado`, `manual`, `provisional`, `plan`, `simulacion`, `prediccion`); `mismoOrigen` devuelve null si un número mezcla fuentes. `trasImportar` marca `recalcular` en la sesión abierta de esa cuenta y no pone `confirmado` en un paso `hecho`. `claveRoadmap` es tag, timestamp, plan, sueño y minuto. `buildBackup` escribe `schema: 4`, `sueno` y `documentos`. `mergeBackup` no cambia de criterio: lo que ya está en el iPhone gana; el archivo rellena huecos, también el sueño y los documentos. El % de las 11 cuentas no cambia.
+
 ## Nota de cambios (11 oct 2026, 3.1.12)
 
 `APP_VERSION` es `3.1.12` y `SHELL_CACHE` es `cp-shell-v31`. `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos del Fan Kit. Las capturas de las cinco pestañas, en claro y en oscuro, son PNG de 375×812.

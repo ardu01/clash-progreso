@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.12</strong><br>
+  <strong>Versión 4.0.0</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -44,11 +44,11 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-Cada vez que se pinta la pantalla, el plan de cada cuenta se calcula una sola vez y el resto de esa vista lo reutiliza. En el iPhone eso evita repetir el mismo trabajo al abrir Inicio, Mejoras o la agenda.
+La copia guarda también el horario de sueño. Una copia de una versión anterior sigue entrando: no borra cuentas, planes ni marcas que solo están en el iPhone, y si aquí ya hay un horario de sueño, ese se conserva.
 
-Si el iPhone corta un guardado, la app no se queda esperando ni lo da por hecho. Avisa, y el pegado se puede repetir.
+Si el almacén del iPhone no responde, los datos no se vacían. Copia lo dice y deja exportar el archivo.
 
-Las cinco pestañas se ven en claro y en oscuro con los mismos datos de prueba.
+El plan de cada cuenta se recuerda mientras no cambien la exportación, el plan, el sueño o el minuto. Importar no convierte en confirmado un paso que solo habías marcado.
 
 ## Funciones
 
@@ -129,7 +129,7 @@ Si el botón no puede leer el portapapeles, mantén pulsado el campo y elige Peg
 
 ### Copia y aspecto
 
-- Una copia con las cuentas, el historial, los planes, las marcas y la meta de cada cuenta. Al importar se guarda sola una copia en este iPhone. Si pasan 7 días sin otra, Copia lo avisa.
+- Una copia con las cuentas, el historial, los planes, las marcas, la meta de cada cuenta y el horario de sueño. Al importar se guarda sola una copia en este iPhone. Si pasan 7 días sin otra, Copia lo avisa. Una copia antigua, sin horario de sueño, sigue entrando.
 - Al restaurar se junta por etiqueta y por fecha: no borra lo que solo está en el iPhone, ni un plan o una marca que la copia no traiga.
 - Tema del sistema, claro u oscuro.
 - Descarga de imágenes para usarlas sin conexión.
@@ -153,7 +153,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v31` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v32` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. La copia lleva `schema` 4. Una copia sin ese campo se restaura igual que antes.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -161,6 +161,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.0.0 | La copia incluye el horario de sueño y una copia antigua sigue entrando. Si el almacén del iPhone falla, los datos no se vacían. El plan se recuerda mientras no cambien la exportación, el plan, el sueño o el minuto. |
 | 3.1.12 | El plan de cada cuenta se calcula una vez por pintado. Un guardado abortado no se da por hecho. Las cinco pestañas tienen captura en claro y en oscuro. |
 | 3.1.11 | Inicio con las tres cifras de la flota, qué hacer ahora y las tres próximas finalizaciones. Actualizar todas sigue donde se quedó y cierra con un resumen de los datos pegados. La agenda separa 24 horas, 7 días y por cuenta, y agrupa la misma hora en una sesión. |
 | 3.1.10 | Un fallo en un botón no deja la pantalla pillada. Inicio y Cuentas usan el mismo recuento de constructores: libre en la exportación, estimado si el temporizador ya llegó a cero, o «Necesita actualización» si la cuenta es vieja. El porcentaje de cada cuenta es frente al máximo de su ayuntamiento. |
