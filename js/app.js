@@ -19,6 +19,7 @@ import {
 import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
 import { compareAccounts, fleetSnapshot, rankAccounts } from "./fleet.js";
+import { estadoColas } from "./colas.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
@@ -734,15 +735,27 @@ function fleetRow(meta) {
   const active = ups.filter((u) => !u.done && !u.extra);
   const cats = {};
   for (const c of CATEGORIES) cats[c.key] = view.cats[c.key] ? view.cats[c.key].pct : null;
+  const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: view.th });
+  const b = colas.builders;
   return {
     tag: meta.tag,
     nombre: meta.nombre,
     chip: meta.chip,
     th: view.th,
     media: view.media,
-    builders: builderStatus(exp),
-    labLibre: !ups.some((u) => u.queue === "laboratorio" && !u.done),
-    mascotasLibres: !ups.some((u) => u.queue === "mascotas" && !u.done),
+    colas,
+    builders: {
+      known: b.known,
+      total: b.total,
+      occupied: b.ocupadosReales,
+      free: b.libresReales,
+      over: b.over,
+      vencidos: b.vencidos,
+      libresEstimados: b.libresEstimados,
+      confianza: b.confianza,
+    },
+    labLibre: colas.laboratorio.libreAccion,
+    mascotasLibres: colas.mascotas.libreAccion,
     proxima: active.length ? active[0].end : null,
     mejoras: ups,
     cats,
@@ -875,8 +888,8 @@ function rosterTools(shown) {
     <div class="section"><div class="card fleet-card">
       <h2 class="t-headline">Todas las cuentas</h2>
       <p class="t-body">Media ${media}</p>
-      <p class="t-footnote c-2">Constructores: ${snap.constructoresLibres} libres · ${snap.constructoresOcupados} ocupados</p>
-      <p class="t-footnote c-2">Laboratorios libres: ${snap.laboratoriosLibres} · Casas de mascotas libres: ${snap.mascotasLibres}</p>
+      <p class="t-footnote c-2">Constructores: ${esc(snap.frase)}</p>
+      <p class="t-footnote c-2">Laboratorios: ${snap.laboratoriosLibres} libres en la exportación${snap.laboratoriosEstimados ? ` · ${snap.laboratoriosEstimados} estimados` : ""} · Casas de mascotas: ${snap.mascotasLibres} libres en la exportación${snap.mascotasEstimadas ? ` · ${snap.mascotasEstimadas} estimadas` : ""}</p>
       <p class="t-footnote c-2">Próxima mejora: ${prox}</p>
       <p class="link-row"><a href="#/ahora">Qué hacer ahora</a><a href="#/ranking">Ranking</a><a href="#/agenda">Agenda</a></p>
     </div></div>`;
@@ -974,7 +987,9 @@ function pasoAhora(paso) {
 
 function prioridadDe(meta) {
   const road = accountRoadmap(meta);
-  const vacio = { meta, road, when: null, exact: false, lane: null, step: null, tier: 3, sortWhen: Infinity, libreYa: false };
+  const exp = expOf(meta.tag);
+  const colas = exp ? estadoColas(exp, state.now, { staleMs: staleLimit() }) : null;
+  const vacio = { meta, road, when: null, exact: false, lane: null, step: null, tier: 3, sortWhen: Infinity, libreYa: false, desactualizada: !!(colas && colas.desactualizada), clase: "real" };
   if (!road) return vacio;
   let best = null;
   for (const lane of road.lanes || []) {
@@ -983,8 +998,9 @@ function prioridadDe(meta) {
     if (!step) continue;
     const sinHora = !!lane.blocked || !!step.sinHora;
     const when = lane.libreYa ? road.now : (sinHora ? null : lane.freeAt);
-    const tier = when == null ? 1 : 0;
-    const cand = { meta, road, when, exact: when != null, lane, step, tier, sortWhen: when == null ? Infinity : when, libreYa: !!lane.libreYa };
+    let tier = when == null ? 1 : 0;
+    if (colas && colas.desactualizada && lane.libreYa) tier = 2;
+    const cand = { meta, road, when, exact: when != null, lane, step, tier, sortWhen: when == null ? Infinity : when, libreYa: !!lane.libreYa, desactualizada: !!(colas && colas.desactualizada), clase: lane.clase || "real" };
     if (!best || cand.tier < best.tier || (cand.tier === best.tier && cand.sortWhen < best.sortWhen)) best = cand;
   }
   return best || vacio;
@@ -1001,7 +1017,9 @@ function textoCola(item) {
   const lane = item.lane;
   const step = item.step;
   let cuando = `${lane.titulo} sin hora exacta`;
-  if (item.libreYa) cuando = `${lane.titulo} libre ahora`;
+  if (item.desactualizada) cuando = "Necesita actualización. Se conserva el último plan.";
+  else if (item.clase === "estimado" && item.libreYa) cuando = `${lane.titulo} libre según la exportación (estimado)`;
+  else if (item.libreYa) cuando = `${lane.titulo} libre en la exportación`;
   else if (item.exact && item.when != null) cuando = `${lane.titulo} libre ${fmtFin(item.when)}`;
   let paso = `${step.title} Nv ${step.fromLvl} → ${step.toLvl}`;
   if (step.provisional) paso += " · provisional";
@@ -1121,15 +1139,9 @@ function renderInicio() {
   const deHoyN = rows.reduce((n, r) => n + (r.mejoras || []).filter((u) => !u.done && !u.extra && u.end > state.now && madridDayKey(u.end) === hoyKey).length, 0);
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
   const deHoy = ordenadas.filter((p) => p.tier === 0 && p.when != null && madridDayKey(p.when) === hoyKey);
-  let ctorLibres = 0;
-  for (const p of ordenadas) {
-    for (const lane of (p.road && p.road.lanes) || []) {
-      if (lane.cola === "constructor" && lane.libreYa) ctorLibres += 1;
-    }
-  }
   const accion = (href, icon, cls, title, sub) => `<li><a class="row row--tile row--accion" href="${href}"><span class="accion__ico ${cls}" aria-hidden="true">${icon}</span><span class="row__main"><span class="row__title">${esc(title)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
   const acciones = [
-    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores libres", `${ctorLibres} ${ctorLibres === 1 ? "constructor libre" : "constructores libres"} ahora · ${deHoy.length} ${deHoy.length === 1 ? "cuenta" : "cuentas"} para abrir hoy`),
+    accion("#/ahora", ICON.choza, "is-go", "Revisar constructores", `${snap.frase} · ${deHoy.length} ${deHoy.length === 1 ? "cuenta" : "cuentas"} para abrir hoy`),
     objMas
       ? accion("#/roster", ICON.objetivo, "is-gold", `Preparar objetivos TH${objMas[0]}`, `${objMas[1]} ${objMas[1] === 1 ? "cuenta" : "cuentas"} por debajo de TH${objMas[0]}`)
       : accion("#/roster", ICON.objetivo, "is-gold", "Objetivos cumplidos", `${enObjetivo} de ${conObj} cuentas en su objetivo`),
@@ -1212,7 +1224,9 @@ function renderRanking() {
   const chips = keys.map(([id, label]) => filterChip("data-rank", id, label, state.rankKey === id)).join("");
   const list = ranked.map((row) => {
     const on = state.compareTags.includes(row.tag);
-    const libres = row.builders && row.builders.free != null ? `${row.builders.free} libres` : "constructores ?";
+    const libres = row.builders && row.builders.free != null
+      ? `${row.builders.free} libres${row.builders.vencidos ? ` · ${row.builders.vencidos} estimados` : ""}`
+      : "constructores ?";
     return `<li><div class="row row--tile"><span class="hex hex--sm${row.puesto <= 3 ? " hex--gold" : ""}" aria-hidden="true"><b>${row.puesto}</b></span>${row.th == null ? "" : thumb(1000001, { size: 44, th: row.th })}<span class="row__main"><span class="row__title"><span class="sr-only">${row.puesto}. </span>${esc(row.nombre)}</span><span class="row__sub">TH${row.th == null ? "—" : row.th} · ${esc(libres)}</span>${meterHtml(row.media, `Media ${fmtPct(row.media)}`)}</span><button type="button" class="btn-text" data-compare="${esc(row.tag)}" aria-pressed="${on ? "true" : "false"}">${on ? "Quitar" : "Comparar"}</button></div></li>`;
   }).join("");
   const picked = compareAccounts(rows, state.compareTags);
@@ -1257,7 +1271,7 @@ function planControls(meta, road) {
   const modo = (id, label) => `<button type="button" role="tab" data-plan-modo="${id}" aria-selected="${plan.modo === id}">${label}</button>`;
   return `<div class="section"><div class="card">
       <h2 class="t-headline">${esc(planLabel(plan, current))}</h2>
-      <p class="t-footnote c-2">${road.configured ? "Plan guardado en esta cuenta." : "Esta cuenta no tiene plan guardado: se usa Maxear TH actual."}</p>
+      <p class="t-footnote c-2">${road.configured ? "Planificado: el plan guardado en esta cuenta." : "Recomendado: no hay plan guardado, se usa Maxear TH actual."}</p>
       <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Objetivo">${modo("maxear", "Maxear")}${modo("rushear", "Rushear")}</div></div>
       <label class="sort-label">TH objetivo
         <select data-plan-th="${esc(meta.tag)}" aria-label="TH objetivo">${thOpts.join("")}</select>
@@ -1313,11 +1327,14 @@ function renderPlan(tag) {
     : "";
   const hora = road.avisoHora ? `<p class="t-footnote c-2">Hay una mejora en curso sin hora exacta. No se le pone una.</p>` : "";
   const desconocido = road.conocidos ? "" : `<p class="t-footnote c-2">La exportación no trae el número de constructores. No se inventan huecos libres.</p>`;
+  const vieja = estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada
+    ? `<p class="t-footnote c-2">Necesita actualización. Se conserva el último plan, del ${esc(fmtWhen(exp.timestamp * 1000))}.</p>`
+    : "";
   const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     ${planControls(meta, road)}
-    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}</div></div>
+    <div class="section"><div class="card"><h2 class="t-headline">Criterio</h2>${criterioHtml(PLAN_TIMELINE, fuera)}${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>${rush}${capNote}${hora}${desconocido}${vieja}</div></div>
     ${sleepCard()}
     ${roadmapList(road)}
     <p class="section-footer"><a href="#/agenda">Agenda de todas las cuentas</a></p>
@@ -1398,9 +1415,12 @@ function timelineOf(meta, exp, view) {
 }
 
 function lineaTexto(line) {
-  let actual = "Libre ahora";
-  if (line.actual && !line.actual.exacta) actual = `${line.actual.nombre}. Sin hora exacta en la exportación.`;
-  else if (line.actual && line.actual.exacta) {
+  let actual = line.clase === "estimado" ? "Libre según la exportación (estimado)" : "Libre en la exportación";
+  if (line.desactualizada && line.libreYa) actual = "Necesita actualización. Se conserva el último plan.";
+  else if (line.actual && !line.actual.exacta) actual = `${line.actual.nombre}. Sin hora exacta en la exportación.`;
+  else if (line.actual && line.actual.exacta && line.clase === "estimado" && line.libreYa) {
+    actual = `${line.actual.nombre} · libre según la exportación (estimado)`;
+  } else if (line.actual && line.actual.exacta) {
     actual = `${line.actual.nombre} · libre ${fmtFin(line.actual.fin)}`;
     if (line.enSueno) actual += " · cae en horas de sueño";
   }
@@ -1436,12 +1456,23 @@ function renderAgenda() {
     const exp = expOf(meta.tag);
     const view = viewOf(meta.tag);
     if (!exp || !view) return null;
-    return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, lineas: timelineOf(meta, exp, view).lineas };
+    const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: view.th });
+    const tl = timelineOf(meta, exp, view);
+    if (colas.desactualizada) {
+      for (const line of tl.lineas) if (line.libreYa) line.desactualizada = true;
+    }
+    return { tag: meta.tag, nombre: meta.nombre, chip: meta.chip, desactualizada: colas.desactualizada, lineas: tl.lineas };
   }).filter(Boolean);
   const agenda = fleetAgenda(cuentas, { now: state.now, dias: 21 });
   const days = agenda.dias.map((day) => {
     const rows = day.eventos.map((ev) => {
-      const cuando = ev.ahora ? "Libre ahora" : fmtFin(ev.fin);
+      const cuando = ev.desactualizada && ev.ahora
+        ? "Necesita actualización"
+        : ev.ahora && ev.clase === "estimado"
+          ? "Libre según la exportación (estimado)"
+          : ev.ahora
+            ? "Libre en la exportación"
+            : fmtFin(ev.fin);
       const sueno = ev.enSueno ? " · en horas de sueño; la siguiente espera a despertar" : "";
       return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ev.chip || ev.nombre)} · ${esc(ev.titulo)}</span><span class="row__sub">${esc(ev.nombre)} · ${esc(cuando)}${esc(sueno)}</span></span></div></li>`;
     }).join("");
@@ -2166,7 +2197,7 @@ function rowCuenta(meta) {
     ${thumb(1000001, { size: 44, th: a.th })}
     <a class="row__main" href="#/progreso/${meta.tag.slice(1)}" aria-label="${esc(aria)}">
       <span class="row__title">${title} ${mark}</span>
-      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? " · sin actualizar" : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
+      <span class="row__sub">TH${a.th} · <span class="tag">${esc(meta.tag)}</span> · ${esc(when)}${stale(exp) ? ` · <span class="chip chip--warn">Necesita actualización</span>` : ""}${(meta.grupos || []).length ? ` · ${esc(meta.grupos.join(", "))}` : ""}</span>
       ${goalBar(meta, a)}
       ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
@@ -2804,14 +2835,13 @@ function mejorasCostes() {
 
 function mejorasPorFin(all) {
   const free = [];
-  for (const meta of allAccounts()) {
-    const exp = expOf(meta.tag);
-    if (!exp) continue;
-    const b = builderStatus(exp);
-    if (b.known && b.free > 0) free.push({ meta, exp, b });
+  let vencidosCtor = 0;
+  for (const row of fleetRows()) {
+    vencidosCtor += row.builders.vencidos || 0;
+    if (row.builders.known && !row.builders.over && row.builders.free > 0) free.push({ meta: accountByTag(row.tag), b: row.builders });
   }
   const freeCard = free.length ? `<div class="section"><div class="card">
-      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres</p>
+      <p class="t-headline" style="margin:0 0 8px">${free.length} ${free.length === 1 ? "cuenta" : "cuentas"} con constructores libres en la exportación</p>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(({ meta, b }) => {
         const a = viewOf(meta.tag);
         return `<span class="chip chip--account">${thumb(1000001, { size: 22, pad: 1, th: a.th })} ${esc(meta.chip)} ${b.free} ${b.free === 1 ? "libre" : "libres"}</span>`;
@@ -2819,7 +2849,7 @@ function mejorasPorFin(all) {
     </div></div>` : "";
   const done = all.filter((u) => u.done);
   const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end || rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag));
-  const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Terminadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
+  const doneBlock = done.length ? `<div class="section"><div class="section-header"><span>Estimadas · pendiente de reimportar</span></div><ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
     const key = madridDayKey(u.end);
@@ -2828,7 +2858,10 @@ function mejorasPorFin(all) {
   }
   for (const list of byDay.values()) list.sort((a, b) => rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag) || a.end - b.end);
   const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><ul class="list">${list.map(upRow).join("")}</ul></div>`).join("");
-  return freeCard + doneBlock + days + helpersBlock();
+  const estimadoNote = vencidosCtor
+    ? `<p class="section-footer">${vencidosCtor === 1 ? "1 temporizador de constructor ya habría acabado" : `${vencidosCtor} temporizadores de constructor ya habrían acabado`}. Es una estimación de la última exportación, no un constructor confirmado.</p>`
+    : "";
+  return freeCard + estimadoNote + doneBlock + days + helpersBlock();
 }
 
 function mejorasPorCuenta() {
@@ -2837,6 +2870,7 @@ function mejorasPorCuenta() {
     if (!exp) return "";
     const a = viewOf(meta.tag);
     const b = builderStatus(exp);
+    const colas = estadoColas(exp, state.now, { staleMs: staleLimit(), th: a.th });
     const list = upgrades(exp);
     const labN = list.filter((u) => u.queue === "laboratorio" && !u.done).length;
     const petN = list.filter((u) => u.queue === "mascotas" && !u.done).length;
@@ -2848,7 +2882,9 @@ function mejorasPorCuenta() {
           ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
           ${builderHead(b, bob)}
           ${slots}
-          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos estimados desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}</p>
+          ${colas.desactualizada ? `<p class="t-footnote c-2" style="margin:8px 0 0">Necesita actualización. Se conserva el último plan.</p>` : ""}
+          ${colas.builders.vencidos ? `<p class="t-footnote c-2" style="margin:8px 0 0">${colas.builders.vencidos === 1 ? "1 temporizador ya habría acabado (estimado)" : `${colas.builders.vencidos} temporizadores ya habrían acabado (estimado)`}. No es un constructor confirmado.</p>` : ""}
+          <p class="t-footnote c-2" style="margin:8px 0 0">Tiempos desde la exportación de ${esc(fmtWhen(exp.timestamp * 1000))}.</p>
         </div>
       </div><ul class="list" style="margin-top:8px">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
   }).join("");
@@ -2887,7 +2923,7 @@ function upRow(u) {
   const title = nameOf(u.id) || (item ? "Sin identificar" : "Ítem");
   const unknown = !item || item.estado === "sin_identificar";
   const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
-  const remain = u.done ? "Terminada" : (fmtRemain(u.end, state.now) || "en < 1 min");
+  const remain = u.done ? "Estimada" : (fmtRemain(u.end, state.now) || "en < 1 min");
   const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
   return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">

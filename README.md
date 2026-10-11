@@ -42,6 +42,8 @@ Datos de prueba del 7 de octubre de 2026.
 
 Si un botón falla, la app avisa en una línea y se puede seguir usando. Los enlaces de la fuente de costes y de la política de Supercell se abren fuera, y la app se queda donde estaba. Inicio, Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cada cuenta siguen respondiendo al toque, también con Actualizar todas abierta.
 
+Inicio y Cuentas cuentan los constructores con el mismo cálculo. Un hueco libre en la exportación es un dato real, con su fecha. Si el temporizador ya llegó a cero, es una estimación: no es un constructor confirmado. Una cuenta sin actualizar desde hace días dice «Necesita actualización» y conserva el último plan. No sale como urgente solo porque esos temporizadores viejos estén a cero. El porcentaje de cada cuenta se compara con el máximo de su ayuntamiento, y la media de la flota es la media de esos porcentajes.
+
 ## Funciones
 
 La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
@@ -151,7 +153,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
-| 3.1.10 | Un fallo en un botón no deja la pantalla pillada: se suelta y se avisa. Los enlaces de fuera se abren fuera. La interfaz nueva no se mezcla con la copia anterior. |
+| 3.1.10 | Un fallo en un botón no deja la pantalla pillada. Inicio y Cuentas usan el mismo recuento de constructores: libre en la exportación, estimado si el temporizador ya llegó a cero, o «Necesita actualización» si la cuenta es vieja. El porcentaje de cada cuenta es frente al máximo de su ayuntamiento. |
 | 3.1.9 | Inicio vuelve a abrirse desde las otras pestañas, también con Actualizar todas abierta. Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cuenta los abre el toque. |
 | 3.1.8 | Actualizar todas, dentro de la app: la lista sigue el orden de Abrir hoy, Pegar esta cuenta lee el portapapeles con el toque y, si falla, un campo. Cada cuenta se reconoce por la etiqueta, se marca y se guarda al momento. El progreso y la sesión siguen si iOS cierra la app. Ya no hace falta Atajos. |
 | 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel. La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. El Crafting Station se llama Defensa artesanal. No entra la base del constructor. |

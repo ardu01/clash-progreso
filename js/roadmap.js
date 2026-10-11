@@ -4,6 +4,7 @@ import { provisionalKey } from "./provisional.js";
 import {
   capsMaxFor, categoryKeyFor, itemName, townHallLevel, builderStatus, VILLAGE_KEYS, pctAt,
 } from "./progress.js";
+import { clasificarHueco, repartirColas } from "./colas.js";
 import { finDe, scheduleNext } from "./schedule.js";
 
 const STORAGES = new Set(["1000005", "1000003", "1000024"]);
@@ -291,37 +292,24 @@ function actualesFrom(exp, now) {
 }
 
 function laneFrom(id, cola, titulo, cur, now) {
-  if (!cur || cur.done) {
-    return { id, cola, titulo, libreYa: true, freeAt: now, blocked: false };
-  }
-  if (!cur.exacta) {
-    return { id, cola, titulo, libreYa: false, freeAt: now, blocked: true };
-  }
-  if (cur.fin <= now) return { id, cola, titulo, libreYa: true, freeAt: now, blocked: false };
-  return { id, cola, titulo, libreYa: false, freeAt: cur.fin, blocked: false };
+  return { id, cola, titulo, ...clasificarHueco(cur, now) };
 }
 
 function makeLanes(exp, now, th) {
-  const builders = builderStatus(exp);
   const actuales = actualesFrom(exp, now);
-  const ctor = actuales.filter((u) => u.queue === "constructor" && !u.extra);
-  const running = ctor.filter((u) => !u.done).sort((a, b) => (a.exacta ? a.fin : Infinity) - (b.exacta ? b.fin : Infinity));
-  const known = !!(builders && builders.known && typeof builders.total === "number");
-  const total = known ? builders.total : running.length;
-  const lanes = [];
-  for (let i = 0; i < total; i += 1) {
-    lanes.push(laneFrom(`c${i}`, "constructor", `Constructor ${i + 1}`, running[i] || null, now));
-  }
-  for (let i = total; i < running.length; i += 1) {
-    lanes.push(laneFrom(`x${i}`, "constructor", "Mejora sin constructor conocido", running[i], now));
-  }
-  const lab = actuales.find((u) => u.queue === "laboratorio" && !u.done) || null;
-  lanes.push(laneFrom("lab", "laboratorio", "Laboratorio", lab, now));
-  if (th >= 14) {
-    const pets = actuales.find((u) => u.queue === "mascotas" && !u.done) || null;
-    lanes.push(laneFrom("pets", "mascotas", "Casa de mascotas", pets, now));
-  }
-  return { lanes, avisoHora: actuales.some((u) => !u.done && !u.exacta), conocidos: known };
+  const partes = repartirColas(actuales, {
+    builders: builderStatus(exp),
+    now,
+    mascotas: th >= 14,
+  });
+  const slots = partes.mascotas
+    ? [...partes.constructores, partes.laboratorio, partes.mascotas]
+    : [...partes.constructores, partes.laboratorio];
+  return {
+    lanes: slots.map((s) => laneFrom(s.id, s.cola, s.titulo, s.cur, now)),
+    avisoHora: partes.avisoHora,
+    conocidos: partes.known,
+  };
 }
 
 function placeStep(step, lanes, sleep, now, cursor) {
@@ -406,6 +394,8 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
     step.provisional = true;
     step.markedAt = mark.markedAt || 0;
   }
+  const origenBase = planIsConfigured(plan) ? "planificado" : "recomendado";
+  for (const step of steps) step.origen = step.provisional ? "provisional" : origenBase;
   const filtered = applyFilters(steps, chosen);
   filtered.kept.sort(byRank);
   const { lanes, avisoHora, conocidos } = makeLanes(exp, nowMs, current || 0);
