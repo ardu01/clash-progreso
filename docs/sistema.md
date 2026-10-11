@@ -2241,3 +2241,11 @@ Un enlace `http` (la fuente de costes y la Fan Content Policy) ya no sustituye l
 `APP_VERSION` es `4.1.7`, `SHELL_CACHE` es `cp-shell-v44` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. Los costes, los tiempos y el plan no cambian.
 
 Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paquete.js`). Lee `./paquete-estetico/paquete.json` y, solo en modo oscuro, carga `base.css` y el CSS del tema elegido; el tema se activa con `:root[data-tema]` cuando su hoja ya ha cargado. La elección se guarda en `localStorage["cp-tema"]`: vacío es «Ninguno» (por defecto), `auto` es «Automático» (TH de la cuenta abierta o de la principal). El selector está en Copia → Apariencia. El service worker guarda el paquete en su propia caché `cp-temas-<versión>` y borra las versiones viejas del paquete; esa caché no depende de `SHELL_CACHE`. Sin paquete, la app no cambia. `.thumb > img`, `frameOf()` y los colores semánticos no se tocan.
+
+## Nota de cambios (11 oct 2026, 4.1.8)
+
+`APP_VERSION` es `4.1.8`, `SHELL_CACHE` es `cp-shell-v45` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. El paquete de temas sigue en 1.0.0.
+
+`js/caches.js` declara `PAQUETE_TEMAS`: `true` si la compilación lleva `paquete-estetico/`, `false` si no. Con `false`, `cargarPaquete()` no hace ninguna petición: no aparece el 404 de `paquete.json` en la consola y la app se ve igual que sin cargador. Un test exige que `PAQUETE_TEMAS` coincida con la existencia de `paquete-estetico/paquete.json`. Si aun así faltara el paquete con `true`, la app sigue igual (la petición falla y no se aplica tema). Sin conexión no cambia: `paquete.json` y los CSS salen de `cp-temas-<versión>`.
+
+El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.

@@ -48,7 +48,7 @@ import { htmlAtencion, htmlMotor } from "./ui-atencion.js";
 import { htmlEstrategias } from "./ui-evolucion.js";
 import { empaquetarCuentas, empezarExploracion, pararExploracion } from "./evolucion/control.js";
 import { cargarFuentes, costeSubirTh } from "./fuentes.js";
-import { aplicarTema, cargarPaquete, elegirTema, gruposDelPaquete, hayPaquete, muestra, temaActivo, temaElegido, temasDelPaquete } from "./temas-paquete.js";
+import { aplicarTema, cargarPaquete, elegirTema, gruposDelPaquete, hayPaquete, muestra, temaActivo, temaAutomatico, temaElegido, temasDelPaquete } from "./temas-paquete.js";
 import {
   anotarResultado, blankSession, clearSession, compareOrden, fraseResumen, isStandalone, mensajePegado, nextOf, ordenDeSesion,
   progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
@@ -292,12 +292,15 @@ function oscuroEfectivo() {
   const t = state.theme || "sistema";
   return t === "dark" || (t === "sistema" && !!window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
 }
-function temaDeAhora() {
-  if (temaElegido() !== "auto") return temaActivo(null);
+// TH de la cuenta abierta o, si no, de la principal: lo que usa «Automático».
+function thDeAhora() {
   const tag = route().tag || null;
   const meta = (tag && allAccounts().find((m) => m.tag === tag)) || allAccounts().find((m) => m.principal);
   const exp = meta && state.index ? expOf(meta.tag) : null;
-  return temaActivo(exp ? townHallLevel(exp) : null);
+  return exp ? townHallLevel(exp) : null;
+}
+function temaDeAhora() {
+  return temaActivo(temaElegido() === "auto" ? thDeAhora() : null);
 }
 let temaMq = null;
 function aplicarTemaApp() {
@@ -316,7 +319,7 @@ function temasHtml() {
   const grupos = gruposDelPaquete().map((g) => [g, temasDelPaquete().filter((t) => t.grupo === g.id)]).filter(([, ts]) => ts.length)
     .map(([g, ts]) => `<h3 class="t-subhead c-2">${esc(g.nombre)}</h3><ul class="temas">${ts.map((t) => btn(t.id, t.nombre, temaImg(t, 40))).join("")}</ul>`).join("");
   return `<div class="section"><div class="card"><h2 class="t-headline">Tema del juego</h2>
-      <ul class="temas">${btn("", "Ninguno", `<span class="swatch" aria-hidden="true"></span>`)}${btn("auto", "Automático", temaImg(temaDeAhora(), 40))}</ul>${grupos}
+      <ul class="temas">${btn("", "Ninguno", `<span class="swatch" aria-hidden="true"></span>`)}${btn("auto", "Automático", temaImg(temaAutomatico(thDeAhora()), 40))}</ul>${grupos}
       <p class="t-footnote c-2">Solo se ve en modo oscuro. Automático usa el TH de la cuenta abierta o, si no, el de la principal. Se guarda en este iPhone. Los temas son de fans, inspirados en el juego.</p></div></div>`;
 }
 

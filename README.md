@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.7</strong><br>
+  <strong>Versión 4.1.8</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -95,6 +95,8 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 | <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
 
 ## En esta versión
+
+La app sabe por su propia compilación si lleva el paquete de temas (`PAQUETE_TEMAS` en `js/caches.js`). Si no lo lleva, no pide `paquete.json` y la consola queda limpia, sin 404. El botón «Automático» del selector enseña el tema que elegiría Automático (el del ayuntamiento de la cuenta abierta o, si no, de la principal), no el tema que esté elegido.
 
 En Copia → Apariencia hay un «Tema del juego» opcional, solo en modo oscuro. Por defecto es «Ninguno». «Automático» usa el ayuntamiento de la cuenta abierta o, si no, el de la principal; también se puede elegir un tema concreto. Los temas no van en la app: son un paquete estético aparte en `paquete-estetico/`, con versión propia y caché `cp-temas-<versión>`. La app solo trae el cargador (`js/temas-paquete.js`); si el paquete no está, nada cambia. El modo claro, los colores de estado y las miniaturas no se tocan.
 
@@ -254,7 +256,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v44` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v45` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -262,6 +264,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.8 | Sin paquete de temas no se pide `paquete.json` (sin 404). El botón «Automático» enseña el tema que elegiría. |
 | 4.1.7 | Tema del juego opcional en Copia → Apariencia, solo en modo oscuro: «Ninguno» por defecto, «Automático» por TH o uno elegido. Los temas son un paquete aparte (`paquete-estetico/`, versión propia y caché `cp-temas-<versión>`); sin él la app no cambia. |
 | 4.1.6 | El águila sale de los máximos de TH17 y TH18. B.O.B cuenta siempre. El plan usa las sesiones, separa el botín por recurso y prioriza desbloqueos, almacenes, oro y elixir. Desde TH17 la subida pide las fusiones al máximo. |
 | 4.1.5 | La barra vuelve a cinco pestañas, sin Operaciones. Operaciones y Explorar estrategias se abren desde Agenda. Los apuntes y las rutas se quedan. |

@@ -1,14 +1,18 @@
 // Cargador del paquete estético «Temas Clash Progreso» (aparte de la app, con versión propia).
 // La app no trae ningún tema: si existe ./paquete-estetico/paquete.json, carga base.css y SOLO el CSS del tema elegido.
 // Solo en modo oscuro. "" = Ninguno (por defecto), "auto" = Automático (TH de la cuenta). Sin paquete no hace nada.
+import { PAQUETE_TEMAS } from "./caches.js";
+
 const RAIZ = "./paquete-estetico/";
 const CLAVE = "cp-tema";
 let paquete = null;
 let pedido = null;
 
-export function cargarPaquete() {
+// Solo se pide si la compilación declara el paquete (PAQUETE_TEMAS): sin paquete no hay petición ni 404.
+export function cargarPaquete({ incluido = PAQUETE_TEMAS, pedir = (u, o) => fetch(u, o) } = {}) {
+  if (!incluido) { paquete = null; return Promise.resolve(null); }
   if (!pedido) {
-    pedido = fetch(RAIZ + "paquete.json", { cache: "no-cache" })
+    pedido = pedir(RAIZ + "paquete.json", { cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
       .catch(() => null)
       .then((p) => { paquete = p && Array.isArray(p.temas) && p.temas.length ? p : null; return paquete; });
@@ -28,7 +32,12 @@ export function temaActivo(th) {
   const e = temaElegido();
   if (!paquete || !e) return null;
   if (e !== "auto") return paquete.temas.find((t) => t.id === e) || null;
-  const auto = paquete.temas.filter((t) => t.th_auto != null).sort((a, b) => a.th_auto - b.th_auto);
+  return temaAutomatico(th);
+}
+// El tema que elegiría «Automático» para ese TH, se haya elegido o no (muestra del botón Automático).
+export const temaAutomatico = (th) => resolverAuto(paquete ? paquete.temas : [], th);
+export function resolverAuto(temas, th) {
+  const auto = temas.filter((t) => t.th_auto != null).sort((a, b) => a.th_auto - b.th_auto);
   if (th == null || !auto.length) return null;
   return auto.filter((t) => t.th_auto <= th).pop() || auto[0];
 }
