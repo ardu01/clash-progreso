@@ -2086,7 +2086,7 @@ Una marca provisional vive en el plan, con la hora estimada. Al importar, si esa
 
 Gráficos → Niveles lista el TH, los héroes frente a su máximo, la media de niveles por categoría, la distribución de muros, el laboratorio, las mascotas, el cara a cara (las cuentas marcadas en Ranking), las cuentas del mismo TH y el ritmo en niveles por semana. Con una sola exportación hay un punto. El ritmo no inventa un 0.
 
-La meta `{ clave, pct }` es opcional en cada cuenta. El tema es sistema, claro u oscuro (`cp-theme`). Cuentas se puede buscar por alias. Una cuenta avisa si la exportación supera los días configurados (por defecto, más de 7). Al importar se guarda una copia en IndexedDB y Copia avisa si han pasado 7 días sin otra. El atajo de varias aldeas está en `docs/atajo.md`.
+La meta `{ clave, pct }` es opcional en cada cuenta. El tema es sistema, claro u oscuro (`cp-theme`). Cuentas se puede buscar por alias. Una cuenta avisa si la exportación supera los días configurados (por defecto, más de 7). Al importar se guarda una copia en IndexedDB y Copia avisa si han pasado 7 días sin otra. Varias aldeas se actualizan con Actualizar todas (`docs/atajo.md`).
 
 ## Nota de cambios (11 oct 2026, 3.1.1)
 
@@ -2109,3 +2109,45 @@ La ruta por defecto es `#/inicio`. La barra tiene Inicio, Cuentas, Mejoras, Aná
 Inicio resume el número de cuentas, el TH de la principal y el objetivo del roster. «Abrir hoy» ordena las cuentas por la cola del plan que queda libre antes (constructor, laboratorio o casa de mascotas). Si el temporizador no es un número, no se inventa la hora y esa cuenta queda fuera del orden del día. «Objetivos de flota» agrupa por el objetivo del roster: cuántas cuentas ya lo tienen y la fecha más tardía del plan de las que faltan. Esa fecha es el máximo del TH anterior, no el momento de subir el ayuntamiento. Si no hay un plan guardado con ese TH, se estima con Maxear y se dice en la pantalla. No se escribe ese plan en los datos guardados.
 
 El ranking lleva el puesto en un hexágono. El mapa de calor usa la escala de menos de 50 %, 50–79 %, 80–99 % y 100 %, con el número entero dentro. El criterio del plan pasa a viñetas; el texto no cambia, y la frase de los héroes de `#28PLGP0G2` sigue como nota. El tema claro u oscuro forzado manda sobre el del sistema.
+
+## Nota de cambios (11 oct 2026, 3.1.3)
+
+`APP_VERSION` es `3.1.3`, `SHELL_CACHE` es `cp-shell-v21` e `IMAGE_CACHE` sigue en `cp-img-v7`. No hay PNG nuevos. `ROSTER_VERSION` sigue en 2. Los nombres y los héroes de 90000016 y 90000059 ya estaban bien desde la 3.1.0; esta versión corrige la rareza, la fuente del héroe y las tablas de mena, que seguían cruzadas.
+
+90000016 es Flecha monolítica (Reina arquera, épica, 27 niveles) y se queda con la tabla de 26 pasos que tiene mena estelar. 90000059 es Colmillos eléctricos (Duque dragón, común, 18 niveles) y se queda con la tabla de 17 pasos, sin mena estelar. La bomba aérea en TH18 pasa de 7 a 8. En 18 edificios, el coste y el tiempo de los niveles 1–3 (o 1–2) dejan de ser los de la supercarga. El consejo heroico Nv1 pasa a 30.000 de elixir y 1 hora, y el lanzatropas Nv3 a 8 días. La choza de constructor Nv1 queda en coste 0 y tiempo 0, que es el valor de la tabla. La torre vengativa Nv1 queda en 1.123.205 segundos (13 días y 5 segundos). Se quitan 10 topes de equipamiento en TH donde la pieza aún no se desbloquea. No se tocan los 18 valores en los que la wiki coincide con el repo y ClashKing no.
+
+Ninguna de las 11 cuentas del 7 de octubre cambia de porcentaje: ni la media, ni una categoría, ni el porcentaje del TH siguiente. C1 sigue en 64,2 (trampas 39,8, equipamiento 61,4) y C2 en 47,7 / 44,5 (equipamiento 58,9 / 58,9). La exportación de C1 ya tiene 8 bombas aéreas, y el denominador usa el mayor entre el tope y las colocadas. El equipamiento de nivel 1 no entra en el %. Los topes que se quitan no los usa ninguna cuenta guardada por encima del nivel 1. El coste pendiente sí cambia: en C1 la mena estelar pendiente pasa de 6.970 a 7.280 y los 9 niveles de la flecha que no tenían coste pasan a tenerlo. El oro y el tiempo pendientes de la aldea también se mueven, porque varios niveles bajos dejaban de ser el precio de construir.
+
+## Nota de cambios (11 oct 2026, 3.1.4)
+
+`APP_VERSION` es `3.1.4`, `SHELL_CACHE` es `cp-shell-v22` e `IMAGE_CACHE` es `cp-img-v8`. `ROSTER_VERSION` sigue en 2. Entran 15 PNG (lado largo como máximo 512, compresión 9, sin recorte nuevo). La precarga de instalación sigue en 220 archivos y 21.579.962 bytes: los PNG nuevos van con `precarga: false`. El conjunto pasa de 602 a 617 archivos.
+
+Dejan de usar la imagen de otro nivel: Torre Tesla 16 y 17, Ballesta 12 y 13, Catapulta 6 y 7, Taller 8, Choza de constructor 8, Caseta de animales 12, Bomba aérea 7 y 8 (el mismo PNG de 66×103, título del Fan Kit «level 7.&8»), Torre infernal 12 y Gigabomba 2 y 3. La torre infernal 12 es el render de marketing en modo orbe; no hay recorte de juego, y no se publica el render de modo objetivo. La gigabomba 2 y 3 son recortes de la lámina oficial; el orden de izquierda a derecha es el de esa lámina. No se usa la variante con plaza de aparcamiento del taller 8 ni el recorte de la gigabomba 1, que ya tenía imagen. Quedan 58 niveles prestados.
+
+La torre de supermagos (1000102) pasa a `ok` con los niveles 1 y 2. El PNG es el edificio, sin el mago encima. La torre multiusos sigue sin PNG. No se sustituye el ayuntamiento 17 ni el 18, y no se añade la aldea del constructor: siguen 12 tropas y 2 héroes.
+
+Nombres con el texto del juego en español (ClashKingAssets `ES.json`, commit b8f42a7): Escolta títere (90000042), Orbe oscuro (90000043), Copo de escarcha (90000050), Pistola aturdidora (90000056), Cabaña de B.O.B. (1000064) y Cohetes de defensa (1000012; el volcado y la comprobación del manifiesto lo dan así). L.A.S.S.I. (73000000) lleva el punto final. El nombre inglés de cada ficha no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.5)
+
+`APP_VERSION` es `3.1.5`, `SHELL_CACHE` es `cp-shell-v23` e `IMAGE_CACHE` sigue en `cp-img-v8`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+El apartado Equipamiento, dentro de Cuentas y fuera de la media de la aldea, muestra la tarjeta «Total para maxear todo el equipamiento» con mena brillante, reluciente y estrellada. La misma suma, cuenta por cuenta, está en Flota. Los filtros son Todos / Común / Épica, héroe, mostrar bloqueados y ocultar elegidos. Cada pieza lleva imagen, nivel actual y máximo, niveles restantes y el coste de mena de cada nivel pendiente. Una pieza bloqueada es la que no está en la exportación o no tiene tope en ese TH: no entra en el total y no se le inventa un nivel. Elegir una pieza solo la aparta de la lista; la exportación no dice cuál lleva puesta el héroe. Las tablas son las de la 3.1.3: 90000016 con mena estrellada y 90000059 sin ella. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.6)
+
+`APP_VERSION` es `3.1.6`, `SHELL_CACHE` es `cp-shell-v24` e `IMAGE_CACHE` sigue en `cp-img-v8`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+El perfil de cada cuenta se abre desde Cuentas y desde Progreso. La tarjeta muestra el nombre de la cuenta, la etiqueta, el ayuntamiento y la fecha de la exportación. Los ajustes (número de chozas de constructor, Constructor aprendiz, Asistente de laboratorio, Alquimista y cualquier otro ayudante que venga) salen del JSON y llevan la marca «De la exportación». La cabaña de B.O.B., si está, no se suma a las chozas. Los héroes de la aldea principal llevan barra de nivel frente al máximo de ese TH. En `#28PLGP0G2` siguen fuera del plan. Las 11 exportaciones de prueba no traen clan, trofeos, liga, estrellas de guerra ni Casa del constructor: esas secciones no se pintan y no hay campos para rellenarlas. Si una exportación futura trae `clan` o un nivel de Casa del constructor, se muestran esos valores y ningún otro inventado. El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.7)
+
+`APP_VERSION` es `3.1.7`, `SHELL_CACHE` es `cp-shell-v25` e `IMAGE_CACHE` es `cp-img-v9`. `ROSTER_VERSION` sigue en 2. La precarga de instalación sigue en 220 archivos y 21.579.962 bytes: los PNG nuevos van con `precarga: false`. El conjunto pasa de 617 a 642 archivos.
+
+Entran 25 PNG no oficiales (`official: false`) solo donde no había imagen del Fan Kit de ese nivel. El lado largo queda en 512 px como máximo, con compresión 9 y sin recorte. La herrería 10 sigue con la oficial del 9. La bomba aérea 12 pasa a la oficial `images/levels/air-bomb_11.png`. La bomba 12 sigue con la oficial del 11: el PNG de 75×76 no se usa. La torre multiusos (1000079) sigue `faltante` y muestra los niveles 1 y 2 en largo alcance; la ficha añade el modo de ataque rápido. La defensa artesanal y el portal portátil usan un solo icono no oficial y siguen `faltante`. Los módulos de la defensa artesanal no cambian: siguen con el render oficial de su defensa. No se añade ninguna imagen de la base del constructor. Quedan 35 niveles prestados. En Copia → Acerca de se acredita el arte de Supercell y las fuentes no oficiales (ClashKing y Fandom, autores en el manifiesto). El % de las 11 cuentas no cambia.
+
+## Nota de cambios (11 oct 2026, 3.1.8)
+
+`APP_VERSION` es `3.1.8`, `SHELL_CACHE` es `cp-shell-v26` e `IMAGE_CACHE` sigue en `cp-img-v9`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. La precarga de instalación sigue en 220 archivos y 21.579.962 bytes.
+
+Actualizar todas está en Inicio y en Cuentas. Abre una sesión con todas las cuentas, en el orden de Abrir hoy (la misma prioridad: antes la cola con hora, y al final la que no tiene hora exacta). Ese orden se congela al empezar. **Pegar esta cuenta** llama a `navigator.clipboard.readText()` en el mismo toque, en Safari y desde el icono de inicio. Si la lectura falla, sale un campo. La etiqueta del JSON marca esa cuenta, no tiene que ser la sugerida. Una etiqueta que no está en la lista no crea una cuenta. Lo que cambia (`ready`) actualiza la última exportación; un duplicado queda sin cambios; una exportación más antigua solo entra al histórico; un texto inválido no se marca. La sesión y el texto pendiente se escriben en `localStorage` antes del guardado en IndexedDB. Si iOS cierra la app, al abrir se vuelve a la sesión y, si quedó texto, se puede guardar con otro toque. Al terminar se ve qué cuentas cambiaron, cuáles no, cuáles fueron al histórico y cuáles no se pegaron. El % de las 11 cuentas no cambia.

@@ -1,6 +1,6 @@
 import {
   CATEGORIES, HERO_ORDER, ROSTER, analyze, averagePct, builderStatus, categoryItems,
-  capsFichaLines, categoryUnlock, catFoot, equipmentView, helpersOf, indexCaps, initials,
+  capsFichaLines, categoryUnlock, catFoot, helpersOf, indexCaps, initials,
   itemName, levelLine, outsidePct, overMaxLabel, rarezaEs, townHallLevel, upgradesOf,
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
@@ -21,7 +21,7 @@ import { accountVisible, dayInRange } from "./range.js";
 import { compareAccounts, fleetSnapshot, rankAccounts } from "./fleet.js";
 import { HEROES_FUERA, PLAN_CRITERIO, planQueue, upgradePlan } from "./plan.js";
 import { achievements, historyPairs, weeklyPace } from "./history.js";
-import { COST_SOURCE, COST_URL, categoryUses, equipmentPieces, piecesOf, remainingCost, usesResource } from "./costs.js";
+import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
 import { accountTimeline, finDe, fleetAgenda, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
@@ -31,6 +31,12 @@ import {
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
+import { applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "./equipo.js";
+import { exportFacts } from "./perfil.js";
+import {
+  blankSession, clearSession, compareOrden, isStandalone, mensajePegado, nextOf, ordenDeSesion,
+  progressOf, readSession, recordPaste, summaryOf, withPending, writeSession,
+} from "./actualizar.js";
 
 const CAT_CLASS = {
   defensas: "defensas",
@@ -87,6 +93,9 @@ const state = {
   flash: null,
   now: Date.now(),
   importUi: freshImport(),
+  actualizarManual: false,
+  actualizarFocus: false,
+  actualizarBorrador: "",
   filters: loadFilters(),
   chartKind: localStorage.getItem("cp-chart-kind") || "lineas",
   compareTags: loadCompare(),
@@ -99,6 +108,9 @@ const state = {
   staleDays: loadStaleDays(),
   rosterQ: "",
   levelKind: localStorage.getItem("cp-level-kind") || "th",
+  eqVista: localStorage.getItem("cp-eq-vista") === "flota" ? "flota" : "cuenta",
+  eqFiltro: loadEqFiltro(),
+  eqElegidos: loadEqElegidos(),
   copyAt: null,
   added: [],
   flashTags: new Set(),
@@ -155,6 +167,33 @@ function loadSleep() {
   }
 }
 
+function loadEqFiltro() {
+  const base = { rareza: "todos", heroe: "todos", bloqueados: false, ocultar: true };
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-eq-filtro") || "{}");
+    const rareza = ["todos", "Common", "Epic"].includes(raw.rareza) ? raw.rareza : "todos";
+    const heroe = typeof raw.heroe === "string" && raw.heroe ? raw.heroe : "todos";
+    return { rareza, heroe, bloqueados: raw.bloqueados === true, ocultar: raw.ocultar !== false };
+  } catch {
+    return base;
+  }
+}
+
+function loadEqElegidos() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("cp-eq-elegidos") || "{}");
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    const out = {};
+    for (const [tag, list] of Object.entries(raw)) {
+      if (!tag.startsWith("#") || !Array.isArray(list)) continue;
+      out[tag] = list.map(String);
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 function loadCompare() {
   try {
     const list = JSON.parse(localStorage.getItem("cp-compare") || "[]");
@@ -180,13 +219,14 @@ function route() {
   }
   if (name === "progreso" && parts[1]) return { name: "progreso", tag: "#" + parts[1] };
   if (name === "graficos" || name === "evolucion") return { name: "graficos", tag: null, cat: null };
+  if (name === "perfil") return { name: "perfil", tag: parts[1] ? "#" + parts[1] : null, cat: null };
   if (name === "ahora" || name === "ranking" || name === "agenda" || name === "equipo") return { name, tag: parts[1] ? "#" + parts[1] : null, cat: null };
   return { name, tag: null, cat: null };
 }
 
 function baseTab(r) {
-  if (r.name === "inicio" || r.name === "ahora" || r.name === "copia") return "inicio";
-  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
+  if (r.name === "inicio" || r.name === "ahora" || r.name === "copia" || r.name === "actualizar") return "inicio";
+  if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "equipo" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
   if (r.name === "mejoras") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
   if (r.name === "agenda" || r.name === "plan") return "agenda";
@@ -356,6 +396,7 @@ function nameOf(id) {
 }
 
 function thumbLevel(opts) {
+  if (opts.levelKey != null && opts.levelKey !== "") return opts.levelKey;
   if (opts.lvl != null && opts.lvl !== "") return opts.lvl;
   if (opts.th != null && opts.th !== "") return opts.th;
   return null;
@@ -373,7 +414,7 @@ function thumb(id, opts = {}) {
   const label = nameOf(id) || "";
   const choice = imageChoice(item, thumbLevel(opts));
   const im = choice.im;
-  if (item.estado === "faltante" || !im || (isHeavy(im, item) && !opts.ficha)) {
+  if (!im || (isHeavy(im, item) && !opts.ficha)) {
     const style = known ? "" : ` style="--size:${size}px"`;
     if (opts.ficha && im && isHeavy(im, item)) {
       return imageThumb(cls, size, label, im, opts, choice);
@@ -949,10 +990,10 @@ function prioridadDe(meta) {
 }
 
 function comparePrioridad(a, b) {
-  if (a.tier !== b.tier) return a.tier - b.tier;
-  if (a.sortWhen !== b.sortWhen) return a.sortWhen - b.sortWhen;
-  if (!!a.meta.principal !== !!b.meta.principal) return a.meta.principal ? -1 : 1;
-  return String(a.meta.nombre).localeCompare(String(b.meta.nombre), "es");
+  return compareOrden(
+    { tier: a.tier, sortWhen: a.sortWhen, principal: !!a.meta.principal, nombre: a.meta.nombre },
+    { tier: b.tier, sortWhen: b.sortWhen, principal: !!b.meta.principal, nombre: b.meta.nombre },
+  );
 }
 
 function textoCola(item) {
@@ -1115,6 +1156,7 @@ function renderInicio() {
   };
   return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">Centro de mando · ${list.length === 1 ? "1 cuenta" : `${list.length} cuentas`}</p>
+    <div class="section">${botonActualizar()}<p class="section-footer">Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.</p></div>
     ${tiles}
     <div class="section"><div class="section-header"><span>Qué hacer ahora</span></div><ul class="list list--tiles">${acciones}</ul></div>
     <div class="section"><div class="section-header"><span>Abrir hoy</span></div>
@@ -1690,6 +1732,188 @@ function armNotices() {
   }, Math.min(wait, 2147483647));
 }
 
+function abrirActualizar() {
+  let ses = readSession(localStorage);
+  if (!ses) {
+    const order = ordenDeSesion(allAccounts().map((meta) => {
+      const p = prioridadDe(meta);
+      return { tag: meta.tag, tier: p.tier, sortWhen: p.sortWhen, principal: !!meta.principal, nombre: meta.nombre };
+    }));
+    ses = blankSession(order, state.now);
+    writeSession(localStorage, ses);
+  }
+  state.actualizarManual = false;
+  if (location.hash !== "#/actualizar") location.hash = "#/actualizar";
+  else render();
+}
+
+function botonActualizar() {
+  const ses = readSession(localStorage);
+  const extra = ses && ses.order.length ? ` · ${progressOf(ses).label}` : "";
+  return `<button type="button" class="btn btn--primary btn--block" data-actualizar>Actualizar todas${esc(extra)}</button>`;
+}
+
+function nombreCuenta(tag) {
+  const meta = accountByTag(tag);
+  return meta ? meta.nombre : tag;
+}
+
+function filaSesion(ses, tag, i, next) {
+  const row = ses.done[tag];
+  let estado = "Pendiente";
+  if (row && row.kind === "ready") estado = "Cambió";
+  else if (row && row.kind === "older") estado = "Al histórico";
+  else if (row) estado = "Sin cambios";
+  else if (tag === next) estado = "Siguiente";
+  const cls = tag === next && !row ? " chip--main" : " chip--muted";
+  return `<li><div class="row row--tile"><span class="orden-n num" aria-hidden="true">${i + 1}</span><span class="row__main"><span class="row__title"><span class="sr-only">${i + 1}. </span>${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span><span class="chip${cls}">${estado}</span></div></li>`;
+}
+
+function campoPegado(ses) {
+  const texto = ses.pending || state.actualizarBorrador || "";
+  if (!state.actualizarManual && !ses.pending) return "";
+  const aviso = ses.pending
+    ? `<p class="t-body">Quedó un pegado sin guardar. Si iOS cerró la app, tócalo otra vez.</p>`
+    : `<p class="t-footnote c-2">Mantén pulsado el campo y elige Pegar.</p>`;
+  return `${aviso}<label class="t-footnote" for="act-paste">Pega aquí el JSON</label><textarea id="act-paste" class="act-paste" data-actualizar-text autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">${esc(texto)}</textarea><button type="button" class="btn btn--primary btn--block" data-pegar-campo>Guardar este pegado</button>`;
+}
+
+function renderActualizar() {
+  const ses = readSession(localStorage);
+  if (!ses) {
+    return `<h1 class="large-title">Actualizar todas</h1>
+      <p class="large-sub">Sin la app Atajos.</p>
+      <div class="section"><div class="card empty"><p class="t-title3">Aún no hay una lista</p><p class="t-subhead c-2">Se abre con las cuentas en el orden de Abrir hoy.</p><button type="button" class="btn btn--primary" data-actualizar>Empezar</button></div></div>`;
+  }
+  const prog = progressOf(ses);
+  const pct = prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
+  const standalone = isStandalone(navigator, (q) => window.matchMedia(q));
+  const hint = standalone
+    ? "Después de copiar, vuelve a este icono. Safari y el icono de inicio no comparten los datos."
+    : "Después de copiar, vuelve a esta pestaña de Safari. El icono de inicio no comparte estos datos.";
+  const barra = `<div class="section"><div class="card act-card">
+      <div class="act-top"><h2 class="t-headline">Progreso</h2><p class="act-count num" aria-live="polite">${esc(prog.label)}</p></div>
+      <div class="act-bar" role="progressbar" aria-valuenow="${prog.done}" aria-valuemin="0" aria-valuemax="${prog.total}" aria-label="${prog.done} de ${prog.total} cuentas"><span style="width:${pct}%"></span></div>
+    </div></div>`;
+  if (ses.status === "done") {
+    const sum = summaryOf(ses);
+    const bloque = (titulo, tags) => {
+      if (!tags.length) return "";
+      const lis = tags.map((tag) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(nombreCuenta(tag))}</span><span class="row__sub tag">${esc(tag)}</span></span></div></li>`).join("");
+      return `<div class="section"><div class="section-header"><span>${titulo}</span></div><ul class="list">${lis}</ul></div>`;
+    };
+    return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
+      <p class="large-sub">Lista terminada</p>
+      ${barra}
+      ${ses.pending ? `<div class="section act-actions">${campoPegado(ses)}</div>` : ""}
+      ${bloque("Cambiaron", sum.changed)}
+      ${bloque("Sin cambios", sum.same)}
+      ${bloque("Al histórico", sum.history)}
+      ${bloque("Sin pegar", sum.missing)}
+      <div class="section"><button type="button" class="btn btn--primary btn--block" data-actualizar-listo>Listo</button></div></div>`;
+  }
+  const next = nextOf(ses);
+  const siguiente = next
+    ? `<div class="section"><div class="card">
+        <p class="t-footnote c-2">Siguiente</p>
+        <h2 class="t-title2">${esc(nombreCuenta(next))}</h2>
+        <p class="tag">${esc(next)}</p>
+        <p class="t-body">En el juego: Ajustes → Más ajustes → Exportar datos → Copiar.</p>
+        <p class="t-footnote c-2">En inglés: Settings → More Settings → Data Export → Copy.</p>
+      </div></div>
+      <p class="section-footer">${esc(hint)}</p>`
+    : `<div class="section"><div class="card empty"><p class="t-title3">No hay cuentas en la lista</p></div></div>`;
+  const manual = state.actualizarManual || !!ses.pending;
+  const lista = ses.order.map((tag, i) => filaSesion(ses, tag, i, next)).join("");
+  return `<div class="act-root" data-standalone="${standalone ? "1" : "0"}"><h1 class="large-title">Actualizar todas</h1>
+    <p class="large-sub">El orden queda fijo al empezar. ${esc(prog.label)}</p>
+    ${barra}
+    ${siguiente}
+    <div class="section act-actions">
+      <button type="button" class="btn btn--primary btn--block" data-pegar-cuenta>Pegar esta cuenta</button>
+      ${manual ? "" : `<button type="button" class="btn btn--secondary btn--block" data-pegar-mano>Pegar a mano</button>`}
+      ${campoPegado(ses)}
+      <button type="button" class="btn btn--secondary btn--block" data-go="#/inicio">Dejar para luego</button>
+    </div>
+    <div class="section"><div class="section-header"><span>Cuentas</span></div><ul class="list list--tiles orden-list">${lista}</ul></div></div>`;
+}
+
+async function pegarCuenta() {
+  let text = "";
+  try {
+    text = await navigator.clipboard.readText();
+  } catch {
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", "Safari no dejó leer el portapapeles. Pega el JSON en el campo.");
+    render();
+    return;
+  }
+  await aplicarPegado(text);
+}
+
+async function aplicarPegado(text) {
+  const cur = readSession(localStorage);
+  if (!cur) return;
+  const marcado = withPending(cur, text);
+  writeSession(localStorage, marcado);
+  const { items } = clipboardImportPlan(text || "", classifyCtx());
+  const result = recordPaste(marcado, items, state.now);
+  writeSession(localStorage, result.session);
+  const accepted = result.notes.some((n) => n.kind === "ready" || n.kind === "duplicate" || n.kind === "older");
+  if (!accepted) {
+    writeSession(localStorage, { ...result.session, pending: "" });
+    state.actualizarBorrador = text || "";
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", mensajePegado(result.notes, nombreCuenta));
+    render();
+    return;
+  }
+  try {
+    if (result.save.length) await persistirPegado(result.save);
+  } catch {
+    state.actualizarManual = true;
+    state.actualizarFocus = true;
+    showToast("err", "No se pudo guardar. El texto sigue en este iPhone: toca Guardar este pegado.");
+    render();
+    return;
+  }
+  writeSession(localStorage, { ...result.session, pending: "" });
+  state.actualizarManual = false;
+  state.actualizarBorrador = "";
+  showToast("ok", mensajePegado(result.notes, nombreCuenta));
+  render();
+}
+
+async function persistirPegado(save) {
+  const before = new Map();
+  for (const it of save) before.set(it.value.tag, state.latest.get(it.value.tag) || null);
+  for (const it of save) await putExport(it.value);
+  state.rows = await allExports();
+  state.latest = latestByTag(state.rows);
+  const seen = new Set();
+  for (const it of save) {
+    const tag = it.value.tag;
+    if (seen.has(tag)) continue;
+    seen.add(tag);
+    const rec = reconcileProvisionals(state.provisionales, { tag, before: before.get(tag), after: state.latest.get(tag) });
+    state.provisionales = rec.provisionales;
+  }
+  saveProvisionals();
+  try {
+    await putCopy(buildBackup({
+      accounts: state.accounts,
+      exports: state.rows,
+      planes: state.planes,
+      provisionales: state.provisionales,
+      version: APP_VERSION,
+    }));
+    state.copyAt = Date.now();
+  } catch { /* la copia automática no bloquea el guardado */ }
+  armFlash(save.map((it) => it.value.tag));
+}
+
 async function savePlan(plan, opts = {}) {
   const before = new Map();
   for (const it of plan.save) before.set(it.value.tag, state.latest.get(it.value.tag) || null);
@@ -1805,21 +2029,28 @@ async function toggleNotify() {
 }
 
 function navbar(r) {
-  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento" };
+  const titles = { inicio: "Clash Progreso", roster: "Cuentas", progreso: "Progreso", mejoras: "Mejoras", graficos: "Análisis", ranking: "Análisis", analisis: "Análisis", copia: "Copia", detalle: "Detalle", ahora: "Ahora", plan: "Plan", historial: "Historial", agenda: "Agenda", equipo: "Equipamiento", perfil: "Perfil", actualizar: "Actualizar" };
   let lead = "";
   let trail = "";
   let title = titles[r.name] || titles[tab] || "";
   let collapsed = "false";
   if (r.name === "inicio") {
     trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
-  } else if (r.name === "copia" || r.name === "ahora") {
+  } else if (r.name === "copia" || r.name === "ahora" || r.name === "actualizar") {
     lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
   } else if (r.name === "roster" || r.name === "importar") {
     trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
+  } else if (r.name === "perfil") {
+    title = "Perfil";
+    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    collapsed = "true";
   } else if (r.name === "plan" || r.name === "historial" || r.name === "equipo") {
     title = r.name === "plan" ? "Plan" : r.name === "historial" ? "Historial" : "Equipamiento";
-    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
+    const backTag = r.tag || state.selected;
+    lead = backTag
+      ? `<button class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
+      : `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
@@ -1875,6 +2106,7 @@ function renderRoster() {
     : `<p class="section-footer">% = media de las categorías desbloqueadas. Una cuenta sin Principal usa como destacada la de TH más alto.</p>`;
   return `<h1 class="large-title">Cuentas</h1>
     <p class="large-sub">${shown.length === list.length ? (list.length === 1 ? "1 cuenta" : `${list.length} cuentas`) : `${shown.length} de ${list.length}`} · ordenadas por ${esc(sortLabel)}</p>
+    <div class="section">${botonActualizar()}<p class="section-footer">Recorre la lista, copia en el juego y pega cada cuenta al volver.</p></div>
     ${rosterTools(shown)}
     ${staleCard()}
     <label class="filter-search"><span class="sr-only">Buscar cuenta</span><input data-roster-q type="search" enterkeyhint="search" placeholder="Buscar cuenta" value="${esc(state.rosterQ)}" aria-label="Buscar cuenta"></label>
@@ -1900,7 +2132,7 @@ function staleCard() {
   if (!pending.length) return "";
   const lis = pending.map((meta) => `<li><a class="row" href="#/progreso/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${expOf(meta.tag) ? "Sin actualización reciente" : "Sin importar"}</span></span>${CHEV}</a></li>`).join("");
   const dia = days === 1 ? "día" : "días";
-  return `<div class="section"><div class="section-header"><span>Actualizar todas</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
+  return `<div class="section"><div class="section-header"><span>Hace tiempo sin datos</span></div><ul class="list">${lis}</ul><p class="section-footer">Cuentas con más de ${days} ${dia} sin una exportación nueva, o sin datos. Al pegar un lote, el resumen dice cuáles siguen pendientes.</p></div>`;
 }
 
 function isSeedRoster(list) {
@@ -1921,6 +2153,7 @@ function rowCuenta(meta) {
         <span class="row__title">${esc(meta.nombre)} ${mark}</span>
         <span class="row__sub"><span class="chip chip--muted">Sin importar</span></span>
       </a>
+      <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
       <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
     </div></li>`;
   }
@@ -1936,6 +2169,7 @@ function rowCuenta(meta) {
       ${goalBar(meta, a)}
       ${meterHtml(a.media, `Media ${fmtPct(a.media)}`)}
     </a>
+    <a class="btn-text" href="#/perfil/${meta.tag.slice(1)}">Perfil</a>
     <button type="button" class="btn-text" data-edit="${esc(meta.tag)}">Editar</button>
   </div></li>`;
 }
@@ -2031,6 +2265,7 @@ function renderProgreso(tag) {
   const counts = chipCounts(rows, { status: filt.status, query: filt.q, index: state.index });
   const narrowed = filt.cat !== "todas" || filt.status !== "todos" || String(filt.q || "").trim();
   const links = exp ? `<div class="section"><ul class="list">
+      <li><a class="row" href="#/perfil/${meta.tag.slice(1)}"><span class="row__main"><span class="row__title">Perfil</span><span class="row__sub">Lo que trae la exportación</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">Plan de mejoras</span><span class="row__sub">Línea de tiempo hasta el TH objetivo</span></span>${CHEV}</a></li>
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span><span class="row__sub">Cambios, ritmo y rachas</span></span>${CHEV}</a></li>
     </ul></div>` : "";
@@ -2058,22 +2293,19 @@ function renderProgreso(tag) {
 
 function equipoSection(exp, meta) {
   const view = viewOf(meta.tag);
-  const pieces = equipmentPieces(exp, state.index, view.th);
-  const bag = remainingCost(pieces).total;
-  const ores = [
-    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
-    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
-    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
-  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
+  const rows = equipmentRows(exp, state.index, view.th);
+  const bag = oreTotal(rows);
+  const ores = `${fmtRes(bag.brillante)} brillante · ${fmtRes(bag.reluciente)} reluciente · ${fmtRes(bag.estrellada)} estrellada`;
   const row = view.cats.equipamiento;
   const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
+  const conTope = rows.filter((p) => !p.bloqueado).length;
   return `<div class="section"><div class="section-header"><span>Equipamiento</span></div>
     <ul class="list list--tiles"><li><a class="row row--tile" href="#/equipo/${meta.tag.slice(1)}">
       <span class="row__main"><span class="row__title">Piezas de héroe</span>
-        <span class="row__sub">${pieces.length} piezas · ${esc(pct)} · aparte de la aldea</span>
+        <span class="row__sub">${conTope} con tope · ${esc(pct)} · aparte de la aldea</span>
         <span class="row__sub">${esc(ores)}</span>
       </span>${CHEV}</a></li></ul>
-    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea.</p></div>`;
+    <p class="section-footer">No entra en la media, el plan ni el coste de la aldea. El total de la flota está en Equipamiento.</p></div>`;
 }
 
 function rushCard(meta) {
@@ -2263,48 +2495,75 @@ function heroesCard(a) {
   return `<div class="section"><div class="section-header"><span>Héroes</span></div><ul class="list">${rows}</ul></div>`;
 }
 
-function equipBlock(exp, meta) {
-  const a = viewOf(meta.tag);
-  const pieces = equipmentView(exp, state.index, a.th);
-  const withImg = pieces.filter((p) => p.meta && (p.meta.estado === "ok" || p.meta.estado === "id_deducido")).length;
-  const missing = pieces.filter((p) => p.meta && p.meta.estado === "faltante").length;
-  const unk = pieces.filter((p) => p.unknown).length;
-  const lvl1 = pieces.filter((p) => p.lvl <= 1).length;
-  const row = a.cats.equipamiento;
-  const groups = new Map();
-  for (const id of HERO_ORDER) groups.set(state.index.items[id].nombre_en, []);
-  groups.set("__unk", []);
-  for (const p of pieces) {
-    const key = p.heroe && groups.has(p.heroe) ? p.heroe : "__unk";
-    groups.get(key).push(p);
+function eqHeroes() {
+  return HERO_ORDER.filter((id) => state.index.items[id]).map((id) => ({
+    id,
+    nombreEn: state.index.items[id].nombre_en,
+    nombre: nameOf(id) || state.index.items[id].nombre_en,
+  }));
+}
+
+function elegidosDe(tag) {
+  const list = state.eqElegidos[tag];
+  return Array.isArray(list) ? list : [];
+}
+
+function oreTiles(bag) {
+  const cell = (n, label) => `<div><b class="num">${fmtRes(n)}</b><span>${label}</span></div>`;
+  return `<div class="eq-ores">${cell(bag.brillante, "Brillante")}${cell(bag.reluciente, "Reluciente")}${cell(bag.estrellada, "Estrellada")}</div>`;
+}
+
+function oreCard(bag, note) {
+  const falta = bag.sinCoste
+    ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 nivel no tiene fila en la fuente y no cuenta como cero." : `${bag.sinCoste} niveles no tienen fila en la fuente y no cuentan como cero.`}</p>`
+    : "";
+  return `<div class="section"><div class="card eq-total">
+      <h2 class="t-headline">Total para maxear todo el equipamiento</h2>
+      ${oreTiles(bag)}
+      <p class="t-footnote c-2">${esc(note)} Este total no cambia con los filtros.</p>
+      ${falta}
+    </div></div>`;
+}
+
+function eqLevelRows(row) {
+  if (!row.pendientes.length) return "";
+  const lis = row.pendientes.map((step) => {
+    const cost = step.mena
+      ? `${fmtRes(step.mena.brillante)} brillante · ${fmtRes(step.mena.reluciente)} reluciente · ${fmtRes(step.mena.estrellada)} estrellada`
+      : "Sin coste en la fuente";
+    return `<li class="eq-lv"><b class="num">Nv ${step.nivel}</b><span>${esc(cost)}</span></li>`;
+  }).join("");
+  return `<ul class="eq-lvs">${lis}</ul>`;
+}
+
+function eqPiece(row, tag, elegidos) {
+  const elegido = elegidos.includes(row.id);
+  const rare = rarezaEs(row.rareza);
+  let estado;
+  if (row.bloqueado) {
+    const donde = row.unlockTh != null ? `disponible en TH${row.unlockTh}` : "sin tope en este ayuntamiento";
+    estado = row.lvl != null ? `Nv ${row.lvl} · bloqueado · ${donde}` : `Bloqueado · ${donde}`;
+  } else if (row.overMax) {
+    estado = `Nv ${row.lvl} · máximo desactualizado (máx. ${row.max})`;
+  } else if (row.max != null && row.lvl >= row.max) {
+    estado = `Nv ${row.lvl} / ${row.max} · al máximo`;
+  } else {
+    const n = row.pendientes.length;
+    estado = `Nv ${row.lvl} / ${row.max} · ${n === 1 ? "1 nivel restante" : `${n} niveles restantes`}`;
   }
-  const cards = [];
-  for (const [key, list] of groups) {
-    if (!list.length && key === "__unk") continue;
-    if (!list.length) continue;
-    list.sort((x, y) => {
-      if (x.unknown !== y.unknown) return x.unknown ? 1 : -1;
-      if (y.lvl !== x.lvl) return y.lvl - x.lvl;
-      return x.id < y.id ? -1 : 1;
-    });
-    const heroId = HERO_ORDER.find((id) => state.index.items[id].nombre_en === key);
-    const title = heroId ? (nameOf(heroId) || key) : "Héroe sin identificar";
-    const heroRow = heroId ? a.heroes.find((h) => h.id === heroId) : null;
-    const head = heroId ? thumb(heroId, { size: 28, lvl: heroRow ? heroRow.lvl : null }) : "";
-    const cells = list.map((p) => eqCell(p)).join("");
-    cards.push(`<section class="card eq-group"><header class="eq-group__hdr">${head}<h3>${esc(title)}</h3><span class="num">${list.length} piezas</span></header><ul class="eq-grid">${cells}</ul></section>`);
-  }
-  const maxed = row.num != null && row.den && row.num >= row.den;
-  return `<div class="section"><div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="t-headline" style="margin:0">Equipamiento</h2><span class="t-headline num">${pieces.length} piezas</span></div>
-      <p class="t-footnote c-2">${withImg} con imagen · ${missing} sin imagen · ${unk} sin identificar · ${lvl1} en nivel 1</p>
-      <div class="prog cat-equipamiento">
-        <span>Progreso</span><span class="prog__pct num${maxed ? " is-max" : ""}">${fmtPct(row.pct)}</span>
-        ${barHtml("equipamiento", a.thSig ? row.sigPct : row.pct, a.thSig ? row.mark : null, { label: `Equipamiento ${fmtPct(row.pct)}` })}
-        <span class="prog__foot">El % no cuenta piezas en nivel 1 ni sin identificar</span>
+  const aria = [row.nombre, rare, estado, elegido ? "elegida para ocultar" : ""].filter(Boolean).join(", ");
+  return `<li class="eq-piece${elegido ? " is-elegido" : ""}">
+      <div class="eq-piece__top">
+        <button type="button" class="eq-piece__open" data-ficha="${row.id}" data-lvl="${row.lvl == null ? "" : row.lvl}" data-max="${row.max || ""}"${row.unlockTh != null ? ` data-unlock="${row.unlockTh}"` : ""} aria-label="${esc(aria)}">
+          ${thumb(row.id, { size: 52, lvl: row.lvl })}
+          <span class="row__main"><span class="row__title">${esc(row.nombre)}${elegido ? ` <span class="chip chip--muted">Elegida</span>` : ""}</span>
+            <span class="row__sub">${esc([rare, estado].filter(Boolean).join(" · "))}</span>
+          </span>
+        </button>
+        <button type="button" class="btn-text" data-eq-elegir="${esc(row.id)}" data-eq-tag="${esc(tag)}" aria-pressed="${elegido ? "true" : "false"}">${elegido ? "Quitar" : "Elegir"}</button>
       </div>
-    </div></div>
-    <div class="section stack">${cards.join("")}</div>`;
+      ${eqLevelRows(row)}
+    </li>`;
 }
 
 function eqCell(p) {
@@ -3485,6 +3744,19 @@ function fichaFrame(inner) {
     </div>`;
 }
 
+function fichaArt(id, item, lvl) {
+  const fastKey = lvl != null && item && item.imagenes_por_nivel && item.imagenes_por_nivel[String(lvl) + "-fast-attack"]
+    ? String(lvl) + "-fast-attack"
+    : null;
+  if (!fastKey) {
+    return `<div style="display:flex;justify-content:center">${thumb(id, { size: 96, ficha: true, lvl })}</div>`;
+  }
+  return `<div class="ficha-modes">
+      <figure>${thumb(id, { size: 72, ficha: true, lvl })}<figcaption class="t-footnote c-2">Largo alcance</figcaption></figure>
+      <figure>${thumb(id, { size: 72, ficha: true, levelKey: fastKey })}<figcaption class="t-footnote c-2">Ataque rápido</figcaption></figure>
+    </div>`;
+}
+
 function fichaSheet() {
   const f = state.ficha;
   if (!f) return "";
@@ -3502,7 +3774,9 @@ function fichaSheet() {
   const badges = [];
   if (unknown) badges.push(`<span class="badge">sin identificar</span>`);
   const notes = [];
-  if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
+  const choice = item ? imageChoice(item, f.lvl) : null;
+  if (choice && choice.im && choice.im.official === false) notes.push(`<p class="t-footnote c-2">Imagen no oficial</p>`);
+  else if (item && item.estado === "faltante") notes.push(`<p class="t-footnote c-2">Sin imagen oficial en el Fan Kit</p>`);
   if (item && item.nombre_pendiente) notes.push(`<p class="t-footnote c-2">Nombre en español sin confirmar</p>`);
   if (item && (item.rareza || item.heroe)) {
     const parts = [];
@@ -3516,7 +3790,7 @@ function fichaSheet() {
   const marca = item ? imageChoice(item, f.lvl).marca : null;
   const marcaHtml = marca ? `<p class="t-footnote c-2 ficha-marca" data-level-note>${esc(marca)}</p>` : "";
   return fichaFrame(`
-        <div style="display:flex;justify-content:center">${thumb(f.id, { size: 96, ficha: true, lvl: f.lvl })}</div>
+        ${fichaArt(f.id, item, f.lvl)}
         ${marcaHtml}
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">${esc(line.text)}${overChip}</p>
@@ -3646,27 +3920,185 @@ function levelBody(list, kind) {
   return `<ul class="list">${rows}</ul>`;
 }
 
+function renderEquipoFlota(list) {
+  const accounts = list.map((meta) => {
+    const exp = expOf(meta.tag);
+    const view = viewOf(meta.tag);
+    return {
+      tag: meta.tag,
+      nombre: meta.nombre,
+      th: view ? view.th : null,
+      piezas: equipmentRows(exp, state.index, view && view.th),
+    };
+  });
+  const { total, filas } = fleetOre(accounts);
+  const rows = filas.map((row) => `<li><button type="button" class="row row--tile" data-eq-cuenta="${esc(row.tag)}">
+      <span class="row__main"><span class="row__title">${esc(row.nombre)}</span>
+        <span class="row__sub">TH${row.th == null ? "—" : row.th} · ${fmtRes(row.bag.brillante)} brillante · ${fmtRes(row.bag.reluciente)} reluciente · ${fmtRes(row.bag.estrellada)} estrellada</span>
+      </span>${CHEV}</button></li>`).join("");
+  return `${oreCard(total, `${filas.length === 1 ? "1 cuenta" : `${filas.length} cuentas`}. Cada una usa el tope de su ayuntamiento.`)}
+    <div class="section"><div class="section-header"><span>Por cuenta</span></div><ul class="list list--tiles">${rows}</ul>
+    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p></div>`;
+}
+
+function renderEquipoCuenta(meta, list) {
+  const exp = expOf(meta.tag);
+  const view = viewOf(meta.tag);
+  const rows = equipmentRows(exp, state.index, view.th);
+  const bag = oreTotal(rows);
+  const filtro = state.eqFiltro;
+  const elegidos = elegidosDe(meta.tag);
+  const visible = applyEqFilter(rows, filtro, elegidos);
+  const heroes = eqHeroes();
+  const groups = groupByHero(visible, heroes);
+  const options = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === meta.tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
+  const heroOpts = [`<option value="todos"${filtro.heroe === "todos" ? " selected" : ""}>Todos los héroes</option>`]
+    .concat(heroes.map((h) => `<option value="${esc(h.nombreEn)}"${filtro.heroe === h.nombreEn ? " selected" : ""}>${esc(h.nombre)}</option>`))
+    .join("");
+  const rare = (id, label) => `<button type="button" role="tab" data-eq-rareza="${id}" aria-selected="${(filtro.rareza || "todos") === id}">${label}</button>`;
+  const cards = groups.map((g) => {
+    const hero = heroes.find((h) => h.nombreEn === g.nombreEn);
+    const head = hero ? thumb(hero.id, { size: 28 }) : "";
+    const lis = g.piezas.map((p) => eqPiece(p, meta.tag, elegidos)).join("");
+    return `<section class="card eq-group"><header class="eq-group__hdr">${head}<h3>${esc(g.nombre)}</h3><span class="num">${g.piezas.length}</span></header><ul class="eq-pieces">${lis}</ul></section>`;
+  }).join("");
+  const empty = `<div class="card empty"><p class="t-title3">Nada con ese filtro</p><p class="t-subhead c-2">Prueba otro héroe o muestra los bloqueados.</p></div>`;
+  const ocultos = rows.filter((r) => elegidos.includes(r.id)).length;
+  const row = view.cats.equipamiento;
+  const pct = row && row.pct != null ? fmtPct(row.pct) : "—";
+  return `<label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
+    ${oreCard(bag, `${meta.nombre} · TH${view.th}.`)}
+    <div class="section"><div class="section-header"><span>Filtros</span></div>
+      <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Rareza">${rare("todos", "Todos")}${rare("Common", "Común")}${rare("Epic", "Épica")}</div></div>
+      <label class="sort-label">Héroe <select data-eq-heroe aria-label="Héroe">${heroOpts}</select></label>
+      <div class="chip-row" role="toolbar" aria-label="Más filtros">
+        <button type="button" data-eq-bloqueados aria-pressed="${filtro.bloqueados ? "true" : "false"}">Mostrar bloqueados</button>
+        <button type="button" data-eq-ocultar aria-pressed="${filtro.ocultar ? "true" : "false"}">Ocultar elegidos</button>
+      </div>
+      <p class="section-footer">Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""}</p>
+    </div>
+    <div class="section stack">${cards || empty}</div>
+    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p>`;
+}
+
 function renderEquipo(tag) {
   const list = allAccounts().filter((meta) => expOf(meta.tag));
   const meta = (tag && accountByTag(tag)) || list.find((m) => m.tag === state.selected) || list[0];
   if (!meta || !expOf(meta.tag)) {
     return `<h1 class="large-title">Equipamiento</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p></div></div>`;
   }
+  const vista = state.eqVista === "flota" ? "flota" : "cuenta";
+  const seg = (id, label) => `<button type="button" role="tab" data-eq-vista="${id}" aria-selected="${vista === id}">${label}</button>`;
+  const head = `<h1 class="large-title">Equipamiento</h1>
+    <p class="large-sub">Apartado de cada cuenta, separado de la aldea. No entra en la media, el plan ni los gráficos.</p>
+    <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Alcance">${seg("cuenta", "Esta cuenta")}${seg("flota", "Flota")}</div></div>`;
+  return head + (vista === "flota" ? renderEquipoFlota(list) : renderEquipoCuenta(meta, list));
+}
+
+function perfilAjustes(facts) {
+  const rows = [];
+  if (facts.constructores.known) {
+    const grupos = facts.constructores.grupos.map((g) => `Nv ${g.lvl} × ${g.cnt}`).join(" · ");
+    const bob = facts.bob
+      ? ` ${(nameOf(facts.bob.id) || "Cabaña de B.O.B.")} Nv ${facts.bob.lvl}${facts.bob.cnt > 1 ? ` × ${facts.bob.cnt}` : ""} no entra en este número.`
+      : "";
+    const lvl = facts.constructores.grupos.length ? facts.constructores.grupos[facts.constructores.grupos.length - 1].lvl : null;
+    rows.push(`<li><div class="row row--tile row--thumb44">
+      ${thumb(1000015, { size: 44, lvl })}
+      <span class="row__main"><span class="row__title">Constructores <span class="chip chip--muted">De la exportación</span></span>
+        <span class="row__sub">${esc(grupos + bob)}</span></span>
+      <span class="row__trail num">${facts.constructores.total}</span>
+    </div></li>`);
+  }
+  for (const h of facts.helpers) {
+    const title = nameOf(h.id) || "Ayudante";
+    rows.push(`<li><div class="row row--tile row--thumb44">
+      ${thumb(h.id, { size: 44, lvl: h.lvl })}
+      <span class="row__main"><span class="row__title">${esc(title)} <span class="chip chip--muted">De la exportación</span></span>
+        <span class="row__sub">Nivel en la exportación</span></span>
+      <span class="row__trail num">Nv ${h.lvl}</span>
+    </div></li>`);
+  }
+  if (!rows.length) return "";
+  return `<div class="section"><div class="section-header"><span>Ajustes de perfil</span></div><ul class="list list--tiles">${rows.join("")}</ul>
+    <p class="section-footer">Si la exportación no trae un ajuste, no se muestra.</p></div>`;
+}
+
+function perfilHeroes(view, tag) {
+  if (!view) return "";
+  const rows = view.heroes.map((h) => {
+    const line = levelLine(h);
+    const lvl = h.lvl == null ? 0 : h.lvl;
+    const name = nameOf(h.id) || "Héroe";
+    const aria = heroAria(name, h, line);
+    const title = rowTitle(name);
+    if (!line.bar) {
+      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+        ${thumb(h.id, { size: 40, lvl: h.lvl })}
+        <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
+      </button></li>`;
+    }
+    const p = h.max ? (lvl / h.max) * 100 : 0;
+    const maxed = lvl >= h.max;
+    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+      ${thumb(h.id, { size: 40, lvl: h.lvl })}
+      <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
+      <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
+    </button></li>`;
+  }).join("");
+  const nota = tag === HEROES_FUERA
+    ? `En ${esc(HEROES_FUERA)} los héroes quedan fuera del plan. Aquí solo se ve el nivel frente al máximo del ayuntamiento.`
+    : "Nivel de la exportación frente al máximo de este ayuntamiento.";
+  return `<div class="section"><div class="section-header"><span>Niveles de héroes</span></div><ul class="list">${rows}</ul><p class="section-footer">${nota}</p></div>`;
+}
+
+function perfilClan(clan) {
+  if (!clan || !clan.length) return "";
+  const lis = clan.map((row) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(row.etiqueta)}</span></span><span class="row__trail num">${esc(String(row.valor))}</span></div></li>`).join("");
+  return `<div class="section"><div class="section-header"><span>Clan</span></div><ul class="list">${lis}</ul><p class="section-footer">Estos datos vienen en la exportación.</p></div>`;
+}
+
+function renderPerfil(tag) {
+  const list = allAccounts();
+  const meta = (tag && accountByTag(tag)) || list.find((m) => m.tag === state.selected) || list[0];
+  if (!meta) {
+    return `<h1 class="large-title">Perfil</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p></div></div>`;
+  }
+  const options = list.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
+  const picker = `<label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>`;
   const exp = expOf(meta.tag);
+  if (!exp) {
+    return `<h1 class="large-title">Perfil</h1>
+      <p class="large-sub">${esc(meta.nombre)} · <span class="tag">${esc(meta.tag)}</span></p>
+      ${picker}
+      <div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene exportación</p><p class="t-subhead c-2">El perfil muestra solo lo que trae el JSON.</p></div></div>`;
+  }
+  const facts = exportFacts(exp);
   const view = viewOf(meta.tag);
-  const pieces = equipmentPieces(exp, state.index, view.th);
-  const bag = remainingCost(pieces).total;
-  const ores = [
-    bag.brillante ? `${fmtRes(bag.brillante)} brillante` : "",
-    bag.resplandeciente ? `${fmtRes(bag.resplandeciente)} resplandeciente` : "",
-    bag.estelar ? `${fmtRes(bag.estelar)} estelar` : "",
-  ].filter(Boolean).join(" · ") || "Sin coste de menas en la fuente para lo que falta.";
-  const options = list.map((m) => `<option value="${esc(m.tag)}"${m.tag === meta.tag ? " selected" : ""}>${esc(m.nombre)}</option>`).join("");
-  return `<h1 class="large-title">Equipamiento</h1>
-    <p class="large-sub">${esc(meta.nombre)} · este apartado no entra en la media, el plan ni los gráficos de la aldea.</p>
-    <label class="sort-label">Cuenta <select data-account aria-label="Cuenta">${options}</select></label>
-    <div class="section"><div class="card"><h2 class="t-headline">Menas hasta el máximo de TH${view.th}</h2><p class="t-body">${esc(ores)}</p><p class="t-footnote c-2">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Solo si el libro trae el número.</p></div></div>
-    ${equipBlock(exp, meta)}`;
+  const th = facts.th == null ? "—" : `TH${facts.th}`;
+  const tiles = [`<div><b class="num">${esc(th)}</b><span>Ayuntamiento</span></div>`];
+  if (facts.casaConstructor != null) {
+    tiles.push(`<div><b class="num">${facts.casaConstructor}</b><span>Casa del constructor</span></div>`);
+  }
+  const when = facts.timestamp ? `Exportación del ${fmtWhen(facts.timestamp * 1000)}` : "Sin fecha en la exportación";
+  const nombre = meta.nombre === meta.tag ? `<span class="tag">${esc(meta.tag)}</span>` : esc(meta.nombre);
+  return `<h1 class="large-title">Perfil</h1>
+    <p class="large-sub">Solo lo que trae la exportación de esta cuenta.</p>
+    ${picker}
+    <div class="section"><div class="card perfil-head">
+      <div class="perfil-id">
+        ${thumb(1000001, { size: 72, th: facts.th })}
+        <span class="row__main">
+          <span class="row__title">${nombre}</span>
+          <span class="row__sub"><span class="tag">${esc(facts.tag || meta.tag)}</span></span>
+        </span>
+      </div>
+      <div class="perfil-tiles">${tiles.join("")}</div>
+      <p class="t-footnote c-2 perfil-note">${esc(when)}. El nombre es el de la cuenta: el JSON no trae el del jugador.</p>
+    </div></div>
+    ${perfilAjustes(facts)}
+    ${perfilHeroes(view, meta.tag)}
+    ${perfilClan(facts.clan)}`;
 }
 
 function screenFor(r) {
@@ -3686,6 +4118,8 @@ function screenFor(r) {
   if (r.name === "plan") return renderPlan(r.tag);
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
+  if (r.name === "perfil") return renderPerfil(r.tag);
+  if (r.name === "actualizar") return renderActualizar();
   return renderInicio();
 }
 
@@ -3816,7 +4250,7 @@ function renderCopia() {
     </ul></div>
     <div class="section"><div class="card about">
       <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
-      <p class="t-body">Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.</p>
+      <p class="t-body">Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.</p>
       <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
     </div></div>
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
@@ -4013,6 +4447,13 @@ function settleSheetFocus() {
   state.sheetScroll = null;
 }
 
+function focusActualizar() {
+  if (!state.actualizarFocus) return;
+  state.actualizarFocus = false;
+  const el = document.querySelector("[data-actualizar-text]");
+  if (el) el.focus();
+}
+
 function focusImportTarget() {
   if (!state.importUi.needsFocus) return;
   state.importUi.needsFocus = false;
@@ -4078,6 +4519,7 @@ function render() {
   paintOfflineThumbs();
   settleSheetFocus();
   focusImportTarget();
+  focusActualizar();
   settleAlert();
   if (state.scrollAdded && r.name === "roster") {
     state.scrollAdded = false;
@@ -4088,6 +4530,54 @@ function render() {
 
 function bind(r) {
   document.getElementById("app").onclick = async (ev) => {
+    const eqVista = ev.target.closest("[data-eq-vista]");
+    if (eqVista) {
+      state.eqVista = eqVista.dataset.eqVista === "flota" ? "flota" : "cuenta";
+      localStorage.setItem("cp-eq-vista", state.eqVista);
+      render();
+      return;
+    }
+    const eqCuenta = ev.target.closest("[data-eq-cuenta]");
+    if (eqCuenta) {
+      state.eqVista = "cuenta";
+      localStorage.setItem("cp-eq-vista", "cuenta");
+      const dest = "#/equipo/" + eqCuenta.dataset.eqCuenta.slice(1);
+      if (location.hash === dest) render();
+      else location.hash = dest;
+      return;
+    }
+    const eqRareza = ev.target.closest("[data-eq-rareza]");
+    if (eqRareza) {
+      state.eqFiltro = { ...state.eqFiltro, rareza: eqRareza.dataset.eqRareza || "todos" };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-eq-bloqueados]")) {
+      state.eqFiltro = { ...state.eqFiltro, bloqueados: !state.eqFiltro.bloqueados };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-eq-ocultar]")) {
+      state.eqFiltro = { ...state.eqFiltro, ocultar: !state.eqFiltro.ocultar };
+      localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+      render();
+      return;
+    }
+    const eqElegir = ev.target.closest("[data-eq-elegir]");
+    if (eqElegir) {
+      const tag = eqElegir.dataset.eqTag;
+      const id = eqElegir.dataset.eqElegir;
+      const cur = elegidosDe(tag).slice();
+      const at = cur.indexOf(id);
+      if (at >= 0) cur.splice(at, 1);
+      else cur.push(id);
+      state.eqElegidos = { ...state.eqElegidos, [tag]: cur };
+      localStorage.setItem("cp-eq-elegidos", JSON.stringify(state.eqElegidos));
+      render();
+      return;
+    }
     const go = ev.target.closest("[data-go]");
     if (go) {
       const dest = go.dataset.go;
@@ -4100,6 +4590,27 @@ function bind(r) {
       return;
     }
     if (ev.target.closest("[data-paste-now]")) { await pasteNow(); return; }
+    if (ev.target.closest("[data-pegar-cuenta]")) { await pegarCuenta(); return; }
+    if (ev.target.closest("[data-pegar-campo]")) {
+      const campo = document.querySelector("[data-actualizar-text]");
+      await aplicarPegado(campo ? campo.value : "");
+      return;
+    }
+    if (ev.target.closest("[data-pegar-mano]")) {
+      state.actualizarManual = true;
+      state.actualizarFocus = true;
+      render();
+      return;
+    }
+    if (ev.target.closest("[data-actualizar-listo]")) {
+      clearSession(localStorage);
+      state.actualizarManual = false;
+      state.actualizarBorrador = "";
+      if (location.hash !== "#/inicio") location.hash = "#/inicio";
+      else render();
+      return;
+    }
+    if (ev.target.closest("[data-actualizar]")) { abrirActualizar(); return; }
     const modo = ev.target.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;
@@ -4406,7 +4917,15 @@ function bind(r) {
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => {
     const tail = sel.value.slice(1);
-    location.hash = route().name === "equipo" ? "#/equipo/" + tail : "#/progreso/" + tail;
+    const name = route().name;
+    const prefix = name === "equipo" ? "#/equipo/" : name === "perfil" ? "#/perfil/" : "#/progreso/";
+    location.hash = prefix + tail;
+  };
+  const eqHeroe = document.querySelector("[data-eq-heroe]");
+  if (eqHeroe) eqHeroe.onchange = () => {
+    state.eqFiltro = { ...state.eqFiltro, heroe: eqHeroe.value || "todos" };
+    localStorage.setItem("cp-eq-filtro", JSON.stringify(state.eqFiltro));
+    render();
   };
   const sort = document.querySelector("[data-sort]");
   if (sort) sort.onchange = () => { state.sortMode = sort.value; localStorage.setItem("cp-sort", state.sortMode); render(); };
@@ -4658,6 +5177,9 @@ async function boot() {
       state.importUi.phase = imported.items.length ? "batch" : "entry";
       location.hash = "#/importar";
     }
+  } else {
+    const sesion = readSession(localStorage);
+    if (sesion && route().name !== "actualizar") location.hash = "#/actualizar";
   }
   render();
   if ("serviceWorker" in navigator) {

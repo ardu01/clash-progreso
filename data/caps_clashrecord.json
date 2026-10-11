@@ -480,14 +480,6 @@
    "max": 15,
    "count": null
   },
-  "Hog Rider Puppet (Royal Champion)": {
-   "max": 15,
-   "count": null
-  },
-  "Haste Vial (Royal Champion)": {
-   "max": 15,
-   "count": null
-  },
   "Rocket Spear (Royal Champion)": {
    "max": 18,
    "count": null
@@ -1023,10 +1015,6 @@
    "count": null
   },
   "Hog Rider Puppet (Royal Champion)": {
-   "max": 18,
-   "count": null
-  },
-  "Haste Vial (Royal Champion)": {
    "max": 18,
    "count": null
   },
@@ -1640,16 +1628,8 @@
    "max": 18,
    "count": null
   },
-  "Stun Blaster (Dragon Duke)": {
-   "max": 18,
-   "count": null
-  },
   "Rocket Backpack (Dragon Duke)": {
    "max": 24,
-   "count": null
-  },
-  "Electro Fangs (Dragon Duke)": {
-   "max": 18,
    "count": null
   },
   "Revenge Deck (Dragon Duke)": {
@@ -2292,10 +2272,6 @@
   },
   "Rocket Backpack (Dragon Duke)": {
    "max": 27,
-   "count": null
-  },
-  "Electro Fangs (Dragon Duke)": {
-   "max": 18,
    "count": null
   },
   "Revenge Deck (Dragon Duke)": {
@@ -3480,7 +3456,7 @@
   },
   "Air Bomb": {
    "max": 13,
-   "count": 7
+   "count": 8
   },
   "Giant Bomb": {
    "max": 12,
@@ -4020,10 +3996,6 @@
    "max": 12,
    "count": null
   },
-  "Healer Puppet (Archer Queen)": {
-   "max": 12,
-   "count": null
-  },
   "Frozen Arrow (Archer Queen)": {
    "max": 15,
    "count": null
@@ -4052,10 +4024,6 @@
    "max": 12,
    "count": null
   },
-  "Noble Iron (Minion Prince)": {
-   "max": 12,
-   "count": null
-  },
   "Dark Crown (Minion Prince)": {
    "max": 15,
    "count": null
@@ -4073,10 +4041,6 @@
    "count": null
   },
   "Rage Gem (Grand Warden)": {
-   "max": 12,
-   "count": null
-  },
-  "Healing Tome (Grand Warden)": {
    "max": 12,
    "count": null
   },
@@ -4519,10 +4483,6 @@
    "count": null
   },
   "Rage Gem (Grand Warden)": {
-   "max": 15,
-   "count": null
-  },
-  "Healing Tome (Grand Warden)": {
    "max": 15,
    "count": null
   },

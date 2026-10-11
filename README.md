@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.2</strong><br>
+  <strong>Versión 3.1.8</strong><br>
   Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -57,7 +57,8 @@ La barra de abajo tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, *
 ### Cuentas
 
 - Lista de las aldeas de prueba y de las que se importen después. Se pueden marcar como Principal y ordenar.
-- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas por el tag y añade o actualiza. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`, o abrir la app con varias aldeas juntas (`docs/atajo.md`).
+- **Actualizar todas**: un botón en Inicio y en Cuentas abre la lista en el orden de Abrir hoy. Al volver del juego, **Pegar esta cuenta** lee el portapapeles con ese toque. Si Safari no deja, hay un campo para pegar a mano. No hace falta la app Atajos (`docs/atajo.md`).
+- **Pegar exportación**: un botón lee el portapapeles, detecta una o varias aldeas por el tag y añade o actualiza. Si Safari no deja leer el portapapeles, se abre el campo de pegado de siempre. También se pueden elegir archivos `.json`.
 - Búsqueda por el alias de la cuenta.
 - Grupos opcionales (hasta 6, de 16 caracteres: principal, farming, TH11) para filtrar en Cuentas, Gráficos y Ranking.
 - Meta opcional de una categoría o de la media, con una barra de progreso.
@@ -91,7 +92,7 @@ Cada punto es una exportación real. Con un solo día importado, la línea es un
 - Cada paso lleva coste, tiempo y fecha estimada de Madrid, con los constructores de esa cuenta. En la línea se marcan las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña, en cada cuenta, el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Si la cuenta no tiene plan guardado, el criterio es Maxear TH actual.
 - Los héroes de `#28PLGP0G2` no entran en el plan.
-- El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe frente al máximo, menas (brillante, resplandeciente y estelar) y comparación.
+- El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe frente al máximo, menas (brillante, reluciente y estrellada) y el total de la flota.
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
 - Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
 - La agenda junta las horas reales de la exportación. Las marcas del plan no entran en la agenda ni en los avisos.
@@ -133,18 +134,24 @@ El menú en inglés, comprobado, es *Settings → More Settings → Data Export 
 
 Si el botón no puede leer el portapapeles, se abre Importar: mantén pulsado el campo y elige Pegar, o elige uno o varios `.json` en Archivos.
 
-Para traer varias aldeas seguidas desde el juego, el atajo está en `docs/atajo.md`.
+Para recorrer todas las aldeas desde el juego, el modo Actualizar todas está en `docs/atajo.md`.
 
 ## Privacidad
 
 Las cuentas, el historial, los grupos, las metas, los planes, las marcas provisionales, los filtros, el tema y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
-Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v20` y la de imágenes `cp-img-v7`.
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v26` y la de imágenes `cp-img-v9`.
 
 ## Historial de versiones
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.8 | Actualizar todas, dentro de la app: la lista sigue el orden de Abrir hoy, Pegar esta cuenta lee el portapapeles con el toque y, si falla, un campo. Cada cuenta se reconoce por la etiqueta, se marca y se guarda al momento. El progreso (4/11) y la sesión siguen si iOS cierra la app. Ya no hace falta Atajos. |
+| 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel: 25 PNG nuevos (lado largo como máximo 512). La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. El Crafting Station se llama Defensa artesanal. No entra la base del constructor. |
+| 3.1.6 | Perfil de cada cuenta, desde Cuentas: nombre de la cuenta, etiqueta, ayuntamiento y los ajustes que trae la exportación (constructores y ayudantes). Los héroes se ven con el nivel y el máximo de ese TH. Lo que el JSON no trae no se muestra y no se rellena a mano. |
+| 3.1.5 | En Equipamiento, por cuenta y en el total de la flota: mena brillante, reluciente y estrellada para maxearlo todo, con filtros y el coste de cada nivel pendiente. Usa las tablas ya corregidas de Flecha monolítica y Colmillos eléctricos. |
+| 3.1.4 | Imagen oficial de 14 niveles que estaban prestados y de la torre de supermagos. Nombres del texto del juego: Escolta títere, Orbe oscuro, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Cohetes de defensa. L.A.S.S.I. lleva el punto. |
+| 3.1.3 | Flecha monolítica y Colmillos eléctricos con la tabla de mena de cada uno. Bomba aérea de TH18: 8. Coste y tiempo de los niveles bajos que estaban copiados de la supercarga, y tres valores desactualizados. Diez topes de equipamiento fuera del TH en que se desbloquean. Ninguna de las 11 cuentas cambia de porcentaje. |
 | 3.1.2 | Inicio con el resumen, qué hacer ahora, el orden para abrir las cuentas hoy y los objetivos de flota. Cinco pestañas: Inicio, Cuentas, Mejoras, Análisis y Agenda. Ranking en hexágono, mapa de calor por escala y el criterio del plan en viñetas. |
 | 3.1.1 | Imagen oficial de 189 niveles que estaban prestados, más el Cuervo avaricioso. Catapulta, Caseta de animales, Torre Tesla y Arrojatroncos. La Artillería infernal se ve en español y sigue sin ID. |
 | 3.1.0 | Qué hacer ahora sale del plan de cada cuenta. Línea de tiempo con TH objetivo y marcas. Equipamiento aparte de la media. Niveles, meta, tema oscuro, búsqueda, copia automática y atajo para varias aldeas. |
@@ -170,6 +177,6 @@ El detalle de cálculos e interfaz está en `docs/sistema.md`.
 
 This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: [www.supercell.com/fan-content-policy](https://www.supercell.com/fan-content-policy).
 
-Material no oficial, no respaldado por Supercell. Las imágenes son del Supercell Fan Kit y se muestran sin modificar. Esta app es gratuita, privada y sin fines comerciales.
+Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.
 
 [Leer la Fan Content Policy](https://supercell.com/en/fan-content-policy/)

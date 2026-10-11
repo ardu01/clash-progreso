@@ -1,8 +1,8 @@
-# Atajo de iPhone para pegar varias aldeas
+# Actualizar todas las cuentas
 
-Clash Progreso acepta varias exportaciones JSON a la vez. El atajo las acumula en el portapapeles y, al terminar, abre la app con todas.
+Clash Progreso recorre las cuentas dentro de la app. No hace falta la app Atajos.
 
-La app no tiene servidor. El atajo solo abre una dirección de esta misma PWA.
+Sirve en Safari y también al abrir Clash Progreso desde el icono de inicio. Las dos no comparten cuentas ni historial: si juegas desde el icono, vuelve al icono; si juegas en una pestaña, vuelve a esa pestaña.
 
 ## Dónde se copia en el juego
 
@@ -10,43 +10,29 @@ El menú en inglés, comprobado, es:
 
 **Settings → More Settings → Data Export → Copy.**
 
-La app muestra, hasta poder comprobarlo en el cliente en español:
+Hasta poder comprobarlo en el cliente en español, la app muestra:
 
 **Ajustes → Más ajustes → Exportar datos → Copiar.**
 
 El juego copia un JSON. No crea un archivo y no incluye el nombre del jugador.
 
-## Qué hace el atajo
+## En la app
 
-1. Crea un atajo en la app Atajos.
-2. Añade una acción **Pedir entrada** (texto) o un bucle en el que, en cada vuelta, elijas **Copiar** en el juego y el atajo haga **Obtener contenido del portapapeles**.
-3. Junta cada copia con la anterior. Sirve un salto de línea entre objetos, o pegarlos uno detrás de otro: la app separa cada `{ ... }`.
-4. Al terminar, abre Clash Progreso con el lote.
+1. En **Inicio** o en **Cuentas**, toca **Actualizar todas**.
+2. La lista sale en el orden de **Abrir hoy**: primero la cuenta cuya cola del plan queda libre antes. El orden no se mueve al pegar. Arriba verás el progreso, por ejemplo `4/11`, y la siguiente cuenta.
+3. Abre esa aldea en el juego, copia la exportación y vuelve a Clash Progreso.
+4. Toca **Pegar esta cuenta**. Ese toque lee el portapapeles. Si iOS pregunta, confirma Pegar.
+5. La app mira la etiqueta del JSON, marca esa cuenta y la guarda en el momento. Puedes pegar otra cuenta de la lista: no tiene que ser la que estaba sugerida.
+6. Sigue hasta el final. El resumen dice cuáles cambiaron, cuáles quedaron igual, cuáles solo entraron al histórico y cuáles no se pegaron.
 
-Safari y la app instalada en la pantalla de inicio **no comparten** cuentas ni historial. El atajo tiene que abrir la misma que uses para jugar con los datos: si importas desde el icono, el atajo debe abrir el icono, no una pestaña nueva de Safari.
+**Dejar para luego** no borra la lista. Si iOS cierra la app, al abrirla la lista sigue donde estaba.
 
-## Abrir la app con el lote
+## Si no deja leer el portapapeles
 
-La dirección es:
+Toca **Pegar a mano**, mantén pulsado el campo y elige Pegar. Luego **Guardar este pegado**.
 
-`https://ardu01.github.io/clash-progreso/#lote=` + el texto del lote pasado por `encodeURIComponent`.
+Un texto que no sea una exportación no marca la cuenta. Una etiqueta que no esté en la lista no añade una cuenta nueva.
 
-Los tags llevan `#`. Sin esa codificación, la dirección se corta.
+## Dirección antigua
 
-También vale `?lote=` o `datos=` en la consulta o en el hash. Al abrirla, la app guarda las exportaciones válidas y deja la pantalla en Cuentas. Si alguna no se puede guardar, abre el campo de pegado con el texto.
-
-`readText()` sin un toque de la persona falla. Por eso el atajo mete los datos en la dirección, en vez de pedirle a la página que lea el portapapeles al arrancar.
-
-## Si la dirección es demasiado larga
-
-iOS limita lo que cabe en una URL. Si el lote no entra:
-
-1. El atajo copia el texto juntado al portapapeles.
-2. Abre `https://ardu01.github.io/clash-progreso/`.
-3. En Cuentas, toca **Pegar exportación**.
-
-Si Safari no deja leer el portapapeles, se abre Importar: mantén pulsado el campo y elige Pegar.
-
-## Qué se guarda
-
-Cada objeto con tag y fecha de exportación se añade o actualiza esa cuenta. Una exportación más antigua se queda solo en el historial. Una repetida no se vuelve a guardar. El resumen del lote dice cuáles cuentas siguen sin actualizar.
+Un atajo viejo todavía puede abrir la app con `#lote=` (el texto va con `encodeURIComponent`, porque los tags llevan `#`). También valen `?lote=` y `datos=`. No es el camino de esta versión: Actualizar todas no depende de esa dirección.

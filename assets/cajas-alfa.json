@@ -3610,5 +3610,245 @@
   "y": 56,
   "w": 332,
   "h": 432
+ },
+ "images/levels/hidden-tesla_16.png": {
+  "x": 223,
+  "y": 184,
+  "w": 65,
+  "h": 137
+ },
+ "images/levels/hidden-tesla_17.png": {
+  "x": 98,
+  "y": 41,
+  "w": 319,
+  "h": 471
+ },
+ "images/levels/x-bow_12.png": {
+  "x": 193,
+  "y": 246,
+  "w": 126,
+  "h": 119
+ },
+ "images/levels/x-bow_13.png": {
+  "x": 151,
+  "y": 130,
+  "w": 200,
+  "h": 192
+ },
+ "images/levels/scattershot_6.png": {
+  "x": 189,
+  "y": 243,
+  "w": 127,
+  "h": 121
+ },
+ "images/levels/scattershot_7.png": {
+  "x": 153,
+  "y": 92,
+  "w": 225,
+  "h": 216
+ },
+ "images/levels/workshop_8.png": {
+  "x": 96,
+  "y": 39,
+  "w": 295,
+  "h": 406
+ },
+ "images/levels/builder-s-hut_8.png": {
+  "x": 1,
+  "y": 67,
+  "w": 511,
+  "h": 445
+ },
+ "images/levels/pet-house_12.png": {
+  "x": 183,
+  "y": 223,
+  "w": 136,
+  "h": 146
+ },
+ "images/levels/inferno-tower_12.png": {
+  "x": 65,
+  "y": 0,
+  "w": 363,
+  "h": 501
+ },
+ "images/levels/air-bomb_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 66,
+  "h": 103
+ },
+ "images/levels/giga-bomb_2.png": {
+  "x": 0,
+  "y": 0,
+  "w": 304,
+  "h": 303
+ },
+ "images/levels/giga-bomb_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 304,
+  "h": 303
+ },
+ "images/levels/super-wizard-tower_1.png": {
+  "x": 67,
+  "y": 53,
+  "w": 378,
+  "h": 413
+ },
+ "images/levels/super-wizard-tower_2.png": {
+  "x": 67,
+  "y": 28,
+  "w": 378,
+  "h": 460
+ },
+ "images/levels/crafting-station.png": {
+  "x": 0,
+  "y": 5,
+  "w": 495,
+  "h": 506
+ },
+ "images/levels/portal-pendant.png": {
+  "x": 0,
+  "y": 0,
+  "w": 301,
+  "h": 286
+ },
+ "images/levels/air-bomb_13.png": {
+  "x": 0,
+  "y": 0,
+  "w": 358,
+  "h": 510
+ },
+ "images/levels/dark-barracks_11.png": {
+  "x": 39,
+  "y": 0,
+  "w": 181,
+  "h": 242
+ },
+ "images/levels/dark-barracks_13.png": {
+  "x": 2,
+  "y": 3,
+  "w": 276,
+  "h": 330
+ },
+ "images/levels/dark-spell-factory_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 330,
+  "h": 328
+ },
+ "images/levels/dark-spell-factory_8.png": {
+  "x": 0,
+  "y": 1,
+  "w": 437,
+  "h": 452
+ },
+ "images/levels/eagle-artillery_7.png": {
+  "x": 3,
+  "y": 2,
+  "w": 242,
+  "h": 217
+ },
+ "images/levels/hero-hall_12.png": {
+  "x": 3,
+  "y": 0,
+  "w": 478,
+  "h": 508
+ },
+ "images/levels/monolith_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 346,
+  "h": 459
+ },
+ "images/levels/mortar_18.png": {
+  "x": 0,
+  "y": 19,
+  "w": 296,
+  "h": 277
+ },
+ "images/levels/multi-archer-tower_3.png": {
+  "x": 0,
+  "y": 0,
+  "w": 276,
+  "h": 341
+ },
+ "images/levels/multi-gear-tower_1_long-range.png": {
+  "x": 0,
+  "y": 0,
+  "w": 348,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_1_fast-attack.png": {
+  "x": 0,
+  "y": 0,
+  "w": 448,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_2_long-range.png": {
+  "x": 0,
+  "y": 0,
+  "w": 348,
+  "h": 512
+ },
+ "images/levels/multi-gear-tower_2_fast-attack.png": {
+  "x": 0,
+  "y": 0,
+  "w": 448,
+  "h": 512
+ },
+ "images/levels/seeking-air-mine_7.png": {
+  "x": 0,
+  "y": 0,
+  "w": 120,
+  "h": 171
+ },
+ "images/levels/skeleton-trap_5.png": {
+  "x": 0,
+  "y": 0,
+  "w": 419,
+  "h": 512
+ },
+ "images/levels/spell-factory_8.png": {
+  "x": 5,
+  "y": 21,
+  "w": 214,
+  "h": 193
+ },
+ "images/levels/spell-tower_4.png": {
+  "x": 3,
+  "y": 14,
+  "w": 453,
+  "h": 497
+ },
+ "images/levels/spring-trap_6.png": {
+  "x": 2,
+  "y": 3,
+  "w": 66,
+  "h": 55
+ },
+ "images/levels/spring-trap_7.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_9.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_11.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
+ },
+ "images/levels/spring-trap_13.png": {
+  "x": 3,
+  "y": 3,
+  "w": 58,
+  "h": 55
  }
 }
