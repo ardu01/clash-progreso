@@ -82,7 +82,28 @@ async function ir(page, hash) {
   if (info.dt > 200) bad("pintar " + hash + " bloqueó " + info.dt + " ms");
   if (info.err) bad("pintar " + hash + " mostró el aviso de error");
   if (info.errs.length) bad("pintar " + hash + ": " + info.errs.join(" | "));
+  await barraUnaFila(page, hash);
   return info;
+}
+
+async function barraUnaFila(page, hash) {
+  const info = await page.evaluate(() => {
+    const links = [...document.querySelectorAll(".tabbar a")];
+    const tops = links.map((a) => a.getBoundingClientRect().top);
+    const delta = tops.length ? Math.max(...tops) - Math.min(...tops) : 0;
+    const doc = document.documentElement;
+    const body = document.body;
+    return {
+      n: links.length,
+      labels: links.map((a) => (a.querySelector("span")?.textContent || "").trim()),
+      rows: delta > 8 ? 2 : 1,
+      scrollX: Math.max(doc.scrollWidth, body.scrollWidth) > doc.clientWidth + 1,
+    };
+  });
+  if (info.n !== 5) bad(hash + " la barra tiene " + info.n + " pestañas");
+  if (info.labels.join(",") !== "Inicio,Cuentas,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
+  if (info.rows !== 1) bad(hash + " la barra ocupa " + info.rows + " filas");
+  if (info.scrollX) bad(hash + " hay scroll horizontal");
 }
 
 async function barrer(page, donde) {
@@ -175,7 +196,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.1.4"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.1.4")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.1.5"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.1.5")).join(" "));
 
 for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);
@@ -229,6 +250,7 @@ await tab.evaluate(() => { location.hash = "#/agenda"; });
 await tab.waitForFunction(() => location.hash === "#/agenda");
 await tab.evaluate(() => history.back());
 await tab.waitForFunction(() => location.hash === "#/mejoras");
+await barraUnaFila(tab, "#/mejoras");
 
 if (fails.length) {
   console.log(fails.join("\n"));

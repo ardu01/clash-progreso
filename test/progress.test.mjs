@@ -954,9 +954,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.1.4 y cachés cp-shell-v41 / cp-img-v10", () => {
-  assert.equal(APP_VERSION, "4.1.4");
-  assert.equal(SHELL_CACHE, "cp-shell-v41");
+test("versión 4.1.5 y cachés cp-shell-v42 / cp-img-v10", () => {
+  assert.equal(APP_VERSION, "4.1.5");
+  assert.equal(SHELL_CACHE, "cp-shell-v42");
   assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1001,6 +1001,7 @@ test("versión 4.1.4 y cachés cp-shell-v41 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-shell-v38"), false);
   assert.equal(sw.includes("cp-shell-v39"), false);
   assert.equal(sw.includes("cp-shell-v40"), false);
+  assert.equal(sw.includes("cp-shell-v41"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1008,7 +1009,8 @@ test("versión 4.1.4 y cachés cp-shell-v41 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v41/);
+  assert.match(caches, /cp-shell-v42/);
+  assert.equal(caches.includes("cp-shell-v41"), false);
   assert.equal(caches.includes("cp-shell-v40"), false);
   assert.equal(caches.includes("cp-shell-v39"), false);
   assert.equal(caches.includes("cp-shell-v38"), false);
@@ -1050,6 +1052,30 @@ test("versión 4.1.4 y cachés cp-shell-v41 / cp-img-v10", () => {
   assert.equal(app.includes("1.1.0"), false);
   assert.equal(app.includes("salvo cuando"), false);
   assert.match(app, /js\/import\.js|from "\.\/import\.js"/);
+});
+
+test("4.1.5: la barra tiene cinco pestañas y Operaciones se abre desde Agenda", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const tab = app.slice(app.indexOf("function tabbar("), app.indexOf("function subImported("));
+  assert.equal(tab.includes("Operaciones"), false);
+  assert.equal(tab.includes("#/operaciones"), false);
+  assert.match(tab, /Inicio/);
+  assert.match(tab, /Cuentas/);
+  assert.match(tab, /Mejoras/);
+  assert.match(tab, /Análisis/);
+  assert.match(tab, /Agenda/);
+  const agenda = app.slice(app.indexOf("function renderAgenda("), app.indexOf("function renderHistorial("));
+  assert.match(agenda, /href="#\/operaciones"/);
+  assert.match(agenda, />Operaciones</);
+  const base = app.slice(app.indexOf("function baseTab("), app.indexOf("function infoBtn("));
+  assert.match(base, /r\.name === "agenda" \|\| r\.name === "operaciones"/);
+  assert.match(base, /return "agenda"/);
+  const ui = readFileSync(new URL("../js/ui-operaciones.js", import.meta.url), "utf8");
+  for (const vista of ["sesion", "mantenimiento", "simulador", "gemelos", "equilibrio", "prediccion", "guerras", "diario", "plantillas", "prioridades", "estrategias"]) {
+    assert.match(ui, new RegExp("#/operaciones/" + vista));
+  }
+  const motor = readFileSync(new URL("../js/ui-atencion.js", import.meta.url), "utf8");
+  assert.match(motor, /#\/operaciones\/prioridades/);
 });
 
 function unidentifiedSplit(exp) {

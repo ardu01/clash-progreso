@@ -260,8 +260,7 @@ function baseTab(r) {
   if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
   if (r.name === "mejoras" || r.name === "plan" || r.name === "equipo") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
-  if (r.name === "agenda") return "agenda";
-  if (r.name === "operaciones") return "operaciones";
+  if (r.name === "agenda" || r.name === "operaciones") return "agenda";
   return "inicio";
 }
 
@@ -1722,8 +1721,10 @@ function renderAgenda() {
   }
   const nav = `<div class="seg-wrap"><nav class="seg seg--nav" role="tablist" aria-label="Agenda"><button type="button" role="tab" data-agenda="24h" aria-selected="${modo === "24h"}">24 h</button><button type="button" role="tab" data-agenda="7d" aria-selected="${modo === "7d"}">7 días</button><button type="button" role="tab" data-agenda="cuenta" aria-selected="${modo === "cuenta"}">Cuenta</button><button type="button" role="tab" data-agenda="curso" aria-selected="${modo === "curso"}">En curso</button></nav></div>`;
   const cuerpoVista = modo === "curso" ? mejorasEnCurso() : cuerpo;
+  const operaciones = `<div class="section">${sectionHead("Operaciones", "Sesión, mantenimiento, simulador, gemelos, equilibrio, predicción, guerras, diario, plantillas, estrategias y prioridades. Los apuntes siguen en este iPhone.")}<ul class="list list--tiles"><li><a class="row row--tile row--accion" href="#/operaciones"><span class="accion__ico is-blue" aria-hidden="true">${ICON.operaciones}</span><span class="row__main"><span class="row__title">Operaciones</span><span class="row__sub">Abre la sesión, la simulación y el resto de vistas</span></span>${CHEV}</a></li></ul></div>`;
   return `<h1 class="large-title">Agenda</h1>
     <div class="title-line"><p class="large-sub">Finalizaciones</p>${infoBtn("Finalizaciones con hora, de la exportación. Una cuenta sin actualizar no entra. La hora es la de Madrid. Si varias cuentas caen en la misma hora, es una sola sesión.")}</div>
+    ${operaciones}
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
     ${nav}
     ${sleepCard()}
@@ -2373,6 +2374,10 @@ function navbar(r) {
     title = "Operaciones";
     lead = `<button class="btn-text" data-go="#/operaciones">${BACK} Operaciones</button>`;
     collapsed = "true";
+  } else if (r.name === "operaciones") {
+    title = "Operaciones";
+    lead = `<button class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
+    collapsed = "true";
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
     title = cat ? cat.label : "Detalle";
@@ -2397,7 +2402,6 @@ function tabbar(r) {
     ${item("mejoras", "#/mejoras", "Mejoras", ICON.mejoras)}
     ${item("analisis", "#/ranking", "Análisis", ICON.analisis)}
     ${item("agenda", "#/agenda", "Agenda", ICON.agenda)}
-    ${item("operaciones", "#/operaciones", "Operaciones", ICON.operaciones)}
   </nav>`;
 }
 
