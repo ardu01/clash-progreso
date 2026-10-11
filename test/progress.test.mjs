@@ -15,6 +15,7 @@ import { progressRows, applyFilter, chipCounts, isAtMax } from "../js/filters.js
 import { buildBackup, mergeBackup, backupFilename, isShareCancel } from "../js/backup.js";
 import { averagePct } from "../js/progress.js";
 import { levelCost } from "../js/costs.js";
+import { addOre, applyEqFilter, equipmentRows, fleetOre, groupByHero, oreTotal } from "../js/equipo.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 
@@ -796,9 +797,81 @@ test("datos 3.1.3: menas, bomba aérea, supercargas y topes", () => {
   assert.equal(c2.cats.equipamiento.pct, 58.9);
 });
 
-test("versión 3.1.4 y cachés cp-shell-v22 / cp-img-v8", () => {
-  assert.equal(APP_VERSION, "3.1.4");
-  assert.equal(SHELL_CACHE, "cp-shell-v22");
+test("3.1.5: menas del equipamiento con la tabla corregida de 16 y 59", () => {
+  const c1exp = exportsByTag.get("#28PLGP0G2");
+  const c1 = equipmentRows(c1exp, index, 18);
+  const puppet = c1.find((p) => p.id === "90000000");
+  assert.equal(puppet.nombre, "Bárbaro títere");
+  assert.equal(puppet.bloqueado, false);
+  assert.equal(puppet.lvl, 12);
+  assert.equal(puppet.max, 18);
+  assert.equal(puppet.pendientes[0].nivel, 13);
+  assert.deepEqual(puppet.pendientes[0].mena, { brillante: 2200, reluciente: 0, estrellada: 0 });
+
+  const arrow = c1.find((p) => p.id === "90000016");
+  const fangs = c1.find((p) => p.id === "90000059");
+  assert.equal(arrow.nombre, "Flecha monolítica");
+  assert.equal(arrow.rareza, "Epic");
+  assert.equal(fangs.nombre, "Colmillos eléctricos");
+  assert.equal(fangs.rareza, "Common");
+  assert.ok(arrow.pendientes.some((step) => step.mena && step.mena.estrellada > 0));
+  assert.ok(fangs.pendientes.every((step) => step.mena && step.mena.estrellada === 0));
+  assert.equal(arrow.pendientes.find((step) => step.nivel === 18).mena.estrellada, 50);
+  assert.equal(fangs.pendientes.find((step) => step.nivel === 18).mena.estrellada, 0);
+
+  const total = oreTotal(c1);
+  assert.equal(total.estrellada > 0, true);
+  const sinTope = c1.filter((p) => p.bloqueado);
+  assert.deepEqual(sinTope.map((p) => p.id), ["90000061"]);
+  assert.equal(sinTope[0].nombre, "Portal portátil");
+  assert.equal(oreTotal(sinTope).brillante, 0);
+
+  const c2 = equipmentRows(exportsByTag.get("#R00C8CPQC"), index, 16);
+  const locked = c2.filter((p) => p.bloqueado);
+  assert.ok(locked.length >= 4);
+  for (const row of locked) assert.equal(row.pendientes.length, 0);
+  assert.equal(oreTotal(locked).brillante, 0);
+  assert.equal(oreTotal(locked).estrellada, 0);
+
+  const epic = applyEqFilter(c1, { rareza: "Epic", heroe: "todos", bloqueados: false, ocultar: true }, []);
+  assert.ok(epic.some((p) => p.id === "90000016"));
+  assert.equal(epic.some((p) => p.id === "90000059"), false);
+  const king = applyEqFilter(c1, { rareza: "todos", heroe: "Barbarian King", bloqueados: false, ocultar: false }, []);
+  assert.ok(king.length > 0);
+  assert.ok(king.every((p) => p.heroe === "Barbarian King"));
+  const hidden = applyEqFilter(c1, { rareza: "todos", heroe: "todos", bloqueados: false, ocultar: true }, ["90000000"]);
+  assert.equal(hidden.some((p) => p.id === "90000000"), false);
+  const shown = applyEqFilter(c2, { rareza: "todos", heroe: "todos", bloqueados: false, ocultar: false }, []);
+  assert.equal(shown.some((p) => p.bloqueado), false);
+  const withLocked = applyEqFilter(c2, { rareza: "todos", heroe: "todos", bloqueados: true, ocultar: false }, []);
+  assert.ok(withLocked.some((p) => p.bloqueado));
+
+  const groups = groupByHero(king, [{ id: "28000000", nombreEn: "Barbarian King", nombre: "Rey Bárbaro" }]);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].nombre, "Rey Bárbaro");
+
+  const fleet = fleetOre([
+    { tag: "#28PLGP0G2", nombre: "C1", th: 18, piezas: c1 },
+    { tag: "#R00C8CPQC", nombre: "C2", th: 16, piezas: c2 },
+  ]);
+  const expected = addOre(oreTotal(c1), oreTotal(c2));
+  assert.equal(fleet.total.estrellada, expected.estrellada);
+  assert.equal(fleet.total.brillante, expected.brillante);
+  assert.equal(fleet.total.reluciente, expected.reluciente);
+  assert.equal(fleet.filas.length, 2);
+
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /Total para maxear todo el equipamiento/);
+  assert.match(app, /Mostrar bloqueados/);
+  assert.match(app, /Ocultar elegidos/);
+  assert.match(app, /Reluciente/);
+  assert.match(app, /Estrellada/);
+  assert.equal(app.includes("resplandeciente"), true);
+});
+
+test("versión 3.1.5 y cachés cp-shell-v23 / cp-img-v8", () => {
+  assert.equal(APP_VERSION, "3.1.5");
+  assert.equal(SHELL_CACHE, "cp-shell-v23");
   assert.equal(IMAGE_CACHE, "cp-img-v8");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -824,14 +897,17 @@ test("versión 3.1.4 y cachés cp-shell-v22 / cp-img-v8", () => {
   assert.equal(sw.includes("cp-shell-v19"), false);
   assert.equal(sw.includes("cp-shell-v20"), false);
   assert.equal(sw.includes("cp-shell-v21"), false);
+  assert.equal(sw.includes("cp-shell-v22"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v22/);
+  assert.match(caches, /cp-shell-v23/);
   assert.equal(caches.includes("cp-shell-v21"), false);
+  assert.equal(caches.includes("cp-shell-v22"), false);
   assert.match(sw, /estilo-3\.1\.css/);
+  assert.match(sw, /js\/equipo\.js/);
   assert.match(caches, /cp-img-v8/);
   assert.equal(caches.includes("cp-img-v7"), false);
   assert.equal(caches.includes("cp-shell-v11"), false);

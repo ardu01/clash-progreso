@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.4</strong><br>
+  <strong>Versión 3.1.5</strong><br>
   Seguimiento de varias cuentas de Clash of Clans, en el iPhone y sin servidor.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -91,7 +91,7 @@ Cada punto es una exportación real. Con un solo día importado, la línea es un
 - Cada paso lleva coste, tiempo y fecha estimada de Madrid, con los constructores de esa cuenta. En la línea se marcan las mejoras que se están haciendo o se van a hacer. La línea se recalcula al momento. Esas marcas no cambian niveles ni porcentajes.
 - **Qué hacer ahora** enseña, en cada cuenta, el siguiente paso de esa línea cuando un constructor, el laboratorio o la casa de mascotas están libres. Si la cuenta no tiene plan guardado, el criterio es Maxear TH actual.
 - Los héroes de `#28PLGP0G2` no entran en el plan.
-- El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe frente al máximo, menas (brillante, resplandeciente y estelar) y comparación.
+- El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe frente al máximo, menas (brillante, reluciente y estrellada) y el total de la flota.
 - Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
 - Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
 - La agenda junta las horas reales de la exportación. Las marcas del plan no entran en la agenda ni en los avisos.
@@ -139,12 +139,13 @@ Para traer varias aldeas seguidas desde el juego, el atajo está en `docs/atajo.
 
 Las cuentas, el historial, los grupos, las metas, los planes, las marcas provisionales, los filtros, el tema y las horas de sueño se quedan en este navegador (`IndexedDB` y `localStorage`). No hay cuenta, no hay login y no se envía nada a un servidor. Lo único que sale del iPhone es el archivo de copia si lo guardas tú (Archivos, AirDrop u otra app del sistema).
 
-Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v22` y la de imágenes `cp-img-v8`.
+Actualizar la app no borra las cuentas ni el historial. El roster sigue en la versión 2: una cuenta borrada no vuelve a sembrarse. La caché de la interfaz es `cp-shell-v23` y la de imágenes `cp-img-v8`.
 
 ## Historial de versiones
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.5 | En Equipamiento, por cuenta y en el total de la flota: mena brillante, reluciente y estrellada para maxearlo todo, con filtros y el coste de cada nivel pendiente. Usa las tablas ya corregidas de Flecha monolítica y Colmillos eléctricos. |
 | 3.1.4 | Imagen oficial de 14 niveles que estaban prestados y de la torre de supermagos. Nombres del texto del juego: Escolta títere, Orbe oscuro, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Cohetes de defensa. L.A.S.S.I. lleva el punto. |
 | 3.1.3 | Flecha monolítica y Colmillos eléctricos con la tabla de mena de cada uno. Bomba aérea de TH18: 8. Coste y tiempo de los niveles bajos que estaban copiados de la supercarga, y tres valores desactualizados. Diez topes de equipamiento fuera del TH en que se desbloquean. Ninguna de las 11 cuentas cambia de porcentaje. |
 | 3.1.2 | Inicio con el resumen, qué hacer ahora, el orden para abrir las cuentas hoy y los objetivos de flota. Cinco pestañas: Inicio, Cuentas, Mejoras, Análisis y Agenda. Ranking en hexágono, mapa de calor por escala y el criterio del plan en viñetas. |

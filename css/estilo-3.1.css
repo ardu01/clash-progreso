@@ -476,3 +476,30 @@ html[data-theme="dark"] .chip--muted {
   font: 900 .882rem/1 var(--font-ui);
 }
 .orden-list > li > .row::before { content: none; }
+
+/* 3.1.5: menas del equipamiento. Losetas del estilo 3.1.2, no la ficha de otra app. */
+.section:has(> .card.eq-total) { container-type: inline-size; }
+.eq-ores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 10px 0 8px; }
+.eq-ores > div {
+  display: grid; align-content: start; gap: 2px; min-width: 0; padding: 8px 6px 10px; border-radius: 12px;
+  background: var(--panel-3); border: 2px solid var(--panel-edge);
+}
+.eq-ores b { font: 900 .95rem/1.15 var(--font-ui); overflow-wrap: anywhere; }
+.eq-ores span { font: 700 .7rem/1.2 var(--font-ui); color: var(--ink-2); }
+@container (max-width: 18em) { .eq-ores { grid-template-columns: 1fr; } }
+.eq-pieces { list-style: none; margin: 0; padding: 0; }
+.eq-piece + .eq-piece { margin-top: 12px; padding-top: 12px; box-shadow: inset 0 0.5px var(--separator); }
+.eq-piece__top { display: flex; align-items: flex-start; gap: 8px; }
+.eq-piece__open {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  min-height: 52px; padding: 0; border: 0; background: none; color: inherit; text-align: left;
+}
+.eq-piece__open .row__main { min-width: 0; }
+.eq-piece__open .row__title { font: 800 .95rem/1.25 var(--font-ui); }
+.eq-lvs { list-style: none; margin: 8px 0 0; padding: 0; }
+.eq-lv {
+  display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline;
+  padding-top: 6px; font: 600 .75rem/1.35 var(--font-text, var(--font)); color: var(--ink-2);
+}
+.eq-lv b { color: var(--ink); min-width: 3.2em; }
+button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 var(--panel-hi), 0 2px 0 rgba(0,0,0,.35); background: var(--panel-2); }
