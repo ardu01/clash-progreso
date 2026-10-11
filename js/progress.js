@@ -29,6 +29,7 @@ const RES_IDS = ["1000004", "1000002", "1000023", "1000005", "1000003", "1000024
 const ARMY_IDS = ["1000000", "1000006", "1000026", "1000007", "1000020", "1000029", "1000059", "1000014", "1000071", "1000068", "1000070"];
 const LAB_SECTIONS = new Set(["units", "spells", "siege_machines"]);
 const HUT = "1000015";
+const BOB_HUT = "1000064";
 const WALL = "1000010";
 const TH_ID = "1000001";
 const CRAFT = "1000097";
@@ -657,14 +658,19 @@ export function categoryOrder(key) {
 }
 
 export function builderStatus(exp) {
-  let total = 0;
+  let chozas = 0;
+  let bob = 0;
   let known = false;
   for (const b of exp.buildings || []) {
     if (String(b.data) === HUT) {
       known = true;
-      total += b.cnt || 1;
+      chozas += b.cnt || 1;
+    } else if (String(b.data) === BOB_HUT) {
+      bob += b.cnt || 1;
     }
   }
+  if (bob) known = true;
+  const total = known ? chozas + bob : null;
   let occupied = 0;
   const consider = (it) => {
     if (it.timer == null || it.extra) return;
@@ -676,7 +682,7 @@ export function builderStatus(exp) {
   }
   const over = known && occupied > total;
   const free = known && !over ? Math.max(0, total - occupied) : null;
-  return { known, total: known ? total : null, occupied, free, over };
+  return { known, total, chozas: known ? chozas : null, bob, occupied, free, over };
 }
 
 export function upgradesOf(exp) {

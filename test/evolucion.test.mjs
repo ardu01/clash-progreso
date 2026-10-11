@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { levelCost } from "../js/costs.js";
-import { empaquetar } from "../js/evolucion/empaquetar.js";
+import { BOTIN_POR_TH, empaquetar } from "../js/evolucion/empaquetar.js";
 import { buscar } from "../js/evolucion/nsga.js";
 import { escenariosDe, semanaDefecto } from "../js/evolucion/sesiones.js";
 import { HEROES_FUERA } from "../js/plan.js";
@@ -89,4 +89,42 @@ test("4.1.1: 1, 11 y 50 cuentas, la misma semilla repite el resultado", () => {
     assert.deepEqual(a.estrategias.map((e) => e.hechos), b.estrategias.map((e) => e.hechos));
     assert.ok(escenariosDe(semanaDefecto(), now, 7, 41011, 3)[0].starts.length >= 1);
   }
+});
+
+test("4.1.6: oro, elixir y oscuro no se suman 1:1 ni se dividen por 400 000", () => {
+  const pack = empaquetar({
+    th: 11,
+    pasos: [{ id: "x", toLvl: 1, queue: "constructor", seconds: 60, categoryKey: "defensas" }],
+    lanes: [{ cola: "constructor" }],
+  });
+  assert.equal(pack.botin.oro, BOTIN_POR_TH.oro[11]);
+  assert.equal(pack.botin.elixir, BOTIN_POR_TH.elixir[11]);
+  assert.equal(pack.botin.oscuro, BOTIN_POR_TH.oscuro[11]);
+  assert.notEqual(pack.botin.oro, pack.botin.oscuro);
+  const mezcla = empaquetar({
+    th: 11,
+    pasos: [{ queue: "constructor", seconds: 60, categoryKey: "recursos", id: "mezcla", toLvl: 1 }],
+    lanes: [{ cola: "constructor" }],
+  });
+  mezcla.oro[0] = 400000;
+  mezcla.elixir[0] = 400000;
+  mezcla.oscuro[0] = 4000;
+  const ataques = 400000 / pack.botin.oro + 400000 / pack.botin.elixir + 4000 / pack.botin.oscuro;
+  const junto = (400000 + 400000 + 4000) / 400000;
+  assert.notEqual(Math.round(ataques * 1000), Math.round(junto * 1000));
+  const real = empaquetar({
+    current: 11,
+    pasos: [
+      { id: "1000008", toLvl: 12, queue: "constructor", seconds: 60, categoryKey: "defensas" },
+      { id: "1000077", toLvl: 2, queue: "constructor", seconds: 60, categoryKey: "heroes" },
+    ],
+    lanes: [{ cola: "constructor" }],
+  });
+  assert.ok(real.oro[0] > 0);
+  assert.equal(real.elixir[0], 0);
+  assert.equal(real.oscuro[0], 0);
+  assert.ok(real.oscuro[1] > 0);
+  assert.equal(real.coste[0], real.oro[0] / real.botin.oro);
+  assert.equal(real.coste[1], real.oscuro[1] / real.botin.oscuro);
+  assert.equal(real.granja[0], real.coste[0] * 3);
 });

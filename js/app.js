@@ -3296,10 +3296,10 @@ function mejorasPorCuenta() {
   }).join("");
 }
 
-/** Chozas y mejoras salen de builderStatus. La extra de constructor no se suma a ese exceso. */
+/** Las chozas salen aparte. B.O.B ya va en el total de huecos, no en este rótulo. */
 function builderCaption(status, bob) {
   return {
-    chozas: status && status.known ? status.total : null,
+    chozas: status && status.known ? (status.chozas != null ? status.chozas : status.total) : null,
     occupied: status ? status.occupied : 0,
     over: !!(status && status.over),
     bob: bob || 0,
@@ -5967,6 +5967,9 @@ function fichasOperacion() {
       cats,
       libreAccion: colas ? colas.builders.libresAccion : 0,
       labLibre: !!(colas && colas.laboratorio.libreAccion),
+      mascotasLibres: !!(colas && colas.mascotas.libreAccion),
+      ayudanteLibre: !!(exp && helpersOf(exp).some((h) => !h.cooldown || (h.end != null && h.end <= state.now))),
+      herreriaLibre: !!(exp && (exp.buildings || []).some((b) => b && String(b.data) === "1000070" && b.timer == null)),
       desactualizada: colas ? !!colas.desactualizada : !exp,
       heroesConTimer: !!(exp && meta.tag !== HEROES_FUERA && (exp.heroes || []).some((h) => h && h.timer != null)),
       muestras: pairs.length,

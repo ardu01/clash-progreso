@@ -156,10 +156,12 @@ test("redondeo par del muro 61,25", () => {
 
 test("constructores: sin extra, con guardianes; nunca libres negativos", () => {
   const c1 = builderStatus(exportsByTag.get("#28PLGP0G2"));
-  assert.equal(c1.total, 5);
+  assert.equal(c1.chozas, 5);
+  assert.equal(c1.bob, 1);
+  assert.equal(c1.total, 6);
   assert.equal(c1.occupied, 6);
-  assert.equal(c1.over, true);
-  assert.equal(c1.free, null);
+  assert.equal(c1.over, false);
+  assert.equal(c1.free, 0);
   for (const roster of ROSTER) {
     const b = builderStatus(exportsByTag.get(roster.tag));
     assert.equal(b.known, true, roster.tag);
@@ -178,7 +180,7 @@ test("constructores: sin extra, con guardianes; nunca libres negativos", () => {
 
 test("defensas frente a otro TH y al TH actual", () => {
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
-  assert.equal(c2.cats.defensas.sigPct, 61.3);
+  assert.equal(c2.cats.defensas.sigPct, 61.1);
   const r = analyze(exportsByTag.get("#R02YUVC0J"), index);
   assert.equal(r.cats.defensas.pct, 54.4);
 });
@@ -259,7 +261,7 @@ test("Artillería infernal solo en el detalle, sin id inventado", () => {
   ]);
   const view = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(view.cats.defensas.pct, 66.9);
-  assert.equal(view.cats.defensas.sigPct, 61.3);
+  assert.equal(view.cats.defensas.sigPct, 61.1);
   const c1 = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "defensas", 18);
   assert.equal(c1.some((r) => r.capsOnly), false);
   const lab = categoryItems(exportsByTag.get("#28PLGP0G2"), index, "laboratorio", 18);
@@ -471,7 +473,7 @@ function fnFromApp(signature, name, deps = {}) {
 
 const V110 = {
   "#28PLGP0G2": { media: 64.2, sigMedia: null, cats: { defensas: [70.1, null], laboratorio: [62.3, null], ejercito_edif: [96.1, null], equipamiento: [61.4, null], mascotas: [41.9, null], heroes: [46, null], trampas: [39.8, null], recursos: [88.1, null], muros: [69.5, null] } },
-  "#R00C8CPQC": { media: 47.7, sigMedia: 44.5, cats: { defensas: [66.9, 61.3], laboratorio: [44.9, 40.9], ejercito_edif: [86.2, 80.6], equipamiento: [58.9, 58.9], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
+  "#R00C8CPQC": { media: 47.7, sigMedia: 44.4, cats: { defensas: [66.9, 61.1], laboratorio: [44.9, 40.9], ejercito_edif: [86.2, 80.6], equipamiento: [58.9, 58.9], mascotas: [13, 10.7], heroes: [23.5, 21.6], trampas: [13.9, 12.2], recursos: [66.5, 65.1], muros: [67, 63.3] } },
   "#GUQUV98JG": { media: 62.2, sigMedia: 48.3, cats: { defensas: [69.2, 62.6], laboratorio: [53.7, 47.9], ejercito_edif: [83.3, 75.8], equipamiento: [67.9, 57.3], mascotas: [null, 0], heroes: [32.7, 28.1], trampas: [48.9, 39.6], recursos: [72.3, 67.4], muros: [75.3, 64.9] } },
   "#GVG9GCYUV": { media: 57, sigMedia: 44.4, cats: { defensas: [68.6, 62], laboratorio: [45.6, 40.6], ejercito_edif: [81.7, 74.2], equipamiento: [80.8, 68.4], mascotas: [null, 0], heroes: [33.1, 28.4], trampas: [26.5, 21.5], recursos: [68.1, 63.4], muros: [75.4, 65] } },
   "#R02YVYLJ8": { media: 56.4, sigMedia: 43.8, cats: { defensas: [65.9, 59.6], laboratorio: [44.1, 39.3], ejercito_edif: [78.3, 71.2], equipamiento: [73.5, 62.2], mascotas: [null, 0], heroes: [30.9, 26.6], trampas: [38.8, 31.4], recursos: [61.1, 56.9], muros: [75.9, 65.4] } },
@@ -506,7 +508,7 @@ test("los porcentajes de las 11 cuentas: defensas como en 1.1.0; equipamiento de
   assert.equal(analyze(exportsByTag.get("#28PLGP0G2"), index).cats.equipamiento.pct, 61.4);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(c2.cats.defensas.pct, 66.9);
-  assert.equal(c2.cats.defensas.sigPct, 61.3);
+  assert.equal(c2.cats.defensas.sigPct, 61.1);
   assert.equal(catFoot(analyze(exportsByTag.get("#28PLGP0G2"), index), analyze(exportsByTag.get("#28PLGP0G2"), index).cats.muros), "Faltan 1884 niveles");
 });
 
@@ -797,7 +799,7 @@ test("datos 3.1.3: menas, bomba aérea, supercargas y topes", () => {
   assert.equal(c1.cats.equipamiento.pct, 61.4);
   const c2 = analyze(exportsByTag.get("#R00C8CPQC"), index);
   assert.equal(c2.media, 47.7);
-  assert.equal(c2.sigMedia, 44.5);
+  assert.equal(c2.sigMedia, 44.4);
   assert.equal(c2.cats.equipamiento.pct, 58.9);
 });
 
@@ -954,9 +956,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.1.5 y cachés cp-shell-v42 / cp-img-v10", () => {
-  assert.equal(APP_VERSION, "4.1.5");
-  assert.equal(SHELL_CACHE, "cp-shell-v42");
+test("versión 4.1.6 y cachés cp-shell-v43 / cp-img-v10", () => {
+  assert.equal(APP_VERSION, "4.1.6");
+  assert.equal(SHELL_CACHE, "cp-shell-v43");
   assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1002,6 +1004,7 @@ test("versión 4.1.5 y cachés cp-shell-v42 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-shell-v39"), false);
   assert.equal(sw.includes("cp-shell-v40"), false);
   assert.equal(sw.includes("cp-shell-v41"), false);
+  assert.equal(sw.includes("cp-shell-v42"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1009,7 +1012,8 @@ test("versión 4.1.5 y cachés cp-shell-v42 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v42/);
+  assert.match(caches, /cp-shell-v43/);
+  assert.equal(caches.includes("cp-shell-v42"), false);
   assert.equal(caches.includes("cp-shell-v41"), false);
   assert.equal(caches.includes("cp-shell-v40"), false);
   assert.equal(caches.includes("cp-shell-v39"), false);
@@ -2222,18 +2226,19 @@ test("2.0.0: C1 muestra 5 chozas, 6 mejoras de constructor y 1 de B.O.B por sepa
   const exp = exportsByTag.get("#28PLGP0G2");
   const status = builderStatus(exp);
   const bob = upgradesOf(exp).filter((u) => u.extra && u.queue === "constructor").length;
-  assert.equal(status.total, 5);
+  assert.equal(status.chozas, 5);
+  assert.equal(status.total, 6);
   assert.equal(status.occupied, 6);
-  assert.equal(status.over, true);
+  assert.equal(status.over, false);
   assert.equal(bob, 1);
   const builderCaption = fnFromApp("function builderCaption(", "builderCaption", {});
   const builderHead = fnFromApp("function builderHead(", "builderHead", { builderCaption });
   const cap = builderCaption(status, bob);
-  assert.deepEqual(cap, { chozas: 5, occupied: 6, over: true, bob: 1 });
+  assert.deepEqual(cap, { chozas: 5, occupied: 6, over: false, bob: 1 });
   const html = builderHead(status, bob);
   assert.match(html, /5 chozas/);
   assert.match(html, /6 mejoras de constructor/);
-  assert.match(html, /Revisar constructores/);
+  assert.doesNotMatch(html, /Revisar constructores/);
   assert.match(html, /1 de B\.O\.B/);
   assert.doesNotMatch(html, /5 \+ 1|1 extra|\(5/);
 });
@@ -2679,12 +2684,12 @@ test("3.1.10: Inicio y Cuentas usan el mismo cálculo y no tratan un temporizado
   }
   const resumen = resumenFlota(estados);
   assert.equal(resumen.libresReales, 0);
-  assert.equal(resumen.ocupadosReales, 44);
+  assert.equal(resumen.ocupadosReales, 50);
   assert.equal(resumen.vencidos, 31);
-  assert.equal(resumen.over, 1);
+  assert.equal(resumen.over, 0);
   const frase = fraseConstructores(resumen);
   assert.match(frase, /0 libres en la exportación/);
-  assert.match(frase, /44 ocupados en la exportación/);
+  assert.match(frase, /50 ocupados en la exportación/);
   assert.match(frase, /31 ya habrían acabado \(estimado\)/);
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.equal(app.includes("ctorLibres"), false);
@@ -2749,4 +2754,16 @@ test("3.1.10: el porcentaje compara cada cuenta con el máximo de su TH", () => 
   const bag = sumLevels("1000008", 1, 2, 1);
   const recurso = cost.r === "oro" ? bag.oro : cost.r === "elixir" ? bag.elixir : cost.r === "oscuro" ? bag.oscuro : bag.muros;
   assert.equal(recurso, cost.n || 0);
+});
+
+test("4.1.6: el águila no tiene máximo en TH17 ni TH18 y el muro de TH18 sigue", () => {
+  assert.equal(caps["17"]["Eagle Artillery"], undefined);
+  assert.equal(caps["18"]["Eagle Artillery"], undefined);
+  assert.equal(caps["11"]["Eagle Artillery"].max, 2);
+  assert.equal(caps["11"]["Eagle Artillery"].count, 1);
+  assert.equal(caps["16"]["Eagle Artillery"].count, 1);
+  assert.deepEqual(caps["18"].Wall, { max: 19, count: 325 });
+  assert.equal(index.byId.get("1000031").has(17), false);
+  assert.equal(index.byId.get("1000031").has(18), false);
+  assert.equal(index.byId.get("1000031").get(16).max, 7);
 });

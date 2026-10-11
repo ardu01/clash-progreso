@@ -2160,6 +2160,12 @@ Un toque en Inicio abre `#/inicio` desde el resto de pestañas y también cuando
 
 Qué hacer ahora, Preparar objetivos, Organizar las mejoras de hoy, las filas de Abrir hoy y las tarjetas de cuenta son enlaces `#/…`. En el icono de inicio el navegador no sigue ese enlace por sí solo y la vista se quedaba igual, sin error de JavaScript. El toque llama a `accionTab` y pone `location.hash`, igual que las pestañas. La miniatura de la fila de Cuentas abre la misma cuenta. El % de las 11 cuentas no cambia.
 
+## Nota de cambios (11 oct 2026, 4.1.6)
+
+`APP_VERSION` es `4.1.6`, `SHELL_CACHE` es `cp-shell-v43` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. Las skins no se tocan. Los costes y los tiempos no cambian.
+
+`data/caps_clashrecord.json` ya no tiene Eagle Artillery en TH17 ni en TH18. El muro de TH18 sigue en máximo 19 y cupo 325. `builderStatus` suma la cabaña de B.O.B al total de huecos; las chozas del perfil siguen sin contarla. `scheduleNext` con una semana de sesiones (por defecto 19:00–21:00, de 0 a 3 por día, lunes en el índice 0) coloca el plan; un objeto de sueño sigue valiendo para la agenda. `empaquetar` parte oro, elixir y oscuro con el tope de botín de la wiki por TH. Desde TH17, `requisitosDe` añade cañón y torre de arqueras al 21, torre de mago al 17 y águila al 7, además de los requisitos del ayuntamiento. `tareasDe` anota mascotas, ayudante y herrería. El orden del plan pone primero Consejo heroico, Herrería, Casa de mascotas y Taller; los almacenes van antes del paso que no cabe; oro y elixir se alternan; los muros y la defensa artesanal quedan al final; de TH11 a TH13 un constructor se queda en héroes, y en `#28PLGP0G2` esos héroes no entran. La subida del ayuntamiento empieza cuando lo pendiente se acerca a lo que dura, nunca antes de los requisitos.
+
 ## Nota de cambios (11 oct 2026, 4.1.5)
 
 `APP_VERSION` es `4.1.5`, `SHELL_CACHE` es `cp-shell-v42` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. Las skins no se tocan.

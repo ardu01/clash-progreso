@@ -23,7 +23,10 @@ export function sleepFromClocks(desde, hasta) {
 }
 
 let relojMadrid = null;
+const partsCache = new Map();
 function parts(ms) {
+  const hit = partsCache.get(ms);
+  if (hit) return hit;
   if (!relojMadrid) {
     relojMadrid = new Intl.DateTimeFormat("en-GB", {
       timeZone: ZONE,
@@ -40,6 +43,8 @@ function parts(ms) {
   for (const p of relojMadrid.formatToParts(new Date(ms))) {
     if (p.type !== "literal") o[p.type] = Number(p.value);
   }
+  if (partsCache.size > 12000) partsCache.clear();
+  partsCache.set(ms, o);
   return o;
 }
 
@@ -48,11 +53,17 @@ function offset(ms) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - ms;
 }
 
+const clockCache = new Map();
 function atClock(year, month, day, minutes) {
+  const key = (year * 10000 + month * 100 + day) * 10000 + minutes;
+  const hit = clockCache.get(key);
+  if (hit != null) return hit;
   const h = Math.floor(minutes / 60);
   const min = minutes % 60;
   let utc = Date.UTC(year, month - 1, day, h, min, 0) - offset(Date.UTC(year, month - 1, day, h, min, 0));
   utc = Date.UTC(year, month - 1, day, h, min, 0) - offset(utc);
+  if (clockCache.size > 12000) clockCache.clear();
+  clockCache.set(key, utc);
   return utc;
 }
 
@@ -91,16 +102,158 @@ export function segundosDe(id, lvl) {
   return row.s;
 }
 
+/** Una sesión 19:00–21:00 cada día. Cada día admite de 0 a 3. El índice 0 es el lunes. */
+export function semanaPlan() {
+  return [0, 1, 2, 3, 4, 5, 6].map(() => [{ inicio: 19 * 60, minutos: 120 }]);
+}
+
+function esSueno(v) {
+  return !!(v && !Array.isArray(v) && typeof v.desde === "number" && typeof v.hasta === "number");
+}
+
+function diaCivil(ms, add) {
+  const p = parts(ms);
+  const civil = new Date(Date.UTC(p.year, p.month - 1, p.day + (add || 0)));
+  return { year: civil.getUTCFullYear(), month: civil.getUTCMonth() + 1, day: civil.getUTCDate(), dow: civil.getUTCDay() };
+}
+
+function lunesDe(dow) {
+  return dow === 0 ? 6 : dow - 1;
+}
+
+function sesionesDelDia(semana, lunes) {
+  const lista = Array.isArray(semana) ? semana[lunes] : null;
+  return (Array.isArray(lista) ? lista : []).slice(0, 3).map((ses) => {
+    const inicio = ((Number(ses && ses.inicio) || 0) % 1440 + 1440) % 1440;
+    const minutos = Math.max(0, Math.min(1440, Number(ses && ses.minutos) || 0));
+    return { inicio, minutos };
+  }).filter((ses) => ses.minutos > 0);
+}
+
+const tablasSesion = new WeakMap();
+
+function tablaDe(semana) {
+  let t = tablasSesion.get(semana);
+  if (!t) {
+    t = { dias: new Map(), hueco: null };
+    tablasSesion.set(semana, t);
+  }
+  return t;
+}
+
+/** Hueco máximo entre el inicio de una sesión y el inicio de la siguiente, más una hora por el cambio de otoño. */
+function huecoMaximoMs(semana) {
+  const t = tablaDe(semana);
+  if (t.hueco != null) return t.hueco;
+  const ancla = Date.parse("2026-01-05T12:00:00Z");
+  const lista = [];
+  for (let add = 0; add < 16; add += 1) {
+    const civil = diaCivil(ancla, add);
+    for (const ses of sesionesDelDia(semana, lunesDe(civil.dow))) {
+      const start = atClock(civil.year, civil.month, civil.day, ses.inicio);
+      lista.push({ start, end: start + ses.minutos * 60000 });
+    }
+  }
+  let max = 0;
+  let pares = 0;
+  for (let i = 0; i < lista.length; i += 1) {
+    let siguiente = null;
+    for (let j = 0; j < lista.length; j += 1) {
+      if (lista[j].end > lista[i].end) { siguiente = lista[j]; break; }
+    }
+    if (!siguiente) continue;
+    pares += 1;
+    max = Math.max(max, siguiente.start - lista[i].start);
+  }
+  t.hueco = pares ? max + 3600000 : Infinity;
+  return t.hueco;
+}
+
+function listaDesde(ms, semana) {
+  const t = tablaDe(semana);
+  const p = parts(ms);
+  const key = p.year * 10000 + p.month * 100 + p.day;
+  const hit = t.dias.get(key);
+  if (hit) return hit;
+  const lista = [];
+  for (let add = 0; add < 21; add += 1) {
+    const civil = diaCivil(ms, add);
+    for (const ses of sesionesDelDia(semana, lunesDe(civil.dow))) {
+      const start = atClock(civil.year, civil.month, civil.day, ses.inicio);
+      lista.push({ start, end: start + ses.minutos * 60000 });
+    }
+  }
+  t.dias.set(key, lista);
+  return lista;
+}
+
+/** Próximo tramo de sesión que aún no ha terminado. null si en 21 días no hay ninguno. */
+export function proximaSesion(ms, semana) {
+  const lista = listaDesde(ms, semana);
+  for (let i = 0; i < lista.length; i += 1) {
+    if (lista[i].end > ms) return lista[i];
+  }
+  return null;
+}
+
+function sesionSiguiente(finSesion, semana) {
+  return proximaSesion(finSesion, semana);
+}
+
 /**
- * La mejora en curso conserva su fin. La siguiente no empieza ni acaba
- * dentro del sueño si cabe en el tiempo despierto. Si dura más, el fin
- * es el real y `finEnSueno` lo dice: no se mueve a una hora inventada.
+ * El plan empieza dentro de una sesión. Si la mejora cabe, termina antes
+ * de que abra la sesión siguiente. Si dura más que ese hueco, empieza
+ * igual y `pasaSesion` lo dice.
  */
-export function scheduleNext(freeAt, durationSec, sleep) {
+function cabeAntesDeLaSiguiente(inicio, dur, semana) {
+  const ses = proximaSesion(inicio, semana);
+  if (!ses || inicio < ses.start || inicio >= ses.end) return false;
+  const siguiente = sesionSiguiente(ses.end, semana);
+  if (!siguiente) return true;
+  return inicio + dur <= siguiente.start;
+}
+
+function scheduleNextSesion(freeAt, durationSec, semana) {
   const dur = typeof durationSec === "number" && Number.isFinite(durationSec) && durationSec >= 0
     ? durationSec * 1000
     : null;
-  const start0 = nextAwake(freeAt, sleep);
+  const ses = proximaSesion(freeAt, semana);
+  if (!ses) {
+    return { inicio: freeAt, fin: dur == null ? null : freeAt + dur, sinDuracion: dur == null, finEnSueno: false, pasaSesion: true, ajustado: false };
+  }
+  const start0 = Math.max(freeAt, ses.start);
+  if (dur == null) {
+    return { inicio: start0, fin: null, sinDuracion: true, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
+  }
+  if (dur > huecoMaximoMs(semana)) {
+    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: true, ajustado: start0 !== freeAt };
+  }
+  if (cabeAntesDeLaSiguiente(start0, dur, semana)) {
+    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
+  }
+  let cursor = ses;
+  for (let i = 0; i < 21; i += 1) {
+    const siguiente = sesionSiguiente(cursor.end, semana);
+    if (!siguiente) break;
+    if (siguiente.start >= freeAt && cabeAntesDeLaSiguiente(siguiente.start, dur, semana)) {
+      return { inicio: siguiente.start, fin: siguiente.start + dur, sinDuracion: false, finEnSueno: false, pasaSesion: false, ajustado: true };
+    }
+    cursor = siguiente;
+  }
+  return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: true, ajustado: start0 !== freeAt };
+}
+
+/**
+ * La mejora en curso conserva su fin. Con un sueño, la siguiente no
+ * empieza ni acaba dentro de ese tramo si cabe despierta. Con una semana
+ * de sesiones, el plan usa esas sesiones y no el sueño.
+ */
+export function scheduleNext(freeAt, durationSec, sleep) {
+  if (Array.isArray(sleep)) return scheduleNextSesion(freeAt, durationSec, sleep);
+  const dur = typeof durationSec === "number" && Number.isFinite(durationSec) && durationSec >= 0
+    ? durationSec * 1000
+    : null;
+  const start0 = nextAwake(freeAt, esSueno(sleep) ? sleep : null);
   if (dur == null) {
     return { inicio: start0, fin: null, sinDuracion: true, finEnSueno: false, ajustado: start0 !== freeAt };
   }

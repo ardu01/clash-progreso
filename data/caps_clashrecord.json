@@ -2624,10 +2624,6 @@
    "max": 11,
    "count": 3
   },
-  "Eagle Artillery": {
-   "max": 7,
-   "count": 0
-  },
   "Scattershot": {
    "max": 6,
    "count": 2
@@ -3301,10 +3297,6 @@
   "Inferno Tower": {
    "max": 12,
    "count": 3
-  },
-  "Eagle Artillery": {
-   "max": 7,
-   "count": 0
   },
   "Scattershot": {
    "max": 7,

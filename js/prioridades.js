@@ -88,6 +88,9 @@ export function tareasDe(cuenta) {
   const libres = Math.max(0, Number(cuenta.libreAccion) || 0);
   if (libres > 0) out.push(tarea(cuenta, "constructor", "Constructor libre", 3, true));
   if (cuenta.labLibre) out.push(tarea(cuenta, "laboratorio", "Laboratorio libre", 2, true));
+  if (cuenta.mascotasLibres) out.push(tarea(cuenta, "mascotas", "Mascotas", 3, true));
+  if (cuenta.ayudanteLibre) out.push(tarea(cuenta, "ayudante", "Ayudante", 2, true));
+  if (cuenta.herreriaLibre) out.push(tarea(cuenta, "herreria", "Herrería", 3, true));
   return out;
 }
 

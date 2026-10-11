@@ -5,7 +5,7 @@ import { ACCOUNT_PALETTE, accountColor, groupedByCategory, lineSeries } from "..
 import { IMAGE_CACHE } from "../js/caches.js";
 import { HEROES_FUERA, planQueue, upgradePlan } from "../js/plan.js";
 import {
-  accountTimeline, finalesEn, finDe, fleetAgenda, fraseFranja, franjasDe, inSleep, nextAwake, scheduleNext, segundosDe, sleepFromClocks,
+  accountTimeline, finalesEn, finDe, fleetAgenda, fraseFranja, franjasDe, inSleep, nextAwake, scheduleNext, segundosDe, semanaPlan, sleepFromClocks,
 } from "../js/schedule.js";
 
 test("la caché de imágenes está en cp-img-v10", () => {
@@ -165,4 +165,40 @@ test("la agenda agrupa la misma hora de Madrid en una sesión", () => {
   const franja = franjasDe(eventos)[0];
   assert.equal(franja.cuentas, 5);
   assert.equal(fraseFranja(franja), "5 cuentas entre 18:00 y 19:00: una sesión");
+});
+
+test("4.1.6: el plan usa las sesiones y no el sueño de 23 a 07", () => {
+  const semana = semanaPlan();
+  assert.equal(semana.length, 7);
+  assert.deepEqual(semana[0], [{ inicio: 19 * 60, minutos: 120 }]);
+  const antes = scheduleNext(Date.parse("2026-10-11T16:30:00Z"), 30 * 60, semana);
+  assert.equal(antes.inicio, Date.parse("2026-10-11T17:00:00Z"));
+  assert.equal(antes.pasaSesion, false);
+  const domingo = semanaPlan();
+  domingo[6] = [];
+  const salto = scheduleNext(Date.parse("2026-10-11T16:00:00Z"), 60, domingo);
+  assert.equal(salto.inicio, Date.parse("2026-10-12T17:00:00Z"));
+  const cuatro = semanaPlan();
+  cuatro[6] = [
+    { inicio: 8 * 60, minutos: 30 },
+    { inicio: 10 * 60, minutos: 30 },
+    { inicio: 12 * 60, minutos: 30 },
+    { inicio: 19 * 60, minutos: 60 },
+  ];
+  const ignora = scheduleNext(Date.parse("2026-10-11T16:00:00Z"), 30 * 60, cuatro);
+  assert.equal(ignora.inicio, Date.parse("2026-10-12T17:00:00Z"));
+  const larga = scheduleNext(Date.parse("2026-10-11T17:00:00Z"), 30 * 3600, semana);
+  assert.equal(larga.pasaSesion, true);
+  assert.equal(larga.inicio, Date.parse("2026-10-11T17:00:00Z"));
+  const otono = scheduleNext(Date.parse("2026-10-11T17:00:00Z"), 25 * 3600, semana);
+  assert.equal(otono.pasaSesion, false);
+  assert.equal(otono.inicio, Date.parse("2026-10-24T17:00:00Z"));
+  const cabe = scheduleNext(Date.parse("2026-10-11T18:30:00Z"), 23 * 3600, semana);
+  assert.equal(cabe.inicio, Date.parse("2026-10-12T17:00:00Z"));
+  assert.equal(cabe.pasaSesion, false);
+  const sleep = { desde: 23 * 60, hasta: 7 * 60 };
+  const enSueno = scheduleNext(Date.parse("2026-10-11T22:30:00Z"), 30 * 60, sleep);
+  const enSesion = scheduleNext(Date.parse("2026-10-11T22:30:00Z"), 30 * 60, semana);
+  assert.notEqual(enSueno.inicio, enSesion.inicio);
+  assert.equal(enSesion.inicio, Date.parse("2026-10-12T17:00:00Z"));
 });

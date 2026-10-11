@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.5</strong><br>
+  <strong>Versión 4.1.6</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -95,6 +95,8 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 | <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
 
 ## En esta versión
+
+La artillería águila ya no cuenta como máximo en TH17 ni en TH18: ahí se fusiona en la Artillería infernal. El sexto constructor, B.O.B, cuenta en el plan siempre, no solo al rushear. Explorar estrategias separa oro, elixir y oscuro, con un botín estimado por recurso y por ayuntamiento. El plan sigue las sesiones (por defecto 19:00–21:00, de cero a tres por día) y no el sueño de 23:00 a 07:00. Desde TH17, subir el ayuntamiento pide las fusiones con las piezas de origen al máximo. La sesión también anota mascotas, ayudantes y herrería.
 
 La barra tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no está en la barra. Está dentro de Agenda, y **Explorar estrategias** también: se abre desde esa misma entrada.
 
@@ -250,7 +252,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v42` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v43` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -258,6 +260,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.6 | El águila sale de los máximos de TH17 y TH18. B.O.B cuenta siempre. El plan usa las sesiones, separa el botín por recurso y prioriza desbloqueos, almacenes, oro y elixir. Desde TH17 la subida pide las fusiones al máximo. |
 | 4.1.5 | La barra vuelve a cinco pestañas, sin Operaciones. Operaciones y Explorar estrategias se abren desde Agenda. Los apuntes y las rutas se quedan. |
 | 4.1.4 | 31 niveles usan el dibujo de su nivel en el Fan Kit. Agenda puede guardar un calendario con los fines de las mejoras. No hay avisos con la app cerrada. |
 | 4.1.3 | Recursos manuales por cuenta, con fecha. El plan y el coste hasta el máximo incluyen subir el ayuntamiento y, si hay cifras, dicen si alcanzan. |
