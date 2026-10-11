@@ -541,3 +541,12 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   padding: 10px 12px; border-radius: 12px; border: 2px solid var(--panel-edge);
   background: var(--panel); color: var(--ink); font: 500 .85rem/1.4 ui-monospace, monospace;
 }
+.aviso-discreto {
+  position: fixed; z-index: 80; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  max-width: calc(100vw - 32px); margin: 0; pointer-events: none;
+  padding: 10px 14px; border-radius: 999px;
+  background: var(--panel-2); color: var(--label);
+  font: 600 13px/18px var(--font); letter-spacing: -0.01em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}

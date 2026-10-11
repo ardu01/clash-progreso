@@ -940,7 +940,7 @@ function costCard(exp, th, full) {
   const bag = cost.total;
   const line = costBits(bag) || "Nada pendiente con coste conocido";
   const miss = bag.sinCoste ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 paso" : `${bag.sinCoste} pasos`} sin coste en la fuente: no se ha sumado.</p>` : "";
-  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
+  const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos.</p>`;
   if (!full) {
     return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo</h2>
@@ -1354,7 +1354,7 @@ function sleepCard() {
         <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
         <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
       </div>
-      <button type="button" class="btn btn--plain btn--block" data-sueno-clear>Sin horario de sueño</button>
+      ${(s.desde || s.hasta) ? `<button type="button" class="btn btn--plain btn--block" data-sueno-clear>Quitar horario de sueño</button>` : ""}
       <p class="t-footnote c-2">${esc(nota)}</p>
     </div></div>`;
 }
@@ -3939,7 +3939,7 @@ function renderEquipoFlota(list) {
       </span>${CHEV}</button></li>`).join("");
   return `${oreCard(total, `${filas.length === 1 ? "1 cuenta" : `${filas.length} cuentas`}. Cada una usa el tope de su ayuntamiento.`)}
     <div class="section"><div class="section-header"><span>Por cuenta</span></div><ul class="list list--tiles">${rows}</ul>
-    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p></div>`;
+    <p class="section-footer">Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>.</p></div>`;
 }
 
 function renderEquipoCuenta(meta, list) {
@@ -3979,7 +3979,7 @@ function renderEquipoCuenta(meta, list) {
       <p class="section-footer">Elegir aparta una pieza de la lista. La exportación no dice cuál lleva puesta el héroe.${ocultos ? ` ${ocultos === 1 ? "1 elegida." : `${ocultos} elegidas.`}` : ""}</p>
     </div>
     <div class="section stack">${cards || empty}</div>
-    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" rel="noopener">${esc(COST_SOURCE)}</a>.</p>`;
+    <p class="section-footer">Progreso del equipamiento ${esc(pct)}. El % no cuenta piezas en nivel 1 ni sin identificar. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>.</p>`;
 }
 
 function renderEquipo(tag) {
@@ -4250,9 +4250,9 @@ function renderCopia() {
       <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>
     </ul></div>
     <div class="section"><div class="card about">
-      <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" rel="noopener">www.supercell.com/fan-content-policy</a>.</p>
+      <p class="t-body" lang="en">This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <a href="https://www.supercell.com/fan-content-policy" target="_blank" rel="noopener noreferrer">www.supercell.com/fan-content-policy</a>.</p>
       <p class="t-body">Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.</p>
-      <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" rel="noopener">Leer la Fan Content Policy</a></p>
+      <p><a class="btn btn--plain" href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Leer la Fan Content Policy</a></p>
     </div></div>
     <input class="file-input" data-backup-file type="file" accept=".json,application/json,text/json,text/plain" tabindex="-1" aria-hidden="true">`;
 }
@@ -4490,6 +4490,61 @@ function onSheetEscape(ev) {
   return false;
 }
 
+let tituloObserver = null;
+let enRecuperacion = false;
+
+function soltarPantalla() {
+  const app = document.getElementById("app");
+  if (!app) return;
+  if (!document.querySelector(".sheet, .alert")) {
+    app.querySelectorAll("[inert]").forEach((el) => el.removeAttribute("inert"));
+    app.querySelectorAll(".sheet-backdrop, .alert-backdrop").forEach((el) => el.remove());
+  }
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+function avisoDiscreto(texto) {
+  let el = document.getElementById("aviso-discreto");
+  if (!el) {
+    el = document.createElement("p");
+    el.id = "aviso-discreto";
+    el.className = "aviso-discreto";
+    el.setAttribute("role", "status");
+    document.body.appendChild(el);
+  }
+  el.textContent = texto;
+  clearTimeout(avisoDiscreto._t);
+  avisoDiscreto._t = setTimeout(() => { if (el) el.remove(); }, 3200);
+}
+
+function recuperar(err) {
+  console.error(err);
+  if (enRecuperacion) {
+    soltarPantalla();
+    avisoDiscreto("Algo no ha respondido. Puedes seguir.");
+    return;
+  }
+  enRecuperacion = true;
+  try {
+    soltarPantalla();
+    try { render(); } catch (err2) { console.error(err2); soltarPantalla(); }
+    avisoDiscreto("Algo no ha respondido. Puedes seguir.");
+  } finally {
+    enRecuperacion = false;
+  }
+}
+
+function abrirFuera(ev, enlace) {
+  ev.preventDefault();
+  try {
+    const abierta = window.open(enlace.href, "_blank", "noopener,noreferrer");
+    if (!abierta) avisoDiscreto("El enlace se abre en Safari.");
+  } catch {
+    avisoDiscreto("El enlace se abre en Safari.");
+  }
+}
+
 function render() {
   const r = route();
   if (r.name === "importar") {
@@ -4514,15 +4569,21 @@ function render() {
     console.error(err);
     screen = `<h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
   }
-  root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  try {
+    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+  } catch (err) {
+    console.error(err);
+    root.innerHTML = `<main class="screen" id="screen"><h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div></main>${tabbar(r)}`;
+  }
   bind(r);
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
+  if (tituloObserver) { tituloObserver.disconnect(); tituloObserver = null; }
   if (title && nav && nav.dataset.collapsed !== "true") {
-    const io = new IntersectionObserver(([e]) => { nav.dataset.collapsed = String(!e.isIntersecting); }, {
+    tituloObserver = new IntersectionObserver(([e]) => { nav.dataset.collapsed = String(!e.isIntersecting); }, {
       rootMargin: `-${nav.offsetHeight}px 0px 0px 0px`, threshold: 0,
     });
-    io.observe(title);
+    tituloObserver.observe(title);
   }
   paintOfflineThumbs();
   settleSheetFocus();
@@ -4564,9 +4625,15 @@ function seguirEnlace(ev, href) {
 }
 
 function bind(r) {
-  document.getElementById("app").onclick = async (ev) => {
+  document.getElementById("app").onclick = (ev) => {
+    atenderToque(ev).catch((err) => recuperar(err));
+  };
+  async function atenderToque(ev) {
+  try {
     const origen = ev.target && ev.target.nodeType === 1 ? ev.target : ev.target && ev.target.parentElement;
     if (!origen || !origen.closest) return;
+    const externo = origen.closest("a[href^='http']");
+    if (externo) { abrirFuera(ev, externo); return; }
     const dest = destinoDelToque(ev);
     if (dest) {
       seguirEnlace(ev, dest);
@@ -4875,8 +4942,13 @@ function bind(r) {
     }
     const dl = origen.closest("[data-dl]");
     if (dl) {
-      if (dl.dataset.dl === "start") downloadAll();
-      if (dl.dataset.dl === "stop" && state.dlAbort) state.dlAbort.abort();
+      if (dl.dataset.dl === "start") downloadAll().catch((err) => recuperar(err));
+      if (dl.dataset.dl === "stop" && state.dlAbort) {
+        state.dlAbort.abort();
+        state.dl.phase = "idle";
+        state.dlAbort = null;
+        render();
+      }
       if (dl.dataset.dl === "purge") {
         rememberAlertOpener(dl, '[data-dl="purge"]');
         state.alert = {
@@ -4953,7 +5025,10 @@ function bind(r) {
       }
       if (name === "add-account") { await addNewAccount(); return; }
     }
-  };
+  } catch (err) {
+    recuperar(err);
+  }
+  }
   const sel = document.querySelector("[data-account]");
   if (sel) sel.onchange = () => {
     const tail = sel.value.slice(1);
@@ -5106,11 +5181,15 @@ async function measureCache() {
 
 async function downloadAll() {
   if (!navigator.onLine) { state.dl.phase = "offline"; render(); return; }
-  try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
   const ctrl = new AbortController();
   state.dlAbort = ctrl;
   state.dl = { phase: "downloading", doneBytes: state.cacheBytes, doneCount: state.cacheCount, errors: 0, note: "" };
   render();
+  try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
+  if (ctrl.signal.aborted) {
+    if (state.dl.phase === "downloading") { state.dl.phase = "idle"; render(); }
+    return;
+  }
   const cache = await caches.open(IMAGE_CACHE);
   let errors = 0;
   let bytes = 0;
@@ -5181,9 +5260,9 @@ async function boot() {
   announce("");
   render();
   const [manifest, caps, bundle] = await Promise.all([
-    fetch("./assets/manifest.json").then((r) => r.json()),
-    fetch("./data/caps_clashrecord.json").then((r) => r.json()),
-    fetch("./data/bundle.json").then((r) => r.json()),
+    fetch("./assets/manifest.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/caps_clashrecord.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/bundle.json?v=" + APP_VERSION).then((r) => r.json()),
   ]);
   state.manifest = manifest;
   state.caps = caps;
@@ -5224,7 +5303,7 @@ async function boot() {
   }
   render();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js", { type: "module" })
+    navigator.serviceWorker.register("./sw.js?v=" + APP_VERSION, { type: "module" })
       .then(() => navigator.serviceWorker.ready)
       .then(() => measureCache())
       .catch(() => measureCache());
@@ -5234,8 +5313,20 @@ async function boot() {
 }
 
 window.addEventListener("hashchange", () => {
-  render();
-  if (route().name === "ajustes" || route().name === "copia") measureCache();
+  try {
+    render();
+    if (route().name === "ajustes" || route().name === "copia") measureCache();
+  } catch (err) {
+    recuperar(err);
+  }
+});
+window.addEventListener("error", (ev) => {
+  if (ev.target && ev.target !== window) return;
+  recuperar(ev.error || ev.message || "error");
+});
+window.addEventListener("unhandledrejection", (ev) => {
+  ev.preventDefault();
+  recuperar(ev.reason || "error");
 });
 document.addEventListener("keydown", (ev) => { if (!onAlertKey(ev)) onSheetEscape(ev); });
 document.addEventListener("visibilitychange", () => {

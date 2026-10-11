@@ -951,9 +951,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
-  assert.equal(APP_VERSION, "3.1.9");
-  assert.equal(SHELL_CACHE, "cp-shell-v28");
+test("versión 3.1.10 y cachés cp-shell-v29 / cp-img-v9", () => {
+  assert.equal(APP_VERSION, "3.1.10");
+  assert.equal(SHELL_CACHE, "cp-shell-v29");
   assert.equal(IMAGE_CACHE, "cp-img-v9");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -985,13 +985,14 @@ test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
   assert.equal(sw.includes("cp-shell-v25"), false);
   assert.equal(sw.includes("cp-shell-v26"), false);
   assert.equal(sw.includes("cp-shell-v27"), false);
+  assert.equal(sw.includes("cp-shell-v28"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
   assert.equal(sw.includes("cp-img-v5"), false);
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v28/);
+  assert.match(caches, /cp-shell-v29/);
   assert.equal(caches.includes("cp-shell-v21"), false);
   assert.equal(caches.includes("cp-shell-v22"), false);
   assert.equal(caches.includes("cp-shell-v23"), false);
@@ -999,6 +1000,7 @@ test("versión 3.1.9 y cachés cp-shell-v28 / cp-img-v9", () => {
   assert.equal(caches.includes("cp-shell-v25"), false);
   assert.equal(caches.includes("cp-shell-v26"), false);
   assert.equal(caches.includes("cp-shell-v27"), false);
+  assert.equal(caches.includes("cp-shell-v28"), false);
   assert.match(sw, /estilo-3\.1\.css/);
   assert.match(sw, /js\/equipo\.js/);
   assert.match(sw, /js\/perfil\.js/);
@@ -2588,4 +2590,22 @@ test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", 
   assert.match(app, /data-fallback/);
   assert.match(app, /applyFallback/);
   assert.equal(app.includes("1000001") && app.includes("imagenes_por_nivel[String(th)]"), false);
+});
+
+test("3.1.10: módulos versionados, aviso si un toque falla y enlaces externos fuera", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const v = APP_VERSION;
+  assert.match(html, new RegExp("js/app.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(html, /type="importmap"/);
+  assert.match(html, new RegExp("js/nav.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(sw, new RegExp("js/caches.js\\?v=" + v.replaceAll(".", "\\.")));
+  assert.match(sw, /ignoreSearch: true/);
+  assert.match(app, /unhandledrejection/);
+  assert.match(app, /aviso-discreto/);
+  assert.match(app, /tituloObserver/);
+  assert.match(app, /sw\.js\?v=/);
+  assert.match(app, /window\.open\(enlace\.href, "_blank", "noopener,noreferrer"\)/);
+  assert.equal(app.includes("target=\"_blank\""), true);
 });

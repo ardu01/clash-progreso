@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 3.1.9</strong><br>
+  <strong>Versión 3.1.10</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -40,7 +40,7 @@ Datos de prueba del 7 de octubre de 2026.
 
 ## En esta versión
 
-Inicio, Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cada cuenta responden al toque, también con Actualizar todas abierta. Actualizar todas sigue dentro de la app: no hace falta Atajos.
+Si un botón falla, la app avisa en una línea y se puede seguir usando. Los enlaces de la fuente de costes y de la política de Supercell se abren fuera, y la app se queda donde estaba. Inicio, Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cada cuenta siguen respondiendo al toque, también con Actualizar todas abierta.
 
 ## Funciones
 
@@ -143,7 +143,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las cuentas y el historial viven en IndexedDB; la sesión de Actualizar todas, el tema, los filtros y el roster viven en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v28` y la de imágenes `cp-img-v9`. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v29` y la de imágenes `cp-img-v9`. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -151,6 +151,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 3.1.10 | Un fallo en un botón no deja la pantalla pillada: se suelta y se avisa. Los enlaces de fuera se abren fuera. La interfaz nueva no se mezcla con la copia anterior. |
 | 3.1.9 | Inicio vuelve a abrirse desde las otras pestañas, también con Actualizar todas abierta. Qué hacer ahora, Abrir hoy, los objetivos y las tarjetas de cuenta los abre el toque. |
 | 3.1.8 | Actualizar todas, dentro de la app: la lista sigue el orden de Abrir hoy, Pegar esta cuenta lee el portapapeles con el toque y, si falla, un campo. Cada cuenta se reconoce por la etiqueta, se marca y se guarda al momento. El progreso y la sesión siguen si iOS cierra la app. Ya no hace falta Atajos. |
 | 3.1.7 | Imágenes no oficiales, marcadas como tales, solo donde el Fan Kit no tiene ese nivel. La herrería 10 sigue con la oficial del 9 y la bomba aérea 12 con la oficial del 11. El Crafting Station se llama Defensa artesanal. No entra la base del constructor. |

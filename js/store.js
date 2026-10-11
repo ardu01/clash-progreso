@@ -1,3 +1,5 @@
+import { APP_VERSION } from "./caches.js";
+
 const DB = "clash-progreso";
 const STORE = "exports";
 
@@ -102,7 +104,7 @@ async function importMissing(paths) {
   const existing = await allExports();
   const have = new Set(existing.map((r) => r.tag + "@" + r.timestamp));
   for (const path of paths) {
-    const res = await fetch(path);
+    const res = await fetch(path + (String(path).includes("?") ? "&" : "?") + "v=" + APP_VERSION);
     if (!res.ok) continue;
     const exp = await res.json();
     const key = exp.tag + "@" + exp.timestamp;
