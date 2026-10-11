@@ -28,15 +28,15 @@ Datos de prueba del 7 de octubre de 2026.
 
 | Inicio | Cuentas | Mejoras |
 | --- | --- | --- |
-| <img src="docs/capturas/319-inicio-claro.png" width="200" alt="Inicio: resumen de la flota, qué hacer ahora y el botón Actualizar todas"> | <img src="docs/capturas/319-cuentas-claro.png" width="200" alt="Cuentas: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/319-mejoras-claro.png" width="200" alt="Mejoras en curso, ordenadas por cuándo terminan"> |
+| <img src="docs/capturas/319-inicio-oscuro.png" width="200" alt="Inicio en oscuro: resumen de la flota, qué hacer ahora y el botón Actualizar todas"> | <img src="docs/capturas/319-cuentas-oscuro.png" width="200" alt="Cuentas en oscuro: resumen de la flota y la lista de aldeas"> | <img src="docs/capturas/319-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro, ordenadas por cuándo terminan"> |
 
 | Análisis | Agenda | Actualizar todas |
 | --- | --- | --- |
-| <img src="docs/capturas/319-analisis-claro.png" width="200" alt="Análisis: ranking de cuentas por la media"> | <img src="docs/capturas/319-agenda-claro.png" width="200" alt="Agenda del día con las colas que quedan libres"> | <img src="docs/capturas/319-actualizar-claro.png" width="200" alt="Actualizar todas: progreso de la lista y la siguiente cuenta a copiar"> |
+| <img src="docs/capturas/319-analisis-oscuro.png" width="200" alt="Análisis en oscuro: ranking de cuentas por la media"> | <img src="docs/capturas/319-agenda-oscuro.png" width="200" alt="Agenda en oscuro, con las colas que quedan libres"> | <img src="docs/capturas/319-actualizar-oscuro.png" width="200" alt="Actualizar todas en oscuro: progreso de la lista y la siguiente cuenta a copiar"> |
 
-| Inicio en oscuro | Cuentas en oscuro |
+| Inicio en claro | Cuentas en claro |
 | --- | --- |
-| <img src="docs/capturas/319-inicio-oscuro.png" width="200" alt="Inicio con el tema oscuro"> | <img src="docs/capturas/319-cuentas-oscuro.png" width="200" alt="Cuentas con el tema oscuro"> |
+| <img src="docs/capturas/319-inicio-claro.png" width="200" alt="Inicio con el tema claro"> | <img src="docs/capturas/319-cuentas-claro.png" width="200" alt="Cuentas con el tema claro"> |
 
 ## En esta versión
 
