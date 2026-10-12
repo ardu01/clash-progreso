@@ -119,6 +119,76 @@ test("4.2.4: la mascota espera la caseta y lo sin confirmar no ocupa cola", () =
   assert.equal(trampa[0].sinConfirmar, true);
   assert.equal(trampa[0].fueraDeCola, true);
   assert.notEqual(trampa[0].seconds, 0);
+  const tornado = reglas.buildings.find((b) => b.key === "tornado_trap");
+  assert.equal(costeDePaso(trampa[0]).oro, tornado.level1_cost.amount);
+  assert.equal(costeDePaso(trampa[0]).sinCoste, 0);
+});
+
+test("4.2.4: el coste con cifra se usa y el null marcado no se inventa", () => {
+  const libro = libroDesbloqueos();
+  const bomba = reglas.buildings.find((b) => b.key === "air_bomb");
+  const idBomba = libro.edificioPorClave.get("air_bomb");
+  const steps = [{
+    id: idBomba, fromLvl: 0, toLvl: 1, seconds: 0, instance: `${idBomba}#0`,
+    queue: "constructor", categoryKey: "trampas", title: "Bomba aérea",
+  }];
+  aplicarDesbloqueos(steps, { tag: "#B", buildings: [{ data: 1000001, lvl: 5 }] }, index, "#B");
+  assert.equal(steps[0].seconds, null);
+  assert.equal(steps[0].sinConfirmar, true);
+  assert.equal(steps[0].fueraDeCola, true);
+  assert.equal(costeDePaso(steps[0]).oro, bomba.level1_cost.amount);
+
+  const choza = libro.edificioPorClave.get("builders_hut");
+  const hut = [{
+    id: choza, fromLvl: 0, toLvl: 1, seconds: 0, instance: `${choza}#0`,
+    queue: "constructor", categoryKey: "recursos", title: "Choza de constructor",
+  }];
+  aplicarDesbloqueos(hut, { tag: "#B", buildings: [{ data: 1000001, lvl: 2 }] }, index, "#B");
+  assert.equal(hut[0].seconds, null);
+  assert.equal(hut[0].costeOverride, undefined);
+  assert.equal(costeDePaso(hut[0]).sinCoste, 1);
+  assert.equal(costeDePaso(hut[0]).oro + costeDePaso(hut[0]).elixir, 0);
+
+  const ayuda = libro.edificioPorClave.get("helper_hut");
+  const ay = [{
+    id: ayuda, fromLvl: 0, toLvl: 1, seconds: 0, instance: `${ayuda}#0`,
+    queue: "constructor", categoryKey: "recursos", title: "Choza de los ayudantes",
+  }];
+  aplicarDesbloqueos(ay, { tag: "#B", buildings: [{ data: 1000001, lvl: 9 }] }, index, "#B");
+  assert.equal(ay[0].costeOverride, undefined);
+  assert.notEqual(costeDePaso(ay[0]).elixir, 1000000);
+  assert.equal(ay[0].sinConfirmar, true);
+
+  assert.equal(libro.porId.get("1000010").key, "walls");
+  const muros = [{
+    id: "1000010", fromLvl: 0, toLvl: 1, seconds: 0, instance: "1000010#0",
+    queue: "constructor", categoryKey: "muros", title: "Muro",
+  }];
+  aplicarDesbloqueos(muros, { tag: "#B", buildings: [{ data: 1000001, lvl: 2 }] }, index, "#B");
+  assert.equal(muros[0].seconds, null);
+  assert.equal(muros[0].sinConfirmar, true);
+  assert.equal(costeDePaso(muros[0]).sinCoste, 1);
+
+  const castillo = libro.edificioPorClave.get("clan_castle");
+  const cc = [{
+    id: castillo, fromLvl: 0, toLvl: 1, seconds: 0, instance: `${castillo}#0`,
+    queue: "constructor", categoryKey: "recursos", title: "Castillo del clan",
+  }];
+  aplicarDesbloqueos(cc, { tag: "#B", buildings: [{ data: 1000001, lvl: 2 }] }, index, "#B");
+  assert.equal(cc[0].seconds, null);
+  assert.equal(cc[0].sinConfirmar, true);
+  assert.equal(costeDePaso(cc[0]).elixir, 10000);
+});
+
+test("4.2.4: el JSON grande se carga aparte y la capacidad derivada no entra", () => {
+  const src = readFileSync(new URL("../js/desbloqueos.js", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.equal(src.includes("capacity_by_th"), false);
+  assert.equal(src.includes("hero_equipment"), false);
+  assert.match(app, /fetch\("\.\/data\/ref\/desbloqueos\.json\?v=" \+ APP_VERSION\)/);
+  const libro = libroDesbloqueos();
+  assert.equal(libro.porId.has("capacity_by_th"), false);
+  assert.ok(libro.porId.size > 100);
 });
 
 test("4.2.4: C1 no mete héroes y el castillo no es requisito de ayuntamiento", () => {

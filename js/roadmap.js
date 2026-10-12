@@ -1,5 +1,5 @@
 import { addBags, levelCost, sumLevels, usesResource } from "./costs.js";
-import { esSinConfirmar, libroDesbloqueos, recursoDe } from "./desbloqueos.js";
+import { costeConfirmado, libroDesbloqueos, recursoDe } from "./desbloqueos.js";
 import { costeTh, capacidadTh } from "./th-costes.js";
 import { HEROES_FUERA } from "./plan.js";
 import { provisionalKey } from "./provisional.js";
@@ -1149,7 +1149,7 @@ function nivelDe(exp, id) {
 
 function aplicarConstruccion(step, regla) {
   const tiempo = regla.level1_build_time_seconds != null ? regla.level1_build_time_seconds : regla.build_time_seconds;
-  const coste = recursoDe(regla.level1_cost || regla.cost);
+  const coste = costeConfirmado(regla.level1_cost || regla.cost, regla.notes);
   const confirmado = typeof tiempo === "number" && Number.isFinite(tiempo) && tiempo > 0;
   if (confirmado) {
     step.seconds = tiempo;
@@ -1162,7 +1162,7 @@ function aplicarConstruccion(step, regla) {
   step.seconds = null;
   step.sinConfirmar = true;
   step.fueraDeCola = true;
-  if (coste && !esSinConfirmar(regla.notes)) step.costeOverride = coste;
+  if (coste) step.costeOverride = coste;
 }
 
 function asegurarEdificio(steps, exp, index, id, hasta) {

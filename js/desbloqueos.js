@@ -8,15 +8,22 @@ function norm(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-export function esSinConfirmar(notes) {
-  return (notes || []).some((n) => String(n).toLowerCase().includes("sin confirmar"));
-}
-
 export function recursoDe(cost) {
   if (!cost || typeof cost.amount !== "number" || !Number.isFinite(cost.amount)) return null;
   const r = RECURSO[cost.resource];
   if (!r) return null;
   return { r, n: cost.amount };
+}
+
+/** Un null con «sin confirmar» no se usa. Un coste con cifra sí, salvo que la nota marque ese coste. */
+export function costeConfirmado(cost, notes) {
+  const valor = recursoDe(cost);
+  if (!valor) return null;
+  const marcado = (notes || []).some((n) => {
+    const s = String(n).toLowerCase();
+    return s.includes("sin confirmar") && s.includes("coste");
+  });
+  return marcado ? null : valor;
 }
 
 function idPorNombre(items) {
@@ -27,7 +34,12 @@ function idPorNombre(items) {
     if (sec.endsWith("2") || sec.includes("builder")) continue;
     if (!map.has(norm(item.nombre_en))) map.set(norm(item.nombre_en), String(id));
   }
-  return (name) => map.get(norm(name)) || null;
+  return (name) => {
+    const key = norm(name);
+    if (map.has(key)) return map.get(key);
+    if (key === "walls") return map.get("wall") || null;
+    return null;
+  };
 }
 
 function anotar(porId, id, regla) {
