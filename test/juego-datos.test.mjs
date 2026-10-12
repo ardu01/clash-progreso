@@ -32,6 +32,9 @@ test("4.2.3: armas TH12–16 a coste 0 y artillería TH17 igual que el plan", ()
   ]);
   assert.equal(armaDe(18).sin_arma, true);
   assert.equal(armaDe(11), null);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const ay = app.slice(app.indexOf("function ayuntamientoLine("), app.indexOf("function resourceAllowsItem("));
+  assert.match(ay, /textoArma\(th\)/);
 });
 
 test("4.2.3: supercargas de TH18 aparte del nivel normal", () => {

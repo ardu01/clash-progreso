@@ -30,6 +30,10 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 | --- | --- | --- |
 | <img src="docs/capturas/421-plan-oscuro.png" width="200" alt="Plan en oscuro: tarjeta cuadrada con la cifra y el icono del recurso arriba, el edificio en el centro y Hecho debajo"> | <img src="docs/capturas/421-inicio-oscuro.png" width="200" alt="Inicio en oscuro: Hoy en tus cuentas, con la tarjeta de coste de cada aldea"> | <img src="docs/capturas/421-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro: las siguientes mejoras de cada cuenta, en la misma tarjeta"> |
 
+| Ahora | Copia |
+| --- | --- |
+| <img src="docs/capturas/423-ahora-oscuro.png" width="200" alt="Ahora en oscuro, sin el botón Activar avisos. El borde dorado marca la cola libre."> | <img src="docs/capturas/423-copia-oscuro.png" width="200" alt="Copia en oscuro: instalar Copiar aldea e Importar a Clash"> |
+
 | Barra | Agenda |
 | --- | --- |
 | <img src="docs/capturas/412-barra-oscuro.png" width="200" alt="Barra inferior en oscuro, una sola fila: Inicio, Cuentas, Mejoras, Análisis y Agenda. Sin Operaciones."> | <img src="docs/capturas/412-agenda-oscuro.png" width="200" alt="Agenda en oscuro: la entrada Operaciones abre la sesión, Explorar estrategias y el resto de vistas"> |

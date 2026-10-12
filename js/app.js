@@ -946,8 +946,10 @@ function lineaCoste(bag, vacio) {
 function ayuntamientoLine(exp) {
   const th = townHallLevel(exp);
   if (!Number.isInteger(th)) return "";
+  const arma = textoArma(th);
+  const armaHtml = arma ? `<p class="t-footnote c-2">${esc(arma)}</p>` : "";
   const siguiente = costeTh(th + 1);
-  if (!siguiente) return "";
+  if (!siguiente) return armaHtml;
   const plan = exp.tag && state.planes ? state.planes[exp.tag] : null;
   const meta = exp.tag ? accountByTag(exp.tag) : null;
   let hasta = th + 1;
@@ -960,7 +962,7 @@ function ayuntamientoLine(exp) {
       extra = `<p class="t-footnote c-2">Hasta TH${hasta}</p><div class="coste-linea">${htmlCoste({ oro: rango.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(rango.segundos))}</p>`;
     }
   }
-  return `<p class="t-body">Ayuntamiento TH${th} → ${th + 1}</p><div class="coste-linea">${htmlCoste({ oro: siguiente.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(siguiente.segundos))}</p>${extra}`;
+  return `<p class="t-body">Ayuntamiento TH${th} → ${th + 1}</p><div class="coste-linea">${htmlCoste({ oro: siguiente.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(siguiente.segundos))}</p>${extra}${armaHtml}`;
 }
 
 function resourceAllowsItem(it) {
