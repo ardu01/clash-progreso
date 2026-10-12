@@ -93,17 +93,46 @@ async function barraUnaFila(page, hash) {
     const delta = tops.length ? Math.max(...tops) - Math.min(...tops) : 0;
     const doc = document.documentElement;
     const body = document.body;
+    const bar = document.querySelector(".tabbar");
+    const span = links[0] ? links[0].querySelector("span") : null;
+    const st = bar ? getComputedStyle(bar) : null;
+    const spanSt = span ? getComputedStyle(span) : null;
+    const fab = document.querySelector(".plan-fab");
+    const fabSt = fab ? getComputedStyle(fab) : null;
+    const fabBox = fab ? fab.getBoundingClientRect() : null;
+    const barBox = bar ? bar.getBoundingClientRect() : null;
     return {
       n: links.length,
       labels: links.map((a) => (a.querySelector("span")?.textContent || "").trim()),
       rows: delta > 8 ? 2 : 1,
       scrollX: Math.max(doc.scrollWidth, body.scrollWidth) > doc.clientWidth + 1,
+      cols: st ? st.gridTemplateColumns.split(" ").filter(Boolean).length : 0,
+      gap: st ? st.columnGap || st.gap : "",
+      font: spanSt ? spanSt.fontSize : "",
+      tracking: spanSt ? spanSt.letterSpacing : "",
+      pad: st ? st.paddingLeft : "",
+      fab: !fab ? "ausente" : (bar && bar.contains(fab) ? "dentro" : "fuera"),
+      fabPos: fabSt ? fabSt.position : "",
+      fabRound: !!(fabSt && fabBox && parseFloat(fabSt.borderTopLeftRadius) >= fabBox.width / 2 - 1),
+      fabSobre: !!(fabBox && barBox && fabBox.bottom <= barBox.top + 1),
+      hoja: !!document.querySelector(".sheet"),
     };
   });
-  if (info.n !== 6) bad(hash + " la barra tiene " + info.n + " pestañas");
-  if (info.labels.join(",") !== "Inicio,Cuentas,Plan,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
+  if (info.n !== 5) bad(hash + " la barra tiene " + info.n + " pestañas");
+  if (info.labels.join(",") !== "Inicio,Cuentas,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
   if (info.rows !== 1) bad(hash + " la barra ocupa " + info.rows + " filas");
   if (info.scrollX) bad(hash + " hay scroll horizontal");
+  if (info.cols !== 5) bad(hash + " la barra tiene " + info.cols + " columnas");
+  if (info.gap !== "4px") bad(hash + " el hueco de la barra es " + info.gap);
+  if (info.font !== "10px") bad(hash + " la etiqueta mide " + info.font);
+  if (info.tracking !== "0px" && info.tracking !== "normal") bad(hash + " el tracking de la etiqueta es " + info.tracking);
+  if (info.pad !== "4px") bad(hash + " el relleno de la barra es " + info.pad);
+  if (!info.hoja) {
+    if (info.fab !== "fuera") bad(hash + " el botón Plan está " + info.fab);
+    if (info.fabPos !== "fixed") bad(hash + " el botón Plan no flota");
+    if (!info.fabRound) bad(hash + " el botón Plan no es redondo");
+    if (!info.fabSobre) bad(hash + " el botón Plan pisa la barra");
+  }
 }
 
 async function barrer(page, donde) {
@@ -182,7 +211,7 @@ async function barrer(page, donde) {
   }
   for (let i = 0; i < 4; i += 1) {
     const closed = await page.evaluate(() => {
-      const btn = document.querySelector(".alert [data-alert-cancel], .sheet [data-close-editor], .sheet [data-close-ficha], .sheet [data-close]");
+      const btn = document.querySelector(".alert [data-alert-cancel], .sheet [data-close-editor], .sheet [data-close-ficha], .sheet [data-plan-cerrar], .sheet [data-close]");
       if (!btn) return false;
       btn.click();
       return true;
@@ -212,12 +241,40 @@ const hub = await page.evaluate(() => {
   };
 });
 if (hub.title !== "Plan") bad("el hub no es Plan");
-if (hub.tab !== "Plan") bad("la pestaña Plan no queda marcada");
+if (hub.tab !== "Inicio") bad("el hub marca " + hub.tab);
 if (hub.n !== 11) bad("el plan muestra " + hub.n + " cuentas");
 if (!hub.hrefs[0] || !hub.hrefs[0].includes("28PLGP0G2")) bad("el plan no empieza por C1: " + hub.hrefs[0]);
 if (!hub.hrefs[1] || !hub.hrefs[1].includes("R00C8CPQC")) bad("el plan no sigue por C2: " + hub.hrefs[1]);
 if (hub.mejorar !== 0) bad("el hub pinta el botón Mejorar");
 if (hub.costes < 1) bad("el hub no pinta iconos de coste");
+
+await ir(page, "#/mejoras");
+await page.evaluate(() => document.querySelector("[data-plan-hoja]")?.click());
+await page.waitForSelector(".sheet [data-plan-hub]");
+const hoja = await page.evaluate(() => ({
+  hash: location.hash,
+  hub: !!document.querySelector(".sheet [data-plan-hub]"),
+  fab: !!document.querySelector(".plan-fab"),
+  tab: (document.querySelector(".tabbar a[aria-current='page'] span")?.textContent || "").trim(),
+  n: document.querySelectorAll(".sheet a.plan-hub").length,
+  dentro: !!document.querySelector(".tabbar .plan-fab"),
+}));
+if (hoja.hash !== "#/mejoras") bad("la hoja cambió de pantalla: " + hoja.hash);
+if (!hoja.hub) bad("la hoja no es el hub");
+if (hoja.fab) bad("el botón flotante tapa la hoja");
+if (hoja.dentro) bad("el botón Plan está dentro de la barra");
+if (hoja.tab !== "Mejoras") bad("la hoja marcó " + hoja.tab);
+if (hoja.n !== 11) bad("la hoja muestra " + hoja.n + " cuentas");
+await page.evaluate(() => document.querySelector("[data-plan-cerrar]")?.click());
+await page.waitForFunction(() => !document.querySelector(".sheet"));
+if (await page.evaluate(() => location.hash) !== "#/mejoras") bad("cerrar la hoja salió de Mejoras");
+
+await ir(page, "#/inicio");
+const tarjeta = await page.evaluate(() => document.querySelector("a.plan-destacada")?.getAttribute("href") || "");
+if (tarjeta !== "#/plan") bad("la tarjeta de Inicio no abre el plan");
+await page.click("a.plan-destacada");
+await page.waitForFunction(() => location.hash === "#/plan");
+if (!(await page.evaluate(() => !!document.querySelector("#screen [data-plan-hub]")))) bad("la tarjeta no abre el mismo hub");
 
 for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/plan", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);

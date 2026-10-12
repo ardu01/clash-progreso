@@ -93,6 +93,7 @@ const state = {
   seg: {},
   mejorasMode: localStorage.getItem("cp-mejoras") === "costes" || localStorage.getItem("cp-mejoras") === "equipo" ? localStorage.getItem("cp-mejoras") : "curso",
   planHub: localStorage.getItem("cp-plan-hub") === "libres" || localStorage.getItem("cp-plan-hub") === "ocupadas" ? localStorage.getItem("cp-plan-hub") : "todas",
+  planHoja: false,
   evo: localStorage.getItem("cp-evo") || "roster",
   estrategiasCfg: { horizonte: 90, presupuesto: 90 },
   estrategiasEstado: "Sin buscar. Simulación.",
@@ -262,7 +263,7 @@ function route() {
 function baseTab(r) {
   if (r.name === "inicio" || r.name === "ahora" || r.name === "copia" || r.name === "actualizar") return "inicio";
   if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
-  if (r.name === "plan") return "plan";
+  if (r.name === "plan") return r.tag ? "roster" : "inicio";
   if (r.name === "mejoras" || r.name === "equipo") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
   if (r.name === "agenda" || r.name === "operaciones") return "agenda";
@@ -1350,6 +1351,7 @@ function renderInicio() {
   const siguiente = ordenadas[0];
   return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">${esc(cabecera)}</p>
+    <a class="plan-destacada" href="#/plan"><span class="plan-destacada__ico" aria-hidden="true">${ICON.plan}</span><span class="row__main"><span class="row__title">Plan</span><span class="row__sub">Las 11 aldeas: qué mejorar ahora</span></span>${CHEV}</a>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
     ${htmlMotor()}
@@ -1712,7 +1714,7 @@ function bloqueosDe(orden) {
   return `<div class="section" data-plan-bloqueo>${sectionHead("No cabe")}<ul class="list">${filas.join("")}</ul></div>`;
 }
 
-function renderPlanHub() {
+function renderPlanHub(opts) {
   const filtro = state.planHub === "libres" || state.planHub === "ocupadas" ? state.planHub : "todas";
   const todas = allAccounts();
   const visibles = todas.filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
@@ -1742,8 +1744,11 @@ function renderPlanHub() {
   const lista = filas.length
     ? `<ul class="list list--tiles">${filas.join("")}</ul>`
     : `<div class="card empty"><p class="t-title3">—</p></div>`;
-  return `<h1 class="large-title">Plan</h1>
-    <p class="large-sub">${esc(sub)}</p>
+  const cabeza = opts && opts.hoja
+    ? `<p class="large-sub">${esc(sub)}</p>`
+    : `<h1 class="large-title">Plan</h1>
+    <p class="large-sub">${esc(sub)}</p>`;
+  return `${cabeza}
     <div data-plan-hub>
       ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
       <div class="chip-row" role="toolbar" aria-label="Constructores">${chip("todas", "Todas")}${chip("libres", "Libres")}${chip("ocupadas", "Ocupadas")}</div>
@@ -2574,7 +2579,6 @@ function tabbar(r) {
   return `<nav class="tabbar" aria-label="Secciones">
     ${item("inicio", "#/inicio", "Inicio", ICON.inicio)}
     ${item("roster", "#/roster", "Cuentas", ICON.cuentas)}
-    ${item("plan", "#/plan", "Plan", ICON.plan)}
     ${item("mejoras", "#/mejoras", "Mejoras", ICON.mejoras)}
     ${item("analisis", "#/ranking", "Análisis", ICON.analisis)}
     ${item("agenda", "#/agenda", "Agenda", ICON.agenda)}
@@ -5034,7 +5038,7 @@ function rememberOpener(el, sel) {
 
 function settleSheetFocus() {
   const sheet = document.querySelector(".sheet");
-  for (const sel of [".navbar", "#screen", ".tabbar"]) {
+  for (const sel of [".navbar", "#screen", ".tabbar", ".plan-fab"]) {
     const el = document.querySelector(sel);
     if (!el) continue;
     if (sheet) el.setAttribute("inert", "");
@@ -5094,6 +5098,11 @@ function focusImportTarget() {
 
 function onSheetEscape(ev) {
   if (!ev || ev.key !== "Escape" || state.alert) return false;
+  if (state.planHoja) {
+    state.planHoja = false;
+    render();
+    return true;
+  }
   if (state.editor) {
     state.editor = null;
     render();
@@ -5171,6 +5180,19 @@ function abrirFuera(ev, enlace) {
   }
 }
 
+function planFab() {
+  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan">${ICON.plan}</button>`;
+}
+
+function renderPlanSheet() {
+  return `<div class="sheet-backdrop" data-plan-cerrar="1"></div>
+    <div class="sheet sheet--plan" role="dialog" aria-modal="true" aria-labelledby="plan-hoja-title">
+      <div class="sheet__grabber"></div>
+      <div class="sheet__bar"><span></span><h2 id="plan-hoja-title" tabindex="-1">Plan</h2><button type="button" class="btn-text btn-text--bold" data-plan-cerrar="1">OK</button></div>
+      <div class="sheet__body">${renderPlanHub({ hoja: true })}</div>
+    </div>`;
+}
+
 function render() {
   const r = route();
   aplicarTemaApp();
@@ -5197,7 +5219,9 @@ function render() {
     screen = `<h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
   }
   try {
-    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+    const planHoja = state.planHoja ? renderPlanSheet() : "";
+    const fab = planHoja || state.editor || state.ficha || r.name === "ajustes" || r.name === "importar" ? "" : planFab();
+    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${fab}${planHoja}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   } catch (err) {
     console.error(err);
     root.innerHTML = `<main class="screen" id="screen"><h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div></main>${tabbar(r)}`;
@@ -5313,6 +5337,14 @@ function bind(r) {
     const dest = destinoDelToque(ev);
     if (dest) {
       seguirEnlace(ev, dest);
+      return;
+    }
+    if (origen.closest("[data-plan-hoja]")) {
+      ev.preventDefault();
+      rememberOpener(origen.closest("[data-plan-hoja]"), "[data-plan-hoja]");
+      state.sheetKey = "";
+      state.planHoja = true;
+      render();
       return;
     }
     const eqVista = origen.closest("[data-eq-vista]");
@@ -5650,6 +5682,7 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
+    if (origen.closest("[data-plan-cerrar]")) { state.planHoja = false; render(); return; }
     if (origen.closest("[data-close]")) { location.hash = "#/roster"; return; }
     if (origen.closest("[data-restore]")) {
       rememberAlertOpener(origen.closest("[data-restore]"), "[data-restore]");
@@ -6370,6 +6403,10 @@ async function boot() {
 
 window.addEventListener("hashchange", () => {
   try {
+    if (state.planHoja) {
+      state.planHoja = false;
+      state.focusReturn = "";
+    }
     render();
     if (route().name === "ajustes" || route().name === "copia") measureCache();
   } catch (err) {

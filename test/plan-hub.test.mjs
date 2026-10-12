@@ -5,13 +5,40 @@ import { imageChoice } from "../js/images.js";
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../css/base.css", import.meta.url), "utf8");
+const estilo = readFileSync(new URL("../css/estilo-3.1.css", import.meta.url), "utf8");
 
-test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
+test("4.2.4: el hub se abre desde Inicio y desde la hoja, sin pestaña nueva", () => {
   const tab = app.slice(app.indexOf("function tabbar("), app.indexOf("function subImported("));
-  assert.match(tab, /#\/plan/);
-  assert.match(tab, /"Plan"/);
+  assert.equal(tab.includes("#/plan"), false);
+  assert.equal(tab.includes("Plan"), false);
   assert.equal(tab.includes("Operaciones"), false);
-  assert.match(css, /repeat\(6, minmax\(0, 1fr\)\)/);
+  assert.match(tab, /Inicio/);
+  assert.match(tab, /Cuentas/);
+  assert.match(tab, /Mejoras/);
+  assert.match(tab, /Análisis/);
+  assert.match(tab, /Agenda/);
+  assert.match(css, /repeat\(5, minmax\(0, 1fr\)\)/);
+  assert.equal(css.includes("repeat(6, minmax(0, 1fr))"), false);
+  const tabCss = estilo.slice(estilo.indexOf("/* Tab bar"), estilo.indexOf("/* ── 1b."));
+  assert.match(tabCss, /gap: 4px/);
+  assert.match(tabCss, /font-size: 10px/);
+  assert.equal(tabCss.includes("font-size: 9px"), false);
+  assert.equal(tabCss.includes("letter-spacing: -0.02em"), false);
+  const base = app.slice(app.indexOf("function baseTab("), app.indexOf("function infoBtn("));
+  assert.match(base, /r\.name === "plan"/);
+  assert.match(base, /return r\.tag \? "roster" : "inicio"/);
+  assert.equal(base.includes('return "plan"'), false);
+  const inicio = app.slice(app.indexOf("function renderInicio("), app.indexOf("function renderAhora("));
+  assert.match(inicio, /class="plan-destacada" href="#\/plan"/);
+  const fab = app.slice(app.indexOf("function planFab("), app.indexOf("function renderPlanSheet("));
+  assert.match(fab, /class="plan-fab"/);
+  assert.match(fab, /data-plan-hoja/);
+  assert.match(fab, /aria-label="Plan"/);
+  const hoja = app.slice(app.indexOf("function renderPlanSheet("), app.indexOf("function render("));
+  assert.match(hoja, /sheet--plan/);
+  assert.match(hoja, /data-plan-cerrar/);
+  assert.match(hoja, /renderPlanHub\(\{ hoja: true \}\)/);
+  assert.match(app, /state\.planHoja/);
   const hub = app.slice(app.indexOf("function renderPlanHub("), app.indexOf("function renderPlan("));
   assert.match(hub, /data-plan-hub/);
   assert.match(hub, /recomendar/);
@@ -25,7 +52,6 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   assert.match(hub, /data-plan-filtro/);
   assert.equal(hub.includes("mejorar:"), false);
   assert.equal(hub.includes("htmlCuerpoMejorar"), false);
-  const inicio = app.slice(app.indexOf("function renderInicio("), app.indexOf("function renderAhora("));
   assert.equal(inicio.includes("hoyEnCuentas"), false);
   assert.equal(inicio.includes("data-hoy-cuentas"), false);
   const mejoras = app.slice(app.indexOf("function renderMejoras("), app.indexOf("function mejorasEquipo("));

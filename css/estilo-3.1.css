@@ -206,7 +206,7 @@ html[data-theme="dark"] .row.row--destructive {
 /* Tab bar = pestañas 3D (Arte v2 components.css .tabbar): activa en panel claro, sube 3 px, borde oscuro;
    el resto, gris con canto. Etiquetas blancas sobre --grey (5,1:1) y tinta sobre --panel (13,7:1). */
 .tabbar {
-  gap: 2px; padding: 4px calc(2px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) calc(2px + env(safe-area-inset-left));
+  gap: 4px; padding: 4px calc(4px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) calc(4px + env(safe-area-inset-left));
   background: linear-gradient(180deg, #6A4B30, #3E2918); border-top: 3px solid #1A120C;
   box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 -4px 12px rgba(0,0,0,.35);
 }
@@ -217,7 +217,7 @@ html[data-theme="dark"] .row.row--destructive {
   box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 3px 0 var(--grey-edge);
   font-family: var(--font-ui); font-weight: 800; transition: transform 80ms;
 }
-.tabbar a span { font-weight: 800; font-size: 9px; line-height: 1.05; letter-spacing: -0.02em; }
+.tabbar a span { font-weight: 800; font-size: 10px; line-height: 1.05; }
 .tabbar svg { width: 20px; height: 20px; stroke-width: 2.4; pointer-events: none; }
 .tabbar a span { pointer-events: none; }
 /* El icono (trazo, sin relleno) y el texto no se comen el toque: en el iPhone el golpe llega al enlace. */
@@ -729,6 +729,47 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   font-size: .72rem; color: var(--label-2);
 }
 .plan-hub .mejora { background: var(--panel); }
+.plan-destacada {
+  display: flex; align-items: center; gap: 12px;
+  margin: 8px var(--margin-r) 16px var(--margin-l);
+  min-height: 84px; padding: 12px 14px; border-radius: 16px;
+  text-decoration: none; color: #24211C;
+  background: linear-gradient(180deg, var(--gold-top), var(--gold) 46%, var(--gold-bot));
+  border: 3px solid var(--gold-edge);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.75), 0 4px 0 var(--gold-edge);
+}
+.plan-destacada:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.75), 0 1px 0 var(--gold-edge); }
+.plan-destacada__ico {
+  flex: none; width: 48px; height: 48px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--gold); background: #3E2918;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.18), 0 2px 0 #1A120C;
+}
+.plan-destacada .row__main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.plan-destacada .row__title,
+.plan-destacada .row__sub { white-space: normal; overflow: visible; text-overflow: clip; }
+.plan-destacada .row__title { font: 900 1.2rem/1.15 var(--font-ui); color: #24211C; }
+.plan-destacada .row__sub { font: 700 .78rem/1.25 var(--font-ui); color: #3E2918; }
+.plan-destacada .chevron { flex: none; width: 8px; height: 13px; }
+.plan-fab {
+  position: fixed; z-index: 25;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 14px);
+  width: 56px; height: 56px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; color: #24211C;
+  border: 3px solid var(--gold-edge);
+  background: linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 var(--gold-edge), 0 8px 16px rgba(0,0,0,.35);
+}
+.plan-fab:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 1px 0 var(--gold-edge); }
+.plan-fab svg,
+.plan-destacada__ico svg {
+  width: 26px; height: 26px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.sheet--plan { background: var(--scene); }
+.sheet--plan .sheet__bar h2,
+.sheet--plan .sheet__bar .btn-text { color: #FFFFFF; }
+.sheet--plan .sheet__bar h2 { font-family: var(--font-ui); font-weight: 900; }
 .hoy-cuenta {
   display: block; color: inherit; text-decoration: none;
   padding: 10px 12px 12px;

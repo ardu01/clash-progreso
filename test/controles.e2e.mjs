@@ -65,7 +65,7 @@ try {
   await paso("Actualizar todas", "#screen [data-actualizar]", "#/actualizar", "Actualizar todas");
   await paso("Dejar para luego", "#screen button[data-go='#/inicio']", "#/inicio", "Inicio");
 
-  for (const tab of ["Cuentas", "Plan", "Mejoras", "Análisis", "Agenda"]) {
+  for (const tab of ["Cuentas", "Mejoras", "Análisis", "Agenda"]) {
     await en("#/inicio", "Inicio");
     await paso("pestaña " + tab, ".tabbar a >> text=" + tab, null, null, { tab });
   }
@@ -91,7 +91,7 @@ try {
   check(!(await page.evaluate(() => !!document.querySelector("#screen .link-row"))), "Cuentas mezcla pestañas con la sesión abierta");
   await en("#/actualizar", "Actualizar todas");
   await paso("Inicio con la sesión abierta", ".tabbar a >> text=Inicio", "#/inicio", "Inicio");
-  for (const tab of ["Cuentas", "Plan", "Mejoras", "Análisis", "Agenda"]) {
+  for (const tab of ["Cuentas", "Mejoras", "Análisis", "Agenda"]) {
     await paso("pestaña " + tab + " con sesión", ".tabbar a >> text=" + tab, null, null, { tab });
     await paso("Inicio desde " + tab + " con sesión", ".tabbar a >> text=Inicio", "#/inicio", "Inicio");
   }

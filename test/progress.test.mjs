@@ -1082,21 +1082,22 @@ test("versión 4.2.4 y cachés cp-shell-v51 / cp-img-v11", () => {
   assert.match(app, /js\/import\.js|from "\.\/import\.js"/);
 });
 
-test("4.2.4: la barra tiene seis pestañas y Operaciones se abre desde Agenda", () => {
+test("4.2.4: la barra tiene cinco pestañas y Operaciones se abre desde Agenda", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const tab = app.slice(app.indexOf("function tabbar("), app.indexOf("function subImported("));
   assert.equal(tab.includes("Operaciones"), false);
   assert.equal(tab.includes("#/operaciones"), false);
+  assert.equal(tab.includes("#/plan"), false);
+  assert.equal(tab.includes("Plan"), false);
   assert.match(tab, /Inicio/);
   assert.match(tab, /Cuentas/);
-  assert.match(tab, /#\/plan/);
-  assert.match(tab, /Plan/);
   assert.match(tab, /Mejoras/);
   assert.match(tab, /Análisis/);
   assert.match(tab, /Agenda/);
   const basePlan = app.slice(app.indexOf("function baseTab("), app.indexOf("function infoBtn("));
   assert.match(basePlan, /r\.name === "plan"/);
-  assert.match(basePlan, /return "plan"/);
+  assert.match(basePlan, /return r\.tag \? "roster" : "inicio"/);
+  assert.equal(basePlan.includes('return "plan"'), false);
   const agenda = app.slice(app.indexOf("function renderAgenda("), app.indexOf("function renderHistorial("));
   assert.match(agenda, /href="#\/operaciones"/);
   assert.match(agenda, />Operaciones</);

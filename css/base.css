@@ -99,7 +99,7 @@ img { max-width: 100%; }
 
 .tabbar {
   position: fixed; z-index: 20; left: 0; right: 0; bottom: 0;
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   height: auto;
   min-height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   padding: 2px env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
