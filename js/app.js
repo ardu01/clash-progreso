@@ -32,7 +32,7 @@ import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
 import { horaMadrid, recomendar } from "./recomendador.js";
-import { htmlCoste, htmlMartillo } from "./coste-tarjeta.js";
+import { htmlCoste, htmlCuerpoMejorar } from "./coste-tarjeta.js";
 import {
   DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -1671,9 +1671,11 @@ function fichaMejora(paso, extra = {}) {
   const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
   const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
   const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
-  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}${htmlMartillo()}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
-  if (!extra.boton) return card;
-  return `<div class="mejora-slot">${card}${extra.boton}</div>`;
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  const mejorar = extra.mejorar ? `<button type="button" class="btn btn--primary btn--small btn--block btn-mejorar" data-go="${esc(extra.mejorar)}">${htmlCuerpoMejorar()}</button>` : "";
+  const abajo = `${mejorar}${extra.boton || ""}`;
+  if (!abajo) return card;
+  return `<div class="mejora-slot">${card}${abajo}</div>`;
 }
 
 function tarjetaAhora(paso, tag) {
@@ -1682,7 +1684,7 @@ function tarjetaAhora(paso, tag) {
   const pie = [dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean).join(" · ");
   const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
   const boton = `<button type="button" class="btn btn--primary btn--small mejora-hecho" data-hecho data-prov-tag="${esc(tag)}" data-hecho-id="${esc(paso.id)}" data-hecho-from="${paso.fromLvl}" data-hecho-to="${paso.toLvl}" data-hecho-instance="${esc(paso.instance || "")}" data-hecho-queue="${esc(paso.queue || "constructor")}" data-hecho-title="${esc(paso.title)}" aria-label="${esc(aria)}">Hecho</button>`;
-  return fichaMejora(paso, { pie, boton });
+  return fichaMejora(paso, { pie, boton, mejorar: `#/progreso/${tag.slice(1)}/plan` });
 }
 
 function hoyEnCuentas() {
@@ -1692,10 +1694,15 @@ function hoyEnCuentas() {
   const filas = cuentas.map((meta) => {
     const road = expOf(meta.tag) ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
+    const href = `#/progreso/${meta.tag.slice(1)}/plan`;
     const cuerpo = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p)).join("")}</div>`
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { mejorar: href })).join("")}</div>`
       : `<span class="row__sub">${expOf(meta.tag) ? "Nada en esta sesión" : "Sin importar"}</span>`;
-    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__title">${esc(meta.nombre)}</span>${cuerpo}</a></li>`;
+    const dentro = rec && rec.ahora.length
+      ? `<span class="row__title">${esc(meta.nombre)}</span>`
+      : `<span class="row__title">${esc(meta.nombre)}</span>${cuerpo}`;
+    const fuera = rec && rec.ahora.length ? cuerpo : "";
+    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="${href}">${dentro}</a>${fuera}</li>`;
   }).join("");
   return `<div class="section" data-hoy-cuentas>${sectionHead("Hoy en tus cuentas")}<ul class="list list--tiles">${filas}</ul></div>`;
 }
@@ -3278,7 +3285,7 @@ function mejorasPlan() {
     const th = road && road.currentTh != null ? `TH${road.currentTh}` : "";
     const sub = [th, label].filter(Boolean).join(" · ");
     const cartas = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p)).join("")}</div>`
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p, { mejorar: `#/progreso/${meta.tag.slice(1)}/plan` })).join("")}</div>`
       : "";
     const thumbHtml = exp ? thumb(1000001, { size: 44, th: viewOf(meta.tag).th }) : "";
     return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a>${cartas}</li>`;

@@ -689,10 +689,16 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   top: calc(var(--y) * 1px);
   object-fit: fill;
 }
-.mejora__fig > .mejora__martillo {
-  position: absolute; right: 0; bottom: 0; z-index: 1;
-}
 .mejora__fig { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; width: 100%; }
+.btn-mejorar,
+.btn-mejorar__cuerpo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-mejorar__cuerpo { display: inline-flex; gap: 6px; max-width: 100%; min-width: 0; }
+.btn-mejorar__icono { position: static; --size: 24px; }
+.btn-mejorar__texto { line-height: 1; }
 .mejora__fig .thumb { --size: 64px; }
 .mejora__nombre, .mejora__nivel, .mejora__pie {
   max-width: 100%; margin: 0;

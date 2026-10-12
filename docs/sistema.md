@@ -2246,7 +2246,7 @@ Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paqu
 
 `APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` es `cp-img-v11`. `ROSTER_VERSION` sigue en 2. Entran 8 PNG del Fan Kit en `assets/oficial/resources/` (oro, elixir, oscuro, gemas, mena brillante, mena reluciente, mena estrellada y el martillo de Mejorar). Cada uno lleva `url_origen` en `iconos_recurso` del manifiesto. Se descargaron tal cual: la copia es idéntica al archivo de origen. La precarga de instalación pasa de 220 a 228 archivos.
 
-`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro, el martillo de Mejorar sobre esa imagen y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
+`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro y el nombre debajo. Desde la 4.2.3 el martillo no va en esa tarjeta: solo dentro del botón **Mejorar**, centrado con la palabra. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
 
 Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. El botón que comparte fila con un título no lleva ese margen en sí: la fila usa `align-items: center` y el aire queda en el contenedor, así título e icono comparten la línea central. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen dentro del grupo.
 
@@ -2287,6 +2287,8 @@ Los nueve módulos de la defensa artesanal dejan el paréntesis en inglés. Punt
 El Portal portátil (`90000061`) copia la curva épica de menas de `90000016` (clash-of-clans-data 0.18.0). ClashRecord y el cliente 18.600.3 citado por Goblins Farm publican la misma tabla, máximo 27. El tope por ayuntamiento es el del Bastón de meteoritos en `caps_clashrecord.json`. El nivel 1 no entra en el porcentaje, así que la media de las 11 cuentas no se mueve.
 
 Los muros del TH18 se comprobaron contra `wall.json` del mismo commit: nivel 18, 7.000.000; nivel 19, 10.000.000; tope 19 y 325 piezas. No se han tocado.
+
+El martillo oficial (`oficial/resources/martillo.png`, el `building_upgrade_hammer` del Fan Kit) deja la tarjeta de coste. Va solo en el botón **Mejorar**: el icono y la palabra forman un grupo centrado en el botón, en la misma línea. **Hecho** sigue siendo la marca del plan y no lleva martillo. Las mejoras ya en curso tampoco lo llevan.
 
 ## Nota de cambios (12 oct 2026, 4.2.2)
 
