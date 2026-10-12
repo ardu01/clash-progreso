@@ -1727,7 +1727,7 @@ function renderPlanHub() {
     const road = row ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
     const cartas = rec && rec.ahora.length
-      ? `<span class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p, { pie: p.seconds == null ? "" : textoSegundos(p.seconds) })).join("")}</span>`
+      ? `<span class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { pie: p.seconds == null ? "" : textoSegundos(p.seconds) })).join("")}</span>`
       : `<span class="plan-hub__vacio">—</span>`;
     const th = row && row.th != null ? row.th : null;
     const figura = th != null ? thumb(1000001, { size: 44, th }) : `<span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>`;

@@ -167,7 +167,7 @@ El centro de mando de la flota.
 
 ### Plan
 
-Las 11 aldeas en una sola vista, en el orden de las cuentas. En cada una: qué poner a mejorar ahora (como máximo dos tarjetas, con la cifra y el icono oficial del recurso), cuántos constructores están libres y ocupados, y cuándo acaba la próxima mejora. Si en esta sesión no hay nada, un guion. Los filtros son el ayuntamiento, el grupo y tres chips: Todas, Libres y Ocupadas. Tocar la cuenta abre su detalle: **Ahora**, **Hecho**, las próximas sesiones y el chip **Maxear TH actual** / **Subir TH**. El botón **Mejorar**, con el martillo, está en ese detalle, no en el hub.
+Las 11 aldeas en una sola vista, en el orden de las cuentas. En cada una: qué poner a mejorar ahora (como máximo cuatro tarjetas, con la cifra y el icono oficial del recurso), cuántos constructores están libres y ocupados, y cuándo acaba la próxima mejora. Si en esta sesión no hay nada, un guion. Los filtros son el ayuntamiento, el grupo y tres chips: Todas, Libres y Ocupadas. Tocar la cuenta abre su detalle: **Ahora**, **Hecho**, las próximas sesiones y el chip **Maxear TH actual** / **Subir TH**. El botón **Mejorar**, con el martillo, está en ese detalle, no en el hub.
 
 ### Mejoras
 
@@ -289,7 +289,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
-| 4.2.4 | La pestaña Plan reúne las 11 aldeas: qué mejorar ahora, constructores libres y ocupados, próxima finalización y coste con iconos oficiales. Un toque abre el detalle. Inicio y Mejoras dejan de repetir ese plan. Si una mejora no cabe en los almacenes (oro, elixir y oscuro, incluido el ayuntamiento), el plan pone antes esos almacenes, con coste y tiempo, y deja la mejora bloqueada con el motivo. Subir el ayuntamiento muestra la imagen oficial del TH de destino. |
+| 4.2.4 | La pestaña Plan reúne las 11 aldeas: qué mejorar ahora, constructores libres y ocupados, próxima finalización y coste con iconos oficiales. Un toque abre el detalle. Inicio y Mejoras dejan de repetir ese plan. Si una mejora no cabe en los almacenes (oro, elixir y oscuro, incluido el ayuntamiento), el plan pone antes esos almacenes, con coste y tiempo, y deja la mejora bloqueada con el motivo. Subir el ayuntamiento muestra la imagen oficial del TH de destino. El hub muestra hasta cuatro mejoras por cuenta. |
 | 4.2.3 | Sin el botón «Activar avisos». En Copia se instalan los atajos «Copiar aldea» e «Importar a Clash». Los módulos de la defensa artesanal pasan a español. Entran las armas del TH12 al TH16 (un nivel, coste 0), las supercargas de TH18 y las menas del Portal portátil, con la fuente marcada. Los muros del TH18 se comprobaron y siguen igual. El martillo oficial sale de la tarjeta de coste y queda solo en el botón Mejorar, centrado con la palabra. |
 | 4.2.2 | Paquete de temas 1.1.0: 20 temas nuevos (mascotas, hechizos, supertropas, asedio, aldea del constructor, Alquimista y Tiradora), agrupados en el selector. Solo en modo oscuro. |
 | 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono oficial arriba, imagen en el centro, texto debajo y el martillo de Mejorar. Los miles van con espacio. Los botones, y la i dorada, llevan margen arriba y abajo y siguen en la línea de su título. |

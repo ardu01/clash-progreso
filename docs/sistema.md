@@ -2274,7 +2274,7 @@ El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la
 
 `APP_VERSION` es `4.2.4`, `SHELL_CACHE` es `cp-shell-v51` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
 
-La barra pasa a seis pestañas, en una fila: Inicio, Cuentas, Plan, Mejoras, Análisis y Agenda. Operaciones sigue dentro de Agenda. `#/plan` pinta el hub de las 11 aldeas con el mismo motor de la 4.2.0 (`decisionRoadmap`, `recomendar`, `fleetRow` y la tarjeta de `htmlCoste`). Por cuenta: como máximo dos pasos de Ahora, sin el botón Mejorar; constructores libres y ocupados; la próxima finalización. Los filtros son ayuntamiento, grupo y los chips Todas, Libres y Ocupadas. Tocar la cuenta abre `#/progreso/TAG/plan`, que conserva Ahora, Hecho, las sesiones y Maxear / Subir TH. La vuelta es Plan.
+La barra pasa a seis pestañas, en una fila: Inicio, Cuentas, Plan, Mejoras, Análisis y Agenda. Operaciones sigue dentro de Agenda. `#/plan` pinta el hub de las 11 aldeas con el mismo motor de la 4.2.0 (`decisionRoadmap`, `recomendar`, `fleetRow` y la tarjeta de `htmlCoste`). Por cuenta: como máximo cuatro pasos de Ahora, sin el botón Mejorar; constructores libres y ocupados; la próxima finalización. Los filtros son ayuntamiento, grupo y los chips Todas, Libres y Ocupadas. Tocar la cuenta abre `#/progreso/TAG/plan`, que conserva Ahora, Hecho, las sesiones y Maxear / Subir TH. La vuelta es Plan.
 
 Inicio deja de pintar «Hoy en tus cuentas». Mejoras deja el segmento Plan: abre En curso, y si `cp-mejoras` valía `plan` también cae en En curso. Costes y Equipo siguen. `#/ahora` no cambia.
 

@@ -18,6 +18,8 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   assert.match(hub, /decisionRoadmap/);
   assert.match(hub, /fleetRow/);
   assert.match(hub, /fichaMejora\(p/);
+  assert.match(hub, /slice\(0, 4\)/);
+  assert.equal(hub.includes("slice(0, 2)"), false);
   assert.match(hub, /textoSegundos/);
   assert.match(hub, /plan-hub__motivo/);
   assert.match(hub, /data-plan-filtro/);
