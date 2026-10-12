@@ -138,3 +138,12 @@ test("4.2.4: subir el ayuntamiento muestra el TH de destino", () => {
   assert.equal(imageChoice(hall, 17).im.ruta, "images/townhalls/town-hall-17.png");
   assert.equal(app.includes("imagenes_por_nivel[String(th)]"), false);
 });
+
+test("4.2.5: la hora de Ahora cabe en la tarjeta", () => {
+  const pie = estilo.slice(estilo.indexOf(".mejora__pie {"), estilo.indexOf(".mejora__nombre { font"));
+  assert.match(pie, /-webkit-line-clamp:\s*2/);
+  assert.match(pie, /white-space:\s*normal/);
+  assert.equal(/\.mejora__nombre, \.mejora__nivel, \.mejora__pie \{[^}]*nowrap/.test(estilo), false);
+  const ahora = app.slice(app.indexOf("function tarjetaAhora("), app.indexOf("function bloqueosDe("));
+  assert.match(ahora, /acaba \$\{fin\}/);
+});
