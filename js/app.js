@@ -538,7 +538,7 @@ function imageThumb(cls, size, label, im, opts, choice) {
   const w = Number(im.ancho) > 0 ? im.ancho : size;
   const h = Number(im.alto) > 0 ? im.alto : size;
   const fitted = fit ? " is-ajuste" : "";
-  return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${w}" height="${h}" loading="${loading}" decoding="async"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
+  return `<span class="thumb ${cls}${tile}${fitted}"${style}${extra} data-initials="${esc(initials(label))}"><img src="./assets/${esc(im.ruta)}" alt="" width="${w}" height="${h}" loading="${loading}" decoding="async" draggable="false"${pri} onload="window.__imgOk(this)" onerror="window.__imgErr(this)"></span>`;
 }
 
 function emptyNamedThumb(label, size) {
@@ -2540,56 +2540,56 @@ function navbar(r) {
   let title = titles[r.name] || "";
   let collapsed = "false";
   if (r.name === "inicio" && r.sub) {
-    lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
   } else if (r.name === "inicio") {
-    trail = `<button class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
+    trail = `<button type="button" class="btn-text btn-ajustes" data-go="#/copia" aria-label="Ajustes, copia y Acerca de">${ICON.ajustes}</button>`;
   } else if (r.name === "agenda" && r.sub) {
-    lead = `<button class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
     collapsed = "true";
   } else if (r.name === "roster" && r.sub) {
-    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
   } else if (r.name === "copia" || r.name === "ahora" || r.name === "actualizar") {
-    lead = `<button class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/inicio">${BACK} Inicio</button>`;
     collapsed = "true";
   } else if (r.name === "roster" || r.name === "importar") {
-    trail = `<button class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
+    trail = `<button type="button" class="btn-text btn-text--bold" data-go="#/importar">Importar</button>`;
   } else if (r.name === "perfil") {
     title = "Perfil";
-    lead = `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
   } else if (r.name === "historial") {
     title = "Historial";
     const backTag = r.tag || state.selected;
     lead = backTag
-      ? `<button class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
-      : `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
+      ? `<button type="button" class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
+      : `<button type="button" class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
   } else if (r.name === "plan" && r.tag) {
     title = "Plan";
-    lead = `<button class="btn-text" data-go="#/plan">${BACK} Plan</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/plan">${BACK} Plan</button>`;
     collapsed = "true";
   } else if (r.name === "plan") {
     title = "Plan";
   } else if (r.name === "equipo") {
     title = "Equipamiento";
-    lead = `<button class="btn-text" data-go="#/mejoras">${BACK} Mejoras</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/mejoras">${BACK} Mejoras</button>`;
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
     collapsed = "true";
   } else if (r.name === "operaciones" && r.sub && r.sub !== "hub") {
     title = "Operaciones";
-    lead = `<button class="btn-text" data-go="#/operaciones">${BACK} Operaciones</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/operaciones">${BACK} Operaciones</button>`;
     collapsed = "true";
   } else if (r.name === "operaciones") {
     title = "Operaciones";
-    lead = `<button class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/agenda">${BACK} Agenda</button>`;
     collapsed = "true";
   } else if (r.name === "detalle") {
     const cat = CATEGORIES.find((c) => c.key === r.cat);
     title = cat ? cat.label : "Detalle";
-    lead = `<button class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
+    lead = `<button type="button" class="btn-text" data-go="#/progreso/${r.tag.slice(1)}">${BACK} Progreso</button>`;
     collapsed = "true";
   }
   return `<header class="navbar" data-collapsed="${collapsed}">
@@ -2631,7 +2631,7 @@ function renderRoster() {
     && (!q || String(meta.alias || meta.tag).toLocaleLowerCase("es").includes(q) || meta.tag.toLocaleLowerCase("es").includes(q)));
   const empty = list.length
     ? ""
-    : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
+    : `<div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><p class="t-subhead c-2">Las de prueba se pueden borrar. Añade la tuya importando su JSON.</p><button type="button" class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
   const rows = shown.map(rowCuenta).join("");
   const seedInfo = isSeedRoster(list)
     ? `Las ${list.length} son de prueba: añade, renombra o borra cuentas. % = media de las categorías desbloqueadas.`
@@ -2651,7 +2651,7 @@ function renderRoster() {
     </label>
     ${empty}
     ${list.length ? `<div class="section">${sectionHead("Lista", seedInfo)}<ul class="list list--tiles">${rows}</ul></div>` : infoBtn(seedInfo)}
-    <div class="section"><button class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
+    <div class="section"><button type="button" class="btn btn--primary btn--block" data-go="#/importar">Añadir cuenta</button></div>
 `;
 }
 
@@ -2783,7 +2783,7 @@ function renderProgreso(tag) {
   const list = allAccounts();
   const meta = accountByTag(tag) || list[0];
   if (!meta) {
-    return `<h1 class="large-title">Progreso</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><button class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
+    return `<h1 class="large-title">Progreso</h1><div class="section"><div class="card empty"><p class="t-title3">Aún no hay cuentas</p><button type="button" class="btn btn--primary" data-go="#/importar">Añadir cuenta</button></div></div>`;
   }
   const exp = expOf(meta.tag);
   const options = list.map((r) => `<option value="${esc(r.tag)}"${r.tag === meta.tag ? " selected" : ""}>${esc(r.nombre)}</option>`).join("");
@@ -2800,7 +2800,7 @@ function renderProgreso(tag) {
       <li><a class="row" href="#/progreso/${meta.tag.slice(1)}/historial"><span class="row__main"><span class="row__title">Historial</span></span>${CHEV}</a></li>
     </ul></div>` : "";
   const body = !exp
-    ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`
+    ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p><p class="t-subhead c-2">Importa su exportación JSON para ver el progreso.</p><button type="button" class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`
     : !inFleet
       ? `<div class="section"><div class="card empty"><p class="t-title3">Esta cuenta queda fuera del filtro</p><button type="button" class="btn btn--secondary" data-clear-filters>Quitar filtros de cuenta</button></div></div>`
       : `${filterControls(counts, filt)}<p class="section-footer">${esc(periodNote(meta.tag))}</p>${narrowed ? filterList(exp, meta, a) : catsBlock(exp, meta)}`;
@@ -3015,7 +3015,7 @@ function catRow(exp, meta, a, c) {
       <span class="prog__foot">${esc(foot)}</span>
     </div></span>${href ? CHEV : ""}`;
   if (!href) {
-    return `<li><button class="row" data-seg="eq" style="padding-top:12px;padding-bottom:12px" aria-label="${esc(aria)}">${inner}</button></li>`;
+    return `<li><button type="button" class="row" data-seg="eq" style="padding-top:12px;padding-bottom:12px" aria-label="${esc(aria)}">${inner}</button></li>`;
   }
   return `<li><a class="row" style="padding-top:12px;padding-bottom:12px" href="${href}" aria-label="${esc(aria)}">${inner}</a></li>`;
 }
@@ -3065,14 +3065,14 @@ function heroesCard(a) {
     const aria = heroAria(name, h, line);
     const title = rowTitle(name);
     if (!line.bar) {
-      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+      return `<li><button type="button" class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
         ${thumb(h.id, { size: 40, lvl: h.lvl })}
         <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
       </button></li>`;
     }
     const p = h.max ? (lvl / h.max) * 100 : 0;
     const maxed = lvl >= h.max;
-    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+    return `<li><button type="button" class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
       ${thumb(h.id, { size: 40, lvl: h.lvl })}
       <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
       <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
@@ -3167,7 +3167,7 @@ function eqCell(p) {
   const box = p.unknown
     ? `<span class="thumb thumb--52 thumb--unknown" aria-hidden="true">?</span>`
     : thumb(p.id, { size: 52, lvl: p.lvl });
-  return `<li><button class="eq ${cls}" data-ficha="${p.id}" data-lvl="${p.lvl}" data-max="${p.max || ""}"${p.unlockTh != null ? ` data-unlock="${p.unlockTh}"` : ""} aria-label="${esc(aria)}">${box}<span class="eq__lvl num">${p.lvl}</span>${cap}</button></li>`;
+  return `<li><button type="button" class="eq ${cls}" data-ficha="${p.id}" data-lvl="${p.lvl}" data-max="${p.max || ""}"${p.unlockTh != null ? ` data-unlock="${p.unlockTh}"` : ""} aria-label="${esc(aria)}">${box}<span class="eq__lvl num">${p.lvl}</span>${cap}</button></li>`;
 }
 
 function renderDetalle(tag, catKey) {
@@ -3253,7 +3253,7 @@ function detailRow(it, catKey, a) {
   if (it.capsOnly) {
     const title = it.capsName;
     const aria = detailAria(title, it, a, {});
-    return `<li><button class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
+    return `<li><button type="button" class="row row--thumb40" data-ficha="caps" data-caps-name="${esc(title)}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
       ${emptyNamedThumb(title, 40)}
       <span class="row__main">${rowTitle(title)}<span class="row__sub num">${esc(lv.text)}</span></span>
       ${lv.bar}
@@ -3266,7 +3266,7 @@ function detailRow(it, catKey, a) {
   const cnt = it.cnt > 1 ? `×${it.cnt}` : "";
   const extras = `${cnt ? `<span class="num">${cnt}</span>` : ""}${idBadge}`;
   const aria = detailAria(title, it, a, { unknown });
-  return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
+  return `<li><button type="button" class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${it.id}" data-lvl="${lv.lvl}" data-max="${it.max || ""}"${it.unlockTh != null ? ` data-unlock="${it.unlockTh}"` : ""} aria-label="${esc(aria)}">
     ${thumb(it.id, { size: 40, lvl: lv.lvl })}
     <span class="row__main">${rowTitle(title, extras)}<span class="row__sub num">${esc(lv.text)}</span></span>
     ${lv.bar}
@@ -3331,7 +3331,7 @@ function builderBaseSection(exp) {
     const title = unknown ? "Sin identificar" : (nameOf(id) || "Ítem");
     const idBadge = unknown ? `<span class="badge badge-id">${esc(id)}</span>` : "";
     const lvl = it.lvl || 0;
-    return `<li><button class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
+    return `<li><button type="button" class="row row--thumb40${unknown ? " is-unknown" : ""}" data-ficha="${id}" data-lvl="${lvl}">
       ${thumb(id, { size: 40, lvl })}
       <span class="row__main">${rowTitle(title, idBadge)}<span class="row__sub num">Nv ${lvl}</span></span>
     </button></li>`;
@@ -3683,26 +3683,26 @@ function offlineDlModel() {
   const done = state.images.length > 0 && count >= state.images.length && state.dl.phase !== "downloading";
   const remainLabel = fmtBytes(remain);
   let status = `${fmtBytes(bytes)} de ${fmtBytes(total)} guardados`;
-  let btn = `<button class="btn btn--primary btn--block" data-dl="start" ${!navigator.onLine ? "disabled" : ""}>Descargar todas (${remainLabel})</button>`;
+  let btn = `<button type="button" class="btn btn--primary btn--block" data-dl="start" ${!navigator.onLine ? "disabled" : ""}>Descargar todas (${remainLabel})</button>`;
   const preN = state.peso && state.peso.precache_instalacion_archivos;
   let note = preN
     ? `Al instalar se guardan ${preN} imágenes. El resto se guarda al verlas por primera vez. Recomendado con wifi.`
     : "El resto de imágenes se guarda al verlas por primera vez. Recomendado con wifi.";
   if (state.dl.phase === "offline" || (!navigator.onLine && state.dl.phase !== "downloading")) {
     status = "Sin conexión. Conéctate para descargar.";
-    btn = `<button class="btn btn--primary btn--block" disabled>Descargar todas (${remainLabel})</button>`;
+    btn = `<button type="button" class="btn btn--primary btn--block" disabled>Descargar todas (${remainLabel})</button>`;
   } else if (state.dl.phase === "downloading") {
     status = `Descargando ${count} de ${totalN} · ${fmtBytes(bytes)} de ${fmtBytes(total)}`;
-    btn = `<button class="btn btn--secondary btn--block" data-dl="stop">Detener</button>`;
+    btn = `<button type="button" class="btn btn--secondary btn--block" data-dl="stop">Detener</button>`;
   } else if (state.dl.phase === "error") {
     status = `No se pudieron descargar ${state.dl.errors} imágenes`;
-    btn = `<button class="btn btn--secondary btn--block" data-dl="start">Reintentar</button>`;
+    btn = `<button type="button" class="btn btn--secondary btn--block" data-dl="start">Reintentar</button>`;
   } else if (state.dl.phase === "space") {
     status = "No hay espacio suficiente en el iPhone";
-    btn = `<button class="btn btn--secondary btn--block" data-dl="start">Reintentar</button>`;
+    btn = `<button type="button" class="btn btn--secondary btn--block" data-dl="start">Reintentar</button>`;
   } else if (done) {
     status = `Las ${totalN} imágenes están disponibles sin conexión`;
-    btn = `<button class="btn btn--destructive btn--block" data-dl="purge">Borrar imágenes guardadas</button>`;
+    btn = `<button type="button" class="btn btn--destructive btn--block" data-dl="purge">Borrar imágenes guardadas</button>`;
   }
   return { total, totalN, bytes, count, p, done, status, btn, note };
 }
@@ -3747,18 +3747,18 @@ function renderAjustes() {
   return `<div class="sheet-backdrop" data-close="1"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="aj-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2 id="aj-title" tabindex="-1">Ajustes</h2><button class="btn-text btn-text--bold" data-go="#/roster">OK</button></div>
+      <div class="sheet__bar"><span></span><h2 id="aj-title" tabindex="-1">Ajustes</h2><button type="button" class="btn-text btn-text--bold" data-go="#/roster">OK</button></div>
       <div class="sheet__body">
         <div class="section-header"><span>Datos</span></div>
         <div class="section" style="margin-top:0"><ul class="list">
-          <li><button class="row" data-go="#/importar"><span class="row__main"><span class="row__title">Importar JSON</span></span>${CHEV}</button></li>
+          <li><button type="button" class="row" data-go="#/importar"><span class="row__main"><span class="row__title">Importar JSON</span></span>${CHEV}</button></li>
           <li><div class="row"><span class="row__main"><span class="row__title">Cuentas importadas</span></span><span class="row__trail num">${imported} de 11</span></div></li>
           ${state.added.map((a) => {
             const label = (a.alias || "").trim() || a.tag;
-            return `<li><button class="row row--destructive" data-quitar="${esc(a.tag)}"><span class="row__main"><span class="row__title">Quitar ${esc(label)}</span></span></button></li>`;
+            return `<li><button type="button" class="row row--destructive" data-quitar="${esc(a.tag)}"><span class="row__main"><span class="row__title">Quitar ${esc(label)}</span></span></button></li>`;
           }).join("")}
-          <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
-          <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos incluidos</span></span></button></li>
+          <li><button type="button" class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
+          <li><button type="button" class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos incluidos</span></span></button></li>
         </ul></div>
         <div class="section"><div class="card offline-dl${done ? " is-done" : ""}">
           <div class="offline-dl__top"><h3>Imágenes sin conexión</h3><span class="num">${count}\u00a0de\u00a0${totalN}</span></div>
@@ -4387,7 +4387,7 @@ function fichaFrame(inner) {
   return `<div class="sheet-backdrop" data-close-ficha="1"></div>
     <div class="sheet sheet--half" role="dialog" aria-modal="true" aria-labelledby="ficha-title">
       <div class="sheet__grabber"></div>
-      <div class="sheet__bar"><span></span><h2 id="ficha-title" tabindex="-1">Ficha</h2><button class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
+      <div class="sheet__bar"><span></span><h2 id="ficha-title" tabindex="-1">Ficha</h2><button type="button" class="btn-text btn-text--bold" data-close-ficha="1">OK</button></div>
       <div class="sheet__body"><div class="ficha">${inner}</div></div>
     </div>`;
 }
@@ -4455,7 +4455,7 @@ function heroLabel(en) {
 function renderAlert() {
   const a = state.alert;
   if (!a) return "";
-  const buttons = a.buttons.map((b, i) => `<button class="${b.cls || ""}" data-alert="${i}"${b.act ? "" : " data-alert-cancel"}>${esc(b.label)}</button>`).join("");
+  const buttons = a.buttons.map((b, i) => `<button type="button" class="${b.cls || ""}" data-alert="${i}"${b.act ? "" : " data-alert-cancel"}>${esc(b.label)}</button>`).join("");
   return `<div class="alert-backdrop"><div class="alert material-float" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-msg">
     <div class="alert__body"><p class="alert__title" id="alert-title">${esc(a.title)}</p><p class="alert__msg" id="alert-msg">${esc(a.msg)}</p></div>
     <div class="alert__actions">${buttons}</div>
@@ -4681,14 +4681,14 @@ function perfilHeroes(view, tag) {
     const aria = heroAria(name, h, line);
     const title = rowTitle(name);
     if (!line.bar) {
-      return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+      return `<li><button type="button" class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
         ${thumb(h.id, { size: 40, lvl: h.lvl })}
         <span class="row__main">${title}<span class="row__sub">${esc(line.text)}</span></span>
       </button></li>`;
     }
     const p = h.max ? (lvl / h.max) * 100 : 0;
     const maxed = lvl >= h.max;
-    return `<li><button class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
+    return `<li><button type="button" class="row row--thumb40" data-ficha="${h.id}" data-lvl="${lvl}" data-max="${h.max || ""}"${h.unlockTh != null ? ` data-unlock="${h.unlockTh}"` : ""} aria-label="${esc(aria)}">
       ${thumb(h.id, { size: 40, lvl: h.lvl })}
       <span class="row__main">${title}<span class="row__sub num">${esc(line.text)}</span></span>
       <span class="row__trail">${barHtml("heroes", p, null, { mini: true, maxed, decorative: true })}</span>
@@ -4781,7 +4781,7 @@ function screenFor(r) {
 function renderGraficos() {
   const list = chartAccounts();
   if (!allAccounts().some((m) => expOf(m.tag))) {
-    return `<h1 class="large-title">Gráficos</h1>${analisisNav("graficos")}<div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
+    return `<h1 class="large-title">Gráficos</h1>${analisisNav("graficos")}<div class="section"><div class="card empty"><p class="t-title3">Aún no hay datos</p><button type="button" class="btn btn--primary" data-go="#/importar">Importar JSON</button></div></div>`;
   }
   const kinds = [["lineas", "Líneas"], ["barras", "Barras"], ["apiladas", "Apiladas"], ["radar", "Radar"], ["calor", "Calor"], ["ritmo", "Ritmo"], ["niveles", "Niveles"]];
   const kindChips = kinds.map(([id, label]) => filterChip("data-chart-kind", id, label, state.chartKind === id)).join("");
@@ -4902,8 +4902,8 @@ function renderCopia() {
       <p class="t-footnote c-2">${esc(note)}</p>
     </div></div>
     <div class="section"><ul class="list">
-      <li><button class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos de prueba</span></span></button></li>
-      <li><button class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
+      <li><button type="button" class="row" data-restore><span class="row__main"><span class="row__title">Restaurar datos de prueba</span></span></button></li>
+      <li><button type="button" class="row row--destructive" data-wipe><span class="row__main"><span class="row__title">Borrar todos los datos</span></span></button></li>
     </ul></div>
     <div class="section">${sectionHead("Acerca de", "Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan Content Policy. Las imágenes del Fan Kit se muestran sin modificar. Las no oficiales son una reducción (lado largo como máximo 512 px, sin recorte); imágenes no oficiales: ClashKing y Fandom (autores en el manifiesto). Esta app es gratuita, privada y sin fines comerciales.")}<ul class="list">
       <li><div class="row"><span class="row__main"><span class="row__title">Versión</span></span><span class="row__trail">${esc(APP_VERSION)}</span></div></li>

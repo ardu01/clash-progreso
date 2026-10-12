@@ -2270,6 +2270,12 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
 
+## Nota de cambios (12 oct 2026, 4.2.9)
+
+`APP_VERSION` es `4.2.9`, `SHELL_CACHE` es `cp-shell-v60` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
+
+Pasada de rendimiento, caché, service worker, botones e imágenes oficiales. Los botones que no decían `type="button"` podían actuar como envío. Ahora lo dicen todos. La miniatura oficial y los iconos de recurso (oro, elixir, oscuro, gemas, menas y martillo) llevan `draggable="false"`, igual que el martillo del botón desde la 4.2.5. El worker ya precargaba los módulos; un test exige que cada archivo de `js/` esté en esa lista, para que una copia sin conexión no se quede sin uno.
+
 ## Nota de cambios (12 oct 2026, 4.2.8)
 
 `APP_VERSION` es `4.2.8`, `SHELL_CACHE` es `cp-shell-v59` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
