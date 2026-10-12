@@ -5328,7 +5328,7 @@ function engancharPlanFab() {
 }
 
 function planFab() {
-  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan">${htmlMartillo(40, "plan-fab__icono")}</button>`;
+  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan de mejoras">${htmlMartillo(40, "plan-fab__icono")}</button>`;
 }
 
 function renderPlanSheet() {

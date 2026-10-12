@@ -34,7 +34,7 @@ test("4.2.4: el hub se abre desde Inicio y desde la hoja, sin pestaña nueva", (
   const fab = app.slice(app.indexOf("function planFab("), app.indexOf("function renderPlanSheet("));
   assert.match(fab, /class="plan-fab"/);
   assert.match(fab, /data-plan-hoja/);
-  assert.match(fab, /aria-label="Plan"/);
+  assert.match(fab, /aria-label="Plan de mejoras"/);
   const hoja = app.slice(app.indexOf("function renderPlanSheet("), app.indexOf("function render("));
   assert.match(hoja, /sheet--plan/);
   assert.match(hoja, /data-plan-cerrar/);
@@ -92,6 +92,12 @@ test("4.2.4: el botón del plan se arrastra, se pega al borde y recuerda el siti
   assert.match(bloque, /stopPropagation/);
   assert.match(bloque, /lado === "izq" \? box\.minX : box\.maxX/);
   assert.match(estilo, /\.plan-fab \{[^}]*touch-action: none/);
+  const fabCss = estilo.slice(estilo.indexOf(".plan-fab {"), estilo.indexOf(".plan-fab__icono"));
+  assert.match(fabCss, /border:\s*2\.5px solid var\(--fab-borde\)/);
+  assert.match(fabCss, /html\[data-theme="dark"\] \.plan-fab \{ --fab-borde: #1A120C; \}/);
+  assert.match(fabCss, /:root:not\(\[data-theme="light"\]\) \.plan-fab \{ --fab-borde: #1A120C; \}/);
+  assert.match(fabCss, /\.plan-fab\.is-arrastre:active[\s\S]*0 6px 0 var\(--fab-borde\), 0 14px 28px rgba\(0,0,0,\.5\)/);
+  assert.match(fabCss, /@media \(prefers-reduced-motion: reduce\) \{\s*\.plan-fab:active \{ transform: none; \}/);
   assert.match(app, /engancharPlanFab\(\)/);
   const fab = app.slice(app.indexOf("function planFab("), app.indexOf("function renderPlanSheet("));
   assert.match(fab, /htmlMartillo\(40, "plan-fab__icono"\)/);
