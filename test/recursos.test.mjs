@@ -1,8 +1,27 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { buildBackup, mergeBackup } from "../js/backup.js";
 import { cubrir, normalizarRecursos, recursosDeCuenta } from "../js/recursos.js";
 import { normalizeAccount, setRecursos } from "../js/roster.js";
+
+test("4.1.9: la ficha no pinta el bloque Recursos y la copia conserva las cifras", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.equal(app.includes("data-recursos"), false);
+  assert.equal(app.includes("recursosCard"), false);
+  assert.equal(app.includes(">Al día<"), false);
+  assert.match(app, /recursosDeCuenta/);
+  const vieja = {
+    tag: "#A", alias: "Mia", principal: false, addedAt: 1, chip: "A", objetivo: 18,
+    recursos: { oro: 1500, elixir: 200, oscuro: 10, brillante: 3, glowy: 1, starry: 0, manual: true, actualizado: 40 },
+  };
+  const file = buildBackup({ accounts: [vieja], exports: [], now: Date.parse("2026-10-12T10:00:00Z") });
+  assert.equal(file.accounts[0].recursos.oro, 1500);
+  assert.equal(file.accounts[0].recursos.starry, 0);
+  const merged = mergeBackup({ accounts: [], exports: [] }, file);
+  assert.equal(merged.accounts[0].recursos.elixir, 200);
+  assert.equal(merged.accounts[0].alias, "Mia");
+});
 
 test("sin cifras no hay recursos y una copia antigua sigue importándose", () => {
   assert.equal(recursosDeCuenta(null), null);
