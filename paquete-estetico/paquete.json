@@ -1,6 +1,6 @@
 {
  "nombre": "Temas Clash Progreso",
- "version": "1.0.0",
+ "version": "1.1.0",
  "formato": 1,
  "descripcion": "Paquete estético aparte de la app: temas solo para modo oscuro. La app solo trae el cargador (js/temas-paquete.js).",
  "requisitos": {
@@ -18,7 +18,7 @@
    "thumb": null,
    "imagen": null,
    "css": "temas/th8.css",
-   "bytes": 10197,
+   "bytes": 10257,
    "muestra": [
     "#513F2B",
     "#AC7441",
@@ -84,7 +84,7 @@
    "thumb": null,
    "imagen": null,
    "css": "temas/th10.css",
-   "bytes": 10763,
+   "bytes": 10775,
    "muestra": [
     "#702D28",
     "#C8452D",
@@ -123,7 +123,7 @@
     "asset": 66724
    },
    "css": "temas/th11.css",
-   "bytes": 14911,
+   "bytes": 14941,
    "muestra": [
     "#69341D",
     "#C67431",
@@ -211,7 +211,7 @@
     "asset": 66728
    },
    "css": "temas/th13.css",
-   "bytes": 39645,
+   "bytes": 39690,
    "muestra": [
     "#3D3F66",
     "#459FC3",
@@ -294,7 +294,7 @@
     "asset": 66735
    },
    "css": "temas/th15.css",
-   "bytes": 17905,
+   "bytes": 17965,
    "muestra": [
     "#443C65",
     "#7260C3",
@@ -333,7 +333,7 @@
     "asset": 66738
    },
    "css": "temas/th16.css",
-   "bytes": 16319,
+   "bytes": 16349,
    "muestra": [
     "#65361D",
     "#B8652B",
@@ -377,7 +377,7 @@
     "asset": 85792
    },
    "css": "temas/th17.css",
-   "bytes": 22782,
+   "bytes": 22713,
    "muestra": [
     "#24363C",
     "#3C849F",
@@ -460,7 +460,7 @@
     "asset": 65719
    },
    "css": "temas/dragones.css",
-   "bytes": 20356,
+   "bytes": 20431,
    "muestra": [
     "#483581",
     "#867EE8",
@@ -504,7 +504,7 @@
     "asset": 48583
    },
    "css": "temas/rey.css",
-   "bytes": 20672,
+   "bytes": 20704,
    "muestra": [
     "#643621",
     "#D07A3B",
@@ -548,7 +548,7 @@
     "asset": 48579
    },
    "css": "temas/reina.css",
-   "bytes": 19946,
+   "bytes": 19993,
    "muestra": [
     "#39425E",
     "#9575DA",
@@ -592,7 +592,7 @@
     "asset": 65739
    },
    "css": "temas/centinela.css",
-   "bytes": 19191,
+   "bytes": 19221,
    "muestra": [
     "#6E2757",
     "#D467C4",
@@ -631,7 +631,7 @@
     "asset": 48561
    },
    "css": "temas/campeona.css",
-   "bytes": 18368,
+   "bytes": 18358,
    "muestra": [
     "#5F3922",
     "#4279C7",
@@ -670,7 +670,7 @@
     "asset": 85744
    },
    "css": "temas/principe.css",
-   "bytes": 17009,
+   "bytes": 17099,
    "muestra": [
     "#1A456A",
     "#1C9DDF",
@@ -709,7 +709,7 @@
     "asset": 135982
    },
    "css": "temas/duque.css",
-   "bytes": 25703,
+   "bytes": 25690,
    "muestra": [
     "#7C1F35",
     "#E0334F",
@@ -738,6 +738,1117 @@
      "fuente": "Clash (clash-temas-motivos.md) (wiki: esposas, cadenas y candado)"
     }
    ]
+  },
+  {
+   "id": "fenix",
+   "nombre": "Fénix",
+   "grupo": "mascota",
+   "th_auto": null,
+   "thumb": {
+    "item": 73000004,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102192,
+    "archivo": "pets/pet_phoenix.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/fenix.css",
+   "bytes": 25395,
+   "muestra": [
+    "#7A2E3A",
+    "#F78747",
+    "#F4BE28"
+   ],
+   "efecto": "Plumas de fuego que suben con vaivén y brasas (las brasas naranjas se ven abajo a la izquierda de la imagen).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "pluma de fuego",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_phoenix.png (plumas magenta, naranja y amarillas de la imagen)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "abanico de tres plumas de fuego",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_phoenix.png (plumas de la cabeza y el cuerpo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "dos plumas de fuego con brasa central",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_phoenix.png (plumas + brasas naranjas abajo a la izquierda)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "fila de puntas de pluma",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_phoenix.png (plumas)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "pluma de fuego en cada extremo",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_phoenix.png (plumas)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "buho",
+   "nombre": "Búho eléctrico",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): portal de Supercell, héroes y animales; blog https://supercell.com/en/games/clashofclans/es/blog/game-updates/meet-the-hero-pets-1-3/",
+   "grupo": "mascota",
+   "th_auto": null,
+   "thumb": {
+    "item": 73000002,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102196,
+    "archivo": "pets/pet_electro_owl.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/buho.css",
+   "bytes": 29848,
+   "muestra": [
+    "#364964",
+    "#60A3B9",
+    "#F4BE28"
+   ],
+   "efecto": "Rayos en cadena que saltan entre dos puntos (un eslabón tras otro) y brillo de ojos cian que late; colores de la imagen. Distinto de los arcos de Tesla de TH12.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "cabeza con penacho en zigzag y ojos cian que brillan",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_electro_owl.png (penacho oscuro en zigzag y ojos que brillan)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "cabeza del búho con ojos que brillan",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_electro_owl.png (idem; ojos brillantes también en el blog oficial: Clash (clash-temas-1-1-motivos.md): https://supercell.com/en/games/clashofclans/es/blog/game-updates/meet-the-hero-pets-1-3/)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "rayo en cadena entre dos nodos",
+     "fuente": "Clash: ataque de rayo en cadena a 2 objetivos, https://clashofclans.fandom.com/wiki/Electro_Owl (color: cian de los ojos de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "plumas de pecho en escama",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_electro_owl.png (plumas blancas del pecho)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "ala de plumas azul marino y gris",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_electro_owl.png (alas)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "morsa",
+   "nombre": "Morsa glacial",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): portal de Supercell, https://support.supercell.com/clash-of-clans/es/articles/about-heroes-pets-9.html",
+   "grupo": "mascota",
+   "th_auto": null,
+   "thumb": {
+    "item": 73000009,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102195,
+    "archivo": "pets/pet_frosty.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/morsa.css",
+   "bytes": 30068,
+   "muestra": [
+    "#465266",
+    "#9BA1C1",
+    "#F4BE28"
+   ],
+   "efecto": "Volutas de aliento helado que salen hacia los lados y se deshacen, con destellos cian de los ojos; sin nieve.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "par de colmillos de marfil",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_frosty.png (colmillos)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "cejas pobladas, hocico y colmillos",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_frosty.png (cejas, hocico y colmillos)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "dos colmillos",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_frosty.png (colmillos)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "volutas de aliento helado",
+     "fuente": "Clash: «icy breath» en su descripción oficial, https://clashofclans.fandom.com/wiki/Frosty (colores: blanco lavanda del pelaje y cian de los ojos de la imagen)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "colmillo curvo en cada extremo",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_frosty.png (colmillos)"
+    }
+   ],
+   "por_confirmar": [],
+   "notas": [
+    "Ácaros glaciales (Frostmites): confirmados por Clash, pero no se dibujan porque no hay imagen oficial suya en el Fan Kit para copiarlos con fidelidad.",
+    "Nieve: DUDOSO según Clash; no se usa."
+   ]
+  },
+  {
+   "id": "zorro",
+   "nombre": "Zorro espiritual",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): portal de Supercell; blog https://supercell.com/en/games/clashofclans/es/blog/news/conoce-al-zorro-espiritual/",
+   "grupo": "mascota",
+   "th_auto": null,
+   "thumb": {
+    "item": 73000010,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 66007,
+    "archivo": "pets/pet_spirit_fox.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/zorro.css",
+   "bytes": 23543,
+   "muestra": [
+    "#235472",
+    "#47AAD8",
+    "#F4BE28"
+   ],
+   "efecto": "Siluetas translúcidas de la cabeza del zorro que aparecen y se desvanecen (invisibilidad) y destellos; ya no hay motas que dejen estela.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "orejas grandes en punta",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_spirit_fox.png (orejas)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "cara con orejas y marcas azul oscuro alrededor de los ojos",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_spirit_fox.png (cara y marcas)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "dos colas mullidas enroscadas",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_spirit_fox.png (cola)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "ondas del pelaje",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_spirit_fox.png (pelaje azul claro)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "cola mullida enroscada",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_spirit_fox.png (cola)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "siluetas fantasmales translúcidas que aparecen y se desvanecen",
+     "fuente": "Clash: «caminata espiritual» lo vuelve invisible, «criatura fantasmal», https://clashofclans.fandom.com/wiki/Spirit_Fox (colores: cian del pelaje de la imagen)"
+    }
+   ],
+   "por_confirmar": [],
+   "notas": [
+    "Estelas espirituales: DUDOSO según Clash; se han quitado."
+   ]
+  },
+  {
+   "id": "unicornio",
+   "nombre": "Unicornio",
+   "grupo": "mascota",
+   "th_auto": null,
+   "thumb": {
+    "item": 73000003,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102190,
+    "archivo": "pets/pet_unicorn.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/unicornio.css",
+   "bytes": 22953,
+   "muestra": [
+    "#5F4D2B",
+    "#D8AE4F",
+    "#F4BE28"
+   ],
+   "efecto": "Esferas de luz dorada que suben y laten y destellos (las esferas se ven alrededor del cuerno).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "cuerno blanco en espiral",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_unicorn.png (cuerno blanco asomando entre las crines)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "cuerno con esferas de luz dorada",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_unicorn.png (cuerno + esferas de luz amarilla de la imagen)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "crin dorada trenzada con esfera de luz",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_unicorn.png (crines doradas)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "crin dorada trenzada",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_unicorn.png (crines)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "cuerno con esfera de luz",
+     "fuente": "Fan Kit oficial: se ve en pets/pet_unicorn.png (cuerno + luces)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "rayo",
+   "nombre": "Hechizo de rayo",
+   "grupo": "hechizo",
+   "th_auto": null,
+   "thumb": {
+    "item": 26000000,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102198,
+    "archivo": "spells/spell_lightning.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/rayo.css",
+   "bytes": 20257,
+   "muestra": [
+    "#0B3F99",
+    "#13D1F8",
+    "#F4BE28"
+   ],
+   "efecto": "Relámpagos verticales que caen y destellan en los bordes y fogonazos blancos (los relámpagos llenan el fondo de la imagen); distinto de los arcos de la Tesla de TH12.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "frasco del hechizo con líquido azul",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_lightning.png (frasco con corcho y líquido azul)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "frasco entre dos relámpagos",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_lightning.png (frasco + relámpagos blancos y cian del fondo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "relámpago horizontal ramificado",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_lightning.png (relámpagos del fondo)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "zigzag de relámpago",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_lightning.png (relámpagos)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "frasco del hechizo en cada extremo",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_lightning.png (frasco)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "furia",
+   "nombre": "Hechizo de furia",
+   "grupo": "hechizo",
+   "th_auto": null,
+   "thumb": {
+    "item": 26000002,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 48548,
+    "archivo": "spells/spell_rage.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/furia.css",
+   "bytes": 20251,
+   "muestra": [
+    "#59287A",
+    "#C998D2",
+    "#F4BE28"
+   ],
+   "efecto": "Arcos de remolino morado que giran alrededor de la figura y motas lilas (el remolino es el fondo de la imagen).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "frasco con líquido morado",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_rage.png (frasco)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "frasco sobre remolino morado",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_rage.png (remolino lila del fondo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "remolino",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_rage.png (remolino del fondo)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "onda de remolino",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_rage.png (remolino)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "frasco morado",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_rage.png (frasco)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "hielo",
+   "nombre": "Hechizo de hielo",
+   "grupo": "hechizo",
+   "th_auto": null,
+   "thumb": {
+    "item": 26000005,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102200,
+    "archivo": "spells/spell_freeze.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/hielo.css",
+   "bytes": 28430,
+   "muestra": [
+    "#035870",
+    "#02EBF8",
+    "#F4BE28"
+   ],
+   "efecto": "Ramas de escarcha que crecen desde las esquinas y destellos (las ramas en helecho llenan el fondo); distinto de los cristales que giran de TH13.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "frasco con líquido cian",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_freeze.png (frasco)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "frasco entre ramas de escarcha",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_freeze.png (ramas de escarcha en helecho del fondo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "ramas de escarcha",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_freeze.png (idem)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "escarcha en helecho",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_freeze.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "frasco cian",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_freeze.png (frasco)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "curacion",
+   "nombre": "Hechizo curativo",
+   "nombre_dudoso": {
+    "alternativa": "Hechizo de curación",
+    "fuente": "Clash (clash-temas-1-1-motivos.md): coc.guide da «Hechizo curativo» (https://coc.guide/es/spell/healingwave) y la tabla de navegación de wiki.gg/es lo llama «Hechizo de curación»; se mantiene «Hechizo curativo» (también en el manifiesto de la app)"
+   },
+   "grupo": "hechizo",
+   "th_auto": null,
+   "thumb": {
+    "item": 26000001,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 48546,
+    "archivo": "spells/spell_heal.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/curacion.css",
+   "bytes": 22276,
+   "muestra": [
+    "#6C4B1C",
+    "#C48E3A",
+    "#F4BE28"
+   ],
+   "efecto": "Anillos dorados concéntricos que se abren desde el centro, como el anillo de curación, y destellos; sin cruces ni corazones.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "frasco con líquido dorado",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_heal.png (frasco)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "frasco dentro de anillos dorados concéntricos",
+     "fuente": "Clash: anillo de curación en el suelo, https://clashofclans.fandom.com/wiki/Healing_Spell (colores: dorado del líquido y del fondo de la imagen)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "anillos dorados concéntricos",
+     "fuente": "Clash: ondas de curación, https://clashofclans.fandom.com/wiki/Healing_Spell"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "motas de luz",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_heal.png (motas brillantes del fondo)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "frasco dorado dentro de un anillo",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_heal.png (frasco + anillo de curación (Clash, idem))"
+    }
+   ],
+   "por_confirmar": [],
+   "notas": [
+    "Cruces y corazones: DUDOSO según Clash; no se usan."
+   ]
+  },
+  {
+   "id": "terremoto",
+   "nombre": "Hechizo de terremoto",
+   "grupo": "hechizo",
+   "th_auto": null,
+   "thumb": {
+    "item": 26000010,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102202,
+    "archivo": "spells/spell_earthquake.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/terremoto.css",
+   "bytes": 23574,
+   "muestra": [
+    "#5A3A20",
+    "#B98B57",
+    "#F4BE28"
+   ],
+   "efecto": "Grietas que se abren abajo y astillas que saltan (en la imagen hay grietas en zigzag y astillas levantadas).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "frasco con líquido marrón",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_earthquake.png (frasco)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "frasco sobre una grieta",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_earthquake.png (suelo agrietado en zigzag del fondo)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "grieta en zigzag",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_earthquake.png (idem)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "grieta",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_earthquake.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "frasco marrón con grieta",
+     "fuente": "Fan Kit oficial: se ve en spells/spell_earthquake.png (frasco + grietas)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "dragon-infernal",
+   "nombre": "Dragón infernal",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/infernodragon",
+   "grupo": "supertropa",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000063,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (coc/assets/oficial); falta en el manifiesto de la app: asset a añadir por Imágenes",
+    "asset": 102214,
+    "archivo": "super_troops/super_inferno_dragon.png",
+    "en_manifiesto_app": false
+   },
+   "css": "temas/dragon-infernal.css",
+   "bytes": 21366,
+   "muestra": [
+    "#46514F",
+    "#E07A3A",
+    "#F4BE28"
+   ],
+   "efecto": "Rayo infernal horizontal detrás de la figura que se va intensificando y se reinicia, con humo y brasas.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "casco de acero con cuernos marrones",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_inferno_dragon.png (casco y cuernos)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "casco metálico con cuernos y rejilla",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_inferno_dragon.png (idem; casco metálico también en Clash, https://clashofclans.fandom.com/wiki/Inferno_Dragon)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "barril de madera con aros de hierro entre placas dentadas",
+     "fuente": "Clash: barril con aros de hierro a la espalda, https://clashofclans.fandom.com/wiki/Inferno_Dragon (colores: marrón de los cuernos y acero del casco de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "canto dentado de acero",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_inferno_dragon.png (placa del pecho)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "placa de acero dentada con remaches",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_inferno_dragon.png (idem)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "rayo infernal continuo que se intensifica",
+     "fuente": "Clash: rayo infernal continuo que sube de daño, https://clashofclans.fandom.com/wiki/Inferno_Dragon (color: naranja y amarillo del fuego de la boca que se ve en la imagen; el color exacto del rayo es DUDOSO según Clash)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "sabueso",
+   "nombre": "Sabueso de hielo",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/ice-hound",
+   "grupo": "supertropa",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000076,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (coc/assets/oficial); falta en el manifiesto de la app: asset a añadir por Imágenes",
+    "asset": 102213,
+    "archivo": "super_troops/super_ice_hound.png",
+    "en_manifiesto_app": false
+   },
+   "css": "temas/sabueso.css",
+   "bytes": 22215,
+   "muestra": [
+    "#223560",
+    "#379DD6",
+    "#F4BE28"
+   ],
+   "efecto": "Nubecillas blancas que derivan y destellos en cristales azules (cuerpo de nube y cristal del lomo); distinto de TH13 y del Hechizo de hielo.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "cristal de hielo azul",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_ice_hound.png (cristal azul del lomo)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "nube blanca con cristales azules",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_ice_hound.png (cuerpo de nube blanca + cristales)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "nube",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_ice_hound.png (cuerpo de nube)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "bordes de nube",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_ice_hound.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "nube con cristal",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_ice_hound.png (idem)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "supermago",
+   "nombre": "Supermago",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/super-wizard",
+   "grupo": "supertropa",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000083,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (coc/assets/oficial); falta en el manifiesto de la app: asset a añadir por Imágenes",
+    "asset": 65766,
+    "archivo": "super_troops/super_wizard.png",
+    "en_manifiesto_app": false
+   },
+   "css": "temas/supermago.css",
+   "bytes": 21278,
+   "muestra": [
+    "#70351D",
+    "#C64914",
+    "#F4BE28"
+   ],
+   "efecto": "Rayos ramificados de fuego y electricidad que salen desde abajo (las manos) y se encadenan uno tras otro, y chispas naranjas que suben.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "capucha naranja con ojos amarillos que brillan",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_wizard.png (capucha y ojos)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "idem",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_wizard.png (idem)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "rayos ramificados en cadena desde un punto central",
+     "fuente": "Clash: «Chain Magic», fuego y rayo encadenados, https://clashofclans.fandom.com/wiki/Super_Wizard (colores: amarillo de los ojos y naranja de la capucha de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "pliegue en V",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_wizard.png (borde de la capucha)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "capucha",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_wizard.png (idem)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "superbruja",
+   "nombre": "Superbruja",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/head-witch",
+   "grupo": "supertropa",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000066,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (coc/assets/oficial); falta en el manifiesto de la app: asset a añadir por Imágenes",
+    "asset": 102209,
+    "archivo": "super_troops/super_witch.png",
+    "en_manifiesto_app": false
+   },
+   "css": "temas/superbruja.css",
+   "bytes": 29651,
+   "muestra": [
+    "#46234E",
+    "#966ADF",
+    "#F4BE28"
+   ],
+   "efecto": "La silueta del Grandullón aparece detrás de la figura y calaveras doradas con ojos magenta que suben; sin murciélagos.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "máscara dorada con cuernos enroscados y ojos magenta",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_witch.png (máscara y ojos)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "idem",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_witch.png (idem)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "calavera entre dos cuernos dorados",
+     "fuente": "Clash: calaveras y el Grandullón, https://clashofclans.fandom.com/wiki/Super_Witch (colores: dorado de la máscara-calavera y magenta de los ojos de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "banda dorada",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_witch.png (oro de la máscara)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "cuerno dorado enroscado",
+     "fuente": "Fan Kit oficial: se ve en super_troops/super_witch.png (idem)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "silueta del Grandullón (esqueleto gigante) y calaveras",
+     "fuente": "Clash: invoca un esqueleto gigante, el Grandullón, https://clashofclans.wiki.gg/es/wiki/Lanzallamas (tabla «Superbruja (Grandullón)») y https://clashofclans.fandom.com/wiki/Super_Witch"
+    }
+   ],
+   "por_confirmar": [],
+   "notas": [
+    "Murciélagos: son de la Bruja nocturna, no de la Superbruja (Clash); no se usan."
+   ]
+  },
+  {
+   "id": "dirigible",
+   "nombre": "Dirigible bélico",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/siege-machine-flyer",
+   "grupo": "asedio",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000052,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 65993,
+    "archivo": "siege_machines/siege_battle_blimp.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/dirigible.css",
+   "bytes": 27863,
+   "muestra": [
+    "#86382B",
+    "#D9A35E",
+    "#F4BE28"
+   ],
+   "efecto": "Bombas con mecha que caen por los lados de la figura, con nubes muy tenues de fondo.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "globo rojo con red de cuerda",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_battle_blimp.png (globo y red)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "globo con red, largueros de madera y espolón",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_battle_blimp.png (idem)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "cuerda con una bomba",
+     "fuente": "Clash: suelta bombas por el camino, https://clashofclans.fandom.com/wiki/Battle_Blimp (colores: metal gris de la proa y cuerda de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "red de cuerda en rombos",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_battle_blimp.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "medio globo con red",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_battle_blimp.png (idem)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "bombas que caen; nubes solo de fondo",
+     "fuente": "Clash: bombas, idem; nubes DUDOSO según Clash, solo como fondo tenue"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "lanzallamas",
+   "nombre": "Lanzallamas",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): «Lanzallamas» = Flame Flinger, máquina de asedio de la aldea principal (taller nivel 6), https://coc.guide/es/troop/siege-catapult y https://clashofclans.wiki.gg/es/wiki/Lanzallamas; no es el Escupellamas del TH17 ni una tropa de la aldea del constructor",
+   "grupo": "asedio",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000091,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": 102206,
+    "archivo": "siege_machines/siege_flame_flinger.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/lanzallamas.css",
+   "bytes": 27874,
+   "muestra": [
+    "#863924",
+    "#D3935C",
+    "#F4BE28"
+   ],
+   "efecto": "Espíritus de fuego que vuelan en arco por encima de la figura y llamas del suelo ardiendo que titilan abajo.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "jaula octogonal de acero",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_flame_flinger.png (jaula de la cuchara)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "jaula sobre el mástil rojo",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_flame_flinger.png (idem)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "trío de espíritus de fuego en arco",
+     "fuente": "Clash: lanza tríos de espíritus de fuego, https://clashofclans.fandom.com/wiki/Flame_Flinger (colores: naranja del contenido de la jaula de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "tablas rojas",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_flame_flinger.png (madera roja)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "bloque de tablas rojas atado con cuerda",
+     "fuente": "Fan Kit oficial: se ve en siege_machines/siege_flame_flinger.png (idem)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "espíritus de fuego en vuelo en arco y suelo ardiendo",
+     "fuente": "Clash: idem, deja el suelo ardiendo"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "bruja-nocturna",
+   "nombre": "Bruja nocturna",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): https://coc.guide/es/troop/dark-witch",
+   "grupo": "constructor",
+   "th_auto": null,
+   "thumb": {
+    "item": 4000042,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": "BHLiJJDzEusBJakyukTh",
+    "archivo": "builder_base/Icon_BB_Night_Witch.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/bruja-nocturna.css",
+   "bytes": 26963,
+   "muestra": [
+    "#393434",
+    "#4FD8F0",
+    "#F4BE28"
+   ],
+   "efecto": "Murciélagos que cruzan volando por los lados de la figura y una neblina roja tenue abajo.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "capucha gris oscura con ojos cian",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Night_Witch.png (capucha y ojos que brillan)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "idem",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Night_Witch.png (idem)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "murciélago",
+     "fuente": "Clash: invoca murciélagos (Enjambre de murciélagos), https://clashofclans.fandom.com/wiki/Night_Witch (colores: gris oscuro de la capa y cian de los ojos de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "pliegue de la capucha con filete cian",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Night_Witch.png (capucha + ojos)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "bastón con un murciélago en la punta",
+     "fuente": "Clash: el bastón tiene un murciélago en la punta, idem"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "murciélagos en vuelo y neblina roja",
+     "fuente": "Clash: murciélagos e «neblina rojo sangre» bajo los pies (nivel 9+), idem; el rojo no sale en la imagen y se usa solo como acento tenue"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "maquina",
+   "nombre": "Máquina bélica",
+   "nombre_fuente": "Clash (clash-temas-1-1-motivos.md): portal de Supercell; https://coc.guide/es/army/hero-altar-warmachine",
+   "grupo": "constructor",
+   "th_auto": null,
+   "thumb": {
+    "item": 28000003,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": "fkbYcTKhAmRHCyveqSJz",
+    "archivo": "builder_base/Icon_BB_Hero_Battle_Machine.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/maquina.css",
+   "bytes": 23823,
+   "muestra": [
+    "#5E3A20",
+    "#8A90B0",
+    "#F4BE28"
+   ],
+   "efecto": "Rayos del martillo eléctrico que saltan encadenados por los lados y destellos en los remaches.",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "barril de duelas con aros de acero",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Hero_Battle_Machine.png (barril)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "martillo gigante con rayos (martillo eléctrico)",
+     "fuente": "Clash: martillo gigante y habilidad «Martillo eléctrico», https://clashofclans.fandom.com/wiki/Battle_Machine (colores: madera y acero de la imagen; rayo en blanco)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "banda de acero con remaches",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Hero_Battle_Machine.png (aros con remaches)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "duelas de madera",
+     "fuente": "Fan Kit oficial: se ve en builder_base/Icon_BB_Hero_Battle_Machine.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "martillo gigante",
+     "fuente": "Clash: idem"
+    }
+   ],
+   "por_confirmar": [],
+   "notas": [
+    "Llave inglesa y otras herramientas: DUDOSO según Clash; no se usan."
+   ]
+  },
+  {
+   "id": "alquimista",
+   "nombre": "Alquimista",
+   "grupo": "ayudante",
+   "th_auto": null,
+   "thumb": {
+    "item": 93000002,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": "ytDBekk1XYMppWuon26t",
+    "archivo": "helpers/Alchemist_pose.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/alquimista.css",
+   "bytes": 20360,
+   "muestra": [
+    "#5A4A2A",
+    "#B68642",
+    "#F4BE28"
+   ],
+   "efecto": "Chispas verdes y magenta que titilan alrededor (como las del cristal del bastón).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "cristal verde y magenta",
+     "fuente": "Fan Kit oficial: se ve en helpers/Alchemist_pose.png (cristal del bastón)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "bastón con el cristal y chispas",
+     "fuente": "Fan Kit oficial: se ve en helpers/Alchemist_pose.png (bastón + chispas moradas alrededor del cristal)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "cristal",
+     "fuente": "Fan Kit oficial: se ve en helpers/Alchemist_pose.png (idem)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "bufanda verde con chevron",
+     "fuente": "Fan Kit oficial: se ve en helpers/Alchemist_pose.png (bufanda)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "bastón con cristal",
+     "fuente": "Fan Kit oficial: se ve en helpers/Alchemist_pose.png (idem)"
+    }
+   ],
+   "por_confirmar": []
+  },
+  {
+   "id": "tiradora",
+   "nombre": "Tiradora",
+   "nombre_fuente": "Confirmado por Miguel: «Tiradora» es el nombre oficial en español del guardián del TH18 (Longshot); el otro guardián es «el destructor» (Smasher). Blog de Supercell: https://supercell.com/en/games/clashofclans/es/blog/release-notes/llega-el-ayuntamiento-de-nivel-18-actualizaci%C3%B3n-2/",
+   "grupo": "guardian",
+   "th_auto": null,
+   "thumb": {
+    "item": 107000000,
+    "nivel": null
+   },
+   "imagen": {
+    "fuente": "Fan Kit oficial (manifiesto de la app)",
+    "asset": "9NTnoEF51KLghKUE5SKE",
+    "archivo": "guardians/guardian_longshot_01.png",
+    "en_manifiesto_app": true
+   },
+   "css": "temas/tiradora.css",
+   "bytes": 23085,
+   "muestra": [
+    "#5A4E46",
+    "#407CDA",
+    "#F4BE28"
+   ],
+   "efecto": "Proyectiles explosivos dorados que salen en arco desde lo alto y caen con un estallido, y una onda azul tenue que se abre detrás (golpe final).",
+   "motivos": [
+    {
+     "pieza": "pestaña",
+     "motivo": "punta dorada de su cabeza",
+     "fuente": "Fan Kit oficial: se ve en guardians/guardian_longshot_01.png (punta dorada de lo alto)"
+    },
+    {
+     "pieza": "emblema",
+     "motivo": "piedra almenada con banda dorada, tachones y ojos azules",
+     "fuente": "Fan Kit oficial: se ve en guardians/guardian_longshot_01.png (cabeza almenada + bandas doradas + ojos)"
+    },
+    {
+     "pieza": "separador",
+     "motivo": "proyectil explosivo en arco largo con impacto azul",
+     "fuente": "Miguel / Supercell: lanza proyectiles explosivos desde la cabeza en arco a muy larga distancia, https://supercell.com/en/games/clashofclans/es/blog/release-notes/llega-el-ayuntamiento-de-nivel-18-actualizaci%C3%B3n-2/ y https://www.clasher.us/es/clash-of-clans/unit/longshot-home-village (colores: dorado de la punta y azul de los ojos de la imagen)"
+    },
+    {
+     "pieza": "cabecera",
+     "motivo": "banda dorada con tachón",
+     "fuente": "Fan Kit oficial: se ve en guardians/guardian_longshot_01.png (idem)"
+    },
+    {
+     "pieza": "botones",
+     "motivo": "bloque de piedra con banda dorada",
+     "fuente": "Fan Kit oficial: se ve en guardians/guardian_longshot_01.png (idem)"
+    },
+    {
+     "pieza": "efecto",
+     "motivo": "proyectiles explosivos en arco y onda azul del «golpe final»",
+     "fuente": "Miguel / Supercell: habilidad «golpe final», explota al caer con una onda azul, https://supercell.com/en/games/clashofclans/es/blog/release-notes/llega-el-ayuntamiento-de-nivel-18-actualizaci%C3%B3n-2/ y https://www.clasher.us/es/clash-of-clans/unit/longshot-home-village"
+    }
+   ],
+   "por_confirmar": [],
+   "fuentes": [
+    "https://supercell.com/en/games/clashofclans/es/blog/release-notes/llega-el-ayuntamiento-de-nivel-18-actualizaci%C3%B3n-2/",
+    "https://www.clasher.us/es/clash-of-clans/unit/longshot-home-village"
+   ]
   }
  ],
  "grupos": [
@@ -752,6 +1863,34 @@
   {
    "id": "heroe",
    "nombre": "Héroes"
+  },
+  {
+   "id": "mascota",
+   "nombre": "Mascotas"
+  },
+  {
+   "id": "hechizo",
+   "nombre": "Hechizos"
+  },
+  {
+   "id": "supertropa",
+   "nombre": "Supertropas"
+  },
+  {
+   "id": "asedio",
+   "nombre": "Máquinas de asedio"
+  },
+  {
+   "id": "constructor",
+   "nombre": "Aldea del constructor"
+  },
+  {
+   "id": "ayudante",
+   "nombre": "Ayudantes"
+  },
+  {
+   "id": "guardian",
+   "nombre": "Guardianes"
   }
  ]
 }

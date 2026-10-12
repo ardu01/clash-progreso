@@ -9,7 +9,7 @@ const leer = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 test("4.1.8: PAQUETE_TEMAS dice la verdad sobre paquete-estetico/", () => {
   assert.equal(typeof PAQUETE_TEMAS, "boolean");
   assert.equal(PAQUETE_TEMAS, existsSync(new URL("../paquete-estetico/paquete.json", import.meta.url)));
-  if (PAQUETE_TEMAS) assert.equal(JSON.parse(leer("../paquete-estetico/paquete.json")).version, "1.0.0");
+  if (PAQUETE_TEMAS) assert.equal(JSON.parse(leer("../paquete-estetico/paquete.json")).version, "1.1.0");
 });
 
 test("4.1.8: sin paquete en la compilación no se pide paquete.json (sin 404)", async () => {
@@ -35,4 +35,22 @@ test("4.1.8: «Automático» resuelve por TH aunque haya otro tema elegido", () 
   const app = leer("../js/app.js");
   assert.match(app, /btn\("auto", "Automático", temaImg\(temaAutomatico\(thDeAhora\(\)\), 40\)\)/);
   assert.equal(app.includes('btn("auto", "Automático", temaImg(temaDeAhora()'), false);
+});
+
+test("4.2.2: paquete 1.1.0 con 38 temas, grupos y Automático solo con ayuntamientos", () => {
+  if (!PAQUETE_TEMAS) return;
+  const p = JSON.parse(leer("../paquete-estetico/paquete.json"));
+  assert.equal(p.version, "1.1.0");
+  assert.equal(p.temas.length, 38);
+  const grupos = p.grupos.map((g) => g.id);
+  assert.deepEqual(grupos, ["ayuntamiento", "especial", "heroe", "mascota", "hechizo", "supertropa", "asedio", "constructor", "ayudante", "guardian"]);
+  for (const t of p.temas) {
+    assert.ok(grupos.includes(t.grupo), t.id);
+    assert.equal(t.css, `temas/${t.id}.css`);
+    assert.ok(existsSync(new URL("../paquete-estetico/" + t.css, import.meta.url)), t.id);
+    if (t.grupo !== "ayuntamiento") assert.equal(t.th_auto, null, t.id);
+  }
+  assert.equal(resolverAuto(p.temas, 18).id, "th18");
+  const app = leer("../js/app.js");
+  assert.match(app, /<span class="swatch" data-sw=/);
 });

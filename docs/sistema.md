@@ -2269,3 +2269,9 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 `js/caches.js` declara `PAQUETE_TEMAS`: `true` si la compilación lleva `paquete-estetico/`, `false` si no. Con `false`, `cargarPaquete()` no hace ninguna petición: no aparece el 404 de `paquete.json` en la consola y la app se ve igual que sin cargador. Un test exige que `PAQUETE_TEMAS` coincida con la existencia de `paquete-estetico/paquete.json`. Si aun así faltara el paquete con `true`, la app sigue igual (la petición falla y no se aplica tema). Sin conexión no cambia: `paquete.json` y los CSS salen de `cp-temas-<versión>`.
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
+
+## Nota de cambios (12 oct 2026, 4.2.2)
+
+`APP_VERSION` es `4.2.2`, `SHELL_CACHE` es `cp-shell-v49` e `IMAGE_CACHE` no cambia. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos de la app.
+
+`paquete-estetico/` pasa a la 1.1.0 (38 temas, 10 grupos en `grupos`). El cargador no cambia: ya leía `grupos` y `temaImg` ya caía en la muestra de colores si el item del tema no está en el manifiesto (las cuatro supertropas). `PAQUETE_TEMAS` sigue en `true` y `resolverAuto` solo usa temas con `th_auto` (ayuntamientos). El service worker guarda el paquete en `cp-temas-1.1.0` y borra `cp-temas-1.0.0` al leer la versión nueva. `.thumb > img`, `frameOf()` y los colores semánticos no se tocan.
