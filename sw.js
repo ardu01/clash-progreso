@@ -186,7 +186,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(paqueteEstetico(event.request, url));
     return;
   }
-  if (url.pathname.includes("/assets/images/")) {
+  if (url.pathname.includes("/assets/images/") || url.pathname.includes("/assets/oficial/resources/")) {
     event.respondWith(cacheFirst(event.request));
     return;
   }

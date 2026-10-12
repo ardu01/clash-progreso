@@ -31,7 +31,7 @@ import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
 import { horaMadrid, recomendar } from "./recomendador.js";
-import { htmlCoste } from "./coste-tarjeta.js";
+import { htmlCoste, htmlMartillo } from "./coste-tarjeta.js";
 import {
   DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -1674,7 +1674,7 @@ function fichaMejora(paso, extra = {}) {
   const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
   const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
   const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
-  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}${htmlMartillo()}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
   if (!extra.boton) return card;
   return `<div class="mejora-slot">${card}${extra.boton}</div>`;
 }
@@ -5992,7 +5992,7 @@ async function purgeImages() {
     const cache = await caches.open(key);
     const reqs = await cache.keys();
     for (const req of reqs) {
-      if (req.url.includes("/assets/images/")) await cache.delete(req);
+      if (req.url.includes("/assets/images/") || req.url.includes("/assets/oficial/resources/")) await cache.delete(req);
     }
   }
   state.dl.phase = "idle";

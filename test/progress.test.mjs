@@ -273,10 +273,10 @@ test("Artillería infernal solo en el detalle, sin id inventado", () => {
 
 test("672 sha256 coinciden con el manifiesto v3.1.18", () => {
   assert.equal(manifest.version_set_imagenes, "v3.1.18");
-  assert.equal(manifest.peso_imagenes.total_archivos, 672);
-  assert.equal(manifest.peso_imagenes.total_bytes, 107868055);
-  assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 220);
-  assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 21579962);
+  assert.equal(manifest.peso_imagenes.total_archivos, 680);
+  assert.equal(manifest.peso_imagenes.total_bytes, 108705608);
+  assert.equal(manifest.peso_imagenes.precache_instalacion_archivos, 228);
+  assert.equal(manifest.peso_imagenes.precache_instalacion_bytes, 22417515);
   assert.equal(manifest.peso_imagenes.umbral_pesado_bytes, 3000000);
   assert.deepEqual(manifest.peso_imagenes.pesados, []);
   const want = new Map();
@@ -449,7 +449,7 @@ test("missing.json coincide con el archivo publicado", () => {
 
 test("manifest.json coincide con la v3.1.18", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "04aea283569232829681c6fc8aaf990206bb91667b60846cdff036dc8701119f");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "082355ef9e49f27ea1e7850b257114a55196e2f2ae32c5b31d2accb7b357024d");
   assert.equal(manifest.version_set_imagenes, "v3.1.18");
 });
 
@@ -956,10 +956,10 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.2.1 y cachés cp-shell-v48 / cp-img-v10", () => {
+test("versión 4.2.1 y cachés cp-shell-v48 / cp-img-v11", () => {
   assert.equal(APP_VERSION, "4.2.1");
   assert.equal(SHELL_CACHE, "cp-shell-v48");
-  assert.equal(IMAGE_CACHE, "cp-img-v10");
+  assert.equal(IMAGE_CACHE, "cp-img-v11");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const caches = readFileSync(new URL("../js/caches.js", import.meta.url), "utf8");
@@ -1050,7 +1050,8 @@ test("versión 4.2.1 y cachés cp-shell-v48 / cp-img-v10", () => {
   assert.match(sw, /js\/perfil\.js/);
   assert.match(sw, /js\/actualizar\.js/);
   assert.match(sw, /js\/nav\.js/);
-  assert.match(caches, /cp-img-v10/);
+  assert.match(caches, /cp-img-v11/);
+  assert.equal(caches.includes("cp-img-v10"), false);
   assert.equal(caches.includes("cp-img-v7"), false);
   assert.equal(caches.includes("cp-img-v8"), false);
   assert.equal(caches.includes("cp-img-v9"), false);
@@ -1187,7 +1188,7 @@ test("el Logger se muestra entero, sin recortar la caja; el nivel 5 tiene su PNG
   assert.equal(manifest.items["107000008"].imagenes_por_nivel["5"].ruta, "images/guardians/logger_5.png");
   assert.equal(im.precarga, false);
   assert.equal(im.pesado, false);
-  assert.equal(IMAGE_CACHE, "cp-img-v10");
+  assert.equal(IMAGE_CACHE, "cp-img-v11");
 });
 
 test("la media sin cambio no repite el valor ni pone flecha", () => {
@@ -2453,7 +2454,7 @@ test("3.1.7: imágenes no oficiales solo donde no hay oficial", () => {
   assert.match(manifest.unofficial_notes.builder_base, /base del constructor/);
   assert.match(manifest.unofficial_notes.crafting_modules, /oficial/);
   const urls = precacheUrls(manifest);
-  assert.equal(urls.length, 220);
+  assert.equal(urls.length, 228);
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const copia = app.slice(app.indexOf("function renderCopia("), app.indexOf("function lastImportLabel("));
   assert.match(copia, /Arte © Supercell bajo la Fan Content Policy/);
@@ -2616,16 +2617,16 @@ test("2.1.1: el aviso de Supercell está solo en Copia, apartado Acerca de", () 
   assert.match(web, /no oficial/);
 });
 
-test("2.1.0: la precarga son 220 rutas con precarga true y catalog no duplica", () => {
+test("2.1.0: la precarga son 228 rutas con precarga true y catalog no duplica", () => {
   const urls = precacheUrls(manifest);
-  assert.equal(urls.length, 220);
-  assert.equal(new Set(urls).size, 220);
+  assert.equal(urls.length, 228);
+  assert.equal(new Set(urls).size, 228);
   assert.equal(urls.length, manifest.peso_imagenes.precache_instalacion_archivos);
   const list = catalog(manifest);
-  assert.equal(list.length, 672);
-  assert.equal(new Set(list.map((im) => im.url)).size, 672);
+  assert.equal(list.length, 680);
+  assert.equal(new Set(list.map((im) => im.url)).size, 680);
   assert.equal(list.reduce((s, im) => s + im.bytes, 0), manifest.peso_imagenes.total_bytes);
-  assert.equal(list.filter((im) => im.precache).length, 220);
+  assert.equal(list.filter((im) => im.precache).length, 228);
   for (const id of ["107000000", "107000001", "107000008"]) {
     const url = "./assets/" + manifest.items[id].imagen.ruta;
     assert.equal(urls.includes(url), false, id);

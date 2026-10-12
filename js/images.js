@@ -118,20 +118,33 @@ function imageList(item) {
   return images;
 }
 
+function iconosRecurso(manifest) {
+  const bag = manifest && manifest.iconos_recurso;
+  return bag ? Object.values(bag) : [];
+}
+
+function remember(byUrl, im) {
+  const url = "./assets/" + im.ruta;
+  const prev = byUrl.get(url);
+  if (prev) {
+    if (im.precarga === true) prev.precache = true;
+    return;
+  }
+  byUrl.set(url, { url, bytes: Number(im.bytes) || 0, precache: im.precarga === true });
+}
+
 /** Rutas únicas, sin pesadas (> 3 MB). La misma ruta en varios niveles cuenta una vez. */
 export function catalog(manifest) {
   const byUrl = new Map();
   for (const item of Object.values((manifest && manifest.items) || {})) {
     for (const im of imageList(item)) {
       if (!im || !im.ruta || isHeavy(im, item)) continue;
-      const url = "./assets/" + im.ruta;
-      const prev = byUrl.get(url);
-      if (prev) {
-        if (im.precarga === true) prev.precache = true;
-        continue;
-      }
-      byUrl.set(url, { url, bytes: Number(im.bytes) || 0, precache: im.precarga === true });
+      remember(byUrl, im);
     }
+  }
+  for (const im of iconosRecurso(manifest)) {
+    if (!im || !im.ruta || isHeavy(im)) continue;
+    remember(byUrl, im);
   }
   return [...byUrl.values()];
 }
@@ -139,11 +152,13 @@ export function catalog(manifest) {
 /** Solo precarga === true, deduplicado por URL. */
 export function precacheUrls(manifest) {
   const urls = new Set();
+  const take = (im) => {
+    if (!im || !im.ruta || im.precarga !== true) return;
+    urls.add("./assets/" + im.ruta);
+  };
   for (const item of Object.values((manifest && manifest.items) || {})) {
-    for (const im of imageList(item)) {
-      if (!im || !im.ruta || im.precarga !== true) continue;
-      urls.add("./assets/" + im.ruta);
-    }
+    for (const im of imageList(item)) take(im);
   }
+  for (const im of iconosRecurso(manifest)) take(im);
   return [...urls];
 }

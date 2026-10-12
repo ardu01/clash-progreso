@@ -2244,11 +2244,11 @@ Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paqu
 
 ## Nota de cambios (12 oct 2026, 4.2.1)
 
-`APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+`APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` es `cp-img-v11`. `ROSTER_VERSION` sigue en 2. Entran 8 PNG del Fan Kit en `assets/oficial/resources/` (oro, elixir, oscuro, gemas, mena brillante, mena reluciente, mena estrellada y el martillo de Mejorar). Cada uno lleva `url_origen` en `iconos_recurso` del manifiesto. Se descargaron tal cual: la copia es idéntica al archivo de origen. La precarga de instalación pasa de 220 a 228 archivos.
 
-`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con la marca del recurso, la imagen del edificio o la tropa en el centro y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. El Fan Kit de esta copia no trae los contadores de oro, elixir, oscuro, gemas ni menas; esas marcas son SVG propio, no un recorte. El estilo se inspira en el botón de mejorar y no lo copia.
+`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro, el martillo de Mejorar sobre esa imagen y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
 
-Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen: el grupo sí lo separa del texto.
+Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. El botón que comparte fila con un título no lleva ese margen en sí: la fila usa `align-items: center` y el aire queda en el contenedor, así título e icono comparten la línea central. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen dentro del grupo.
 
 ## Nota de cambios (12 oct 2026, 4.2.0)
 

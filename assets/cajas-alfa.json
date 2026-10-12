@@ -4030,5 +4030,53 @@
   "y": 71,
   "w": 1024,
   "h": 953
+ },
+ "oficial/resources/oro.png": {
+  "x": 205,
+  "y": 201,
+  "w": 91,
+  "h": 99
+ },
+ "oficial/resources/elixir.png": {
+  "x": 208,
+  "y": 201,
+  "w": 85,
+  "h": 99
+ },
+ "oficial/resources/oscuro.png": {
+  "x": 186,
+  "y": 182,
+  "w": 128,
+  "h": 137
+ },
+ "oficial/resources/gemas.png": {
+  "x": 0,
+  "y": 0,
+  "w": 100,
+  "h": 111
+ },
+ "oficial/resources/brillante.png": {
+  "x": 0,
+  "y": 0,
+  "w": 392,
+  "h": 362
+ },
+ "oficial/resources/reluciente.png": {
+  "x": 0,
+  "y": 0,
+  "w": 371,
+  "h": 381
+ },
+ "oficial/resources/estrellada.png": {
+  "x": 0,
+  "y": 0,
+  "w": 402,
+  "h": 423
+ },
+ "oficial/resources/martillo.png": {
+  "x": 325,
+  "y": 301,
+  "w": 417,
+  "h": 459
  }
 }
