@@ -2272,7 +2272,7 @@ El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la
 
 ## Nota de cambios (12 oct 2026, 4.2.4)
 
-`APP_VERSION` es `4.2.4`, `SHELL_CACHE` es `cp-shell-v53` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+`APP_VERSION` es `4.2.4`, `SHELL_CACHE` es `cp-shell-v54` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
 
 Un paso de nivel 0 a 1 con tiempo 0 no entra en el plan. La regla sale de `data/ref/desbloqueos.json` (Fandom, nombres de ClashKing), no de una cifra inventada. Un edificio que falta es una construcción: coste, tiempo y constructor. Si el tiempo o el coste vienen `null` y la nota dice «sin confirmar», el plan enseña «dato sin confirmar» y no ocupa una cola. Una cifra de coste que sí viene se conserva, aunque el tiempo sea null; no se usa si la nota marca ese coste. `capacity_by_th` es un cálculo derivado y el plan no lo lee. El JSON se carga al arrancar, fuera del grafo de módulos. Un héroe espera el nivel del Consejo de héroes; una tropa, un hechizo o una máquina esperan el nivel del cuartel, la fábrica o el taller; una mascota espera el nivel de la caseta. Ese edificio va antes, y el desbloqueo después. El Gran Centinela suma 1 000 000 de elixir de nivel 1, que la fuente sí trae, al paso del Consejo que lo abre. Los héroes de `#28PLGP0G2` siguen fuera. El castillo del clan no es requisito para subir el ayuntamiento.
 

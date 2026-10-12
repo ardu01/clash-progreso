@@ -1786,9 +1786,26 @@ function renderPlan(tag) {
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     <div class="chip-row chip-row--plan" role="toolbar" aria-label="Objetivo"><button type="button" data-plan-objetivo="maxear" aria-pressed="${subirOn ? "false" : "true"}">Maxear TH actual</button>${subir}</div>
+    ${notaAyudantes(road)}
+    ${subirOn ? notaCastillo(road) : ""}
     <div class="section" data-plan-ahora>${sectionHead("Ahora")}${ahora}</div>
     ${bloqueosDe(road.orden)}
     <div class="section" data-plan-sesiones>${sectionHead("Próximas sesiones")}${sesiones}</div>`;
+}
+
+function notaAyudantes(road) {
+  const a = road && road.ayudantes;
+  if (!a) return "";
+  const bits = [];
+  if (a.constructorAprendiz) bits.push(`Constructor aprendiz Nv ${a.constructorAprendiz.lvl}`);
+  if (a.asistenteLaboratorio) bits.push(`Asistente de laboratorio Nv ${a.asistenteLaboratorio.lvl}`);
+  if (!bits.length) return "";
+  return `<p class="t-footnote c-2">${esc(bits.join(" · "))}. Entran en la simulación. El ahorro de tiempo no está en la fuente y no se resta.</p>`;
+}
+
+function notaCastillo(road) {
+  if (!road || !road.avisoCastillo) return "";
+  return `<p class="t-footnote c-2">${esc(road.avisoCastillo.texto)}</p>`;
 }
 
 function criterioHtml(texto, fuera) {
@@ -6304,6 +6321,7 @@ function fichasOperacion() {
       labLibre: !!(colas && colas.laboratorio.libreAccion),
       mascotasLibres: !!(colas && colas.mascotas.libreAccion),
       ayudanteLibre: !!(exp && helpersOf(exp).some((h) => !h.cooldown || (h.end != null && h.end <= state.now))),
+      helpers: exp ? helpersOf(exp).map((h) => ({ id: h.id, lvl: h.lvl })) : [],
       herreriaLibre: !!(exp && (exp.buildings || []).some((b) => b && String(b.data) === "1000070" && b.timer == null)),
       desactualizada: colas ? !!colas.desactualizada : !exp,
       heroesConTimer: !!(exp && meta.tag !== HEROES_FUERA && (exp.heroes || []).some((h) => h && h.timer != null)),

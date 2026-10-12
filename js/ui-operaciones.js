@@ -102,6 +102,15 @@ function vistaMantenimiento(m) {
     <div class="section">${filas}</div>`;
 }
 
+function lineaAyudantes(resultado) {
+  if (!resultado) return "";
+  const bits = [];
+  if (resultado.constructorAprendiz) bits.push(`Constructor aprendiz Nv ${resultado.constructorAprendiz.lvl}`);
+  if (resultado.asistenteLaboratorio) bits.push(`Asistente de laboratorio Nv ${resultado.asistenteLaboratorio.lvl}`);
+  if (!bits.length) return "Esta cuenta no trae Constructor aprendiz ni Asistente de laboratorio.";
+  return `${bits.join(" · ")}. Entran en la simulación. El ahorro de tiempo no está en la fuente y no se resta.`;
+}
+
 function vistaSimulador(m) {
   const sim = m.doc.sim || {};
   const resultado = sim.resultado;
@@ -110,6 +119,7 @@ function vistaSimulador(m) {
   const linea = resultado
     ? `${resultado.dias} días de constructor · ${resultado.lanzamientosDia} lanzamientos al día. ${fraseOrigen(resultado)}`
     : "Pulsa Calcular. No cambia la aldea.";
+  const ayudantes = lineaAyudantes(resultado);
   return `<h1 class="large-title">Simulador</h1>
     <div class="section"><div class="card">
       ${head("Escenario", `${recursos} ${th} Sin objetos mágicos.`)}
@@ -124,6 +134,7 @@ function vistaSimulador(m) {
       <button type="button" class="btn btn--primary btn--block" data-op="sim-calc">Calcular</button>
       <button type="button" class="btn btn--secondary btn--block" data-op="evento">Guardar como evento</button>
       <p class="t-body">${esc(linea)}</p>
+      ${ayudantes ? `<p class="t-footnote c-2">${esc(ayudantes)}</p>` : ""}
       <p class="t-footnote c-2">${(m.doc.eventos || []).length} eventos</p>
     </div></div>`;
 }

@@ -8,6 +8,7 @@ import {
 } from "./progress.js";
 import { clasificarHueco, repartirColas } from "./colas.js";
 import { finDe, scheduleNext, semanaPlan } from "./schedule.js";
+import { ayudantesDe } from "./simulacion.js";
 
 const ORDER = ["laboratorio", "ejercito_edif", "heroes", "defensas", "trampas", "recursos", "muros", "mascotas"];
 const SKIP_CAT = new Set(["equipamiento", "aldea", "ayuntamiento"]);
@@ -38,7 +39,8 @@ export const REQUISITOS_NOTA = "Provisional. clash-of-clans-data 0.18.0 no trae 
 
 const HERO_HALL = "1000071";
 const BOB_HUT = "1000064";
-const NO_REQUISITO = new Set(["1000015", "1000014", BOB_HUT, "1000001"]);
+const CASTILLO = "1000014";
+const NO_REQUISITO = new Set(["1000015", CASTILLO, BOB_HUT, "1000001"]);
 const ESTRUCTURA = new Set(["defensas", "trampas", "recursos", "ejercito_edif", "muros"]);
 /** Artillería infernal del TH17. Niveles 2 a 5 de town-hall.json en clash-of-clans-data 0.18.0. El 1 viene con el ayuntamiento. */
 const ARMA_TH17 = {
@@ -1363,6 +1365,8 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
     trabajoSeg: placed.trabajoSeg,
     calendarioSeg: placed.calendarioSeg,
     heroesFuera: c.heroesFuera,
+    ayudantes: ayudantesDe(exp),
+    avisoCastillo: avisoCastillo(exp, index),
     fin: placed.fin,
     now: c.nowMs,
     rush,
@@ -1672,6 +1676,24 @@ function requisitosDe(exp, index, fromTh) {
   return { desde: fromTh, hacia: fromTh + 1, sinTopes: false, filas };
 }
 
+/** El castillo no es requisito. Si va por detrás del tope de los datos, solo es un aviso. */
+export function avisoCastillo(exp, index) {
+  const th = townHallLevel(exp);
+  if (!Number.isInteger(th)) return null;
+  const cap = capRow(index, CASTILLO, th);
+  if (!cap || cap.max == null || cap.count === 0) return null;
+  const list = instanciasDe(exp, CASTILLO);
+  const actual = list.length ? Math.min(...list.map((it) => it.lvl || 0)) : 0;
+  if (actual >= cap.max) return null;
+  return {
+    id: CASTILLO,
+    title: "Castillo del clan",
+    actual,
+    tope: cap.max,
+    texto: `Aviso: el castillo del clan no se exige para subir el ayuntamiento. En el juego no está confirmado. Esta aldea lo tiene en Nv ${actual}; los datos de este TH llegan a Nv ${cap.max}.`,
+  };
+}
+
 /** Requisitos para poder mejorar el ayuntamiento hasta `targetTh`. Provisionales. */
 export function requisitosAyuntamiento(exp, index, targetTh) {
   const current = townHallLevel(exp);
@@ -1681,12 +1703,14 @@ export function requisitosAyuntamiento(exp, index, targetTh) {
   if (Number.isInteger(current) && goal.target > current) {
     for (let th = current; th < goal.target; th += 1) pasos.push(requisitosDe(exp, index, th));
   }
+  const aviso = avisoCastillo(exp, index);
   return {
     currentTh: current,
     targetTh: goal.target,
     provisional: true,
     nota: REQUISITOS_NOTA,
     pasos,
+    avisos: aviso ? [aviso] : [],
   };
 }
 
