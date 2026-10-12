@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.2.0</strong><br>
+  <strong>Versión 4.2.1</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -96,9 +96,9 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 
 ## En esta versión
 
-El plan de cada cuenta decide la siguiente mejora. Arriba, **Ahora**: una mejora por constructor libre (o que queda libre en la próxima sesión), por el laboratorio y por la casa de mascotas, con imagen, nombre, nivel, coste, duración y hora de fin en Madrid. **Hecho** la marca como iniciada y el plan se recalcula. Debajo, **Próximas sesiones**: día a día, qué iniciar y en qué hueco. El único ajuste de esa pantalla es el chip **Maxear TH actual** / **Subir TH**. No hace falta tener el oro anotado: si no hay cifras, no bloquea.
+El plan de cada cuenta decide la siguiente mejora. Arriba, **Ahora**: una mejora por constructor libre (o que queda libre en la próxima sesión), por el laboratorio y por la casa de mascotas. Cada coste es una tarjeta cuadrada: la cifra arriba, con el icono del recurso, el dibujo del edificio o la tropa en el centro y el nombre debajo. Los miles van con espacio. **Hecho** queda bajo la tarjeta, marca la mejora como iniciada y el plan se recalcula. Debajo, **Próximas sesiones**: día a día, qué iniciar y en qué hueco. El único ajuste de esa pantalla es el chip **Maxear TH actual** / **Subir TH**. No hace falta tener el oro anotado: si no hay cifras, no bloquea.
 
-En Inicio, **Hoy en tus cuentas** resume lo que toca en la próxima sesión en cada aldea, en el orden de las cuentas.
+En Inicio, **Hoy en tus cuentas** resume lo que toca en la próxima sesión en cada aldea, en el orden de las cuentas, con la misma tarjeta. Mejoras usa esa tarjeta en el plan de cada cuenta, en los costes y en lo que está en curso.
 
 La ficha de cada cuenta ya no lleva el bloque Recursos. No pide oro, elixir, oscuro, brillante, reluciente ni estrellada, ni el ingreso al día. No está en ninguna pantalla. Si esas cifras ya estaban guardadas, siguen en la cuenta y en la copia JSON; una copia antigua, sin ese campo, se importa igual. Sin cifras, el plan y Explorar estrategias hacen lo mismo que hacían cuando no había datos.
 
@@ -133,7 +133,7 @@ La barra de abajo tiene cinco pestañas en una sola fila: **Inicio**, **Cuentas*
 El centro de mando de la flota.
 
 - La cabecera y tres cifras: cuentas, constructores libres en la exportación y cuántas mejoras terminan hoy. Si no hay datos, un guion.
-- **Hoy en tus cuentas**: lo que toca iniciar en la próxima sesión en cada aldea, en el orden de las cuentas. Si en esa sesión no hay nada, lo dice. Abre el plan de esa cuenta.
+- **Hoy en tus cuentas**: lo que toca iniciar en la próxima sesión en cada aldea, en el orden de las cuentas, con la tarjeta de coste. Si en esa sesión no hay nada, lo dice. Abre el plan de esa cuenta.
 - **Qué hacer ahora**: revisar constructores disponibles y preparar objetivos de ayuntamiento.
 - **Próximas finalizaciones**: las tres mejoras de la flota que acaban antes, con la cuenta y la hora. Si no hay ninguna, un guion.
 - **Abrir hoy**: en qué orden abrir las cuentas, según el plan y la hora en que queda libre un constructor, el laboratorio o la casa de mascotas. Si el temporizador no es un número, esa cuenta no entra en el orden y no se inventa la hora.
@@ -172,7 +172,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 
 ### Agenda, plan y qué hacer ahora
 
-- El plan está en Mejoras, uno por cuenta. **Ahora** recomienda una mejora por hueco libre (constructor, laboratorio o casa de mascotas) que se puede iniciar en la próxima sesión: imagen, nombre, nivel, coste, duración y hora de fin en Madrid. **Hecho** la anota como iniciada y recalcula. No cambia niveles ni porcentajes, ni escribe un temporizador.
+- El plan está en Mejoras, uno por cuenta. **Ahora** recomienda una mejora por hueco libre (constructor, laboratorio o casa de mascotas) que se puede iniciar en la próxima sesión. El coste se ve como una tarjeta cuadrada: cifra e icono del recurso arriba, imagen en el centro, nombre y nivel debajo. Los miles llevan espacio. **Hecho** queda bajo la tarjeta: anota la mejora como iniciada y recalcula. No cambia niveles ni porcentajes, ni escribe un temporizador.
 - **Próximas sesiones** lista, día a día, qué iniciar en cada sesión y en qué hueco. Las sesiones siguen siendo las de la cuenta: por defecto 19:00–21:00, de cero a tres por día. Esa pantalla no las edita.
 - Arriba, un chip: **Maxear TH actual** o **Subir TH** (rush esencial al ayuntamiento siguiente). No hay más ajustes en esa pantalla. Sin oro anotado, la recomendación no se bloquea.
 - El orden es el del plan: desbloqueos, almacenes cuando hace falta, oro y elixir alternos, muros al final. B.O.B cuenta. Los héroes de la cuenta de prueba no entran. Desde TH17, subir pide las fusiones al máximo.
@@ -264,7 +264,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v47` y la de imágenes `cp-img-v10`. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v48` y la de imágenes `cp-img-v10`. Las marcas de oro, elixir, oscuro, gemas y menas son dibujo propio: esta copia del Fan Kit trae edificios y tropas, no esos contadores. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -272,6 +272,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono arriba, imagen en el centro, texto debajo. Los miles van con espacio. |
 | 4.2.0 | El plan decide la siguiente mejora: Ahora, Hecho y las próximas sesiones. El chip elige maxear el TH actual o subir. Inicio resume el día de las 11 cuentas. Sin cifras de recursos no se bloquea. |
 | 4.1.9 | La ficha de cuenta ya no pide recursos a mano. Esas cifras, si estaban, siguen en la copia. Sin ellas, el plan y las estrategias no cambian. |
 | 4.1.8 | Sin paquete de temas no se pide `paquete.json` (sin 404). El botón «Automático» enseña el tema que elegiría. |

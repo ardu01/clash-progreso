@@ -196,7 +196,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.0"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.0")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.1"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.1")).join(" "));
 const hoy = await page.evaluate(() => {
   const root = document.querySelector("[data-hoy-cuentas]");
   const links = root ? [...root.querySelectorAll("a[href*='/plan']")] : [];

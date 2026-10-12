@@ -639,5 +639,58 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 [data-plan-ahora] .row__sub,
 [data-plan-sesiones] .row__sub,
 [data-hoy-cuentas] .row__sub { white-space: normal; overflow-wrap: anywhere; }
+
+/* 4.2.1: tarjeta de coste. Cuadrada, cifra arriba, dibujo al centro, nombre debajo. */
+.mejora-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+.mejora-slot { min-width: 0; display: flex; flex-direction: column; }
+.mejora {
+  aspect-ratio: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 6px 8px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid #1E1B16;
+  background: var(--panel-2);
+  color: var(--ink);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+.mejora__coste {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 2px 8px; width: 100%; min-width: 0; margin: 0;
+  font: 800 .75rem/1.1 var(--font-ui, var(--font));
+}
+.mejora__recurso { display: inline-flex; align-items: center; gap: 3px; min-width: 0; max-width: 100%; }
+.mejora__recurso .num { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mejora__vacio { color: var(--label-2); }
+.recurso { width: 16px; height: 16px; flex: none; display: block; }
+.mejora__fig { flex: 1; min-height: 0; display: grid; place-items: center; }
+.mejora__fig .thumb { --size: 64px; }
+.mejora__nombre, .mejora__nivel, .mejora__pie {
+  max-width: 100%; margin: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mejora__nombre { font: 700 .75rem/1.15 var(--font); }
+.mejora__nivel, .mejora__pie { font-size: .68rem; color: var(--label-2); }
+.mejora-hecho { width: 100%; min-height: 44px; margin-top: 6px; }
+.hoy-cuenta {
+  display: block; color: inherit; text-decoration: none;
+  padding: 10px 12px 12px;
+}
+.hoy-cuenta .row__title { margin-bottom: 8px; }
+.list > li > .mejora-grid { padding: 0 12px 12px; }
+.coste-linea { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.coste-linea .mejora__coste { width: auto; justify-content: flex-start; font-size: .882rem; }
 .t-body.cubre-ok { color: var(--green-text); font-weight: 700; }
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }

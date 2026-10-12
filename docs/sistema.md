@@ -2242,6 +2242,12 @@ Un enlace `http` (la fuente de costes y la Fan Content Policy) ya no sustituye l
 
 Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paquete.js`). Lee `./paquete-estetico/paquete.json` y, solo en modo oscuro, carga `base.css` y el CSS del tema elegido; el tema se activa con `:root[data-tema]` cuando su hoja ya ha cargado. La elección se guarda en `localStorage["cp-tema"]`: vacío es «Ninguno» (por defecto), `auto` es «Automático» (TH de la cuenta abierta o de la principal). El selector está en Copia → Apariencia. El service worker guarda el paquete en su propia caché `cp-temas-<versión>` y borra las versiones viejas del paquete; esa caché no depende de `SHELL_CACHE`. Sin paquete, la app no cambia. `.thumb > img`, `frameOf()` y los colores semánticos no se tocan.
 
+## Nota de cambios (12 oct 2026, 4.2.1)
+
+`APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con la marca del recurso, la imagen del edificio o la tropa en el centro y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. El Fan Kit de esta copia no trae los contadores de oro, elixir, oscuro, gemas ni menas; esas marcas son SVG propio, no un recorte. El estilo se inspira en el botón de mejorar y no lo copia.
+
 ## Nota de cambios (12 oct 2026, 4.2.0)
 
 `APP_VERSION` es `4.2.0`, `SHELL_CACHE` es `cp-shell-v47` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2.
