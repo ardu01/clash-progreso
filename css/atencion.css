@@ -1,8 +1,9 @@
 .motor-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 .motor-btn {
   display: flex;

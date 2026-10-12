@@ -2248,6 +2248,8 @@ Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paqu
 
 `js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con la marca del recurso, la imagen del edificio o la tropa en el centro y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. El Fan Kit de esta copia no trae los contadores de oro, elixir, oscuro, gemas ni menas; esas marcas son SVG propio, no un recorte. El estilo se inspira en el botón de mejorar y no lo copia.
 
+Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen: el grupo sí lo separa del texto.
+
 ## Nota de cambios (12 oct 2026, 4.2.0)
 
 `APP_VERSION` es `4.2.0`, `SHELL_CACHE` es `cp-shell-v47` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2.

@@ -694,3 +694,23 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .coste-linea .mejora__coste { width: auto; justify-content: flex-start; font-size: .882rem; }
 .t-body.cubre-ok { color: var(--green-text); font-weight: 700; }
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }
+
+/* 4.2.1: aire arriba y abajo de cada botón, para que no se pegue al texto. */
+button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row) {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.seg-wrap,
+.chip-row,
+.motor-grid,
+.alert__actions {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.motor-grid { gap: 12px; }
+.chip-row { row-gap: 12px; }
+.section-head > .info-pop,
+.title-line > .info-pop,
+.info-pop { margin-top: 12px; }
+.sheet__actions .btn + .btn { margin-top: 12px; }
+.mejora-hecho { margin-top: 12px; margin-bottom: 12px; }

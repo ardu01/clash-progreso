@@ -65,3 +65,11 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   assert.match(sw, /js\/coste-tarjeta\.js/);
   assert.equal(app.includes("cuello de botella"), false);
 });
+
+test("4.2.1: los botones tienen margen vertical y la i no se pega al texto", () => {
+  const css = readFileSync(new URL("../css/estilo-3.1.css", import.meta.url), "utf8");
+  assert.match(css, /button:not\(\.navbar \*\)/);
+  assert.match(css, /margin-top: 12px;/);
+  assert.match(css, /margin-bottom: 12px;/);
+  assert.match(css, /\.mejora-hecho \{ margin-top: 12px; margin-bottom: 12px; \}/);
+});

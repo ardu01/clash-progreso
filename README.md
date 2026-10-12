@@ -272,7 +272,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
-| 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono arriba, imagen en el centro, texto debajo. Los miles van con espacio. |
+| 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono arriba, imagen en el centro, texto debajo. Los miles van con espacio. Los botones, y la i dorada, llevan margen arriba y abajo. |
 | 4.2.0 | El plan decide la siguiente mejora: Ahora, Hecho y las próximas sesiones. El chip elige maxear el TH actual o subir. Inicio resume el día de las 11 cuentas. Sin cifras de recursos no se bloquea. |
 | 4.1.9 | La ficha de cuenta ya no pide recursos a mano. Esas cifras, si estaban, siguen en la copia. Sin ellas, el plan y las estrategias no cambian. |
 | 4.1.8 | Sin paquete de temas no se pide `paquete.json` (sin 404). El botón «Automático» enseña el tema que elegiría. |
