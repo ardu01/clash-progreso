@@ -1020,6 +1020,9 @@ export function buildRoadmap({ exp, index, tag, plan, provisionals, sleep, now }
 
 export function programar(steps, lanes, ventana, now) {
   const semana = Array.isArray(ventana) ? ventana : semanaPlan();
+  for (const lane of lanes || []) {
+    if (lane && lane.libreEn == null) lane.libreEn = lane.freeAt;
+  }
   const lista = prepararSubida(ordenarParaPlan(steps));
   const th = (lanes || []).reduce((n, lane) => (lane && lane.th != null ? lane.th : n), null);
   const nHeroes = lista.filter((s) => s.categoryKey === "heroes" && s.queue === "constructor").length;

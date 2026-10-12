@@ -2242,6 +2242,12 @@ Un enlace `http` (la fuente de costes y la Fan Content Policy) ya no sustituye l
 
 Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paquete.js`). Lee `./paquete-estetico/paquete.json` y, solo en modo oscuro, carga `base.css` y el CSS del tema elegido; el tema se activa con `:root[data-tema]` cuando su hoja ya ha cargado. La elección se guarda en `localStorage["cp-tema"]`: vacío es «Ninguno» (por defecto), `auto` es «Automático» (TH de la cuenta abierta o de la principal). El selector está en Copia → Apariencia. El service worker guarda el paquete en su propia caché `cp-temas-<versión>` y borra las versiones viejas del paquete; esa caché no depende de `SHELL_CACHE`. Sin paquete, la app no cambia. `.thumb > img`, `frameOf()` y los colores semánticos no se tocan.
 
+## Nota de cambios (12 oct 2026, 4.2.0)
+
+`APP_VERSION` es `4.2.0`, `SHELL_CACHE` es `cp-shell-v47` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2.
+
+La pantalla Plan deja de pedir filtros. `recomendar` (`js/recomendador.js`) lee el orden que ya calcula `buildRoadmap` y las sesiones de `semanaPlan` / `proximaSesion` (por defecto 19:00–21:00). `programar` guarda en cada hueco `libreEn`, la hora a la que queda libre, antes de ir colocando pasos. **Ahora** enseña una mejora por constructor, laboratorio o casa de mascotas que queda libre antes de que acabe la próxima sesión. **Hecho** es una marca provisional: no escribe niveles ni temporizadores, vacía la caché del plan y vuelve a pintar. **Próximas sesiones** agrupa, un inicio por hueco, los siete días siguientes. El chip **Maxear TH actual** / **Subir TH** cambia el modo (maxear, o rush esencial al TH siguiente) y quita filtros guardados. Sin cifras de recursos no se oculta la recomendación. Inicio pinta **Hoy en tus cuentas** en el orden del roster.
+
 ## Nota de cambios (12 oct 2026, 4.1.9)
 
 `APP_VERSION` es `4.1.9`, `SHELL_CACHE` es `cp-shell-v46` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.

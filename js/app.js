@@ -30,8 +30,9 @@ import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClo
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
+import { horaMadrid, recomendar } from "./recomendador.js";
 import {
-  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
+  DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
@@ -1267,6 +1268,7 @@ function renderInicio() {
       <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
       <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
     </div></div>`;
+  const hoy = hoyEnCuentas();
   const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
   const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
@@ -1316,6 +1318,7 @@ function renderInicio() {
     <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
+    ${hoy}
     ${htmlMotor()}
     <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
     <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
@@ -1587,6 +1590,79 @@ function roadmapList(road) {
   return `<div class="section"><div class="section-header"><span>Línea de tiempo</span></div><ul class="list">${rows}</ul>${more}${missing}</div>`;
 }
 
+function planVista(raw, currentTh) {
+  const plan = effectivePlan(raw);
+  const limpio = {
+    ...plan,
+    ataque: false,
+    defensa: false,
+    muros: false,
+    heroes: false,
+    categoria: "",
+    recurso: "todos",
+    duracion: "",
+    rush: "esencial",
+  };
+  const current = Number.isInteger(currentTh) ? currentTh : null;
+  const subir = plan.modo === "rushear" && current != null && current < maxTownHall(state.index);
+  if (subir) return { ...limpio, modo: "rushear", th: Math.min(maxTownHall(state.index), current + 1) };
+  return { ...limpio, modo: "maxear", th: null };
+}
+
+function decisionRoadmap(meta) {
+  const exp = expOf(meta.tag);
+  if (!exp || !state.index) return null;
+  const current = townHallLevel(exp);
+  const raw = state.planes[meta.tag];
+  const plan = planVista(raw, current);
+  if (JSON.stringify(effectivePlan(raw)) === JSON.stringify(plan)) return accountRoadmap(meta);
+  const key = claveRoadmap({
+    tag: meta.tag,
+    timestamp: exp.timestamp,
+    plan,
+    sueno: state.sleep,
+    now: state.now,
+  }) + "\0vista";
+  return cachedRoad(key, () => buildRoadmap({
+    exp,
+    index: state.index,
+    tag: meta.tag,
+    plan,
+    provisionals: state.provisionales,
+    sleep: activeSleep(),
+    now: state.now,
+  }));
+}
+
+function textoFinMadrid(ms) {
+  if (ms == null) return "";
+  if (madridDayKey(ms) === madridDayKey(state.now)) return horaMadrid(ms);
+  return fmtFin(ms);
+}
+
+function tarjetaAhora(paso, tag) {
+  const bag = costeDePaso(paso);
+  const coste = bag ? costBits({ ...bag, segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, diasConstructor: 0 }) : "";
+  const dur = paso.seconds == null ? "" : textoSegundos(paso.seconds);
+  const fin = textoFinMadrid(paso.fin);
+  const bits = [coste, dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean);
+  const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
+  return `<li><div class="row row--tile">${thumb(paso.id, { size: 44, lvl: paso.fromLvl })}<span class="row__main"><span class="row__title">${esc(paso.title)}</span><span class="row__sub num">Nv ${paso.fromLvl} → ${paso.toLvl}</span><span class="row__sub">${esc(bits.join(" · "))}</span></span><span class="row__trail"><button type="button" class="btn btn--primary btn--small" data-hecho data-prov-tag="${esc(tag)}" data-hecho-id="${esc(paso.id)}" data-hecho-from="${paso.fromLvl}" data-hecho-to="${paso.toLvl}" data-hecho-instance="${esc(paso.instance || "")}" data-hecho-queue="${esc(paso.queue || "constructor")}" data-hecho-title="${esc(paso.title)}" aria-label="${esc(aria)}">Hecho</button></span></div></li>`;
+}
+
+function hoyEnCuentas() {
+  const porTag = new Map(allAccounts().map((m) => [m.tag, m]));
+  const cuentas = state.accounts.map((a) => porTag.get(a.tag)).filter(Boolean);
+  if (!cuentas.length) return "";
+  const filas = cuentas.map((meta) => {
+    const road = expOf(meta.tag) ? decisionRoadmap(meta) : null;
+    const rec = road ? recomendar(road) : null;
+    const nombres = rec && rec.ahora.length ? rec.ahora.slice(0, 4).map((p) => p.title).join(" · ") : (expOf(meta.tag) ? "Nada en esta sesión" : "Sin importar");
+    return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(nombres)}</span></span>${CHEV}</a></li>`;
+  }).join("");
+  return `<div class="section" data-hoy-cuentas>${sectionHead("Hoy en tus cuentas")}<ul class="list list--tiles">${filas}</ul></div>`;
+}
+
 function renderPlan(tag) {
   const meta = accountByTag(tag);
   const exp = meta && expOf(meta.tag);
@@ -1594,25 +1670,25 @@ function renderPlan(tag) {
   if (!meta || !exp || !view) {
     return `<h1 class="large-title">Plan</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
   }
-  const road = accountRoadmap(meta);
-  const notas = [PLAN_TIMELINE];
-  if (road.heroesFuera) notas.push(`En ${HEROES_FUERA} los héroes quedan fuera del plan.`);
-  if (road.plan.modo === "rushear") notas.push(RUSH_NOTE);
-  else if (road.targetTh > road.currentTh) notas.push(`Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.`);
-  if (road.avisoHora) notas.push("Hay una mejora en curso sin hora exacta. No se le pone una.");
-  if (road.plan.modo === "rushear" && road.calendarioSeg != null && road.trabajoSeg > road.calendarioSeg) notas.push("El fin usa los constructores a la vez. Los días de constructor del coste son la suma del trabajo, no el calendario.");
-  if (road.plan.modo !== "rushear" && !road.conocidos) notas.push("La exportación no trae el número de constructores. No se inventan huecos libres.");
-  if (estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada) notas.push(`Necesita actualización. Se conserva el último plan, del ${fmtWhen(exp.timestamp * 1000)}.`);
-  const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
-  const cifras = road.rush ? "" : `${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>`;
+  const road = decisionRoadmap(meta);
+  const rec = recomendar(road);
+  const current = road.currentTh || view.th || 1;
+  const puedeSubir = current < maxTownHall(state.index);
+  const subirOn = road.plan.modo === "rushear";
+  const ahora = rec.ahora.length
+    ? `<ul class="list">${rec.ahora.map((paso) => tarjetaAhora(paso, meta.tag)).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">Nada que iniciar en esta sesión.</p></div>`;
+  const sesiones = rec.sesiones.length
+    ? `<ul class="list">${rec.sesiones.map((ses) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ses.dia)} · <span class="num">${esc(ses.hora)}</span></span></span></div></li>${ses.huecos.map((h) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(h.hueco)}</span><span class="row__sub">${esc(h.title)} <span class="num">Nv ${h.fromLvl} → ${h.toLvl}</span></span></span></div></li>`).join("")}`).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">Nada más en estos días.</p></div>`;
+  const subir = puedeSubir
+    ? `<button type="button" data-plan-objetivo="subir" aria-pressed="${subirOn ? "true" : "false"}">Subir TH</button>`
+    : "";
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
-    ${planControls(meta, road)}
-    ${coberturaCard(meta, road)}
-    ${road.rush ? rushPanel(road) : ""}
-    <div class="section"><div class="card"><div class="section-head"><h2 class="t-headline">Criterio</h2>${infoBtn(notas.join(" "))}</div>${cifras}</div></div>
-    ${roadmapList(road)}
-    ${costCard(exp, view.th, true)}`;
+    <div class="chip-row chip-row--plan" role="toolbar" aria-label="Objetivo"><button type="button" data-plan-objetivo="maxear" aria-pressed="${subirOn ? "false" : "true"}">Maxear TH actual</button>${subir}</div>
+    <div class="section" data-plan-ahora>${sectionHead("Ahora")}${ahora}</div>
+    <div class="section" data-plan-sesiones>${sectionHead("Próximas sesiones")}${sesiones}</div>`;
 }
 
 function criterioHtml(texto, fuera) {
@@ -5299,6 +5375,38 @@ function bind(r) {
       render();
       return;
     }
+    const objetivo = origen.closest("[data-plan-objetivo]");
+    if (objetivo) {
+      const tag = route().tag;
+      const meta = tag ? accountByTag(tag) : null;
+      const exp = meta && expOf(meta.tag);
+      const current = exp ? townHallLevel(exp) : null;
+      const reset = { ataque: false, defensa: false, muros: false, heroes: false, categoria: "", recurso: "todos", duracion: "", rush: "esencial" };
+      if (tag && objetivo.dataset.planObjetivo === "subir" && Number.isInteger(current) && current < maxTownHall(state.index)) {
+        setAccountPlan(tag, { ...reset, modo: "rushear", th: current + 1 });
+      } else if (tag) {
+        setAccountPlan(tag, { ...reset, modo: "maxear", th: null });
+      }
+      render();
+      return;
+    }
+    const hecho = origen.closest("[data-hecho]");
+    if (hecho) {
+      const tag = hecho.dataset.provTag;
+      const step = {
+        id: hecho.dataset.hechoId,
+        fromLvl: Number(hecho.dataset.hechoFrom),
+        toLvl: Number(hecho.dataset.hechoTo),
+        instance: hecho.dataset.hechoInstance || "",
+        queue: hecho.dataset.hechoQueue || "constructor",
+        title: hecho.dataset.hechoTitle || "Mejora",
+      };
+      if (tag) state.provisionales = toggleProvisional(state.provisionales, step, tag, state.now);
+      saveProvisionals();
+      roadCache.clear();
+      render();
+      return;
+    }
     const modo = origen.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;
@@ -5325,6 +5433,7 @@ function bind(r) {
       const steps = road ? road.orden.filter((s) => keys.includes(s.key)) : [];
       for (const step of steps) state.provisionales = toggleProvisional(state.provisionales, step, tag, state.now);
       saveProvisionals();
+      roadCache.clear();
       render();
       return;
     }
