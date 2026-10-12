@@ -5238,16 +5238,21 @@ function limitesPlanFab(fab) {
   return { minX, maxX, minY, maxY: Math.max(minY, suelo), size, w };
 }
 
+function fijarPlanFab(fab, x, y) {
+  fab.style.left = Math.round(x) + "px";
+  fab.style.top = Math.round(y) + "px";
+  fab.style.right = "auto";
+  fab.style.bottom = "auto";
+  return fab.getBoundingClientRect();
+}
+
 function aplicarPlanFab(fab, pos, animar) {
   if (!fab) return;
   const box = limitesPlanFab(fab);
   const y = box.minY + (box.maxY - box.minY) * pos.y;
   const x = pos.lado === "izq" ? box.minX : box.maxX;
   fab.classList.toggle("is-snap", !!animar);
-  fab.style.left = Math.round(x) + "px";
-  fab.style.top = Math.round(y) + "px";
-  fab.style.right = "auto";
-  fab.style.bottom = "auto";
+  fijarPlanFab(fab, x, y);
 }
 
 function posicionPlanFab() {
@@ -5255,7 +5260,7 @@ function posicionPlanFab() {
 }
 
 function cortarPlanFab() {
-  document.removeEventListener("pointermove", moverPlanFab, { passive: false });
+  document.removeEventListener("pointermove", moverPlanFab);
   document.removeEventListener("pointerup", soltarPlanFab);
   document.removeEventListener("pointercancel", soltarPlanFab);
   planFabGesto = null;
@@ -5276,10 +5281,7 @@ function moverPlanFab(ev) {
   const x = Math.min(box.maxX, Math.max(box.minX, gesto.left + dx));
   const y = Math.min(box.maxY, Math.max(box.minY, gesto.top + dy));
   fab.classList.remove("is-snap");
-  fab.style.left = Math.round(x) + "px";
-  fab.style.top = Math.round(y) + "px";
-  fab.style.right = "auto";
-  fab.style.bottom = "auto";
+  fijarPlanFab(fab, x, y);
 }
 
 function soltarPlanFab(ev) {
@@ -5302,13 +5304,11 @@ function soltarPlanFab(ev) {
 
 function engancharPlanFab() {
   const fab = document.querySelector(".plan-fab");
-  if (!fab) {
-    if (planFabGesto && (!planFabGesto.el || !planFabGesto.el.isConnected)) cortarPlanFab();
-    return;
-  }
+  if (planFabGesto && (!fab || planFabGesto.el !== fab)) cortarPlanFab();
+  if (!fab) return;
   aplicarPlanFab(fab, posicionPlanFab(), false);
   fab.addEventListener("pointerdown", (ev) => {
-    if (planFabGesto && planFabGesto.el && planFabGesto.el.isConnected) return;
+    if (planFabGesto && planFabGesto.el === fab && planFabGesto.id === ev.pointerId) return;
     if (planFabGesto) cortarPlanFab();
     if (ev.pointerType !== "touch" && ev.button !== 0) return;
     planFabSuprimir = false;
