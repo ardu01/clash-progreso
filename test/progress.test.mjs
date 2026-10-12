@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexCaps, analyze, equipmentView, categoryItems, townHallLevel, pct, builderStatus, upgradesOf, itemName, ROSTER, capsMaxFor, levelLine, categoryUnlock, catFoot, capsFichaLines, presentItem, outsidePct, overMaxLabel, CATEGORIES, VILLAGE_KEYS } from "../js/progress.js";
 import { parseLoose } from "../js/parse.js";
@@ -963,9 +963,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.2.8 y cachés cp-shell-v59 / cp-img-v11", () => {
-  assert.equal(APP_VERSION, "4.2.8");
-  assert.equal(SHELL_CACHE, "cp-shell-v59");
+test("versión 4.2.9 y cachés cp-shell-v60 / cp-img-v11", () => {
+  assert.equal(APP_VERSION, "4.2.9");
+  assert.equal(SHELL_CACHE, "cp-shell-v60");
   assert.equal(IMAGE_CACHE, "cp-img-v11");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1028,6 +1028,7 @@ test("versión 4.2.8 y cachés cp-shell-v59 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-shell-v56"), false);
   assert.equal(sw.includes("cp-shell-v57"), false);
   assert.equal(sw.includes("cp-shell-v58"), false);
+  assert.equal(sw.includes("cp-shell-v59"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1035,7 +1036,8 @@ test("versión 4.2.8 y cachés cp-shell-v59 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v59/);
+  assert.match(caches, /cp-shell-v60/);
+  assert.equal(caches.includes("cp-shell-v59"), false);
   assert.equal(caches.includes("cp-shell-v58"), false);
   assert.equal(caches.includes("cp-shell-v57"), false);
   assert.equal(caches.includes("cp-shell-v56"), false);
@@ -2839,5 +2841,28 @@ test("4.1.7: cargador del paquete de temas, «Ninguno» por defecto y caché pro
     const css = leer("../paquete-estetico/" + t.css).replace(/\/\*[\s\S]*?\*\//g, "");
     assert.equal(css.includes("/assets/wiki/"), false, t.id);
     assert.equal(/\.thumb\s*>\s*img/.test(css), false, t.id);
+  }
+});
+
+test("4.2.9: los botones tienen tipo, las imágenes oficiales no se arrastran y el worker lista los módulos", () => {
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const buttons = app.match(/<button\b[^>]*>/g) || [];
+  assert.ok(buttons.length > 40);
+  assert.equal(buttons.some((tag) => !tag.includes('type="button"')), false);
+  assert.match(app, /decoding="async" draggable="false"/);
+  const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
+  const listed = new Set([...sw.matchAll(/"(\.\/js\/[^"]+\.js)"/g)].map((m) => m[1].slice(2)));
+  const files = [];
+  const walk = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (name.endsWith(".js")) files.push(p);
+    }
+  };
+  walk(join(root, "js"));
+  for (const file of files) {
+    const rel = relative(root, file).split("\\").join("/");
+    assert.equal(listed.has(rel), true, rel);
   }
 });

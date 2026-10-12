@@ -229,7 +229,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.8"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.8")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.9"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.9")).join(" "));
 if (await page.evaluate(() => !!document.querySelector("[data-hoy-cuentas]"))) bad("Inicio sigue duplicando el plan");
 await ir(page, "#/plan");
 const hub = await page.evaluate(() => {
