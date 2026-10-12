@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { imageChoice } from "../js/images.js";
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../css/base.css", import.meta.url), "utf8");
@@ -47,4 +48,25 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   const pantalla = app.slice(app.indexOf("function screenFor("), app.indexOf("function renderGraficos("));
   assert.match(pantalla, /r\.name === "plan" && r\.tag/);
   assert.match(pantalla, /renderPlanHub\(\)/);
+});
+
+test("4.2.4: subir el ayuntamiento muestra el TH de destino", () => {
+  const mini = app.slice(app.indexOf("function miniaturaDe("), app.indexOf("function fichaMejora("));
+  assert.match(mini, /town-hall/);
+  assert.match(mini, /1000001/);
+  assert.match(mini, /toLvl/);
+  assert.match(app.slice(app.indexOf("function fichaMejora("), app.indexOf("function tarjetaAhora(")), /miniaturaDe\(paso\)/);
+  const hub = app.slice(app.indexOf("function renderPlanHub("), app.indexOf("function renderPlan("));
+  assert.match(hub, /thumb\(1000001, \{ size: 44, th \}\)/);
+  const manifest = JSON.parse(readFileSync(new URL("../assets/manifest.json", import.meta.url)));
+  const hall = manifest.items["1000001"];
+  const destino = imageChoice(hall, 12);
+  const actual = imageChoice(hall, 11);
+  assert.equal(destino.im.ruta, hall.imagenes_por_nivel["12"].ruta);
+  assert.equal(destino.im.ruta, "images/townhalls/town-hall-12.png");
+  assert.notEqual(destino.im.ruta, actual.im.ruta);
+  assert.match(destino.im.origen.fuente, /Fan Kit/);
+  assert.equal(destino.im.es_inferior, false);
+  assert.equal(imageChoice(hall, 17).im.ruta, "images/townhalls/town-hall-17.png");
+  assert.equal(app.includes("imagenes_por_nivel[String(th)]"), false);
 });

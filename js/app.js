@@ -1668,11 +1668,17 @@ function textoFinMadrid(ms) {
   return fmtFin(ms);
 }
 
+function miniaturaDe(paso) {
+  const ayuntamiento = paso && (paso.id === "town-hall" || String(paso.id) === "1000001");
+  const id = ayuntamiento ? 1000001 : (paso ? paso.id : null);
+  const lvl = ayuntamiento && paso.toLvl != null ? paso.toLvl : (paso && paso.fromLvl != null ? paso.fromLvl : (paso ? paso.lvl : null));
+  return thumb(id, { size: 64, lvl });
+}
+
 function fichaMejora(paso, extra = {}) {
   const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
-  const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
   const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
-  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${miniaturaDe(paso)}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
   const mejorar = extra.mejorar ? `<button type="button" class="btn btn--primary btn--small btn--block btn-mejorar" data-go="${esc(extra.mejorar)}">${htmlCuerpoMejorar()}</button>` : "";
   const abajo = `${mejorar}${extra.boton || ""}`;
   if (!abajo) return card;

@@ -2280,6 +2280,8 @@ Inicio deja de pintar «Hoy en tus cuentas». Mejoras deja el segmento Plan: abr
 
 Cada mejora se compara con lo que la aldea puede guardar ahora: almacenes de oro, de elixir y de elixir oscuro, más la capacidad del propio ayuntamiento (`capacidadTh`, `storageCapacity` de `town-hall.json`). Si el coste no entra, el plan adelanta los niveles de almacén que faltan para cubrir ese hueco, con su coste y su tiempo, y deja la mejora sin hora y con el motivo. Vale para el ayuntamiento, el arma, las defensas, el laboratorio, los héroes y los muros. Las menas no pasan por el almacén. No mira el oro anotado en la cuenta: si no hay cifras y la mejora sí entra, sigue recomendada.
 
+La tarjeta de subir el ayuntamiento, en el detalle y en el hub, usa la imagen oficial del nivel al que se llega. Sale de `imagenes_por_nivel` del ayuntamiento (`1000001`), los PNG del Fan Kit que ya están por nivel. El icono de la cuenta sigue siendo el ayuntamiento actual.
+
 ## Nota de cambios (12 oct 2026, 4.2.3)
 
 `APP_VERSION` es `4.2.3`, `SHELL_CACHE` es `cp-shell-v50` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
