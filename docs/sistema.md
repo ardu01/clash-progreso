@@ -2274,7 +2274,7 @@ El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la
 
 `APP_VERSION` es `4.2.5`, `SHELL_CACHE` es `cp-shell-v56` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
 
-Revisión de Inicio, el hub Plan y el botón flotante, en oscuro, con las 11 cuentas, en WebKit en línea y sin conexión. En `#/progreso/TAG/plan`, el pie de la tarjeta de Ahora juntaba la duración, «acaba vie 16/10 19:00» y la cola en una sola línea. En la tarjeta cuadrada eso cortaba el reloj en «19…». `.mejora__pie` pasa a dos líneas, así la hora entra entera y el dibujo del edificio sigue dentro de la tarjeta. El nombre y el nivel siguen en una línea.
+Revisión de Inicio, el hub Plan y el botón flotante, en oscuro, con las 11 cuentas, en WebKit en línea y sin conexión. En `#/progreso/TAG/plan`, el pie de la tarjeta de Ahora juntaba la duración, «acaba vie 16/10 19:00» y la cola en una sola línea. En la tarjeta cuadrada eso cortaba el reloj en «19…». `.mejora__pie` pasa a dos líneas, así la hora entra entera y el dibujo del edificio sigue dentro de la tarjeta. El nombre y el nivel siguen en una línea. `marcaHtml` pone `draggable="false"` solo en la imagen del martillo (botón Mejorar y botón flotante), para que el navegador no inicie un arrastre de imagen.
 
 ## Nota de cambios (12 oct 2026, 4.2.4)
 

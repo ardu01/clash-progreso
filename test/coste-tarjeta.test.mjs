@@ -52,6 +52,8 @@ test("4.2.1: el muro muestra las dos marcas y las gemas su dibujo", () => {
   assert.match(iconoRecurso("oro"), /recurso--oro/);
   assert.match(htmlMartillo(), /oficial\/resources\/martillo\.png/);
   assert.match(htmlMartillo(), /btn-mejorar__icono/);
+  assert.match(htmlMartillo(40, "plan-fab__icono"), /<img [^>]*draggable="false"/);
+  assert.equal(iconoRecurso("oro").includes("draggable"), false);
   assert.match(htmlCuerpoMejorar(), /btn-mejorar__cuerpo/);
   assert.match(htmlCuerpoMejorar(), />Mejorar</);
   assert.equal(htmlCoste({ oro: 1000 }).includes("martillo"), false);

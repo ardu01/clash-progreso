@@ -104,6 +104,7 @@ test("4.2.4: el botón del plan se arrastra, se pega al borde y recuerda el siti
   assert.equal(fab.includes("<svg"), false);
   const icono = htmlMartillo(40, "plan-fab__icono");
   assert.match(icono, /oficial\/resources\/martillo\.png/);
+  assert.match(icono, /draggable="false"/);
   assert.match(icono, /width="1024"/);
   assert.match(icono, /height="1024"/);
   assert.equal(icono.includes("<svg"), false);
