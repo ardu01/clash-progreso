@@ -32,7 +32,7 @@ import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
 import { horaMadrid, recomendar } from "./recomendador.js";
-import { htmlCoste, htmlCuerpoMejorar } from "./coste-tarjeta.js";
+import { htmlCoste, htmlCuerpoMejorar, htmlMartillo } from "./coste-tarjeta.js";
 import {
   DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -5328,7 +5328,7 @@ function engancharPlanFab() {
 }
 
 function planFab() {
-  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan">${ICON.plan}</button>`;
+  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan">${htmlMartillo(40, "plan-fab__icono")}</button>`;
 }
 
 function renderPlanSheet() {

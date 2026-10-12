@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { imageChoice } from "../js/images.js";
+import { htmlMartillo } from "../js/coste-tarjeta.js";
+import { DEVICE_SCALE, ajusteOf, imageChoice } from "../js/images.js";
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../css/base.css", import.meta.url), "utf8");
@@ -92,6 +93,23 @@ test("4.2.4: el botón del plan se arrastra, se pega al borde y recuerda el siti
   assert.match(bloque, /lado === "izq" \? box\.minX : box\.maxX/);
   assert.match(estilo, /\.plan-fab \{[^}]*touch-action: none/);
   assert.match(app, /engancharPlanFab\(\)/);
+  const fab = app.slice(app.indexOf("function planFab("), app.indexOf("function renderPlanSheet("));
+  assert.match(fab, /htmlMartillo\(40, "plan-fab__icono"\)/);
+  assert.equal(fab.includes("<svg"), false);
+  const icono = htmlMartillo(40, "plan-fab__icono");
+  assert.match(icono, /oficial\/resources\/martillo\.png/);
+  assert.match(icono, /width="1024"/);
+  assert.match(icono, /height="1024"/);
+  assert.equal(icono.includes("<svg"), false);
+  const manifest = JSON.parse(readFileSync(new URL("../assets/manifest.json", import.meta.url), "utf8"));
+  const cajas = JSON.parse(readFileSync(new URL("../assets/cajas-alfa.json", import.meta.url), "utf8"));
+  const im = manifest.iconos_recurso.martillo;
+  assert.equal(im.copia_identica, true);
+  assert.ok(im.ancho >= 1024 && im.alto >= 1024);
+  const box = cajas[im.ruta];
+  const aj = ajusteOf({ ruta: im.ruta, ancho: im.ancho, alto: im.alto }, 40);
+  const arte = Math.max(box.w, box.h);
+  assert.ok(arte >= arte * aj.escala * DEVICE_SCALE, "el martillo se ampliaría por encima de @3x");
 });
 
 test("4.2.4: subir el ayuntamiento muestra el TH de destino", () => {

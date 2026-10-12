@@ -115,6 +115,8 @@ async function barraUnaFila(page, hash) {
       fabPos: fabSt ? fabSt.position : "",
       fabRound: !!(fabSt && fabBox && parseFloat(fabSt.borderTopLeftRadius) >= fabBox.width / 2 - 1),
       fabSobre: !!(fabBox && barBox && fabBox.bottom <= barBox.top + 1),
+      fabIcon: !fab ? "" : (fab.querySelector("svg") ? "svg" : (fab.querySelector("img")?.getAttribute("src") || "")),
+      fabW: Number(fab?.querySelector("img")?.getAttribute("width") || 0),
       hoja: !!document.querySelector(".sheet"),
     };
   });
@@ -132,6 +134,8 @@ async function barraUnaFila(page, hash) {
     if (info.fabPos !== "fixed") bad(hash + " el botón Plan no flota");
     if (!info.fabRound) bad(hash + " el botón Plan no es redondo");
     if (!info.fabSobre) bad(hash + " el botón Plan pisa la barra");
+    if (!String(info.fabIcon).includes("oficial/resources/martillo.png")) bad(hash + " el botón Plan no usa el martillo oficial");
+    if (info.fabW < 1024) bad(hash + " el martillo del botón no está a 1024");
   }
 }
 
