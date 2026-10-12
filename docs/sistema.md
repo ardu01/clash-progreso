@@ -2270,6 +2270,12 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
 
+## Nota de cambios (12 oct 2026, 4.2.7)
+
+`APP_VERSION` es `4.2.7`, `SHELL_CACHE` es `cp-shell-v58` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
+
+Revisión de Agenda, operaciones y sesiones. El selector de Agenda son botones, y `.seg--nav` solo vestía los enlaces de Análisis: en un iPhone estrecho «En curso» no encogía. Ahora enlaces y botones comparten la regla, con `min-width: 0` y el texto en varias líneas. La cabecera de una franja («11 cuentas entre 19:00 y 20:00: una sesión») puede partirse dentro del tablón. Operaciones deja de pintar siempre 23:00–07:00: si el iPhone tiene un sueño guardado, enseña esas horas.
+
 ## Nota de cambios (12 oct 2026, 4.2.6)
 
 `APP_VERSION` es `4.2.6`, `SHELL_CACHE` es `cp-shell-v57` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
