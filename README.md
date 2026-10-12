@@ -26,6 +26,10 @@ La primera visita con red guarda la interfaz. Las imágenes se pueden descargar 
 
 Datos de prueba del 7 de octubre de 2026. La barra tiene seis pestañas. Plan reúne las 11 aldeas. Operaciones no está en la barra: se abre desde Agenda, y desde ahí también Explorar estrategias.
 
+| Plan | Barra |
+| --- | --- |
+| <img src="docs/capturas/424-plan-oscuro.png" width="200" alt="Plan en oscuro: por cuenta, qué mejorar ahora, constructores libres y ocupados, la próxima finalización y el coste con iconos. La pestaña Plan está marcada."> | <img src="docs/capturas/424-barra-oscuro.png" width="200" alt="Barra inferior en oscuro, una sola fila: Inicio, Cuentas, Plan, Mejoras, Análisis y Agenda."> |
+
 | Plan | Inicio | Mejoras |
 | --- | --- | --- |
 | <img src="docs/capturas/421-plan-oscuro.png" width="200" alt="Plan en oscuro: tarjeta cuadrada con la cifra y el icono del recurso arriba, el edificio en el centro y Hecho debajo"> | <img src="docs/capturas/421-inicio-oscuro.png" width="200" alt="Inicio en oscuro: Hoy en tus cuentas, con la tarjeta de coste de cada aldea"> | <img src="docs/capturas/421-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro: las siguientes mejoras de cada cuenta, en la misma tarjeta"> |

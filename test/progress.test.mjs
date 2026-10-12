@@ -2805,7 +2805,7 @@ test("4.1.7: cargador del paquete de temas, «Ninguno» por defecto y caché pro
   const app = leer("../js/app.js");
   assert.match(cargador, /localStorage\.getItem\(CLAVE\) \|\| ""/);
   assert.match(cargador, /\.\/paquete-estetico\//);
-  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.2\.3"/);
+  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.2\.4"/);
   assert.match(sw, /"\.\/js\/temas-paquete\.js"/);
   assert.match(sw, /const TEMAS_CACHE = "cp-temas-"/);
   assert.match(sw, /!key\.startsWith\(TEMAS_CACHE\)/);

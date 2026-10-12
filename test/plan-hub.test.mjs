@@ -29,8 +29,9 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   assert.match(mejoras, /En curso/);
   const detalle = app.slice(app.indexOf("function renderPlan("), app.indexOf("function criterioHtml("));
   assert.match(detalle, /data-plan-ahora/);
-  assert.match(detalle, />Hecho</);
-  assert.match(detalle, /data-hecho/);
+  assert.match(detalle, /tarjetaAhora/);
+  assert.match(app, />Hecho</);
+  assert.match(app, /data-hecho/);
   assert.match(app, /data-go="#\/plan"/);
   assert.equal(app.includes("Hoy en tus cuentas"), false);
   assert.equal(app.includes("function mejorasPlan("), false);
