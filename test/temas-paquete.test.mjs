@@ -54,3 +54,13 @@ test("4.2.2: paquete 1.1.0 con 38 temas, grupos y Automático solo con ayuntamie
   const app = leer("../js/app.js");
   assert.match(app, /<span class="swatch" data-sw=/);
 });
+
+test("4.2.8: el radar no corta las etiquetas y el tema no hereda el margen de los botones", () => {
+  const app = leer("../js/app.js");
+  const radar = app.slice(app.indexOf("function radarSvg("), app.indexOf("function paceBlock("));
+  assert.match(radar, /text-anchor/);
+  assert.match(radar, /viewBox="-24 0 368 250"/);
+  const css = leer("../css/estilo-3.1.css");
+  assert.match(css, /\.chart\.radar text \{ fill: var\(--label-2\)/);
+  assert.match(css, /:not\(\.temas \*\)/);
+});

@@ -2270,6 +2270,12 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
 
+## Nota de cambios (12 oct 2026, 4.2.8)
+
+`APP_VERSION` es `4.2.8`, `SHELL_CACHE` es `cp-shell-v59` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
+
+Revisión de gráficos, comparadores y temas. Las etiquetas del radar salían del recuadro (la de arriba se cortaba y las de los lados usaban el ancla por defecto) y el texto era negro, ilegible sobre la tarjeta oscura. El ancla depende del lado, el recuadro deja margen y el relleno es `--label-2`. La regla de margen de los botones (4.2.1) no exceptuaba `.temas button`, así que cada tema sumaba 12 px arriba y abajo y rompía la rejilla. Queda fuera de esa regla.
+
 ## Nota de cambios (12 oct 2026, 4.2.7)
 
 `APP_VERSION` es `4.2.7`, `SHELL_CACHE` es `cp-shell-v58` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
