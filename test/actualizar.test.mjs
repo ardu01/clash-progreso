@@ -154,6 +154,14 @@ test("Safari y el icono usan la misma detección, y la app no pide Atajos para p
   assert.match(doc, /Ajustes → Más ajustes → Exportar datos → Copiar/);
   assert.match(doc, /no comparten/);
   assert.match(doc, /No hace falta la app Atajos/);
+  assert.match(doc, /https:\/\/ardu01\.github\.io\/clash-progreso\/atajos\/copiar-aldea\.shortcut/);
+  assert.match(doc, /https:\/\/ardu01\.github\.io\/clash-progreso\/atajos\/importar-a-clash\.shortcut/);
+  assert.equal(doc.includes("No hay un enlace de instalación"), false);
+  assert.match(app, /Instalar «Copiar aldea»/);
+  assert.match(app, /Instalar «Importar a Clash»/);
+  assert.equal(app.includes("Activar avisos"), false);
+  assert.equal(app.includes("cp-notify"), false);
+  assert.equal(app.includes("data-notify"), false);
 });
 
 test("el resumen sale de los pegados y la siguiente no repite una cuenta hecha", () => {

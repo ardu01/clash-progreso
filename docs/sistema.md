@@ -2178,7 +2178,7 @@ La barra vuelve a cinco pestañas: Inicio, Cuentas, Mejoras, Análisis y Agenda.
 
 El Fan Kit (Game assets, búsqueda del 11 oct 2026) tiene PNG propio para 31 de los 35 niveles que usaban la imagen de otro. Esos 31 pasan a ese archivo, con `es_inferior` en falso. La mina de rastreo aéreo 5 y 6 comparten `Building_HV_Seeking_Air_Mine_level_5&6`. Siguen prestados, y quedan en `assets/FALTANTES.md`: herrería 10, bomba 12, bomba aérea 12 y Destructor 5. Torre multiusos, Defensa artesanal y Portal portátil no tienen PNG de aldea principal en el Fan Kit; siguen faltantes y no se les añade arte de otra fuente. Los guardianes nuevos salen de la rendición `?width=1024` porque el original pasa de 3 MB.
 
-Los nombres que el diario de la 3.1.1 dejaba en inglés (Escolta títere, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Orbe oscuro) ya están en español, con fuente en el `ES.json` de ClashKingAssets `b8f42a7`. Yeti se llama igual en el blog en español. Los nueve módulos de la defensa artesanal siguen con el paréntesis en inglés (`Hitpoints`, `Damage`, `Seconds Active`, `Poison Level`, `Explosion Damage`): el blog en español nombra las tres defensas y no los módulos, y ese `ES.json` no trae las claves `TID_SEASONAL_DEFENSE_*_MODULE_*`. No se inventa la traducción.
+Los nombres que el diario de la 3.1.1 dejaba en inglés (Escolta títere, Copo de escarcha, Pistola aturdidora, Cabaña de B.O.B. y Orbe oscuro) ya están en español, con fuente en el `ES.json` de ClashKingAssets `b8f42a7`. Yeti se llama igual en el blog en español. Los nueve módulos de la defensa artesanal llevaban el paréntesis en inglés hasta la 4.2.3, que los pasa a Puntos de vida, Daño, Segundos en activo, Nivel de veneno y Daño de explosión.
 
 Web Push en una PWA instalada en iOS 16.4 o posterior exige la app en la pantalla de inicio, un service worker, el permiso de la persona y un servicio que guarde la suscripción y envíe el aviso. Sin ese servicio el aviso no sale con la app cerrada. Esta app no tiene servidor, y no hay avisos del iPhone con la app cerrada. `js/calendario.js` arma un `.ics` con el fin real de cada mejora de la exportación (hora UTC, cinco minutos de bloque para que el Calendario lo muestre, sin alarma). En Agenda, **Añadir al calendario** lo guarda. No se guarda solo y no enciende `cp-notify`.
 
@@ -2246,7 +2246,7 @@ Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paqu
 
 `APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` es `cp-img-v11`. `ROSTER_VERSION` sigue en 2. Entran 8 PNG del Fan Kit en `assets/oficial/resources/` (oro, elixir, oscuro, gemas, mena brillante, mena reluciente, mena estrellada y el martillo de Mejorar). Cada uno lleva `url_origen` en `iconos_recurso` del manifiesto. Se descargaron tal cual: la copia es idéntica al archivo de origen. La precarga de instalación pasa de 220 a 228 archivos.
 
-`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro, el martillo de Mejorar sobre esa imagen y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
+`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro y el nombre debajo. Desde la 4.2.3 el martillo no va en esa tarjeta: solo dentro del botón **Mejorar**, centrado con la palabra. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
 
 Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. El botón que comparte fila con un título no lleva ese margen en sí: la fila usa `align-items: center` y el aire queda en el contenedor, así título e icono comparten la línea central. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen dentro del grupo.
 
@@ -2269,6 +2269,26 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 `js/caches.js` declara `PAQUETE_TEMAS`: `true` si la compilación lleva `paquete-estetico/`, `false` si no. Con `false`, `cargarPaquete()` no hace ninguna petición: no aparece el 404 de `paquete.json` en la consola y la app se ve igual que sin cargador. Un test exige que `PAQUETE_TEMAS` coincida con la existencia de `paquete-estetico/paquete.json`. Si aun así faltara el paquete con `true`, la app sigue igual (la petición falla y no se aplica tema). Sin conexión no cambia: `paquete.json` y los CSS salen de `cp-temas-<versión>`.
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
+
+## Nota de cambios (12 oct 2026, 4.2.3)
+
+`APP_VERSION` es `4.2.3`, `SHELL_CACHE` es `cp-shell-v50` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.
+
+Se quita el botón «Activar avisos» y el código que pedía `Notification` y guardaba `cp-notify`. No hay servidor, así que no hay avisos. El calendario de Agenda sigue igual. El borde dorado de Ahora usa `data-ahora`.
+
+En Copia, **Instalar «Copiar aldea»** e **Instalar «Importar a Clash»** abren los archivos de `atajos/`. `docs/atajo.md` tiene las mismas direcciones. Actualizar todas sigue leyendo el portapapeles y no depende de Atajos. Importar a Clash no usa «Abrir URL» hacia la página: Abrir app se elige a mano, el icono de inicio.
+
+Los nueve módulos de la defensa artesanal dejan el paréntesis en inglés. Puntos de vida y Daño son las cabeceras del blog en español de la actualización artesanal (`https://supercell.com/en/games/clashofclans/es/blog/release-notes/esta-es-la-actualizaci%C3%B3n-m%C3%A1s-artesanal/`). Segundos en activo, Nivel de veneno y Daño de explosión usan esas mismas palabras oficiales (puntos de vida, daño, segundos, veneno, explosión) para el módulo que el inglés llama Hitpoints, Damage, Seconds Active, Poison Level y Explosion Damage. Yeti se queda: el blog en español lo llama igual. Torre Tesla ya era el nombre del blog en español.
+
+`data/armas-th.json` sale de clash-of-clans-data `aaa517aa` (`town-hall.json`). Del TH12 al TH16 el arma tiene un nivel y coste 0. Supercell quitó esos niveles de mejora el 6 oct 2025 (`https://supercell.com/en/games/clashofclans/blog/release-notes/get-ready-for-ranked-update/`). El nombre en español es «Giga Tesla» en el TH12 y «Giga torre infernal» del 13 al 16 (`https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/`). La artillería infernal del TH17 no cambia: sus niveles 2 a 5 coinciden con ese archivo. El TH18 no tiene arma ahí. Esa nota se ve en Mejoras, pestaña Costes, junto al coste de subir el ayuntamiento.
+
+`data/supercargas.json` son los 18 edificios con `supercharge: true` en el mismo commit. Van en la ficha, no en el porcentaje ni en el plan, y no sustituyen el coste de los niveles normales.
+
+El Portal portátil (`90000061`) copia la curva épica de menas de `90000016` (clash-of-clans-data 0.18.0). ClashRecord y el cliente 18.600.3 citado por Goblins Farm publican la misma tabla, máximo 27. El tope por ayuntamiento es el del Bastón de meteoritos en `caps_clashrecord.json`. El nivel 1 no entra en el porcentaje, así que la media de las 11 cuentas no se mueve.
+
+Los muros del TH18 se comprobaron contra `wall.json` del mismo commit: nivel 18, 7.000.000; nivel 19, 10.000.000; tope 19 y 325 piezas. No se han tocado.
+
+El martillo oficial (`oficial/resources/martillo.png`, el `building_upgrade_hammer` del Fan Kit) deja la tarjeta de coste. Va solo en el botón **Mejorar**: el icono y la palabra forman un grupo centrado en el botón, en la misma línea. **Hecho** sigue siendo la marca del plan y no lleva martillo. Las mejoras ya en curso tampoco lo llevan.
 
 ## Nota de cambios (12 oct 2026, 4.2.2)
 

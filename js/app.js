@@ -25,13 +25,14 @@ import { achievements, historyPairs, weeklyPace } from "./history.js";
 import { COST_SOURCE, COST_URL, categoryUses, piecesOf, remainingCost, usesResource } from "./costs.js";
 import { cubrir, recursosDeCuenta } from "./recursos.js";
 import { TH_FUENTE, TH_URL, costeTh, costeThRango } from "./th-costes.js";
+import { SUPER_NOTA, supercargasDe, textoArma } from "./juego-datos.js";
 import { accountColor, groupedBars, groupedByCategory, heatmap, lineSeries, radarPoints } from "./charts.js";
 import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClocks } from "./schedule.js";
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
 import { horaMadrid, recomendar } from "./recomendador.js";
-import { htmlCoste, htmlMartillo } from "./coste-tarjeta.js";
+import { htmlCoste, htmlCuerpoMejorar } from "./coste-tarjeta.js";
 import {
   DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -123,7 +124,6 @@ const state = {
   chartKind: localStorage.getItem("cp-chart-kind") || "lineas",
   compareTags: loadCompare(),
   rankKey: localStorage.getItem("cp-rank") || "media",
-  notifyOn: localStorage.getItem("cp-notify") === "1",
   sleep: loadSleep(),
   planes: loadPlanes(),
   provisionales: loadProvisionals(),
@@ -946,8 +946,10 @@ function lineaCoste(bag, vacio) {
 function ayuntamientoLine(exp) {
   const th = townHallLevel(exp);
   if (!Number.isInteger(th)) return "";
+  const arma = textoArma(th);
+  const armaHtml = arma ? `<p class="t-footnote c-2">${esc(arma)}</p>` : "";
   const siguiente = costeTh(th + 1);
-  if (!siguiente) return "";
+  if (!siguiente) return armaHtml;
   const plan = exp.tag && state.planes ? state.planes[exp.tag] : null;
   const meta = exp.tag ? accountByTag(exp.tag) : null;
   let hasta = th + 1;
@@ -960,7 +962,7 @@ function ayuntamientoLine(exp) {
       extra = `<p class="t-footnote c-2">Hasta TH${hasta}</p><div class="coste-linea">${htmlCoste({ oro: rango.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(rango.segundos))}</p>`;
     }
   }
-  return `<p class="t-body">Ayuntamiento TH${th} → ${th + 1}</p><div class="coste-linea">${htmlCoste({ oro: siguiente.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(siguiente.segundos))}</p>${extra}`;
+  return `<p class="t-body">Ayuntamiento TH${th} → ${th + 1}</p><div class="coste-linea">${htmlCoste({ oro: siguiente.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(siguiente.segundos))}</p>${extra}${armaHtml}`;
 }
 
 function resourceAllowsItem(it) {
@@ -1389,15 +1391,10 @@ function renderAhora() {
       return `<li><a class="row row--tile" href="#/progreso/${row.meta.tag.slice(1)}/plan">${th == null ? "" : thumb(1000001, { size: 44, th }) }<span class="row__main"><span class="row__title">${esc(row.meta.nombre)}</span><span class="row__sub">${esc(label)} · TH${th == null ? "—" : th}</span><span class="row__sub">${esc(lines.join(" · "))}</span>${meterHtml(media, `Media ${fmtPct(media)}`)}</span>${CHEV}</a></li>`;
     }).join("")}</ul>`
     : `<div class="card empty"><p class="t-title3">—</p></div>`;
-  const on = state.notifyOn;
-  return `<h1 class="large-title">Ahora</h1>
-    <div class="title-line"><p class="large-sub">Siguiente paso</p>${infoBtn("El siguiente paso del plan de cada cuenta, cuando una cola está libre. Sin plan guardado, el criterio es Maxear TH actual.")}</div>
+  return `<h1 class="large-title" data-ahora>Ahora</h1>
+    <div class="title-line"><p class="large-sub">Siguiente paso</p>${infoBtn("El siguiente paso del plan de cada cuenta, cuando una cola está libre. Sin plan guardado, el criterio es Maxear TH actual. Esta app no avisa al terminar: no hay servidor. En Agenda se puede guardar un calendario con esos fines. No se guarda solo.")}</div>
     ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
-    <div class="section">${list}</div>
-    <div class="section"><div class="card">
-      <div class="section-head"><h2 class="t-headline">Aviso al terminar</h2>${infoBtn("Si la app está abierta, puede avisar cuando llegue el fin real de una mejora de la exportación. Las marcas provisionales del plan no avisan. Con la app cerrada no hay aviso: Web Push en el iPhone necesita un servidor que envíe el mensaje, y esta app no tiene servidor. En Agenda se puede guardar un calendario con esos fines. No se guarda solo.")}</div>
-      <button type="button" class="btn ${on ? "btn--secondary" : "btn--primary"} btn--block" data-notify aria-pressed="${on ? "true" : "false"}">${on ? "Avisos activados" : "Activar avisos"}</button>
-    </div></div>`;
+    <div class="section">${list}</div>`;
 }
 
 function renderRanking() {
@@ -1674,9 +1671,11 @@ function fichaMejora(paso, extra = {}) {
   const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
   const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
   const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
-  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}${htmlMartillo()}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
-  if (!extra.boton) return card;
-  return `<div class="mejora-slot">${card}${extra.boton}</div>`;
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  const mejorar = extra.mejorar ? `<button type="button" class="btn btn--primary btn--small btn--block btn-mejorar" data-go="${esc(extra.mejorar)}">${htmlCuerpoMejorar()}</button>` : "";
+  const abajo = `${mejorar}${extra.boton || ""}`;
+  if (!abajo) return card;
+  return `<div class="mejora-slot">${card}${abajo}</div>`;
 }
 
 function tarjetaAhora(paso, tag) {
@@ -1685,7 +1684,7 @@ function tarjetaAhora(paso, tag) {
   const pie = [dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean).join(" · ");
   const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
   const boton = `<button type="button" class="btn btn--primary btn--small mejora-hecho" data-hecho data-prov-tag="${esc(tag)}" data-hecho-id="${esc(paso.id)}" data-hecho-from="${paso.fromLvl}" data-hecho-to="${paso.toLvl}" data-hecho-instance="${esc(paso.instance || "")}" data-hecho-queue="${esc(paso.queue || "constructor")}" data-hecho-title="${esc(paso.title)}" aria-label="${esc(aria)}">Hecho</button>`;
-  return fichaMejora(paso, { pie, boton });
+  return fichaMejora(paso, { pie, boton, mejorar: `#/progreso/${tag.slice(1)}/plan` });
 }
 
 function hoyEnCuentas() {
@@ -1695,10 +1694,15 @@ function hoyEnCuentas() {
   const filas = cuentas.map((meta) => {
     const road = expOf(meta.tag) ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
+    const href = `#/progreso/${meta.tag.slice(1)}/plan`;
     const cuerpo = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p)).join("")}</div>`
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { mejorar: href })).join("")}</div>`
       : `<span class="row__sub">${expOf(meta.tag) ? "Nada en esta sesión" : "Sin importar"}</span>`;
-    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__title">${esc(meta.nombre)}</span>${cuerpo}</a></li>`;
+    const dentro = rec && rec.ahora.length
+      ? `<span class="row__title">${esc(meta.nombre)}</span>`
+      : `<span class="row__title">${esc(meta.nombre)}</span>${cuerpo}`;
+    const fuera = rec && rec.ahora.length ? cuerpo : "";
+    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="${href}">${dentro}</a>${fuera}</li>`;
   }).join("");
   return `<div class="section" data-hoy-cuentas>${sectionHead("Hoy en tus cuentas")}<ul class="list list--tiles">${filas}</ul></div>`;
 }
@@ -2128,35 +2132,6 @@ function periodNote(tag) {
   return `${n} ${n === 1 ? "nivel" : "niveles"} ${label}. El % es el de la última exportación.`;
 }
 
-function armNotices() {
-  clearTimeout(armNotices._t);
-  armNotices._t = 0;
-  if (!state.ready || !state.notifyOn) return;
-  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  let soonest = null;
-  for (const meta of allAccounts()) {
-    const exp = expOf(meta.tag);
-    if (!exp) continue;
-    for (const u of upgrades(exp)) {
-      if (u.extra || u.done) continue;
-      if (!soonest || u.end < soonest.end) soonest = { end: u.end, nombre: meta.nombre };
-    }
-  }
-  if (!soonest) return;
-  const wait = soonest.end - Date.now();
-  if (wait <= 0) return;
-  const fireAt = soonest.end;
-  armNotices._t = setTimeout(() => {
-    if (Date.now() + 1500 >= fireAt) {
-      try {
-        new Notification("Mejora terminada", { body: `${soonest.nombre}: una mejora ha llegado a su fin.` });
-      } catch { /* el navegador no mostró el aviso */ }
-    }
-    state.now = Date.now();
-    armNotices();
-  }, Math.min(wait, 2147483647));
-}
-
 function abrirActualizar() {
   let ses = readSession(localStorage);
   if (!ses) {
@@ -2460,28 +2435,24 @@ async function pasteNow() {
   await savePlan(plan);
 }
 
-async function toggleNotify() {
-  if (typeof Notification === "undefined") {
-    showToast("err", "Este navegador no permite avisos.");
-    render();
-    return;
+function notasDatos(f) {
+  if (!f || f.id == null) return "";
+  const partes = [];
+  const arma = String(f.id) === "1000001" ? textoArma(f.lvl) : "";
+  if (arma) partes.push(`<p class="t-footnote c-2">${esc(arma)}</p>`);
+  if (String(f.id) === "90000061") {
+    partes.push(`<p class="t-footnote c-2">Menas del 2 al 27: la curva épica de clash-of-clans-data 0.18.0, confirmada para el Portal portátil. El nivel 1 no entra en el porcentaje.</p>`);
   }
-  if (!state.notifyOn) {
-    let perm = Notification.permission;
-    if (perm === "default") {
-      try { perm = await Notification.requestPermission(); } catch { perm = "denied"; }
+  const supers = supercargasDe(f.id);
+  if (supers.length) {
+    partes.push(`<p class="t-footnote c-2">Supercarga de TH18. ${esc(SUPER_NOTA)}</p>`);
+    for (const row of supers) {
+      const bag = { oro: 0, elixir: 0, oscuro: 0 };
+      if (row.r === "oro" || row.r === "elixir" || row.r === "oscuro") bag[row.r] = row.n;
+      partes.push(`<p class="t-footnote c-2">Supercarga ${row.nivel}</p><div class="coste-linea">${htmlCoste(bag)}</div><p class="t-footnote c-2 num">${esc(textoSegundos(row.s))}</p>`);
     }
-    if (perm !== "granted") {
-      state.notifyOn = false;
-      localStorage.setItem("cp-notify", "0");
-      showToast("err", "Sin permiso de avisos.");
-      render();
-      return;
-    }
-    state.notifyOn = true;
-  } else state.notifyOn = false;
-  localStorage.setItem("cp-notify", state.notifyOn ? "1" : "0");
-  render();
+  }
+  return partes.join("");
 }
 
 function navbar(r) {
@@ -3314,7 +3285,7 @@ function mejorasPlan() {
     const th = road && road.currentTh != null ? `TH${road.currentTh}` : "";
     const sub = [th, label].filter(Boolean).join(" · ");
     const cartas = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p)).join("")}</div>`
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p, { mejorar: `#/progreso/${meta.tag.slice(1)}/plan` })).join("")}</div>`
       : "";
     const thumbHtml = exp ? thumb(1000001, { size: 44, th: viewOf(meta.tag).th }) : "";
     return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a>${cartas}</li>`;
@@ -4405,7 +4376,8 @@ function fichaSheet() {
         <p class="t-title3">${esc(title)} ${badges.join(" ")}</p>
         <p class="t-title2 num">${esc(line.text)}${overChip}</p>
         <p class="badge badge-id">${esc(f.id)}</p>
-        ${notes.join("")}`);
+        ${notes.join("")}
+        ${notasDatos(f)}`);
 }
 
 function heroLabel(en) {
@@ -4841,6 +4813,12 @@ function renderCopia() {
       <button type="button" class="btn btn--secondary btn--block" data-backup-pick>Restaurar</button>
     </div></div>
     <div class="section"><div class="card">
+      <div class="section-head"><h2 class="t-headline">Atajos del iPhone</h2>${infoBtn("Copiar aldea comprueba que el portapapeles trae una exportación. Importar a Clash abre el icono de inicio, no Safari. Actualizar todas no los necesita: Pegar esta cuenta lee el mismo portapapeles.")}</div>
+      <p class="t-footnote c-2">Se instalan desde el enlace. Si iOS pide permiso, permite los atajos. En Importar a Clash, Abrir app tiene que ser el icono de Clash Progreso.</p>
+      <a class="btn btn--primary btn--block" href="https://ardu01.github.io/clash-progreso/atajos/copiar-aldea.shortcut">Instalar «Copiar aldea»</a>
+      <a class="btn btn--secondary btn--block" href="https://ardu01.github.io/clash-progreso/atajos/importar-a-clash.shortcut">Instalar «Importar a Clash»</a>
+    </div></div>
+    <div class="section"><div class="card">
       <div class="section-head"><h2 class="t-headline">Apariencia</h2>${infoBtn("Una cuenta avisa cuando la exportación tiene más de esos días. El valor inicial es 7.")}</div>
       <div class="chip-row" role="toolbar" aria-label="Tema">${[["sistema", "Sistema"], ["light", "Claro"], ["dark", "Oscuro"]].map(([id, label]) => `<button type="button" data-theme="${id}" aria-pressed="${state.theme === id ? "true" : "false"}">${label}</button>`).join("")}</div>
       <label class="sort-label">Días sin actualizar
@@ -5207,7 +5185,6 @@ function render() {
     state.scrollAdded = false;
     document.getElementById("otras-cuentas")?.scrollIntoView({ block: "start" });
   }
-  armNotices();
 }
 
 function destinoDelToque(ev) {
@@ -5484,7 +5461,6 @@ function bind(r) {
       render();
       return;
     }
-    if (origen.closest("[data-notify]")) { await toggleNotify(); return; }
     if (origen.closest("[data-calendario]")) { await exportarCalendario(); return; }
     if (origen.closest("[data-clear-filters]")) { setFilter({ th: "", grupo: "" }); render(); return; }
     if (origen.closest("[data-sueno-clear]")) { saveSleep("", ""); render(); return; }
@@ -6370,13 +6346,11 @@ document.addEventListener("visibilitychange", () => {
   state.now = Date.now();
   const name = route().name;
   if (name === "mejoras" || name === "ahora" || name === "roster") render();
-  else armNotices();
 });
 setInterval(() => {
   state.now = Date.now();
   const name = route().name;
   if (name === "mejoras" || name === "ahora") render();
-  else armNotices();
 }, 60000);
 window.addEventListener("online", () => {
   retryOfflineThumbs();

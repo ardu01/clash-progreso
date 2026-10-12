@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { fmtMiles, htmlCoste, htmlMartillo, iconoRecurso, partesDeBolsa } from "../js/coste-tarjeta.js";
+import { fmtMiles, htmlCoste, htmlCuerpoMejorar, htmlMartillo, iconoRecurso, partesDeBolsa } from "../js/coste-tarjeta.js";
 
 const ORIGEN = {
   oro: "https://media.ffycdn.net/eu/supercell/9YH5NnM3Ycxvi2wThWCt.png",
@@ -50,7 +50,10 @@ test("4.2.1: el muro muestra las dos marcas y las gemas su dibujo", () => {
   assert.match(iconoRecurso("elixir"), /<img /);
   assert.match(iconoRecurso("oro"), /recurso--oro/);
   assert.match(htmlMartillo(), /oficial\/resources\/martillo\.png/);
-  assert.match(htmlMartillo(), /mejora__martillo/);
+  assert.match(htmlMartillo(), /btn-mejorar__icono/);
+  assert.match(htmlCuerpoMejorar(), /btn-mejorar__cuerpo/);
+  assert.match(htmlCuerpoMejorar(), />Mejorar</);
+  assert.equal(htmlCoste({ oro: 1000 }).includes("martillo"), false);
   const src = readFileSync(new URL("../js/coste-tarjeta.js", import.meta.url), "utf8");
   assert.equal(/<svg/.test(src), false);
   assert.equal(/https?:/.test(src), false);
@@ -85,7 +88,10 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   const cartas = app.slice(app.indexOf("function fichaMejora("), app.indexOf("function renderPlan("));
   assert.match(cartas, /class="mejora"/);
   assert.match(cartas, /htmlCoste/);
-  assert.match(cartas, /htmlMartillo/);
+  assert.match(cartas, /htmlCuerpoMejorar/);
+  assert.match(cartas, /btn-mejorar/);
+  assert.equal(cartas.includes("htmlMartillo"), false);
+  assert.equal(cartas.includes("mejora__martillo"), false);
   assert.match(cartas, /mejora-grid/);
   assert.match(cartas, />Hecho</);
   assert.equal(cartas.includes("fmtRes"), false);
@@ -100,7 +106,8 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   assert.equal(ay.includes("fmtRes"), false);
   const curso = app.slice(app.indexOf("function upRow("), app.indexOf("function helpersBlock("));
   assert.match(curso, /fichaMejora/);
-  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.2/);
+  assert.equal(curso.includes("mejorar:"), false);
+  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.3/);
   assert.match(sw, /js\/coste-tarjeta\.js/);
   assert.equal(app.includes("cuello de botella"), false);
 });
@@ -113,4 +120,6 @@ test("4.2.1: los botones tienen margen vertical y la i no se pega al texto", () 
   assert.match(css, /margin-top: 12px;/);
   assert.match(css, /margin-bottom: 12px;/);
   assert.match(css, /\.mejora-hecho \{ margin-top: 12px; margin-bottom: 12px; \}/);
+  assert.match(css, /\.btn-mejorar,\s*\n\.btn-mejorar__cuerpo \{\s*\n  display: flex;\s*\n  align-items: center;\s*\n  justify-content: center;\s*\n\}/);
+  assert.equal(css.includes(".mejora__fig > .mejora__martillo"), false);
 });

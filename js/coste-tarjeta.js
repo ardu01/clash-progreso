@@ -1,6 +1,6 @@
 /**
- * Cifra y marca de un coste, al estilo de la tarjeta de mejorar:
- * el número arriba, el recurso oficial al lado y el martillo del botón Mejorar.
+ * Cifra y marca de un coste: el número arriba y el recurso oficial al lado.
+ * El martillo oficial no va en el coste. Va en el botón Mejorar, centrado con esa palabra.
  * Los PNG están en assets/oficial/resources/, copiados tal cual del Fan Kit.
  * La URL de origen vive en el manifiesto (url_origen), no aquí.
  */
@@ -57,7 +57,12 @@ export function iconoRecurso(id) {
 }
 
 export function htmlMartillo() {
-  return marcaHtml("martillo", 36, "mejora__martillo");
+  return marcaHtml("martillo", 24, "btn-mejorar__icono");
+}
+
+/** Icono y palabra «Mejorar» en un solo grupo, para centrarlos dentro del botón. */
+export function htmlCuerpoMejorar() {
+  return `<span class="btn-mejorar__cuerpo">${htmlMartillo()}<span class="btn-mejorar__texto">Mejorar</span></span>`;
 }
 
 export function partesDeBolsa(bag) {
