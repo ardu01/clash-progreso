@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.2.5";
-import { precacheUrls } from "./js/images.js?v=4.2.5";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.2.6";
+import { precacheUrls } from "./js/images.js?v=4.2.6";
 
 // El nombre de la caché de interfaz vive en SHELL_CACHE. Al cambiar, este archivo cambia con él y el worker se reinstala.
 
