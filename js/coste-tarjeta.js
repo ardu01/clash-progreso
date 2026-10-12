@@ -49,7 +49,8 @@ function marcaHtml(id, size, clase) {
   const cls = ["recurso", `recurso--${id}`, aj ? "is-ajuste" : "", clase].filter(Boolean).join(" ");
   const vars = [`--size:${size}px`];
   if (aj) vars.push(`--dw:${cssNum(aj.dw)}`, `--dh:${cssNum(aj.dh)}`, `--x:${cssNum(aj.left)}`, `--y:${cssNum(aj.top)}`);
-  return `<span class="${cls}" style="${vars.join(";")}"><img src="./assets/${spec.ruta}" alt="" width="${spec.ancho}" height="${spec.alto}" decoding="async"></span>`;
+  const fijo = id === "martillo" ? ` draggable="false"` : "";
+  return `<span class="${cls}" style="${vars.join(";")}"><img src="./assets/${spec.ruta}" alt="" width="${spec.ancho}" height="${spec.alto}" decoding="async"${fijo}></span>`;
 }
 
 export function iconoRecurso(id) {

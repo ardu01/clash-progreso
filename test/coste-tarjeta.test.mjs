@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { APP_VERSION } from "../js/caches.js";
 import { fmtMiles, htmlCoste, htmlCuerpoMejorar, htmlMartillo, iconoRecurso, partesDeBolsa } from "../js/coste-tarjeta.js";
 
 const ORIGEN = {
@@ -51,6 +52,8 @@ test("4.2.1: el muro muestra las dos marcas y las gemas su dibujo", () => {
   assert.match(iconoRecurso("oro"), /recurso--oro/);
   assert.match(htmlMartillo(), /oficial\/resources\/martillo\.png/);
   assert.match(htmlMartillo(), /btn-mejorar__icono/);
+  assert.match(htmlMartillo(40, "plan-fab__icono"), /<img [^>]*draggable="false"/);
+  assert.equal(iconoRecurso("oro").includes("draggable"), false);
   assert.match(htmlCuerpoMejorar(), /btn-mejorar__cuerpo/);
   assert.match(htmlCuerpoMejorar(), />Mejorar</);
   assert.equal(htmlCoste({ oro: 1000 }).includes("martillo"), false);
@@ -109,7 +112,7 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   const curso = app.slice(app.indexOf("function upRow("), app.indexOf("function helpersBlock("));
   assert.match(curso, /fichaMejora/);
   assert.equal(curso.includes("mejorar:"), false);
-  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.4/);
+  assert.match(html, new RegExp("js/coste-tarjeta\\.js\\?v=" + APP_VERSION.replaceAll(".", "\\.")));
   assert.match(sw, /js\/coste-tarjeta\.js/);
   assert.equal(app.includes("cuello de botella"), false);
 });

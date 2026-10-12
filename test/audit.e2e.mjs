@@ -229,7 +229,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.4"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.4")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.5"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.5")).join(" "));
 if (await page.evaluate(() => !!document.querySelector("[data-hoy-cuentas]"))) bad("Inicio sigue duplicando el plan");
 await ir(page, "#/plan");
 const hub = await page.evaluate(() => {
@@ -251,6 +251,26 @@ if (!hub.hrefs[0] || !hub.hrefs[0].includes("28PLGP0G2")) bad("el plan no empiez
 if (!hub.hrefs[1] || !hub.hrefs[1].includes("R00C8CPQC")) bad("el plan no sigue por C2: " + hub.hrefs[1]);
 if (hub.mejorar !== 0) bad("el hub pinta el botón Mejorar");
 if (hub.costes < 1) bad("el hub no pinta iconos de coste");
+
+await ir(page, "#/progreso/28PLGP0G2/plan");
+const relojes = await page.evaluate(() => {
+  return [...document.querySelectorAll("[data-plan-ahora] .mejora__pie")].map((el) => {
+    const text = el.textContent || "";
+    const m = text.match(/\d{1,2}:\d{2}/);
+    if (!m || !el.firstChild || el.firstChild.nodeType !== 3) return { ok: false, text };
+    const idx = el.firstChild.textContent.indexOf(m[0]);
+    if (idx < 0) return { ok: false, text };
+    const range = document.createRange();
+    range.setStart(el.firstChild, idx);
+    range.setEnd(el.firstChild, idx + m[0].length);
+    const box = el.getBoundingClientRect();
+    const rects = [...range.getClientRects()];
+    const ok = rects.length > 0 && rects.every((r) => r.width > 1 && r.top >= box.top - 1 && r.bottom <= box.bottom + 1 && r.left >= box.left - 1 && r.right <= box.right + 1);
+    return { ok, clock: m[0], text };
+  });
+});
+if (!relojes.length) bad("Ahora de C1 no muestra la hora");
+for (const r of relojes) if (!r.ok) bad("la hora de Ahora se corta: " + (r.text || ""));
 
 await ir(page, "#/mejoras");
 await page.evaluate(() => document.querySelector("[data-plan-hoja]")?.click());
