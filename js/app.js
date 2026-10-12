@@ -5180,6 +5180,153 @@ function abrirFuera(ev, enlace) {
   }
 }
 
+const PLAN_FAB_KEY = "cp-plan-fab";
+const PLAN_FAB_UMBRAL = 8;
+let planFabSafe = null;
+let planFabGesto = null;
+let planFabSuprimir = false;
+
+function leerPlanFab() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PLAN_FAB_KEY) || "");
+    if (!raw || (raw.lado !== "izq" && raw.lado !== "der")) return null;
+    const y = Number(raw.y);
+    if (!Number.isFinite(y)) return null;
+    return { lado: raw.lado, y: Math.min(1, Math.max(0, y)) };
+  } catch {
+    return null;
+  }
+}
+
+function guardarPlanFab(pos) {
+  localStorage.setItem(PLAN_FAB_KEY, JSON.stringify({ lado: pos.lado, y: Math.round(pos.y * 1000) / 1000 }));
+}
+
+function insetsPlanFab() {
+  if (planFabSafe) return planFabSafe;
+  const leer = (nombre) => {
+    const el = document.createElement("div");
+    el.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;height:0;";
+    el.style.width = `env(${nombre})`;
+    document.body.appendChild(el);
+    const n = el.getBoundingClientRect().width;
+    el.remove();
+    return Number.isFinite(n) ? n : 0;
+  };
+  planFabSafe = {
+    top: leer("safe-area-inset-top"),
+    right: leer("safe-area-inset-right"),
+    bottom: leer("safe-area-inset-bottom"),
+    left: leer("safe-area-inset-left"),
+  };
+  return planFabSafe;
+}
+
+function limitesPlanFab(fab) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const size = fab.offsetWidth || 56;
+  const borde = 16;
+  const hueco = 14;
+  const safe = insetsPlanFab();
+  const tab = document.querySelector(".tabbar");
+  const tabTop = tab ? tab.getBoundingClientRect().top : h - safe.bottom;
+  const minX = safe.left + borde;
+  const maxX = Math.max(minX, w - safe.right - borde - size);
+  const minY = safe.top + borde;
+  const suelo = Math.min(h - safe.bottom, tabTop) - hueco - size;
+  return { minX, maxX, minY, maxY: Math.max(minY, suelo), size, w };
+}
+
+function aplicarPlanFab(fab, pos, animar) {
+  if (!fab) return;
+  const box = limitesPlanFab(fab);
+  const y = box.minY + (box.maxY - box.minY) * pos.y;
+  const x = pos.lado === "izq" ? box.minX : box.maxX;
+  fab.classList.toggle("is-snap", !!animar);
+  fab.style.left = Math.round(x) + "px";
+  fab.style.top = Math.round(y) + "px";
+  fab.style.right = "auto";
+  fab.style.bottom = "auto";
+}
+
+function posicionPlanFab() {
+  return leerPlanFab() || { lado: "der", y: 1 };
+}
+
+function cortarPlanFab() {
+  document.removeEventListener("pointermove", moverPlanFab, { passive: false });
+  document.removeEventListener("pointerup", soltarPlanFab);
+  document.removeEventListener("pointercancel", soltarPlanFab);
+  planFabGesto = null;
+}
+
+function moverPlanFab(ev) {
+  const gesto = planFabGesto;
+  if (!gesto || ev.pointerId !== gesto.id) return;
+  const fab = gesto.el && gesto.el.isConnected ? gesto.el : null;
+  if (!fab) return;
+  const dx = ev.clientX - gesto.x;
+  const dy = ev.clientY - gesto.y;
+  if (!gesto.movido && Math.hypot(dx, dy) < PLAN_FAB_UMBRAL) return;
+  gesto.movido = true;
+  fab.classList.add("is-arrastre");
+  if (ev.cancelable) ev.preventDefault();
+  const box = limitesPlanFab(fab);
+  const x = Math.min(box.maxX, Math.max(box.minX, gesto.left + dx));
+  const y = Math.min(box.maxY, Math.max(box.minY, gesto.top + dy));
+  fab.classList.remove("is-snap");
+  fab.style.left = Math.round(x) + "px";
+  fab.style.top = Math.round(y) + "px";
+  fab.style.right = "auto";
+  fab.style.bottom = "auto";
+}
+
+function soltarPlanFab(ev) {
+  const gesto = planFabGesto;
+  if (!gesto || (ev && ev.pointerId != null && ev.pointerId !== gesto.id)) return;
+  cortarPlanFab();
+  const fab = gesto.el && gesto.el.isConnected ? gesto.el : null;
+  if (fab) fab.classList.remove("is-arrastre");
+  if (!gesto.movido || !fab) return;
+  planFabSuprimir = true;
+  const rect = fab.getBoundingClientRect();
+  const box = limitesPlanFab(fab);
+  const lado = rect.left + rect.width / 2 < box.w / 2 ? "izq" : "der";
+  const rango = Math.max(1, box.maxY - box.minY);
+  const y = Math.min(1, Math.max(0, (rect.top - box.minY) / rango));
+  const pos = { lado, y };
+  guardarPlanFab(pos);
+  aplicarPlanFab(fab, pos, true);
+}
+
+function engancharPlanFab() {
+  const fab = document.querySelector(".plan-fab");
+  if (!fab) {
+    if (planFabGesto && (!planFabGesto.el || !planFabGesto.el.isConnected)) cortarPlanFab();
+    return;
+  }
+  aplicarPlanFab(fab, posicionPlanFab(), false);
+  fab.addEventListener("pointerdown", (ev) => {
+    if (planFabGesto && planFabGesto.el && planFabGesto.el.isConnected) return;
+    if (planFabGesto) cortarPlanFab();
+    if (ev.pointerType !== "touch" && ev.button !== 0) return;
+    planFabSuprimir = false;
+    const r = fab.getBoundingClientRect();
+    planFabGesto = { id: ev.pointerId, el: fab, x: ev.clientX, y: ev.clientY, left: r.left, top: r.top, movido: false };
+    try { fab.setPointerCapture(ev.pointerId); } catch { /* un toque de prueba no siempre deja capturar */ }
+    document.addEventListener("pointermove", moverPlanFab, { passive: false });
+    document.addEventListener("pointerup", soltarPlanFab);
+    document.addEventListener("pointercancel", soltarPlanFab);
+  });
+  fab.addEventListener("click", (ev) => {
+    if (!planFabSuprimir) return;
+    planFabSuprimir = false;
+    ev.preventDefault();
+    ev.stopPropagation();
+  }, true);
+}
+
 function planFab() {
   return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan">${ICON.plan}</button>`;
 }
@@ -5227,6 +5374,7 @@ function render() {
     root.innerHTML = `<main class="screen" id="screen"><h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div></main>${tabbar(r)}`;
   }
   bind(r);
+  engancharPlanFab();
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
   if (tituloObserver) { tituloObserver.disconnect(); tituloObserver = null; }
@@ -6401,6 +6549,14 @@ async function boot() {
   }
 }
 
+function recolocarPlanFab() {
+  planFabSafe = null;
+  if (planFabGesto) return;
+  const fab = document.querySelector(".plan-fab");
+  if (fab) aplicarPlanFab(fab, posicionPlanFab(), false);
+}
+window.addEventListener("resize", recolocarPlanFab);
+window.visualViewport?.addEventListener("resize", recolocarPlanFab);
 window.addEventListener("hashchange", () => {
   try {
     if (state.planHoja) {

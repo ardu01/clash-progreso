@@ -78,6 +78,22 @@ test("4.2.4: el hub se abre desde Inicio y desde la hoja, sin pestaña nueva", (
   assert.match(pantalla, /renderPlanHub\(\)/);
 });
 
+test("4.2.4: el botón del plan se arrastra, se pega al borde y recuerda el sitio", () => {
+  const bloque = app.slice(app.indexOf("const PLAN_FAB_KEY"), app.indexOf("function planFab("));
+  assert.match(bloque, /cp-plan-fab/);
+  assert.match(bloque, /safe-area-inset-top/);
+  assert.match(bloque, /safe-area-inset-right/);
+  assert.match(bloque, /safe-area-inset-bottom/);
+  assert.match(bloque, /safe-area-inset-left/);
+  assert.match(bloque, /\.tabbar/);
+  assert.match(bloque, /PLAN_FAB_UMBRAL/);
+  assert.match(bloque, /pointerType !== "touch"/);
+  assert.match(bloque, /stopPropagation/);
+  assert.match(bloque, /lado === "izq" \? box\.minX : box\.maxX/);
+  assert.match(estilo, /\.plan-fab \{[^}]*touch-action: none/);
+  assert.match(app, /engancharPlanFab\(\)/);
+});
+
 test("4.2.4: subir el ayuntamiento muestra el TH de destino", () => {
   const mini = app.slice(app.indexOf("function miniaturaDe("), app.indexOf("function fichaMejora("));
   assert.match(mini, /town-hall/);

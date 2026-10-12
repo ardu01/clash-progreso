@@ -756,11 +756,17 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 14px);
   width: 56px; height: 56px; padding: 0; border-radius: 50%;
   display: grid; place-items: center; color: #24211C;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   border: 3px solid var(--gold-edge);
   background: linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot));
   box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 var(--gold-edge), 0 8px 16px rgba(0,0,0,.35);
 }
 .plan-fab:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 1px 0 var(--gold-edge); }
+.plan-fab.is-arrastre,
+.plan-fab.is-arrastre:active { transform: none; transition: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .plan-fab.is-snap { transition: left 180ms ease, top 180ms ease; }
+}
 .plan-fab svg,
 .plan-destacada__ico svg {
   width: 26px; height: 26px; fill: none; stroke: currentColor;
@@ -782,7 +788,7 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }
 
 /* 4.2.1: aire arriba y abajo, sin sacar el botón de la línea de su título. */
-button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *),
+button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *):not(.plan-fab),
 a.btn {
   margin-top: 12px;
   margin-bottom: 12px;

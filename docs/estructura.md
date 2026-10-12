@@ -22,7 +22,7 @@ Cada pestaña de la barra hace una cosa. Ajustes y Copia no están en la barra: 
 
 **Cuentas.** Pegar, buscar, ordenar, filtrar y la lista. Cada fila abre el progreso de esa aldea (categorías, perfil, historial, aldea del constructor). El resumen de la flota es una cifra; el detalle de constructores, laboratorios y mascotas está en ⓘ.
 
-**Plan.** No está en la barra. La tarjeta de Inicio abre `#/plan`. El botón redondo, encima de la barra y sin cambiarla, abre el mismo hub en una hoja. Las 11 aldeas a la vez: qué poner a mejorar ahora, constructores libres y ocupados, próxima finalización y coste con iconos oficiales. Filtros de ayuntamiento, grupo y constructores (Todas, Libres, Ocupadas). Tocar una cuenta abre su detalle (Ahora, Hecho, sesiones, Maxear o Subir TH).
+**Plan.** No está en la barra. La tarjeta de Inicio abre `#/plan`. El botón redondo, encima de la barra y sin cambiarla, abre el mismo hub en una hoja. Se puede arrastrar: se pega al borde más cercano, respeta la safe area y la barra, y recuerda el sitio. Las 11 aldeas a la vez: qué poner a mejorar ahora, constructores libres y ocupados, próxima finalización y coste con iconos oficiales. Filtros de ayuntamiento, grupo y constructores (Todas, Libres, Ocupadas). Tocar una cuenta abre su detalle (Ahora, Hecho, sesiones, Maxear o Subir TH).
 
 **Mejoras.** Tres modos: En curso, Costes (hasta el máximo del ayuntamiento actual) y Equipo (flota y cada cuenta). El plan no se repite aquí.
 

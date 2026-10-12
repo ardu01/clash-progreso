@@ -341,6 +341,87 @@ await tab.evaluate(() => history.back());
 await tab.waitForFunction(() => location.hash === "#/mejoras");
 await barraUnaFila(tab, "#/mejoras");
 
+await ir(page, "#/roster");
+const dedo = async (deltas, yClick) => page.evaluate(({ deltas, yClick }) => {
+  const fab = document.querySelector(".plan-fab");
+  const r = fab.getBoundingClientRect();
+  let x = r.left + r.width / 2;
+  let y = r.top + r.height / 2;
+  const id = 7;
+  const ev = (tipo, px, py) => fab.dispatchEvent(new PointerEvent(tipo, {
+    bubbles: true, cancelable: true, pointerId: id, pointerType: "touch",
+    clientX: px, clientY: py, button: 0, buttons: tipo === "pointerup" ? 0 : 1, isPrimary: true,
+  }));
+  ev("pointerdown", x, y);
+  for (const d of deltas) {
+    x += d.x;
+    y += d.y;
+    ev("pointermove", x, y);
+  }
+  ev("pointerup", x, y);
+  if (yClick) fab.click();
+  const box = document.querySelector(".plan-fab");
+  const rect = box ? box.getBoundingClientRect() : fab.getBoundingClientRect();
+  const bar = document.querySelector(".tabbar").getBoundingClientRect();
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem("cp-plan-fab") || "null"); } catch { guardado = "roto"; }
+  return {
+    left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+    vw: innerWidth, barTop: bar.top, hoja: !!document.querySelector(".sheet"),
+    hash: location.hash, guardado,
+  };
+}, { deltas, yClick });
+
+const corto = await dedo([{ x: 3, y: 2 }], true);
+if (!corto.hoja) bad("un toque sin arrastrar no abre el plan");
+if (corto.hash !== "#/roster") bad("el toque cambió de pantalla: " + corto.hash);
+if (corto.guardado) bad("un toque guardó posición");
+await page.evaluate(() => document.querySelector("[data-plan-cerrar]")?.click());
+await page.waitForFunction(() => !document.querySelector(".sheet"));
+
+const izquierda = await dedo([{ x: -320, y: -2000 }], true);
+if (izquierda.hoja) bad("arrastrar abrió la hoja");
+if (izquierda.hash !== "#/roster") bad("arrastrar cambió de pantalla");
+if (!izquierda.guardado || izquierda.guardado.lado !== "izq") bad("no guardó el borde izquierdo: " + JSON.stringify(izquierda.guardado));
+if (izquierda.left > 20) bad("no se pegó a la izquierda: " + izquierda.left);
+if (izquierda.top < 12 || izquierda.top > 20) bad("no respeta el margen de arriba: " + izquierda.top);
+if (izquierda.bottom > izquierda.barTop + 1) bad("el botón pisa la barra");
+await ir(page, "#/agenda");
+const sigue = await page.evaluate(() => document.querySelector(".plan-fab").getBoundingClientRect().left);
+if (Math.abs(sigue - izquierda.left) > 2) bad("al cambiar de pantalla no conserva el borde");
+
+const abajo = await dedo([{ x: 0, y: 800 }], false);
+if (abajo.bottom > abajo.barTop - 8) bad("al bajar no deja aire sobre la barra: " + abajo.bottom + " / " + abajo.barTop);
+if (abajo.top < 12) bad("al bajar se sale por arriba");
+if (abajo.guardado.lado !== "izq") bad("al bajar cambió de borde: " + abajo.guardado.lado);
+
+const derecha = await dedo([{ x: 400, y: -80 }], true);
+if (derecha.hoja) bad("el segundo arrastre abrió la hoja");
+if (derecha.guardado.lado !== "der") bad("no guardó el borde derecho: " + JSON.stringify(derecha.guardado));
+if (derecha.right < derecha.vw - 20) bad("no se pegó a la derecha: " + derecha.right);
+if (derecha.bottom > derecha.barTop + 1) bad("a la derecha pisa la barra");
+const yGuardada = derecha.guardado.y;
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.waitForSelector(".plan-fab");
+const recarga = await page.evaluate(() => {
+  const r = document.querySelector(".plan-fab").getBoundingClientRect();
+  const g = JSON.parse(localStorage.getItem("cp-plan-fab") || "null");
+  return { left: r.left, right: r.right, bottom: r.bottom, barTop: document.querySelector(".tabbar").getBoundingClientRect().top, g };
+});
+if (!recarga.g || recarga.g.lado !== "der") bad("al recargar olvidó el borde");
+if (Math.abs(recarga.g.y - yGuardada) > 0.02) bad("al recargar olvidó la altura");
+if (recarga.right < 375 - 20) bad("al recargar no está a la derecha");
+if (recarga.bottom > recarga.barTop + 1) bad("al recargar pisa la barra");
+await page.evaluate(() => localStorage.setItem("cp-plan-fab", "{\"lado\":\"arriba\"}"));
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.waitForSelector(".plan-fab");
+const rota = await page.evaluate(() => {
+  const r = document.querySelector(".plan-fab").getBoundingClientRect();
+  return { left: r.left, right: r.right, vw: innerWidth, hoja: !!document.querySelector(".sheet") };
+});
+if (rota.hoja) bad("una posición rota abrió la hoja");
+if (rota.left < rota.vw / 2) bad("una posición rota no vuelve al borde derecho");
+
 if (fails.length) {
   console.log(fails.join("\n"));
   await browser.close();
