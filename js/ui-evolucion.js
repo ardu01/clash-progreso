@@ -50,7 +50,7 @@ export function htmlEstrategias(modelo) {
   return `<h1 class="large-title">Estrategias</h1>
     <p class="large-sub">Simulación · las 11 cuentas juntas</p>
     <div class="section"><div class="card">
-      <div class="section-head"><div class="section-header"><span>Explorar</span></div>${info("No usa el sueño de 23 a 07. Cada día, por defecto, una sesión de 19:00 a 21:00. Las colas pueden terminar fuera; el siguiente paso espera a la próxima sesión. El farmeo es una hipótesis.")}</div>
+      <div class="section-head"><div class="section-header"><span>Explorar</span></div>${info("No usa el sueño de 23 a 07. Cada día, por defecto, una sesión de 19:00 a 21:00. En esa sesión se lanza lo que esté libre, aunque termine de noche. El siguiente paso espera a la próxima sesión. El farmeo es una hipótesis.")}</div>
       <p class="t-footnote c-2">Horizonte</p>
       ${chips("horizonte", cfg.horizonte, [30, 90, 180, 365])}
       <p class="t-footnote c-2">Minutos al día</p>

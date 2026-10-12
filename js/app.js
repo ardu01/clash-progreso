@@ -1834,7 +1834,7 @@ function sleepCard() {
     ? "Las dos horas son la misma: no se aplica ningún tramo."
     : "Horas de Madrid. Si lo dejas vacío, no se mueve ninguna mejora.";
   return `<div class="section"><div class="card">
-      <div class="section-head"><h2 class="t-headline">Horas de sueño</h2>${infoBtn(`La siguiente mejora no empieza ni termina en ese tramo. La hora de lo que ya se está mejorando no se cambia: sale de la exportación. ${nota}`)}</div>
+      <div class="section-head"><h2 class="t-headline">Horas de sueño</h2>${infoBtn(`La siguiente mejora no empieza en ese tramo: hace falta estar delante para lanzarla. Puede terminar de noche. La hora de lo que ya se está mejorando no se cambia: sale de la exportación. ${nota}`)}</div>
       <div class="date-row">
         <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
         <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
@@ -1898,7 +1898,7 @@ function lineaTexto(line) {
   else if (sig && sig.sinDuracion) next = `${sig.title}. Sin tiempo oficial para el siguiente nivel: no se inventa el fin.`;
   else if (sig && sig.fin != null) {
     next = `${sig.title} · empieza ${fmtFin(sig.inicio)} · acaba ${fmtFin(sig.fin)}`;
-    if (sig.finEnSueno) next += " · el fin cae de noche porque dura más que el tiempo despierto";
+    if (sig.finEnSueno) next += " · acaba de noche";
   }
   return { actual, next };
 }
