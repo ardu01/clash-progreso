@@ -382,6 +382,7 @@ html[data-theme="dark"] .chip--goal-ok {
 /* Líneas y radar */
 .chart__line { stroke-width: 3; }
 .chart__pt { stroke-width: 3; }
+.chart.radar text { fill: var(--label-2); font: 700 11px/13px var(--font); }
 .radar .ring { stroke: var(--sep); stroke-width: 1.5; }
 .radar .chart__area { fill: color-mix(in srgb, var(--gold) 35%, transparent); }
 .radar .chart__line { stroke: var(--gold-edge); }
@@ -810,7 +811,7 @@ html[data-theme="dark"] .plan-fab { --fab-borde: #1A120C; }
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }
 
 /* 4.2.1: aire arriba y abajo, sin sacar el botón de la línea de su título. */
-button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *):not(.plan-fab),
+button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *):not(.plan-fab):not(.temas *),
 a.btn {
   margin-top: 12px;
   margin-bottom: 12px;

@@ -2177,12 +2177,16 @@ function radarSvg(view, cats) {
     const angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
     const x = (160 + Math.cos(angle) * 100).toFixed(1);
     const y = (120 + Math.sin(angle) * 100).toFixed(1);
-    const lx = (160 + Math.cos(angle) * 118).toFixed(1);
-    const ly = (120 + Math.sin(angle) * 118).toFixed(1);
-    return `<line x1="160" y1="120" x2="${x}" y2="${y}" class="chart__grid"/><text x="${lx}" y="${ly}">${esc(String(p.label).split(" ")[0])}</text>`;
+    const cos = Math.cos(angle);
+    const lx = (160 + cos * 104).toFixed(1);
+    let ly = 120 + Math.sin(angle) * 104;
+    if (ly < 14) ly = 14;
+    if (ly > 236) ly = 236;
+    const anchor = cos > 0.4 ? "start" : cos < -0.4 ? "end" : "middle";
+    return `<line x1="160" y1="120" x2="${x}" y2="${y}" class="chart__grid"/><text x="${lx}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${esc(String(p.label).split(" ")[0])}</text>`;
   }).join("");
   const aria = pts.map((p) => `${p.label} ${fmtPct(p.value)}`).join(", ");
-  return `<svg class="chart radar" viewBox="0 0 320 250" role="img" aria-label="${esc(aria)}">
+  return `<svg class="chart radar" viewBox="-24 0 368 250" role="img" aria-label="${esc(aria)}">
       <polygon class="ring" points="${ring(0.5)}"/><polygon class="ring" points="${ring(1)}"/>
       ${spokes}
       <polygon class="chart__area" points="${pts.map((p) => `${p.x},${p.y}`).join(" ")}"/>
