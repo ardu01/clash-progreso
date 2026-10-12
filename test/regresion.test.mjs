@@ -61,7 +61,7 @@ test("3.1.12: las 11 cuentas conservan porcentaje, copia, plan y rutas", () => {
   for (let i = 0; i < ROSTER.length; i += 1) {
     assert.equal(analyze(byTag.get(ROSTER[i].tag), index).media, medias[i]);
   }
-  for (const hash of ["#/inicio", "#/roster", "#/mejoras", "#/ranking", "#/agenda"]) {
+  for (const hash of ["#/inicio", "#/roster", "#/plan", "#/mejoras", "#/ranking", "#/agenda"]) {
     assert.equal(accionTab("#/copia", hash).hash, hash);
     const vuelta = accionTab(hash, "#/inicio");
     if (hash === "#/inicio") assert.equal(vuelta.type, "scroll");

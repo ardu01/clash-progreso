@@ -100,8 +100,8 @@ async function barraUnaFila(page, hash) {
       scrollX: Math.max(doc.scrollWidth, body.scrollWidth) > doc.clientWidth + 1,
     };
   });
-  if (info.n !== 5) bad(hash + " la barra tiene " + info.n + " pestañas");
-  if (info.labels.join(",") !== "Inicio,Cuentas,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
+  if (info.n !== 6) bad(hash + " la barra tiene " + info.n + " pestañas");
+  if (info.labels.join(",") !== "Inicio,Cuentas,Plan,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
   if (info.rows !== 1) bad(hash + " la barra ocupa " + info.rows + " filas");
   if (info.scrollX) bad(hash + " hay scroll horizontal");
 }
@@ -196,22 +196,30 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.3"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.3")).join(" "));
-const hoy = await page.evaluate(() => {
-  const root = document.querySelector("[data-hoy-cuentas]");
-  const links = root ? [...root.querySelectorAll("a[href*='/plan']")] : [];
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.4"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.4")).join(" "));
+if (await page.evaluate(() => !!document.querySelector("[data-hoy-cuentas]"))) bad("Inicio sigue duplicando el plan");
+await ir(page, "#/plan");
+const hub = await page.evaluate(() => {
+  const root = document.querySelector("[data-plan-hub]");
+  const links = root ? [...root.querySelectorAll("a.plan-hub")] : [];
   return {
+    title: (document.querySelector("h1.large-title")?.textContent || "").trim(),
     n: links.length,
     hrefs: links.map((a) => a.getAttribute("href")),
-    titulo: root ? (root.querySelector(".section-header span")?.textContent || "") : "",
+    costes: root ? root.querySelectorAll(".recurso").length : 0,
+    mejorar: root ? root.querySelectorAll(".btn-mejorar").length : 0,
+    tab: (document.querySelector(".tabbar a[aria-current='page'] span")?.textContent || "").trim(),
   };
 });
-if (hoy.titulo !== "Hoy en tus cuentas") bad("falta Hoy en tus cuentas");
-if (hoy.n !== 11) bad("Hoy en tus cuentas muestra " + hoy.n + " cuentas");
-if (!hoy.hrefs[0] || !hoy.hrefs[0].includes("28PLGP0G2")) bad("Hoy no empieza por C1: " + hoy.hrefs[0]);
-if (!hoy.hrefs[1] || !hoy.hrefs[1].includes("R00C8CPQC")) bad("Hoy no sigue por C2: " + hoy.hrefs[1]);
+if (hub.title !== "Plan") bad("el hub no es Plan");
+if (hub.tab !== "Plan") bad("la pestaña Plan no queda marcada");
+if (hub.n !== 11) bad("el plan muestra " + hub.n + " cuentas");
+if (!hub.hrefs[0] || !hub.hrefs[0].includes("28PLGP0G2")) bad("el plan no empieza por C1: " + hub.hrefs[0]);
+if (!hub.hrefs[1] || !hub.hrefs[1].includes("R00C8CPQC")) bad("el plan no sigue por C2: " + hub.hrefs[1]);
+if (hub.mejorar !== 0) bad("el hub pinta el botón Mejorar");
+if (hub.costes < 1) bad("el hub no pinta iconos de coste");
 
-for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
+for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/plan", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);
   await barrer(page, hash);
 }

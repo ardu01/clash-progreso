@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { accionTab } from "../js/nav.js";
 
-const pestanas = ["#/roster", "#/mejoras", "#/ranking", "#/agenda"];
+const pestanas = ["#/roster", "#/plan", "#/mejoras", "#/ranking", "#/agenda"];
 
 test("Inicio se abre desde cada pestaña", () => {
   for (const hash of pestanas) {

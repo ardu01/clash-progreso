@@ -206,7 +206,7 @@ html[data-theme="dark"] .row.row--destructive {
 /* Tab bar = pestañas 3D (Arte v2 components.css .tabbar): activa en panel claro, sube 3 px, borde oscuro;
    el resto, gris con canto. Etiquetas blancas sobre --grey (5,1:1) y tinta sobre --panel (13,7:1). */
 .tabbar {
-  gap: 4px; padding: 4px calc(4px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) calc(4px + env(safe-area-inset-left));
+  gap: 2px; padding: 4px calc(2px + env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 4px) calc(2px + env(safe-area-inset-left));
   background: linear-gradient(180deg, #6A4B30, #3E2918); border-top: 3px solid #1A120C;
   box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 -4px 12px rgba(0,0,0,.35);
 }
@@ -217,7 +217,7 @@ html[data-theme="dark"] .row.row--destructive {
   box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 3px 0 var(--grey-edge);
   font-family: var(--font-ui); font-weight: 800; transition: transform 80ms;
 }
-.tabbar a span { font-weight: 800; font-size: 10px; line-height: 1.05; }
+.tabbar a span { font-weight: 800; font-size: 9px; line-height: 1.05; letter-spacing: -0.02em; }
 .tabbar svg { width: 20px; height: 20px; stroke-width: 2.4; pointer-events: none; }
 .tabbar a span { pointer-events: none; }
 /* El icono (trazo, sin relleno) y el texto no se comen el toque: en el iPhone el golpe llega al enlace. */
@@ -707,6 +707,21 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .mejora__nombre { font: 700 .75rem/1.15 var(--font); }
 .mejora__nivel, .mejora__pie { font-size: .68rem; color: var(--label-2); }
 .mejora-hecho { width: 100%; min-height: 44px; margin-top: 6px; }
+.plan-hub {
+  display: flex; flex-direction: column; gap: 8px; min-width: 0;
+  padding: 10px; border-radius: 14px; color: inherit; text-decoration: none;
+  background: var(--panel-2); border: 3px solid var(--panel-edge);
+}
+.plan-hub__head {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px; align-items: center; min-width: 0;
+}
+.plan-hub__id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.plan-hub__nombre { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan-hub__colas, .plan-hub__fin { font-size: .72rem; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.plan-hub__fin { white-space: nowrap; }
+.plan-hub__vacio { color: var(--label-2); font-weight: 800; }
+.plan-hub .mejora { background: var(--panel); }
 .hoy-cuenta {
   display: block; color: inherit; text-decoration: none;
   padding: 10px 12px 12px;

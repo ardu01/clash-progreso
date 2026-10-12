@@ -1,0 +1,41 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+
+const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+const css = readFileSync(new URL("../css/base.css", import.meta.url), "utf8");
+
+test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
+  const tab = app.slice(app.indexOf("function tabbar("), app.indexOf("function subImported("));
+  assert.match(tab, /#\/plan/);
+  assert.match(tab, /"Plan"/);
+  assert.equal(tab.includes("Operaciones"), false);
+  assert.match(css, /repeat\(6, minmax\(0, 1fr\)\)/);
+  const hub = app.slice(app.indexOf("function renderPlanHub("), app.indexOf("function renderPlan("));
+  assert.match(hub, /data-plan-hub/);
+  assert.match(hub, /recomendar/);
+  assert.match(hub, /decisionRoadmap/);
+  assert.match(hub, /fleetRow/);
+  assert.match(hub, /fichaMejora\(p\)/);
+  assert.match(hub, /data-plan-filtro/);
+  assert.equal(hub.includes("mejorar:"), false);
+  assert.equal(hub.includes("htmlCuerpoMejorar"), false);
+  const inicio = app.slice(app.indexOf("function renderInicio("), app.indexOf("function renderAhora("));
+  assert.equal(inicio.includes("hoyEnCuentas"), false);
+  assert.equal(inicio.includes("data-hoy-cuentas"), false);
+  const mejoras = app.slice(app.indexOf("function renderMejoras("), app.indexOf("function mejorasEquipo("));
+  assert.equal(mejoras.includes("mejorasPlan"), false);
+  assert.equal(mejoras.includes('tab("plan"'), false);
+  assert.match(mejoras, /En curso/);
+  const detalle = app.slice(app.indexOf("function renderPlan("), app.indexOf("function criterioHtml("));
+  assert.match(detalle, /data-plan-ahora/);
+  assert.match(detalle, />Hecho</);
+  assert.match(detalle, /data-hecho/);
+  assert.match(app, /data-go="#\/plan"/);
+  assert.equal(app.includes("Hoy en tus cuentas"), false);
+  assert.equal(app.includes("function mejorasPlan("), false);
+  assert.equal(app.includes("cuello de botella"), false);
+  const pantalla = app.slice(app.indexOf("function screenFor("), app.indexOf("function renderGraficos("));
+  assert.match(pantalla, /r\.name === "plan" && r\.tag/);
+  assert.match(pantalla, /renderPlanHub\(\)/);
+});

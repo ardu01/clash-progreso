@@ -96,9 +96,11 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   assert.match(cartas, />Hecho</);
   assert.equal(cartas.includes("fmtRes"), false);
   assert.equal(cartas.includes("costBits"), false);
-  const plan = app.slice(app.indexOf("function mejorasPlan("), app.indexOf("function mejorasEquipo("));
+  const plan = app.slice(app.indexOf("function renderPlanHub("), app.indexOf("function renderPlan("));
   assert.match(plan, /fichaMejora/);
   assert.match(plan, /mejora-grid/);
+  assert.equal(plan.includes("mejorar:"), false);
+  assert.equal(plan.includes("htmlCuerpoMejorar"), false);
   const costes = app.slice(app.indexOf("function costCard("), app.indexOf("function etiquetaPaso("));
   assert.match(costes, /lineaCoste/);
   const ay = app.slice(app.indexOf("function ayuntamientoLine("), app.indexOf("function resourceAllowsItem("));
@@ -107,7 +109,7 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   const curso = app.slice(app.indexOf("function upRow("), app.indexOf("function helpersBlock("));
   assert.match(curso, /fichaMejora/);
   assert.equal(curso.includes("mejorar:"), false);
-  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.3/);
+  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.4/);
   assert.match(sw, /js\/coste-tarjeta\.js/);
   assert.equal(app.includes("cuello de botella"), false);
 });

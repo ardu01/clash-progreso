@@ -963,9 +963,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.2.3 y cachés cp-shell-v50 / cp-img-v11", () => {
-  assert.equal(APP_VERSION, "4.2.3");
-  assert.equal(SHELL_CACHE, "cp-shell-v50");
+test("versión 4.2.4 y cachés cp-shell-v51 / cp-img-v11", () => {
+  assert.equal(APP_VERSION, "4.2.4");
+  assert.equal(SHELL_CACHE, "cp-shell-v51");
   assert.equal(IMAGE_CACHE, "cp-img-v11");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1019,6 +1019,7 @@ test("versión 4.2.3 y cachés cp-shell-v50 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-shell-v47"), false);
   assert.equal(sw.includes("cp-shell-v48"), false);
   assert.equal(sw.includes("cp-shell-v49"), false);
+  assert.equal(sw.includes("cp-shell-v50"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1026,7 +1027,8 @@ test("versión 4.2.3 y cachés cp-shell-v50 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v50/);
+  assert.match(caches, /cp-shell-v51/);
+  assert.equal(caches.includes("cp-shell-v50"), false);
   assert.equal(caches.includes("cp-shell-v49"), false);
   assert.equal(caches.includes("cp-shell-v48"), false);
   assert.equal(caches.includes("cp-shell-v47"), false);
@@ -1080,16 +1082,21 @@ test("versión 4.2.3 y cachés cp-shell-v50 / cp-img-v11", () => {
   assert.match(app, /js\/import\.js|from "\.\/import\.js"/);
 });
 
-test("4.1.5: la barra tiene cinco pestañas y Operaciones se abre desde Agenda", () => {
+test("4.2.4: la barra tiene seis pestañas y Operaciones se abre desde Agenda", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   const tab = app.slice(app.indexOf("function tabbar("), app.indexOf("function subImported("));
   assert.equal(tab.includes("Operaciones"), false);
   assert.equal(tab.includes("#/operaciones"), false);
   assert.match(tab, /Inicio/);
   assert.match(tab, /Cuentas/);
+  assert.match(tab, /#\/plan/);
+  assert.match(tab, /Plan/);
   assert.match(tab, /Mejoras/);
   assert.match(tab, /Análisis/);
   assert.match(tab, /Agenda/);
+  const basePlan = app.slice(app.indexOf("function baseTab("), app.indexOf("function infoBtn("));
+  assert.match(basePlan, /r\.name === "plan"/);
+  assert.match(basePlan, /return "plan"/);
   const agenda = app.slice(app.indexOf("function renderAgenda("), app.indexOf("function renderHistorial("));
   assert.match(agenda, /href="#\/operaciones"/);
   assert.match(agenda, />Operaciones</);
