@@ -16,7 +16,9 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   assert.match(hub, /recomendar/);
   assert.match(hub, /decisionRoadmap/);
   assert.match(hub, /fleetRow/);
-  assert.match(hub, /fichaMejora\(p\)/);
+  assert.match(hub, /fichaMejora\(p/);
+  assert.match(hub, /textoSegundos/);
+  assert.match(hub, /plan-hub__motivo/);
   assert.match(hub, /data-plan-filtro/);
   assert.equal(hub.includes("mejorar:"), false);
   assert.equal(hub.includes("htmlCuerpoMejorar"), false);
@@ -29,6 +31,12 @@ test("4.2.4: Plan es una pestaña y el hub reutiliza el motor", () => {
   assert.match(mejoras, /En curso/);
   const detalle = app.slice(app.indexOf("function renderPlan("), app.indexOf("function criterioHtml("));
   assert.match(detalle, /data-plan-ahora/);
+  assert.match(detalle, /bloqueosDe/);
+  assert.match(app, /data-plan-bloqueo/);
+  assert.match(app, /No cabe/);
+  const bloqueo = app.slice(app.indexOf("function bloqueosDe("), app.indexOf("function renderPlanHub("));
+  assert.equal(bloqueo.includes("Hecho"), false);
+  assert.equal(bloqueo.includes("data-hecho"), false);
   assert.match(detalle, /tarjetaAhora/);
   assert.match(app, />Hecho</);
   assert.match(app, /data-hecho/);

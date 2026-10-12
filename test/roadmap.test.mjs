@@ -7,7 +7,7 @@ import { analyze, builderStatus, indexCaps } from "../js/progress.js";
 import { HEROES_FUERA } from "../js/plan.js";
 import { reconcileMessage, reconcileProvisionals, toggleProvisional } from "../js/provisional.js";
 import {
-  ahoraDe, buildRoadmap, capTownHall, constructoresParaPlan, effectivePlan, marcarCabida, ordenarParaPlan, planIsConfigured, planLabel,
+  ahoraDe, buildRoadmap, capTownHall, capacidadAldea, constructoresParaPlan, costeDePaso, effectivePlan, marcarCabida, ordenarParaPlan, planIsConfigured, planLabel,
   prepararSubida, programar, requisitosAyuntamiento, rushGaps,
 } from "../js/roadmap.js";
 import { semanaPlan } from "../js/schedule.js";
@@ -459,4 +459,118 @@ test("4.1.6: el plan prioriza desbloqueos, almacenes, oro y elixir, y aparta mur
   assert.equal(conDia.orden[0].inicio, now);
   const noche = programar(base.map((s) => ({ ...s })), lanes.map((l) => ({ ...l })), semanaPlan(), Date.parse("2026-10-11T22:30:00Z"));
   assert.equal(noche.orden[0].inicio, Date.parse("2026-10-12T17:00:00Z"));
+});
+
+test("4.2.4: si no cabe, el almacén va antes y la mejora queda bloqueada", () => {
+  const soloTh = capacidadAldea({ buildings: [{ data: 1000001, lvl: 18 }] });
+  assert.equal(soloTh.oro, 5000000);
+  assert.equal(soloTh.elixir, 5000000);
+  assert.equal(soloTh.oscuro, 50000);
+  const conAlmacen = capacidadAldea({ buildings: [{ data: 1000001, lvl: 18 }, { data: 1000005, lvl: 19, cnt: 1 }] });
+  assert.equal(conAlmacen.oro, 5000000 + 6500000);
+  assert.equal(capacidadAldea({ buildings: [] }).oro, 0);
+
+  const th8 = {
+    buildings: [
+      { data: 1000001, lvl: 8 },
+      { data: 1000005, lvl: 8, cnt: 1 },
+      { data: 1000003, lvl: 8, cnt: 1 },
+      { data: 1000024, lvl: 2, cnt: 1 },
+    ],
+  };
+  const cap8 = capacidadAldea(th8);
+  assert.equal(cap8.oro, 225000 + 750000);
+  assert.equal(cap8.elixir, 225000 + 750000);
+  assert.equal(cap8.oscuro, 17500 + 5000);
+  const subida8 = { id: "town-hall", fromLvl: 8, toLvl: 9, instance: "town-hall", queue: "constructor", seconds: costeTh(9).segundos, title: "Ayuntamiento", categoryKey: "recursos" };
+  const barato = { id: "1000008", fromLvl: 1, toLvl: 2, instance: "1000008#0", queue: "constructor", seconds: levelCost("1000008", 2).s, title: "Cañón", categoryKey: "defensas" };
+  marcarCabida([subida8, barato], th8, index);
+  assert.equal(costeTh(9).oro > cap8.oro, true);
+  assert.equal(subida8.noCabe, true);
+  assert.match(subida8.motivo, /No cabe en el oro/);
+  assert.equal(barato.noCabe, false);
+
+  const exp = {
+    buildings: [
+      { data: 1000001, lvl: 10 },
+      { data: 1000005, lvl: 10, cnt: 1 },
+      { data: 1000003, lvl: 10, cnt: 1 },
+      { data: 1000024, lvl: 2, cnt: 1 },
+    ],
+  };
+  const cap = capacidadAldea(exp);
+  assert.equal(cap.oro, 850000 + 1500000);
+  assert.equal(cap.elixir, 850000 + 1500000);
+  assert.equal(cap.oscuro, 17500 + 20000);
+  const th = { id: "town-hall", fromLvl: 10, toLvl: 11, instance: "town-hall", queue: "constructor", seconds: costeTh(11).segundos, title: "Ayuntamiento", categoryKey: "recursos" };
+  const oro = { id: "1000005", fromLvl: 10, toLvl: 11, instance: "1000005#0", queue: "constructor", seconds: levelCost("1000005", 11).s, title: "Almacén de oro", categoryKey: "recursos" };
+  const elixir = { id: "1000003", fromLvl: 10, toLvl: 11, instance: "1000003#0", queue: "constructor", seconds: levelCost("1000003", 11).s, title: "Almacén de elixir", categoryKey: "recursos" };
+  const oscuro = { id: "1000024", fromLvl: 2, toLvl: 3, instance: "1000024#0", queue: "constructor", seconds: levelCost("1000024", 3).s, title: "Almacén de elixir oscuro", categoryKey: "recursos" };
+  const canon = { id: "1000008", fromLvl: 1, toLvl: 2, instance: "1000008#1", queue: "constructor", seconds: levelCost("1000008", 2).s, title: "Cañón", categoryKey: "defensas" };
+  const caro = { id: "1000008", fromLvl: 20, toLvl: 21, instance: "1000008#2", queue: "constructor", seconds: levelCost("1000008", 21).s, title: "Cañón", categoryKey: "defensas" };
+  const muro = { id: "1000010", fromLvl: 16, toLvl: 17, instance: "1000010#0", queue: "constructor", seconds: 0, title: "Muro", categoryKey: "muros" };
+  const cuartel = { id: "1000026", fromLvl: 7, toLvl: 8, instance: "1000026#0", queue: "constructor", seconds: levelCost("1000026", 8).s, title: "Cuartel oscuro", categoryKey: "ejercito_edif" };
+  const tropa = { id: "4000010", fromLvl: 7, toLvl: 8, instance: "4000010#0", queue: "laboratorio", seconds: levelCost("4000010", 8).s, title: "Tropa", categoryKey: "laboratorio" };
+  const pasos = [th, oro, elixir, oscuro, canon, caro, muro, cuartel, tropa];
+  marcarCabida(pasos, exp, index);
+
+  assert.equal(costeTh(11).oro > cap.oro, true);
+  assert.equal(th.noCabe, true);
+  assert.equal(th.motivo, "No cabe en el oro: cuesta 4\u00a0000\u00a0000 y caben 2\u00a0350\u00a0000.");
+  assert.equal(oro.antesDeNoCabe, true);
+  assert.equal(oro.noCabe, false);
+  assert.equal(oro.seconds, levelCost("1000005", 11).s);
+  const oro14 = pasos.find((s) => s.id === "1000005" && s.toLvl === 14);
+  assert.ok(oro14);
+  assert.equal(levelCost("1000005", 14).n > cap.elixir, true);
+  assert.equal(oro14.antesDeNoCabe, true);
+  assert.equal(oro14.noCabe, false);
+  assert.equal(oro14.title, "Almacén de oro");
+  assert.equal(pasos.some((s) => s.id === "1000005" && s.toLvl > 14), false);
+
+  assert.equal(canon.noCabe, false);
+  assert.equal(caro.noCabe, true);
+  assert.match(caro.motivo, /No cabe en el oro: cuesta 3\u00a0000\u00a0000/);
+  assert.equal(muro.noCabe, true);
+  assert.equal(muro.motivo, "No cabe en el oro ni en el elixir: cuesta 5\u00a0000\u00a0000 y caben 2\u00a0350\u00a0000 y 2\u00a0350\u00a0000.");
+  assert.equal(cuartel.noCabe, true);
+  assert.match(cuartel.motivo, /No cabe en el elixir/);
+  assert.equal(elixir.antesDeNoCabe, true);
+  assert.equal(elixir.noCabe, false);
+  assert.equal(pasos.some((s) => s.id === "1000003" && s.toLvl > 17), false);
+  assert.equal(tropa.noCabe, true);
+  assert.match(tropa.motivo, /elixir oscuro/);
+  assert.equal(oscuro.antesDeNoCabe, true);
+  assert.equal(oscuro.noCabe, false);
+  assert.equal(oscuro.seconds, levelCost("1000024", 3).s);
+
+  const arma = { id: "inferno-artillery", fromLvl: 1, toLvl: 2, instance: "inferno-artillery#0", queue: "constructor", seconds: 518400, title: "Artillería infernal", categoryKey: "defensas" };
+  marcarCabida([arma], { buildings: [{ data: 1000001, lvl: 18 }] }, index);
+  assert.equal(arma.noCabe, true);
+  assert.match(arma.motivo, /cuesta 10\u00a0000\u00a0000 y caben 5\u00a0000\u00a0000/);
+
+  const gratis = { id: "1000010", fromLvl: 0, toLvl: 1, instance: "1000010#1", queue: "constructor", seconds: 0, title: "Muro", categoryKey: "muros" };
+  marcarCabida([gratis], { buildings: [] }, index);
+  assert.equal(gratis.noCabe, false);
+
+  const lanes = [{ id: "c0", cola: "constructor", titulo: "Constructor 1", libreEn: now, freeAt: now, libreYa: true, blocked: false }];
+  const placed = programar(pasos, lanes, null, now);
+  const thP = placed.orden.find((s) => s.id === "town-hall");
+  const oroP = placed.orden.find((s) => s.id === "1000005" && s.fromLvl === 10);
+  const oscuroP = placed.orden.find((s) => s.id === "1000024");
+  assert.equal(thP.inicio, null);
+  assert.equal(thP.fin, null);
+  assert.equal(thP.laneId, null);
+  assert.equal(thP.noCabe, true);
+  assert.equal(placed.orden.find((s) => s.id === "1000008" && s.toLvl === 21).inicio, null);
+  assert.equal(placed.orden.find((s) => s.id === "1000010").inicio, null);
+  assert.equal(placed.orden.find((s) => s.queue === "laboratorio").inicio, null);
+  assert.ok(oroP.inicio != null);
+  assert.ok(oroP.fin > oroP.inicio);
+  assert.equal(costeDePaso(oroP).elixir, levelCost("1000005", 11).n);
+  assert.equal(oroP.seconds, levelCost("1000005", 11).s);
+  assert.ok(oscuroP.inicio != null);
+  assert.equal(oscuroP.seconds, levelCost("1000024", 3).s);
+  assert.ok(placed.orden.find((s) => s.id === "1000008" && s.toLvl === 2).inicio != null);
+  assert.ok(placed.orden.findIndex((s) => s.antesDeNoCabe && s.id === "1000005") < placed.orden.findIndex((s) => s.id === "town-hall"));
 });

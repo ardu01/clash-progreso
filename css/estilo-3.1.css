@@ -638,6 +638,8 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 [data-plan-ahora] .btn.btn--small { min-height: 44px; padding: 0 12px; }
 [data-plan-ahora] .row__sub,
 [data-plan-sesiones] .row__sub,
+[data-plan-bloqueo] .row__title,
+[data-plan-bloqueo] .row__sub,
 [data-hoy-cuentas] .row__sub { white-space: normal; overflow-wrap: anywhere; }
 
 /* 4.2.1: tarjeta de coste. Cuadrada, cifra arriba, dibujo al centro, nombre debajo. */
@@ -721,6 +723,11 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .plan-hub__colas, .plan-hub__fin { font-size: .72rem; color: var(--label-2); font-variant-numeric: tabular-nums; }
 .plan-hub__fin { white-space: nowrap; }
 .plan-hub__vacio { color: var(--label-2); font-weight: 800; }
+.plan-hub__motivo {
+  display: block; min-width: 0; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .72rem; color: var(--label-2);
+}
 .plan-hub .mejora { background: var(--panel); }
 .hoy-cuenta {
   display: block; color: inherit; text-decoration: none;

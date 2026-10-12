@@ -1688,6 +1688,24 @@ function tarjetaAhora(paso, tag) {
   return fichaMejora(paso, { pie, boton, mejorar: `#/progreso/${tag.slice(1)}/plan` });
 }
 
+function bloqueosDe(orden) {
+  const grupos = new Map();
+  for (const step of orden || []) {
+    if (!step || !step.noCabe) continue;
+    const motivo = step.motivo || "No cabe en los almacenes.";
+    if (!grupos.has(motivo)) grupos.set(motivo, []);
+    grupos.get(motivo).push(step);
+  }
+  if (!grupos.size) return "";
+  const filas = [];
+  for (const [motivo, steps] of grupos) {
+    const primero = steps[0];
+    const mas = steps.length > 1 ? ` y ${steps.length - 1} más` : "";
+    filas.push(`<li><div class="row"><span class="row__main"><span class="row__title">${esc(primero.title || "Mejora")} <span class="num">Nv ${primero.fromLvl} → ${primero.toLvl}</span>${esc(mas)}</span><span class="row__sub">${esc(motivo)}</span></span></div></li>`);
+  }
+  return `<div class="section" data-plan-bloqueo>${sectionHead("No cabe")}<ul class="list">${filas.join("")}</ul></div>`;
+}
+
 function renderPlanHub() {
   const filtro = state.planHub === "libres" || state.planHub === "ocupadas" ? state.planHub : "todas";
   const todas = allAccounts();
@@ -1703,13 +1721,15 @@ function renderPlanHub() {
     const road = row ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
     const cartas = rec && rec.ahora.length
-      ? `<span class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p)).join("")}</span>`
+      ? `<span class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p, { pie: p.seconds == null ? "" : textoSegundos(p.seconds) })).join("")}</span>`
       : `<span class="plan-hub__vacio">—</span>`;
     const th = row && row.th != null ? row.th : null;
     const figura = th != null ? thumb(1000001, { size: 44, th }) : `<span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>`;
     const colas = known ? `${free} libres · ${row.builders.occupied} ocupados` : "—";
     const fin = row && row.proxima ? fmtFin(row.proxima) : "—";
-    filas.push(`<li><a class="plan-hub" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="plan-hub__head">${figura}<span class="plan-hub__id"><span class="plan-hub__nombre">${esc(meta.nombre)}</span><span class="plan-hub__colas">${esc(colas)}</span></span><span class="plan-hub__fin">${esc(fin)}</span></span>${cartas}</a></li>`);
+    const bloqueo = road && (road.orden || []).find((s) => s.noCabe && s.motivo);
+    const nota = bloqueo ? `<span class="plan-hub__motivo">${esc(bloqueo.motivo)}</span>` : "";
+    filas.push(`<li><a class="plan-hub" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="plan-hub__head">${figura}<span class="plan-hub__id"><span class="plan-hub__nombre">${esc(meta.nombre)}</span><span class="plan-hub__colas">${esc(colas)}</span></span><span class="plan-hub__fin">${esc(fin)}</span></span>${nota}${cartas}</a></li>`);
   }
   const n = filas.length;
   const sub = n === todas.length ? (n === 1 ? "1 cuenta" : `${n} cuentas`) : `${n} de ${todas.length}`;
@@ -1750,6 +1770,7 @@ function renderPlan(tag) {
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     <div class="chip-row chip-row--plan" role="toolbar" aria-label="Objetivo"><button type="button" data-plan-objetivo="maxear" aria-pressed="${subirOn ? "false" : "true"}">Maxear TH actual</button>${subir}</div>
     <div class="section" data-plan-ahora>${sectionHead("Ahora")}${ahora}</div>
+    ${bloqueosDe(road.orden)}
     <div class="section" data-plan-sesiones>${sectionHead("Próximas sesiones")}${sesiones}</div>`;
 }
 

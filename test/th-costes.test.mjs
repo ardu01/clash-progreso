@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { TH_FUENTE, TH_URL, costeTh, costeThRango } from "../js/th-costes.js";
+import { TH_FUENTE, TH_URL, capacidadTh, costeTh, costeThRango } from "../js/th-costes.js";
 
 test("el coste del ayuntamiento cita clash-of-clans-data y suma TH2 a TH18", () => {
   assert.match(TH_FUENTE, /clash-of-clans-data 0\.18\.0/);
@@ -28,4 +28,14 @@ test("el coste del ayuntamiento cita clash-of-clans-data y suma TH2 a TH18", () 
   const modulos = readFileSync(new URL("../js/th-costes.js", import.meta.url), "utf8");
   assert.match(modulos, /chiefpansancolt\/clash-of-clans-data/);
   assert.match(modulos, /v0\.18\.0\/data\/home\/town-hall\/town-hall\.json/);
+  const th7 = capacidadTh(7);
+  assert.equal(th7.oscuro, 2500);
+  assert.equal(th7.oro, 500000);
+  const th18cap = capacidadTh(18);
+  assert.equal(th18cap.oro, 5000000);
+  assert.equal(th18cap.elixir, 5000000);
+  assert.equal(th18cap.oscuro, 50000);
+  assert.equal(capacidadTh(0), null);
+  assert.equal(capacidadTh(19), null);
+  assert.match(modulos, /storageCapacity/);
 });

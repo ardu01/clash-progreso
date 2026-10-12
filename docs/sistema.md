@@ -2278,6 +2278,8 @@ La barra pasa a seis pestañas, en una fila: Inicio, Cuentas, Plan, Mejoras, An�
 
 Inicio deja de pintar «Hoy en tus cuentas». Mejoras deja el segmento Plan: abre En curso, y si `cp-mejoras` valía `plan` también cae en En curso. Costes y Equipo siguen. `#/ahora` no cambia.
 
+Cada mejora se compara con lo que la aldea puede guardar ahora: almacenes de oro, de elixir y de elixir oscuro, más la capacidad del propio ayuntamiento (`capacidadTh`, `storageCapacity` de `town-hall.json`). Si el coste no entra, el plan adelanta los niveles de almacén que faltan para cubrir ese hueco, con su coste y su tiempo, y deja la mejora sin hora y con el motivo. Vale para el ayuntamiento, el arma, las defensas, el laboratorio, los héroes y los muros. Las menas no pasan por el almacén. No mira el oro anotado en la cuenta: si no hay cifras y la mejora sí entra, sigue recomendada.
+
 ## Nota de cambios (12 oct 2026, 4.2.3)
 
 `APP_VERSION` es `4.2.3`, `SHELL_CACHE` es `cp-shell-v50` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.

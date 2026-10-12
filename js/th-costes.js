@@ -32,6 +32,40 @@ function vacio() {
   return { oro: 0, elixir: 0, oscuro: 0, brillante: 0, glowy: 0, starry: 0, segundos: 0 };
 }
 
+/**
+ * Capacidad del propio ayuntamiento, por nivel. No es el coste.
+ * storageCapacity de town-hall.json en clash-of-clans-data 0.18.0.
+ * El elixir oscuro empieza en el nivel 7.
+ */
+const CAP_TH = [
+  null,
+  [1000, 1000, 0],
+  [2500, 2500, 0],
+  [10000, 10000, 0],
+  [50000, 50000, 0],
+  [100000, 100000, 0],
+  [300000, 300000, 0],
+  [500000, 500000, 2500],
+  [750000, 750000, 5000],
+  [1000000, 1000000, 10000],
+  [1500000, 1500000, 20000],
+  [2000000, 2000000, 20000],
+  [2000000, 2000000, 20000],
+  [2000000, 2000000, 20000],
+  [3000000, 3000000, 30000],
+  [3000000, 3000000, 30000],
+  [4000000, 4000000, 40000],
+  [4000000, 4000000, 40000],
+  [5000000, 5000000, 50000],
+];
+
+/** Capacidad de oro, elixir y oscuro del ayuntamiento. Fuera de 1–18, null. */
+export function capacidadTh(nivel) {
+  const row = Number.isInteger(nivel) ? CAP_TH[nivel] : null;
+  if (!row) return null;
+  return { oro: row[0], elixir: row[1], oscuro: row[2] };
+}
+
 /** Coste de llegar a `nivel` (2–18). Fuera de ese rango, null. */
 export function costeTh(nivel) {
   if (!Number.isInteger(nivel)) return null;
