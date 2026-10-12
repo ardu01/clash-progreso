@@ -26,9 +26,9 @@ La primera visita con red guarda la interfaz. Las imágenes se pueden descargar 
 
 Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operaciones no está entre ellas. Se abre desde Agenda, y desde ahí también Explorar estrategias.
 
-| Plan | Inicio |
-| --- | --- |
-| <img src="docs/capturas/420-plan-oscuro.png" width="200" alt="Plan en oscuro: Ahora, con la mejora recomendada y Hecho, y el chip Maxear TH actual"> | <img src="docs/capturas/420-inicio-oscuro.png" width="200" alt="Inicio en oscuro: Hoy en tus cuentas, con lo que toca en la próxima sesión"> |
+| Plan | Inicio | Mejoras |
+| --- | --- | --- |
+| <img src="docs/capturas/421-plan-oscuro.png" width="200" alt="Plan en oscuro: tarjeta cuadrada con la cifra y el icono del recurso arriba, el edificio en el centro y Hecho debajo"> | <img src="docs/capturas/421-inicio-oscuro.png" width="200" alt="Inicio en oscuro: Hoy en tus cuentas, con la tarjeta de coste de cada aldea"> | <img src="docs/capturas/421-mejoras-oscuro.png" width="200" alt="Mejoras en oscuro: las siguientes mejoras de cada cuenta, en la misma tarjeta"> |
 
 | Barra | Agenda |
 | --- | --- |
