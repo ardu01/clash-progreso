@@ -8,6 +8,7 @@ import { cargarFuentes, costeSubirTh, hayCosteTh, hayRecursosManuales, recursosD
 import { convertirEnPlan, cuentaRezagada, crearGemelo } from "../js/gemelo.js";
 import { alinear, crearGuerra, textoNumero } from "../js/guerra.js";
 import { docVacio, reducir } from "../js/operaciones.js";
+import { htmlOperaciones } from "../js/ui-operaciones.js";
 import { aplicarPlantilla } from "../js/plantillas.js";
 import { enHorizonte, metaFlota, predecirNiveles } from "../js/prediccion.js";
 import { C1, C2, estrategiaPorDefecto, ordenarCuentas, planMantenimiento, tareasDe } from "../js/prioridades.js";
@@ -208,4 +209,24 @@ test("4.1.6: la sesión también anota mascotas, ayudantes y herrería", () => {
   assert.match(app, /mascotasLibres/);
   assert.match(app, /ayudanteLibre/);
   assert.match(app, /herreriaLibre/);
+});
+
+test("4.2.7: la Agenda no corta la franja y Operaciones usa el sueño guardado", () => {
+  const css = readFileSync(new URL("../css/estilo-3.1.css", import.meta.url), "utf8");
+  const nav = css.slice(css.indexOf(".seg--nav {"), css.indexOf(".screen > .seg-wrap:first-of-type"));
+  assert.match(nav, /\.seg--nav > :is\(a, button\)/);
+  assert.match(nav, /min-width:\s*0/);
+  assert.match(nav, /white-space:\s*normal/);
+  assert.match(css, /\.screen:has\(\[data-agenda\]\) > \.section > \.section-header > span \{ min-width: 0; white-space: normal; \}/);
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /sueno: state\.sleep/);
+  const propio = htmlOperaciones({
+    sub: "hub",
+    doc: { minutos: 60 },
+    cuentas: [],
+    sueno: { desde: "22:30", hasta: "06:15" },
+  });
+  assert.match(propio, /22:30–06:15/);
+  const defecto = htmlOperaciones({ sub: "hub", doc: { minutos: 60 }, cuentas: [] });
+  assert.match(defecto, /23:00–07:00/);
 });

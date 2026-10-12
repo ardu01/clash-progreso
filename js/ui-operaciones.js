@@ -37,8 +37,9 @@ function hub(m) {
   const aviso = m.doc.aviso;
   const c1 = cuentas.find((cuenta) => cuenta.tag === "#28PLGP0G2");
   const lente = c1 ? `${c1.nombre}: ${etiquetaEstrategia(estrategiaPorDefecto(c1))}` : "Sin cuentas";
+  const sueno = m.sueno && m.sueno.desde && m.sueno.hasta ? m.sueno : SUEÑO_DEFECTO;
   return `<h1 class="large-title">Operaciones</h1>
-    <p class="large-sub">1–2 h al día · sueño ${esc(SUEÑO_DEFECTO.desde)}–${esc(SUEÑO_DEFECTO.hasta)}</p>
+    <p class="large-sub">1–2 h al día · sueño ${esc(sueno.desde)}–${esc(sueno.hasta)}</p>
     ${aviso ? `<div class="section"><div class="card"><p class="t-body">${esc(aviso.texto)}</p><button type="button" class="btn btn--plain btn--block" data-op="aviso-cerrar">Entendido</button></div></div>` : ""}
     <div class="section">${head("Sesión inteligente", "Te guía cuenta por cuenta. C1 va primero y, dentro de cada aldea, el constructor libre. Lo marcado no queda confirmado hasta una exportación.")}
       <ul class="list">${fila("#/operaciones/sesion", "Empezar la sesión", `${m.doc.minutos} min · ${lente}`)}</ul>

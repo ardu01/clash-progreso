@@ -6421,6 +6421,7 @@ function renderOperaciones(r) {
     now: state.now,
     cuentas: fichasOperacion(),
     doc: docOp(),
+    sueno: state.sleep,
   });
 }
 
