@@ -1,4 +1,5 @@
 import { addBags, levelCost, sumLevels, usesResource } from "./costs.js";
+import { esSinConfirmar, libroDesbloqueos, recursoDe } from "./desbloqueos.js";
 import { costeTh, capacidadTh } from "./th-costes.js";
 import { HEROES_FUERA } from "./plan.js";
 import { provisionalKey } from "./provisional.js";
@@ -706,6 +707,14 @@ function recursoPaso(step) {
 
 function costeDeCabida(step) {
   if (!step) return null;
+  if (step.sinConfirmar && !step.costeOverride && !step.costeExtra) return null;
+  if (step.costeOverride || step.costeExtra) {
+    const base = step.costeOverride;
+    const extra = step.costeExtra;
+    if (base && extra && base.r === extra.r) return { recurso: base.r, n: base.n + extra.n };
+    if (base) return { recurso: base.r, n: base.n };
+    if (extra) return { recurso: extra.r, n: extra.n };
+  }
   if (step.id === "town-hall") {
     const row = costeTh(step.toLvl);
     return row ? { recurso: "oro", n: row.oro } : null;
@@ -869,6 +878,7 @@ export function marcarCabida(steps, exp, index) {
 
 function banda(step) {
   if (step.antesDeNoCabe) return 1;
+  if (step.abreDesbloqueo && !step.noCabe) return 0;
   if (DESBLOQUEO.has(String(step.id)) && !step.noCabe) return 0;
   if (step.noCabe) return 3;
   if (String(step.id) === WALL_ID) return 4;
@@ -974,8 +984,26 @@ function makeLanes(exp, now, th, builders) {
   };
 }
 
-function placeStep(step, lanes, ventana, now, cursor, ctx) {
+function placeStep(step, lanes, ventana, now, cursor, ctx, alcanza) {
   const chain = cursor.get(step.instance) || null;
+  let esperaAt = 0;
+  if (step.esperaEdificio) {
+    const at = alcanza ? alcanza.get(`${step.esperaEdificio.instance}@${step.esperaEdificio.nivel}`) : null;
+    if (at == null) {
+      cursor.set(step.instance, { blocked: true, at: null });
+      return {
+        ...step,
+        key: `${step.id}:${step.fromLvl}:${step.toLvl}:${step.instance}`,
+        laneId: null,
+        inicio: null,
+        fin: null,
+        sinHora: true,
+        sinDuracion: step.seconds == null,
+        finEnSueno: false,
+      };
+    }
+    esperaAt = at;
+  }
   let pool = lanes.filter((lane) => lane.cola === step.queue);
   if (ctx && ctx.heroes > 0 && step.queue === "constructor") {
     if (step.categoryKey === "heroes") {
@@ -1009,7 +1037,7 @@ function placeStep(step, lanes, ventana, now, cursor, ctx) {
   }
   let elegido = null;
   for (const lane of open) {
-    const candidato = Math.max(lane.freeAt, step.notBefore || 0, chain && chain.at ? chain.at : 0, now);
+    const candidato = Math.max(lane.freeAt, step.notBefore || 0, chain && chain.at ? chain.at : 0, esperaAt, now);
     const mejorHueco = elegido && candidato === elegido.inicio && lane.freeAt > elegido.lane.freeAt;
     if (!elegido || candidato < elegido.inicio || mejorHueco) elegido = { lane, inicio: candidato };
   }
@@ -1023,35 +1051,54 @@ function placeStep(step, lanes, ventana, now, cursor, ctx) {
   }
   lane.freeAt = plan.fin;
   cursor.set(step.instance, { blocked: false, at: plan.fin });
+  if (alcanza) alcanza.set(`${step.instance}@${step.toLvl}`, plan.fin);
   return { ...base, ...plan, sinHora: false, laneId: lane.id };
 }
 
+function bolsaVaciaPaso() {
+  return {
+    oro: 0, elixir: 0, oscuro: 0, muros: 0, brillante: 0, resplandeciente: 0, estelar: 0,
+    segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, sinCoste: 0,
+  };
+}
+
+function sumarRecurso(bag, coste) {
+  if (!coste) return bag;
+  if (coste.r === "oro") bag.oro += coste.n;
+  else if (coste.r === "elixir") bag.elixir += coste.n;
+  else if (coste.r === "oscuro") bag.oscuro += coste.n;
+  return bag;
+}
+
 function partePaso(step) {
-  if (step.id === "town-hall") {
+  let bag;
+  if (step.costeOverride) {
+    bag = bolsaVaciaPaso();
+    sumarRecurso(bag, step.costeOverride);
+    if (typeof step.seconds === "number" && step.seconds > 0) bag.segConstructor = step.seconds;
+  } else if (step.sinConfirmar) {
+    bag = bolsaVaciaPaso();
+    bag.sinCoste = 1;
+  } else if (step.id === "town-hall") {
     const row = costeTh(step.toLvl);
-    const bag = {
-      oro: 0, elixir: 0, oscuro: 0, muros: 0, brillante: 0, resplandeciente: 0, estelar: 0,
-      segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, sinCoste: 0,
-    };
+    bag = bolsaVaciaPaso();
     if (!row) bag.sinCoste = 1;
     else {
       bag.oro = row.oro;
       bag.segConstructor = row.segundos;
     }
-    return bag;
+  } else if (step.id === "inferno-artillery") {
+    const row = ARMA_TH17.levels[step.toLvl];
+    bag = bolsaVaciaPaso();
+    if (!row) bag.sinCoste = 1;
+    else {
+      bag.oro = row.n;
+      bag.segConstructor = row.s;
+    }
+  } else {
+    bag = sumLevels(step.id, step.fromLvl, step.toLvl, 1);
   }
-  if (step.id !== "inferno-artillery") return sumLevels(step.id, step.fromLvl, step.toLvl, 1);
-  const row = ARMA_TH17.levels[step.toLvl];
-  const bag = {
-    oro: 0, elixir: 0, oscuro: 0, muros: 0, brillante: 0, resplandeciente: 0, estelar: 0,
-    segConstructor: 0, segLaboratorio: 0, segMascotas: 0, segHerreria: 0, sinCoste: 0,
-  };
-  if (!row) bag.sinCoste = 1;
-  else {
-    bag.oro = row.n;
-    bag.segConstructor = row.s;
-  }
-  return bag;
+  return sumarRecurso(bag, step.costeExtra);
 }
 
 export function costeDePaso(step) {
@@ -1088,10 +1135,155 @@ function bagOf(steps) {
 }
 
 /** Pasos del plan, ya filtrados y ordenados, y las colas antes de colocarlos. */
+function nivelDe(exp, id) {
+  const list = instanciasDe(exp, id);
+  if (!list.length) return { lv: 0, instance: `${id}#0` };
+  let idx = 0;
+  list.forEach((it, i) => {
+    if ((it.lvl || 0) < (list[idx].lvl || 0)) idx = i;
+  });
+  let lv = list[idx].lvl || 0;
+  if (list[idx].timer != null) lv += 1;
+  return { lv, instance: `${id}#${idx}` };
+}
+
+function aplicarConstruccion(step, regla) {
+  const tiempo = regla.level1_build_time_seconds != null ? regla.level1_build_time_seconds : regla.build_time_seconds;
+  const coste = recursoDe(regla.level1_cost || regla.cost);
+  const confirmado = typeof tiempo === "number" && Number.isFinite(tiempo) && tiempo > 0;
+  if (confirmado) {
+    step.seconds = tiempo;
+    step.queue = "constructor";
+    if (coste) step.costeOverride = coste;
+    step.sinConfirmar = false;
+    step.fueraDeCola = false;
+    return;
+  }
+  step.seconds = null;
+  step.sinConfirmar = true;
+  step.fueraDeCola = true;
+  if (coste && !esSinConfirmar(regla.notes)) step.costeOverride = coste;
+}
+
+function asegurarEdificio(steps, exp, index, id, hasta) {
+  const info = nivelDe(exp, id);
+  if (info.lv >= hasta) return info;
+  const ya = steps.filter((s) => String(s.id) === String(id));
+  const instance = ya.length ? ya.slice().sort((a, b) => a.fromLvl - b.fromLvl)[0].instance : info.instance;
+  const tienen = new Set(ya.filter((s) => s.instance === instance).map((s) => s.toLvl));
+  const item = index && index.items && index.items[String(id)];
+  const sec = (item && item.seccion_exportacion) || "buildings";
+  const categoryKey = categoryKeyFor(index, id, sec);
+  const regla = libroDesbloqueos().porId.get(String(id));
+  for (let from = info.lv; from < hasta; from += 1) {
+    const toLvl = from + 1;
+    let step = ya.find((s) => s.instance === instance && s.toLvl === toLvl);
+    if (!step && !tienen.has(toLvl)) {
+      const cost = levelCost(id, toLvl);
+      step = {
+        id: String(id),
+        fromLvl: from,
+        toLvl,
+        goal: hasta,
+        instance,
+        categoryKey,
+        queue: "constructor",
+        title: titleOf(index, id, categoryKey),
+        seconds: cost && typeof cost.s === "number" && Number.isFinite(cost.s) ? cost.s : null,
+        notBefore: null,
+        blocked: false,
+        provisional: false,
+        markedAt: 0,
+      };
+      if (from === 0 && regla && (regla.tipo === "edificio" || regla.tipo === "guardian")) aplicarConstruccion(step, regla);
+      if (step.fromLvl === 0 && step.toLvl === 1 && step.seconds === 0) {
+        step.seconds = null;
+        step.sinConfirmar = true;
+        step.fueraDeCola = true;
+      }
+      steps.push(step);
+      tienen.add(toLvl);
+    }
+    if (step) step.abreDesbloqueo = true;
+  }
+  return { lv: info.lv, instance };
+}
+
+/** Sustituye un 0→1 de tiempo 0 por la construcción o por el edificio que lo abre. */
+export function aplicarDesbloqueos(steps, exp, index, tag) {
+  const libro = libroDesbloqueos();
+  if (!libro || !steps) return steps;
+  const quitar = [];
+  const esperas = [];
+  for (let i = 0; i < steps.length; i += 1) {
+    const step = steps[i];
+    if (step.fromLvl !== 0 || step.toLvl !== 1) continue;
+    const regla = libro.porId.get(String(step.id));
+    if (!regla) {
+      if (step.seconds === 0) {
+        step.seconds = null;
+        step.sinConfirmar = true;
+        step.fueraDeCola = true;
+      }
+      continue;
+    }
+    if (regla.tipo === "edificio" || regla.tipo === "guardian") {
+      aplicarConstruccion(step, regla);
+      continue;
+    }
+    if (tag === HEROES_FUERA && regla.tipo === "heroe") continue;
+    quitar.push(i);
+    if (!regla.prerrequisito || regla.nivel == null) {
+      step.seconds = null;
+      step.sinConfirmar = true;
+      step.fueraDeCola = true;
+      quitar.pop();
+      continue;
+    }
+    const edificio = asegurarEdificio(steps, exp, index, regla.prerrequisito, regla.nivel);
+    const abre = steps.find((s) => s.instance === edificio.instance && s.toLvl === regla.nivel);
+    if (abre) {
+      if (!abre.desbloquea) abre.desbloquea = [];
+      if (regla.nombre && !abre.desbloquea.includes(regla.nombre)) abre.desbloquea.push(regla.nombre);
+      const extra = recursoDe(regla.level1_cost);
+      if (extra) abre.costeExtra = extra;
+    }
+    if (edificio.lv >= regla.nivel) {
+      if (extraPendiente(regla)) {
+        step.seconds = null;
+        step.sinTiempoJuego = true;
+        step.fueraDeCola = true;
+        step.costeOverride = recursoDe(regla.level1_cost);
+        quitar.pop();
+      }
+      continue;
+    }
+    esperas.push({ instance: step.instance, edificio: edificio.instance, nivel: regla.nivel });
+  }
+  for (let i = quitar.length - 1; i >= 0; i -= 1) steps.splice(quitar[i], 1);
+  for (const esp of esperas) {
+    const siguientes = steps.filter((s) => s.instance === esp.instance).sort((a, b) => a.fromLvl - b.fromLvl);
+    if (siguientes.length) siguientes[0].esperaEdificio = { instance: esp.edificio, nivel: esp.nivel };
+  }
+  for (const step of steps) {
+    if (step.fromLvl === 0 && step.toLvl === 1 && step.seconds === 0) {
+      step.seconds = null;
+      step.sinConfirmar = true;
+      step.fueraDeCola = true;
+    }
+  }
+  return steps;
+}
+
+function extraPendiente(regla) {
+  return regla.tipo === "heroe" && recursoDe(regla.level1_cost) && (regla.level1_time_seconds == null);
+}
+
 export function compilarPasos({ exp, index, tag, plan, provisionals, now }) {
   const chosen = effectivePlan(plan);
   const nowMs = now || Date.now();
   const { steps, goal, current, filas, sugerencias } = collectSteps(exp, index, chosen, tag);
+  aplicarDesbloqueos(steps, exp, index, tag);
   const marks = new Map();
   for (const raw of provisionals || []) {
     if (!raw || raw.tag !== tag) continue;
@@ -1191,10 +1383,11 @@ export function programar(steps, lanes, ventana, now) {
   }
   const ctx = { heroes: nHeroes };
   const cursor = new Map();
+  const alcanza = new Map();
   const orden = [];
   let finReq = 0;
   for (const step of lista) {
-    if (step.noCabe) {
+    if (step.noCabe || step.fueraDeCola) {
       orden.push({
         ...step,
         key: `${step.id}:${step.fromLvl}:${step.toLvl}:${step.instance}`,
@@ -1210,7 +1403,7 @@ export function programar(steps, lanes, ventana, now) {
     const listo = step.id === "town-hall"
       ? { ...step, notBefore: Math.max(step.notBefore || 0, finReq) }
       : step;
-    const placed = placeStep(listo, lanes, semana, now, cursor, ctx);
+    const placed = placeStep(listo, lanes, semana, now, cursor, ctx, alcanza);
     orden.push(placed);
     if (step.rushClase === "requisito" && step.queue === "constructor" && placed.fin != null && placed.fin > finReq) {
       finReq = placed.fin;

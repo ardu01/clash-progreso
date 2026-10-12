@@ -5,6 +5,7 @@ import {
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
+import { fijarDesbloqueos } from "./desbloqueos.js";
 import { ajusteOf, catalog, imageChoice, isHeavy } from "./images.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
@@ -1143,7 +1144,9 @@ function pasoAhora(paso) {
   const nv = `Nv ${paso.fromLvl} → ${paso.toLvl}`;
   const hueco = paso.clase === "estimado" ? "estimado" : paso.clase === "ajuste" ? "ajuste" : "en la exportación";
   let when = "";
-  if (paso.sinDuracion) when = " · sin tiempo en la fuente";
+  if (paso.sinConfirmar) when = " · dato sin confirmar";
+  else if (paso.sinTiempoJuego) when = " · sin tiempo en el juego";
+  else if (paso.sinDuracion) when = " · sin tiempo en la fuente";
   else if (paso.sinHora || paso.fin == null) when = " · sin hora exacta";
   else when = ` · acaba ${fmtFin(paso.fin)}`;
   return `${paso.titulo} ${hueco} · ${paso.title} ${nv} · ${etiquetaPaso(paso)}${when}`;
@@ -1605,9 +1608,12 @@ function roadmapList(road) {
   const rows = view.rows.map((row) => {
     const times = row.cnt > 1 ? ` × ${row.cnt}` : "";
     let when = "Sin siguiente fecha";
-    if (row.sinDuracion) when = "Sin tiempo en la fuente";
+    if (row.sinConfirmar) when = "dato sin confirmar";
+    else if (row.sinTiempoJuego) when = "Sin tiempo en el juego";
+    else if (row.sinDuracion) when = "Sin tiempo en la fuente";
     else if (row.sinHora || row.fin == null) when = "Sin hora exacta: el temporizador en curso no es un número";
     else when = `Empieza ${fmtFin(row.inicio)} · acaba ${fmtFin(row.fin)}`;
+    if (row.desbloquea && row.desbloquea.length) when += ` · Desbloquea ${row.desbloquea.join(", ")}`;
     const mark = row.rushClase === "sugerencia" ? " · Sugerencia" : (row.provisional ? " · provisional" : "");
     const pressed = row.provisional ? "true" : "false";
     const keys = encodeURIComponent(JSON.stringify(row.keys));
@@ -1688,7 +1694,7 @@ function fichaMejora(paso, extra = {}) {
 }
 
 function tarjetaAhora(paso, tag) {
-  const dur = paso.seconds == null ? "" : textoSegundos(paso.seconds);
+  const dur = paso.sinConfirmar ? "dato sin confirmar" : (paso.sinTiempoJuego ? "Sin tiempo en el juego" : (paso.seconds == null ? "" : textoSegundos(paso.seconds)));
   const fin = textoFinMadrid(paso.fin);
   const pie = [dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean).join(" · ");
   const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
@@ -1729,7 +1735,7 @@ function renderPlanHub(opts) {
     const road = row ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
     const cartas = rec && rec.ahora.length
-      ? `<span class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { pie: p.seconds == null ? "" : textoSegundos(p.seconds) })).join("")}</span>`
+      ? `<span class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { pie: p.sinConfirmar ? "dato sin confirmar" : (p.sinTiempoJuego ? "Sin tiempo en el juego" : (p.seconds == null ? "" : textoSegundos(p.seconds))) })).join("")}</span>`
       : `<span class="plan-hub__vacio">—</span>`;
     const th = row && row.th != null ? row.th : null;
     const figura = th != null ? thumb(1000001, { size: 44, th }) : `<span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>`;
@@ -1871,6 +1877,7 @@ function lineaTexto(line) {
   let next = "Sin siguiente con este criterio";
   const sig = line.siguiente;
   if (sig && sig.sinHora) next = `${sig.title}. No se programa: la mejora en curso no trae hora.`;
+  else if (sig && sig.sinConfirmar) next = `${sig.title}. Dato sin confirmar.`;
   else if (sig && sig.sinDuracion) next = `${sig.title}. Sin tiempo oficial para el siguiente nivel: no se inventa el fin.`;
   else if (sig && sig.fin != null) {
     next = `${sig.title} · empieza ${fmtFin(sig.inicio)} · acaba ${fmtFin(sig.fin)}`;
@@ -6494,11 +6501,13 @@ async function boot() {
   state.added = loadAdded();
   announce("");
   render();
-  const [manifest, caps, bundle] = await Promise.all([
+  const [manifest, caps, bundle, desbloqueos] = await Promise.all([
     fetch("./assets/manifest.json?v=" + APP_VERSION).then((r) => r.json()),
     fetch("./data/caps_clashrecord.json?v=" + APP_VERSION).then((r) => r.json()),
     fetch("./data/bundle.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/ref/desbloqueos.json?v=" + APP_VERSION).then((r) => r.json()),
   ]);
+  fijarDesbloqueos(desbloqueos, manifest.items);
   state.manifest = manifest;
   state.caps = caps;
   state.peso = manifest.peso_imagenes;
