@@ -449,7 +449,7 @@ test("missing.json coincide con el archivo publicado", () => {
 
 test("manifest.json coincide con la v3.1.18", () => {
   const buf = readFileSync(new URL("../assets/manifest.json", import.meta.url));
-  assert.equal(createHash("sha256").update(buf).digest("hex"), "082355ef9e49f27ea1e7850b257114a55196e2f2ae32c5b31d2accb7b357024d");
+  assert.equal(createHash("sha256").update(buf).digest("hex"), "40d4a774d75800f809f1b901417e5b82dc3d8e4b75988b834a8131a6948ec8de");
   assert.equal(manifest.version_set_imagenes, "v3.1.18");
 });
 
@@ -828,8 +828,15 @@ test("3.1.5: menas del equipamiento con la tabla corregida de 16 y 59", () => {
   const total = oreTotal(c1);
   assert.equal(total.estrellada > 0, true);
   const sinTope = c1.filter((p) => p.bloqueado);
-  assert.deepEqual(sinTope.map((p) => p.id), ["90000061"]);
-  assert.equal(sinTope[0].nombre, "Portal portátil");
+  assert.deepEqual(sinTope.map((p) => p.id), []);
+  const pendant = c1.find((p) => p.id === "90000061");
+  assert.equal(pendant.nombre, "Portal portátil");
+  assert.equal(pendant.bloqueado, false);
+  assert.equal(pendant.max, 27);
+  assert.equal(pendant.lvl, 1);
+  assert.equal(pendant.pendientes[0].nivel, 2);
+  assert.deepEqual(pendant.pendientes[0].mena, { brillante: 120, reluciente: 0, estrellada: 0 });
+  assert.equal(pendant.pendientes.find((step) => step.nivel === 27).mena.estrellada, 150);
   assert.equal(oreTotal(sinTope).brillante, 0);
 
   const c2 = equipmentRows(exportsByTag.get("#R00C8CPQC"), index, 16);
@@ -956,9 +963,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.2.2 y cachés cp-shell-v49 / cp-img-v11", () => {
-  assert.equal(APP_VERSION, "4.2.2");
-  assert.equal(SHELL_CACHE, "cp-shell-v49");
+test("versión 4.2.3 y cachés cp-shell-v50 / cp-img-v11", () => {
+  assert.equal(APP_VERSION, "4.2.3");
+  assert.equal(SHELL_CACHE, "cp-shell-v50");
   assert.equal(IMAGE_CACHE, "cp-img-v11");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1011,6 +1018,7 @@ test("versión 4.2.2 y cachés cp-shell-v49 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-shell-v46"), false);
   assert.equal(sw.includes("cp-shell-v47"), false);
   assert.equal(sw.includes("cp-shell-v48"), false);
+  assert.equal(sw.includes("cp-shell-v49"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1018,7 +1026,8 @@ test("versión 4.2.2 y cachés cp-shell-v49 / cp-img-v11", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v49/);
+  assert.match(caches, /cp-shell-v50/);
+  assert.equal(caches.includes("cp-shell-v49"), false);
   assert.equal(caches.includes("cp-shell-v48"), false);
   assert.equal(caches.includes("cp-shell-v47"), false);
   assert.equal(caches.includes("cp-shell-v46"), false);
@@ -2378,8 +2387,8 @@ test("2.1.4: cada nivel de estructura tiene imagen propia o la del nivel más ce
   assert.equal(manifest.items["107000001"].imagenes_por_nivel["3"].ruta, "images/guardians/smasher_3.png");
   assert.equal(manifest.items["107000001"].imagenes_por_nivel["5"].marca, "Imagen del nivel 1 (no hay oficial del 5)");
   assert.equal(manifest.items["107000000"].imagenes_por_nivel, undefined);
-  assert.equal(manifest.items["102000033"].nombre, "Vela incandescente (Hitpoints)");
-  assert.equal(manifest.items["102000041"].nombre, "Catapulta explosiva (Explosion Damage)");
+  assert.equal(manifest.items["102000033"].nombre, "Vela incandescente (Puntos de vida)");
+  assert.equal(manifest.items["102000041"].nombre, "Catapulta explosiva (Daño de explosión)");
   assert.equal(manifest.items["90000060"].nombre, "Mazo de la venganza");
   assert.equal(manifest.items["90000061"].nombre, "Portal portátil");
   assert.equal(manifest.items["90000061"].estado, "faltante");
@@ -2789,7 +2798,7 @@ test("4.1.7: cargador del paquete de temas, «Ninguno» por defecto y caché pro
   const app = leer("../js/app.js");
   assert.match(cargador, /localStorage\.getItem\(CLAVE\) \|\| ""/);
   assert.match(cargador, /\.\/paquete-estetico\//);
-  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.2\.2"/);
+  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.2\.3"/);
   assert.match(sw, /"\.\/js\/temas-paquete\.js"/);
   assert.match(sw, /const TEMAS_CACHE = "cp-temas-"/);
   assert.match(sw, /!key\.startsWith\(TEMAS_CACHE\)/);

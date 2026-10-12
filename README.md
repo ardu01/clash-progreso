@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.2.2</strong><br>
+  <strong>Versión 4.2.3</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -266,7 +266,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v49` y la de imágenes `cp-img-v11`. Oro, elixir, oscuro, gemas, las tres menas y el martillo de Mejorar son PNG del Fan Kit, en `assets/oficial/resources/`, con su `url_origen` en el manifiesto. La tarjeta de coste los muestra tal cual, y el martillo va en la tarjeta como en el botón Mejorar. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v50` y la de imágenes `cp-img-v11`. Oro, elixir, oscuro, gemas, las tres menas y el martillo de Mejorar son PNG del Fan Kit, en `assets/oficial/resources/`, con su `url_origen` en el manifiesto. La tarjeta de coste los muestra tal cual, y el martillo va en la tarjeta como en el botón Mejorar. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). Las armas del TH12 al TH16, las supercargas de TH18 y las menas del Portal portátil llevan su fuente en `data/armas-th.json`, `data/supercargas.json` y `data/costes.json`. Los muros del TH18 se comprobaron y no cambian. `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -274,6 +274,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.2.3 | Sin el botón «Activar avisos». En Copia se instalan los atajos «Copiar aldea» e «Importar a Clash». Los módulos de la defensa artesanal pasan a español. Entran las armas del TH12 al TH16 (un nivel, coste 0), las supercargas de TH18 y las menas del Portal portátil, con la fuente marcada. Los muros del TH18 se comprobaron y siguen igual. |
 | 4.2.2 | Paquete de temas 1.1.0: 20 temas nuevos (mascotas, hechizos, supertropas, asedio, aldea del constructor, Alquimista y Tiradora), agrupados en el selector. Solo en modo oscuro. |
 | 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono oficial arriba, imagen en el centro, texto debajo y el martillo de Mejorar. Los miles van con espacio. Los botones, y la i dorada, llevan margen arriba y abajo y siguen en la línea de su título. |
 | 4.2.0 | El plan decide la siguiente mejora: Ahora, Hecho y las próximas sesiones. El chip elige maxear el TH actual o subir. Inicio resume el día de las 11 cuentas. Sin cifras de recursos no se bloquea. |

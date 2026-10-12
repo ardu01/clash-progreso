@@ -1,0 +1,133 @@
+{
+ "fuente": "chiefpansancolt/clash-of-clans-data aaa517aae76f3d8dbc88448f1a2c13cd8808569b, data/home/town-hall/town-hall.json",
+ "url": "https://github.com/chiefpansancolt/clash-of-clans-data/blob/aaa517aae76f3d8dbc88448f1a2c13cd8808569b/data/home/town-hall/town-hall.json",
+ "nota": "El 6 oct 2025 Supercell quitó los niveles de mejora del arma en los ayuntamientos 12 a 15. El 16 ya tenía un solo nivel. El archivo solo trae el nivel 1 a coste 0. Los costes antiguos del blog en español no se cobran.",
+ "blog_es_nombres": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+ "blog_sin_niveles": "https://supercell.com/en/games/clashofclans/blog/release-notes/get-ready-for-ranked-update/",
+ "armas": [
+  {
+   "th": 12,
+   "nombre": "Giga Tesla",
+   "nombre_en": "Giga Tesla",
+   "nombre_fuente": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+   "unico": true,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 140
+    }
+   ],
+   "nota": "Giga Tesla. Un solo nivel, coste 0: viene con el ayuntamiento. Fuente: clash-of-clans-data aaa517aa. Supercell quitó los niveles de mejora el 6 oct 2025."
+  },
+  {
+   "th": 13,
+   "nombre": "Giga torre infernal",
+   "nombre_en": "Giga Inferno",
+   "nombre_fuente": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+   "unico": true,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 200
+    }
+   ],
+   "nota": "Giga torre infernal. Un solo nivel, coste 0: viene con el ayuntamiento. Fuente: clash-of-clans-data aaa517aa. Supercell quitó los niveles de mejora el 6 oct 2025."
+  },
+  {
+   "th": 14,
+   "nombre": "Giga torre infernal",
+   "nombre_en": "Giga Inferno",
+   "nombre_fuente": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+   "unico": true,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 280
+    }
+   ],
+   "nota": "Giga torre infernal. Un solo nivel, coste 0: viene con el ayuntamiento. Fuente: clash-of-clans-data aaa517aa. Supercell quitó los niveles de mejora el 6 oct 2025."
+  },
+  {
+   "th": 15,
+   "nombre": "Giga torre infernal",
+   "nombre_en": "Giga Inferno",
+   "nombre_fuente": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+   "unico": true,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 300
+    }
+   ],
+   "nota": "Giga torre infernal. Mismo nombre oficial que en los ayuntamientos 13 y 14. Un solo nivel, coste 0. Fuente: clash-of-clans-data aaa517aa."
+  },
+  {
+   "th": 16,
+   "nombre": "Giga torre infernal",
+   "nombre_en": "Giga Inferno",
+   "nombre_fuente": "https://supercell.com/en/games/clashofclans/es/blog/news/actualizaci%C3%B3n-ayuntamiento-15-reducci%C3%B3n-de-costes/",
+   "unico": true,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 300
+    }
+   ],
+   "nota": "Giga torre infernal. El ayuntamiento 16 ya tenía un solo nivel. Coste 0. Fuente: clash-of-clans-data aaa517aa."
+  },
+  {
+   "th": 17,
+   "nombre": "Artillería infernal",
+   "nombre_en": "Inferno Artillery",
+   "unico": false,
+   "niveles": [
+    {
+     "nivel": 1,
+     "n": 0,
+     "s": 0,
+     "dps": 40
+    },
+    {
+     "nivel": 2,
+     "n": 10000000,
+     "s": 518400,
+     "dps": 45
+    },
+    {
+     "nivel": 3,
+     "n": 12000000,
+     "s": 604800,
+     "dps": 50
+    },
+    {
+     "nivel": 4,
+     "n": 14000000,
+     "s": 691200,
+     "dps": 55
+    },
+    {
+     "nivel": 5,
+     "n": 18000000,
+     "s": 864000,
+     "dps": 60
+    }
+   ],
+   "nota": "Artillería infernal. El nivel 1 viene con el ayuntamiento. Los niveles 2 a 5 se mejoran: el plan ya usa ese oro y ese tiempo."
+  },
+  {
+   "th": 18,
+   "sin_arma": true,
+   "nota": "El ayuntamiento 18 no tiene arma en clash-of-clans-data aaa517aa."
+  }
+ ]
+}

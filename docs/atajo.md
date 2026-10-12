@@ -39,9 +39,36 @@ Un atajo viejo todavía puede abrir la app con `#lote=` (el texto va con `encode
 
 ## Atajos «Copiar aldea» e «Importar a Clash»
 
-No hay un enlace de instalación. Un enlace de iCloud lo tiene que firmar una cuenta de Apple, y esta app no tiene esa cuenta. Se crean una vez en la app Atajos. No sustituyen a **Actualizar todas**: dejan la exportación en el portapapeles y abren Clash Progreso para que **Pegar esta cuenta** la lea.
+En Copia hay dos botones de instalación. Los archivos viven en el repositorio y se abren desde estas direcciones:
 
-No uses «Abrir URL» con `https://ardu01.github.io/clash-progreso/`. Esa dirección abre Safari, y Safari no comparte las cuentas con el icono de inicio.
+- [Instalar «Copiar aldea»](https://ardu01.github.io/clash-progreso/atajos/copiar-aldea.shortcut)
+- [Instalar «Importar a Clash»](https://ardu01.github.io/clash-progreso/atajos/importar-a-clash.shortcut)
+
+No sustituyen a **Actualizar todas**: dejan la exportación en el portapapeles. **Pegar esta cuenta** la lee. No uses «Abrir URL» con `https://ardu01.github.io/clash-progreso/`. Esa dirección abre Safari, y Safari no comparte las cuentas con el icono de inicio.
+
+Si iOS no instala el archivo a la primera, en Ajustes → Atajos permite los atajos no fiables y vuelve a abrir el enlace. Si aun así no entra, créalos a mano con los pasos de abajo: hacen lo mismo que el archivo.
+
+### Copiar aldea
+
+1. En Atajos, toca el botón de nuevo atajo.
+2. Nómbralo **Copiar aldea**.
+3. Añade **Obtener portapapeles**.
+4. Añade **Si**. La condición es: Portapapeles contiene `tag`.
+5. Dentro del sí, añade **Mostrar notificación** con el texto: `Aldea copiada. En Clash Progreso toca Actualizar todas y luego Pegar esta cuenta.`
+6. Dentro del no, añade **Mostrar notificación** con el texto: `No hay una exportación. En el juego: Ajustes → Más ajustes → Exportar datos → Copiar.` y después **Detener atajo**.
+
+Antes de lanzarlo, en el juego copia la aldea (el menú de arriba). El atajo solo comprueba que el portapapeles trae una exportación y te devuelve a Actualizar todas.
+
+### Importar a Clash
+
+1. Nuevo atajo, nombre **Importar a Clash**.
+2. **Obtener portapapeles**.
+3. **Si** el portapapeles contiene `tag`.
+4. Dentro del sí, **Abrir app** y elige **Clash Progreso** (el icono de inicio, no Safari). El archivo de instalación deja esa acción vacía a propósito: el icono de la pantalla de inicio no tiene un identificador fijo. Si el icono no sale en la lista, quédate en la notificación del otro atajo y abre el icono a mano.
+5. Dentro del no, la misma notificación de «No hay una exportación» y **Detener atajo**.
+
+Al abrirse la app, toca **Actualizar todas** y **Pegar esta cuenta**. Ese toque lee el mismo portapapeles. Los dos atajos y Actualizar todas trabajan sobre ese texto: no hace falta pegarlo en una dirección.
+
 
 ### Copiar aldea
 

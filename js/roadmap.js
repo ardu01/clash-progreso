@@ -33,7 +33,7 @@ export const SUGERENCIAS_RUSH = [
   { id: "1000068", razon: "Caseta de animales. Solo entra si ese ayuntamiento ya la tiene; si no, no se inventa." },
 ];
 const IDS_SUGERENCIA = new Set(SUGERENCIAS_RUSH.map((s) => s.id));
-export const REQUISITOS_NOTA = "Provisional. clash-of-clans-data 0.18.0 no trae los requisitos para mejorar el ayuntamiento. Esta lista coloca cada estructura del ayuntamiento anterior, salvo las chozas, el castillo del clan y la cabaña de B.O.B, y pide el Consejo heroico a su máximo. Desde el TH17 también pide las piezas de las fusiones al máximo: cañón y torre de arqueras al 21, torre de mago al 17 y águila al 7. No está comprobada en el cliente.";
+export const REQUISITOS_NOTA = "Provisional. clash-of-clans-data 0.18.0 no trae los requisitos para mejorar el ayuntamiento. Esta lista coloca cada estructura del ayuntamiento anterior, salvo las chozas, el castillo del clan y la cabaña de B.O.B, y pide el Consejo heroico a su máximo. Desde el TH17 también pide las piezas de las fusiones al máximo: cañón y torre de arqueras al 21, torre de mago al 17 y águila al 7. No está comprobada en el cliente. El arma del TH12 al TH16 no se mejora: viene al máximo con el ayuntamiento. La artillería infernal del TH17 sí, del 2 al 5.";
 
 const HERO_HALL = "1000071";
 const BOB_HUT = "1000064";

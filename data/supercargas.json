@@ -1,0 +1,388 @@
+{
+ "fuente": "chiefpansancolt/clash-of-clans-data aaa517aae76f3d8dbc88448f1a2c13cd8808569b (2026-10-04), niveles con supercharge: true",
+ "url": "https://github.com/chiefpansancolt/clash-of-clans-data/tree/aaa517aae76f3d8dbc88448f1a2c13cd8808569b/data/home",
+ "nota": "Supercarga de TH18, aparte del nivel normal. No sustituye el coste de los niveles 1 a 3. No entra en el porcentaje ni en el plan de maxear.",
+ "items": {
+  "1000002": {
+   "nombre_en": "Elixir Collector",
+   "archivo": "resource-buildings/elixir-collector.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 1700000,
+     "s": 172800,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 1500000,
+     "s": 259200,
+     "th": 18
+    },
+    {
+     "nivel": 3,
+     "r": "oro",
+     "n": 1300000,
+     "s": 345600,
+     "th": 18
+    }
+   ]
+  },
+  "1000004": {
+   "nombre_en": "Gold Mine",
+   "archivo": "resource-buildings/gold-mine.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "elixir",
+     "n": 1700000,
+     "s": 172800,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "elixir",
+     "n": 1500000,
+     "s": 259200,
+     "th": 18
+    },
+    {
+     "nivel": 3,
+     "r": "elixir",
+     "n": 1300000,
+     "s": 345600,
+     "th": 18
+    }
+   ]
+  },
+  "1000012": {
+   "nombre_en": "Air Defense",
+   "archivo": "defenses/air-defense.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 6000000,
+     "s": 237600,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 3000000,
+     "s": 367200,
+     "th": 18
+    }
+   ]
+  },
+  "1000013": {
+   "nombre_en": "Mortar",
+   "archivo": "defenses/mortar.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 9000000,
+     "s": 345600,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 7000000,
+     "s": 518400,
+     "th": 18
+    }
+   ]
+  },
+  "1000015": {
+   "nombre_en": "Builder's Hut",
+   "archivo": "defenses/builders-hut.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 10000000,
+     "s": 345600,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 8000000,
+     "s": 518400,
+     "th": 18
+    }
+   ]
+  },
+  "1000019": {
+   "nombre_en": "Hidden Tesla",
+   "archivo": "defenses/hidden-tesla.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 12000000,
+     "s": 388800,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 8000000,
+     "s": 561600,
+     "th": 18
+    }
+   ]
+  },
+  "1000021": {
+   "nombre_en": "X-Bow",
+   "archivo": "defenses/x-bow.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 9000000,
+     "s": 475200,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 7000000,
+     "s": 648000,
+     "th": 18
+    }
+   ]
+  },
+  "1000023": {
+   "nombre_en": "Dark Elixir Drill",
+   "archivo": "resource-buildings/dark-elixir-drill.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "elixir",
+     "n": 5100000,
+     "s": 259200,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "elixir",
+     "n": 4500000,
+     "s": 345600,
+     "th": 18
+    },
+    {
+     "nivel": 3,
+     "r": "elixir",
+     "n": 3900000,
+     "s": 432000,
+     "th": 18
+    }
+   ]
+  },
+  "1000027": {
+   "nombre_en": "Inferno Tower",
+   "archivo": "defenses/inferno-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 13000000,
+     "s": 432000,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 8500000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000032": {
+   "nombre_en": "Bomb Tower",
+   "archivo": "defenses/bomb-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 6000000,
+     "s": 216000,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 3000000,
+     "s": 345600,
+     "th": 18
+    }
+   ]
+  },
+  "1000067": {
+   "nombre_en": "Scattershot",
+   "archivo": "defenses/scattershot.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 14500000,
+     "s": 432000,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 9500000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000077": {
+   "nombre_en": "Monolith",
+   "archivo": "defenses/monolith.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oscuro",
+     "n": 220000,
+     "s": 432000,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oscuro",
+     "n": 200000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000079": {
+   "nombre_en": "Multi-Gear Tower",
+   "archivo": "defenses/multi-gear-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 12000000,
+     "s": 518400,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 10000000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000084": {
+   "nombre_en": "Multi-Archer Tower",
+   "archivo": "defenses/multi-archer-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 12000000,
+     "s": 518400,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 10000000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000085": {
+   "nombre_en": "Ricochet Cannon",
+   "archivo": "defenses/ricochet-cannon.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 12000000,
+     "s": 518400,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 10000000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  },
+  "1000086": {
+   "nombre_en": "Revenge Tower",
+   "archivo": "defenses/revenge-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oscuro",
+     "n": 220000,
+     "s": 604800,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oscuro",
+     "n": 200000,
+     "s": 691200,
+     "th": 18
+    }
+   ]
+  },
+  "1000089": {
+   "nombre_en": "Firespitter",
+   "archivo": "defenses/firespitter.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 14000000,
+     "s": 561600,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 12000000,
+     "s": 648000,
+     "th": 18
+    }
+   ]
+  },
+  "1000102": {
+   "nombre_en": "Super Wizard Tower",
+   "archivo": "defenses/super-wizard-tower.json",
+   "niveles": [
+    {
+     "nivel": 1,
+     "r": "oro",
+     "n": 12000000,
+     "s": 518400,
+     "th": 18
+    },
+    {
+     "nivel": 2,
+     "r": "oro",
+     "n": 14000000,
+     "s": 604800,
+     "th": 18
+    }
+   ]
+  }
+ }
+}

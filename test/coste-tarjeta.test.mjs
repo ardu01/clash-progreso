@@ -100,7 +100,7 @@ test("4.2.1: Plan, Hoy y Mejoras pintan la tarjeta cuadrada", () => {
   assert.equal(ay.includes("fmtRes"), false);
   const curso = app.slice(app.indexOf("function upRow("), app.indexOf("function helpersBlock("));
   assert.match(curso, /fichaMejora/);
-  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.2/);
+  assert.match(html, /js\/coste-tarjeta\.js\?v=4\.2\.3/);
   assert.match(sw, /js\/coste-tarjeta\.js/);
   assert.equal(app.includes("cuello de botella"), false);
 });

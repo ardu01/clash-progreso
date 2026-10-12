@@ -34,7 +34,7 @@ async function preparar(page, standalone) {
   }, standalone);
 }
 
-const ACTIONS = "data-go,data-actualizar,data-actualizar-listo,data-edit,data-ficha,data-paste-now,data-pegar-cuenta,data-pegar-campo,data-pegar-mano,data-plan-objetivo,data-hecho,data-plan-modo,data-plan-flag,data-prov,data-theme,data-notify,data-clear-filters,data-sueno-clear,data-tiempo,data-recurso,data-th,data-grupo,data-chart-kind,data-level-kind,data-rank,data-compare,data-grupo-add,data-grupo-del,data-seg,data-mej,data-pcat,data-pstatus,data-close-editor,data-principal,data-delete,data-backup,data-close-ficha,data-close,data-restore,data-wipe,data-alert,data-dl,data-quitar,data-im,data-im-back,data-im-row,data-act,data-eq-vista,data-eq-cuenta,data-eq-rareza,data-eq-bloqueados,data-eq-ocultar,data-eq-elegir".split(",");
+const ACTIONS = "data-go,data-actualizar,data-actualizar-listo,data-edit,data-ficha,data-paste-now,data-pegar-cuenta,data-pegar-campo,data-pegar-mano,data-plan-objetivo,data-hecho,data-plan-modo,data-plan-flag,data-prov,data-theme,data-clear-filters,data-sueno-clear,data-tiempo,data-recurso,data-th,data-grupo,data-chart-kind,data-level-kind,data-rank,data-compare,data-grupo-add,data-grupo-del,data-seg,data-mej,data-pcat,data-pstatus,data-close-editor,data-principal,data-delete,data-backup,data-close-ficha,data-close,data-restore,data-wipe,data-alert,data-dl,data-quitar,data-im,data-im-back,data-im-row,data-act,data-eq-vista,data-eq-cuenta,data-eq-rareza,data-eq-bloqueados,data-eq-ocultar,data-eq-elegir".split(",");
 
 function enumerar(page) {
   return page.evaluate((names) => {
@@ -196,7 +196,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.2"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.2")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.3"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.3")).join(" "));
 const hoy = await page.evaluate(() => {
   const root = document.querySelector("[data-hoy-cuentas]");
   const links = root ? [...root.querySelectorAll("a[href*='/plan']")] : [];
