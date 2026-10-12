@@ -626,5 +626,120 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
   font: 400 1rem/1.3 var(--font); font-variant-numeric: tabular-nums;
 }
 .card > [data-recursos-dia] { margin-top: 4px; }
+
+/* 4.2.0: el plan decide. El botón cabe al lado del nombre y los dos chips se ven enteros. */
+.chip-row.chip-row--plan {
+  flex-wrap: wrap; overflow: visible;
+  -webkit-mask-image: none; mask-image: none;
+}
+.chip-row.chip-row--plan::after { content: none; }
+.chip-row.chip-row--plan::before { min-width: 0; }
+[data-plan-ahora] .row__trail { flex: none; }
+[data-plan-ahora] .btn.btn--small { min-height: 44px; padding: 0 12px; }
+[data-plan-ahora] .row__sub,
+[data-plan-sesiones] .row__sub,
+[data-hoy-cuentas] .row__sub { white-space: normal; overflow-wrap: anywhere; }
+
+/* 4.2.1: tarjeta de coste. Cuadrada, cifra arriba, dibujo al centro, nombre debajo. */
+.mejora-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+.mejora-slot { min-width: 0; display: flex; flex-direction: column; }
+.mejora {
+  aspect-ratio: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 6px 8px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid #1E1B16;
+  background: var(--panel-2);
+  color: var(--ink);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+.mejora__coste {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 2px 8px; width: 100%; min-width: 0; margin: 0;
+  font: 800 .75rem/1.1 var(--font-ui, var(--font));
+}
+.mejora__recurso { display: inline-flex; align-items: center; gap: 3px; min-width: 0; max-width: 100%; }
+.mejora__recurso .num { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mejora__vacio { color: var(--label-2); }
+.recurso {
+  --size: 18px;
+  position: relative;
+  width: var(--size); height: var(--size);
+  flex: none; display: block; overflow: hidden;
+}
+.recurso.is-ajuste > img {
+  position: absolute;
+  width: calc(var(--dw) * 1px);
+  height: calc(var(--dh) * 1px);
+  max-width: none; max-height: none;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  object-fit: fill;
+}
+.mejora__fig > .mejora__martillo {
+  position: absolute; right: 0; bottom: 0; z-index: 1;
+}
+.mejora__fig { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; width: 100%; }
+.mejora__fig .thumb { --size: 64px; }
+.mejora__nombre, .mejora__nivel, .mejora__pie {
+  max-width: 100%; margin: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mejora__nombre { font: 700 .75rem/1.15 var(--font); }
+.mejora__nivel, .mejora__pie { font-size: .68rem; color: var(--label-2); }
+.mejora-hecho { width: 100%; min-height: 44px; margin-top: 6px; }
+.hoy-cuenta {
+  display: block; color: inherit; text-decoration: none;
+  padding: 10px 12px 12px;
+}
+.hoy-cuenta .row__title { margin-bottom: 8px; }
+.list > li > .mejora-grid { padding: 0 12px 12px; }
+.coste-linea { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.coste-linea .mejora__coste { width: auto; justify-content: flex-start; font-size: .882rem; }
 .t-body.cubre-ok { color: var(--green-text); font-weight: 700; }
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }
+
+/* 4.2.1: aire arriba y abajo, sin sacar el botón de la línea de su título. */
+button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *) {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.section-head,
+.title-line { align-items: center; }
+.section-head > button.info,
+.title-line > button.info { margin: 0; align-self: center; }
+.screen > .section > .section-head > .section-header,
+.screen > .section > .section-head > h2.section-header,
+.section-head > :is(h2, .t-headline, .section-header) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.section-head,
+.card > .section-head { margin-bottom: 12px; }
+.seg-wrap,
+.chip-row,
+.motor-grid,
+.alert__actions {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.motor-grid { gap: 12px; }
+.chip-row { row-gap: 12px; align-items: center; }
+.section-head > .info-pop,
+.title-line > .info-pop,
+.info-pop { margin-top: 12px; }
+.sheet__actions .btn + .btn { margin-top: 12px; }
+.mejora-hecho { margin-top: 12px; margin-bottom: 12px; }

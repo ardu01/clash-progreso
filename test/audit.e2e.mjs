@@ -34,7 +34,7 @@ async function preparar(page, standalone) {
   }, standalone);
 }
 
-const ACTIONS = "data-go,data-actualizar,data-actualizar-listo,data-edit,data-ficha,data-paste-now,data-pegar-cuenta,data-pegar-campo,data-pegar-mano,data-plan-modo,data-plan-flag,data-prov,data-theme,data-notify,data-clear-filters,data-sueno-clear,data-tiempo,data-recurso,data-th,data-grupo,data-chart-kind,data-level-kind,data-rank,data-compare,data-grupo-add,data-grupo-del,data-seg,data-mej,data-pcat,data-pstatus,data-close-editor,data-principal,data-delete,data-backup,data-close-ficha,data-close,data-restore,data-wipe,data-alert,data-dl,data-quitar,data-im,data-im-back,data-im-row,data-act,data-eq-vista,data-eq-cuenta,data-eq-rareza,data-eq-bloqueados,data-eq-ocultar,data-eq-elegir".split(",");
+const ACTIONS = "data-go,data-actualizar,data-actualizar-listo,data-edit,data-ficha,data-paste-now,data-pegar-cuenta,data-pegar-campo,data-pegar-mano,data-plan-objetivo,data-hecho,data-plan-modo,data-plan-flag,data-prov,data-theme,data-notify,data-clear-filters,data-sueno-clear,data-tiempo,data-recurso,data-th,data-grupo,data-chart-kind,data-level-kind,data-rank,data-compare,data-grupo-add,data-grupo-del,data-seg,data-mej,data-pcat,data-pstatus,data-close-editor,data-principal,data-delete,data-backup,data-close-ficha,data-close,data-restore,data-wipe,data-alert,data-dl,data-quitar,data-im,data-im-back,data-im-row,data-act,data-eq-vista,data-eq-cuenta,data-eq-rareza,data-eq-bloqueados,data-eq-ocultar,data-eq-elegir".split(",");
 
 function enumerar(page) {
   return page.evaluate((names) => {
@@ -196,7 +196,20 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.1.9"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.1.9")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.1"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.1")).join(" "));
+const hoy = await page.evaluate(() => {
+  const root = document.querySelector("[data-hoy-cuentas]");
+  const links = root ? [...root.querySelectorAll("a[href*='/plan']")] : [];
+  return {
+    n: links.length,
+    hrefs: links.map((a) => a.getAttribute("href")),
+    titulo: root ? (root.querySelector(".section-header span")?.textContent || "") : "",
+  };
+});
+if (hoy.titulo !== "Hoy en tus cuentas") bad("falta Hoy en tus cuentas");
+if (hoy.n !== 11) bad("Hoy en tus cuentas muestra " + hoy.n + " cuentas");
+if (!hoy.hrefs[0] || !hoy.hrefs[0].includes("28PLGP0G2")) bad("Hoy no empieza por C1: " + hoy.hrefs[0]);
+if (!hoy.hrefs[1] || !hoy.hrefs[1].includes("R00C8CPQC")) bad("Hoy no sigue por C2: " + hoy.hrefs[1]);
 
 for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);
@@ -209,6 +222,17 @@ else {
   const id = tag.split("/")[2];
   for (const hash of [tag, tag + "/plan", tag + "/historial", "#/perfil/" + id, "#/equipo/" + id, "#/importar", "#/ajustes"]) {
     await ir(page, hash);
+    if (String(hash).endsWith("/plan")) {
+      const plan = await page.evaluate(() => ({
+        ahora: !!document.querySelector("[data-plan-ahora]"),
+        sesiones: !!document.querySelector("[data-plan-sesiones]"),
+        modos: document.querySelectorAll("[data-plan-modo], [data-plan-flag], [data-plan-th], [data-recursos], [data-cobertura]").length,
+        objetivo: document.querySelector("[data-plan-objetivo='maxear']")?.textContent?.trim() || "",
+      }));
+      if (!plan.ahora || !plan.sesiones) bad(hash + " no muestra Ahora y Próximas sesiones");
+      if (plan.modos) bad(hash + " sigue pidiendo configuración");
+      if (plan.objetivo !== "Maxear TH actual") bad(hash + " el objetivo es «" + plan.objetivo + "»");
+    }
     await barrer(page, hash);
   }
 }

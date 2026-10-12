@@ -30,8 +30,10 @@ import { accountTimeline, finalesEn, finDe, fraseFranja, franjasDe, sleepFromClo
 import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "./filters.js";
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
+import { horaMadrid, recomendar } from "./recomendador.js";
+import { htmlCoste, htmlMartillo } from "./coste-tarjeta.js";
 import {
-  DURATIONS, PLAN_TIMELINE, RUSH_NOTE, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
+  DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
 } from "./roadmap.js";
 import { normalizeProvisional, reconcileMessage, reconcileProvisionals, toggleProvisional } from "./provisional.js";
@@ -914,6 +916,33 @@ function costOf(exp, th) {
   return remainingCost(piecesOf(exp, state.index, th));
 }
 
+function cifraEnBolsa(bag) {
+  if (!bag) return false;
+  return !!(bag.oro || bag.elixir || bag.oscuro || bag.muros || bag.gemas || bag.brillante || bag.resplandeciente || bag.estelar || bag.reluciente || bag.glowy || bag.estrellada || bag.starry);
+}
+
+function diasDeBolsa(bag) {
+  if (!bag) return "";
+  const times = [];
+  const dias = bag.diasConstructor != null ? bag.diasConstructor : bagDays(bag.segConstructor);
+  if (dias) times.push(`${fmtNum(dias)} d constructor`);
+  const lab = bagDays(bag.segLaboratorio);
+  const pets = bagDays(bag.segMascotas);
+  if (lab) times.push(`${fmtNum(lab)} d laboratorio`);
+  if (pets) times.push(`${fmtNum(pets)} d mascotas`);
+  return times.join(" · ");
+}
+
+function lineaCoste(bag, vacio) {
+  const dias = diasDeBolsa(bag);
+  if (!cifraEnBolsa(bag)) {
+    if (dias) return `<p class="t-footnote c-2 num">${esc(dias)}</p>`;
+    return vacio ? `<p class="t-body">${esc(vacio)}</p>` : "";
+  }
+  const nota = dias ? `<p class="t-footnote c-2 num">${esc(dias)}</p>` : "";
+  return `<div class="coste-linea">${htmlCoste(bag)}</div>${nota}`;
+}
+
 function ayuntamientoLine(exp) {
   const th = townHallLevel(exp);
   if (!Number.isInteger(th)) return "";
@@ -924,12 +953,14 @@ function ayuntamientoLine(exp) {
   let hasta = th + 1;
   const pedido = plan && Number.isInteger(plan.th) ? plan.th : (meta && Number.isInteger(meta.objetivo) ? meta.objetivo : null);
   if (pedido != null && pedido > th) hasta = Math.min(18, pedido);
-  let text = `TH${th} → ${th + 1} · ${fmtRes(siguiente.oro)} oro · ${textoSegundos(siguiente.segundos)}`;
+  let extra = "";
   if (hasta > th + 1) {
     const rango = costeThRango(th, hasta);
-    if (rango && rango.oro) text += ` · hasta TH${hasta}: ${fmtRes(rango.oro)} oro · ${textoSegundos(rango.segundos)}`;
+    if (rango && rango.oro) {
+      extra = `<p class="t-footnote c-2">Hasta TH${hasta}</p><div class="coste-linea">${htmlCoste({ oro: rango.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(rango.segundos))}</p>`;
+    }
   }
-  return `<p class="t-body">Ayuntamiento ${esc(text)}</p>`;
+  return `<p class="t-body">Ayuntamiento TH${th} → ${th + 1}</p><div class="coste-linea">${htmlCoste({ oro: siguiente.oro })}</div><p class="t-footnote c-2 num">${esc(textoSegundos(siguiente.segundos))}</p>${extra}`;
 }
 
 function resourceAllowsItem(it) {
@@ -1068,27 +1099,27 @@ function planList(title, items) {
 function costCard(exp, th, full) {
   const cost = costOf(exp, th);
   const bag = cost.total;
-  const line = costBits(bag) || "Nada pendiente con coste conocido";
+  const line = lineaCoste(bag, "Nada pendiente con coste conocido");
   const miss = bag.sinCoste ? `<p class="t-footnote c-2">${bag.sinCoste === 1 ? "1 paso" : `${bag.sinCoste} pasos`} sin coste en la fuente: no se ha sumado.</p>` : "";
   const cite = `<p class="t-footnote c-2">Hasta el máximo de TH${th}, sin subir el ayuntamiento. Fuente: <a href="${esc(COST_URL)}" target="_blank" rel="noopener noreferrer">${esc(COST_SOURCE)}</a>. Los muros de «oro o elixir» se pagan con uno de los dos. <a href="${esc(TH_URL)}" target="_blank" rel="noopener noreferrer" title="${esc(TH_FUENTE)}">Ayuntamiento</a>.</p>`;
   const hall = ayuntamientoLine(exp);
   if (!full) {
     return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo</h2>
-      <p class="t-body">${esc(line)}</p>
+      ${line}
       ${hall}
       ${miss}${cite}
     </div></div>`;
   }
   const rows = villageCats().map((c) => {
     const part = cost.porCategoria[c.key];
-    const text = costBits(part);
-    if (!text) return "";
-    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(c.label)}</span><span class="row__sub">${esc(text)}</span></span></div></li>`;
+    const cuerpo = lineaCoste(part, "");
+    if (!cuerpo) return "";
+    return `<li><div class="row"><span class="row__main"><span class="row__title">${esc(c.label)}</span>${cuerpo}</span></div></li>`;
   }).join("");
   return `<div class="section"><div class="card">
       <h2 class="t-headline">Hasta el máximo de TH${th}</h2>
-      <p class="t-body">${esc(line)}</p>
+      ${line}
       ${hall}
       ${miss}${cite}
     </div></div>
@@ -1267,6 +1298,7 @@ function renderInicio() {
       <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
       <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
     </div></div>`;
+  const hoy = hoyEnCuentas();
   const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
   const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
@@ -1316,6 +1348,7 @@ function renderInicio() {
     <p class="large-sub">${esc(cabecera)}</p>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
+    ${hoy}
     ${htmlMotor()}
     <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
     <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
@@ -1587,6 +1620,89 @@ function roadmapList(road) {
   return `<div class="section"><div class="section-header"><span>Línea de tiempo</span></div><ul class="list">${rows}</ul>${more}${missing}</div>`;
 }
 
+function planVista(raw, currentTh) {
+  const plan = effectivePlan(raw);
+  const limpio = {
+    ...plan,
+    ataque: false,
+    defensa: false,
+    muros: false,
+    heroes: false,
+    categoria: "",
+    recurso: "todos",
+    duracion: "",
+    rush: "esencial",
+  };
+  const current = Number.isInteger(currentTh) ? currentTh : null;
+  const subir = plan.modo === "rushear" && current != null && current < maxTownHall(state.index);
+  if (subir) return { ...limpio, modo: "rushear", th: Math.min(maxTownHall(state.index), current + 1) };
+  return { ...limpio, modo: "maxear", th: null };
+}
+
+function decisionRoadmap(meta) {
+  const exp = expOf(meta.tag);
+  if (!exp || !state.index) return null;
+  const current = townHallLevel(exp);
+  const raw = state.planes[meta.tag];
+  const plan = planVista(raw, current);
+  if (JSON.stringify(effectivePlan(raw)) === JSON.stringify(plan)) return accountRoadmap(meta);
+  const key = claveRoadmap({
+    tag: meta.tag,
+    timestamp: exp.timestamp,
+    plan,
+    sueno: state.sleep,
+    now: state.now,
+  }) + "\0vista";
+  return cachedRoad(key, () => buildRoadmap({
+    exp,
+    index: state.index,
+    tag: meta.tag,
+    plan,
+    provisionals: state.provisionales,
+    sleep: activeSleep(),
+    now: state.now,
+  }));
+}
+
+function textoFinMadrid(ms) {
+  if (ms == null) return "";
+  if (madridDayKey(ms) === madridDayKey(state.now)) return horaMadrid(ms);
+  return fmtFin(ms);
+}
+
+function fichaMejora(paso, extra = {}) {
+  const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
+  const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
+  const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}${htmlMartillo()}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  if (!extra.boton) return card;
+  return `<div class="mejora-slot">${card}${extra.boton}</div>`;
+}
+
+function tarjetaAhora(paso, tag) {
+  const dur = paso.seconds == null ? "" : textoSegundos(paso.seconds);
+  const fin = textoFinMadrid(paso.fin);
+  const pie = [dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean).join(" · ");
+  const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
+  const boton = `<button type="button" class="btn btn--primary btn--small mejora-hecho" data-hecho data-prov-tag="${esc(tag)}" data-hecho-id="${esc(paso.id)}" data-hecho-from="${paso.fromLvl}" data-hecho-to="${paso.toLvl}" data-hecho-instance="${esc(paso.instance || "")}" data-hecho-queue="${esc(paso.queue || "constructor")}" data-hecho-title="${esc(paso.title)}" aria-label="${esc(aria)}">Hecho</button>`;
+  return fichaMejora(paso, { pie, boton });
+}
+
+function hoyEnCuentas() {
+  const porTag = new Map(allAccounts().map((m) => [m.tag, m]));
+  const cuentas = state.accounts.map((a) => porTag.get(a.tag)).filter(Boolean);
+  if (!cuentas.length) return "";
+  const filas = cuentas.map((meta) => {
+    const road = expOf(meta.tag) ? decisionRoadmap(meta) : null;
+    const rec = road ? recomendar(road) : null;
+    const cuerpo = rec && rec.ahora.length
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p)).join("")}</div>`
+      : `<span class="row__sub">${expOf(meta.tag) ? "Nada en esta sesión" : "Sin importar"}</span>`;
+    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="row__title">${esc(meta.nombre)}</span>${cuerpo}</a></li>`;
+  }).join("");
+  return `<div class="section" data-hoy-cuentas>${sectionHead("Hoy en tus cuentas")}<ul class="list list--tiles">${filas}</ul></div>`;
+}
+
 function renderPlan(tag) {
   const meta = accountByTag(tag);
   const exp = meta && expOf(meta.tag);
@@ -1594,25 +1710,25 @@ function renderPlan(tag) {
   if (!meta || !exp || !view) {
     return `<h1 class="large-title">Plan</h1><div class="section"><div class="card empty"><p class="t-title3">Esta cuenta aún no tiene datos</p></div></div>`;
   }
-  const road = accountRoadmap(meta);
-  const notas = [PLAN_TIMELINE];
-  if (road.heroesFuera) notas.push(`En ${HEROES_FUERA} los héroes quedan fuera del plan.`);
-  if (road.plan.modo === "rushear") notas.push(RUSH_NOTE);
-  else if (road.targetTh > road.currentTh) notas.push(`Para llegar a TH${road.targetTh} el nivel pedido es el máximo de TH${road.capTh}.`);
-  if (road.avisoHora) notas.push("Hay una mejora en curso sin hora exacta. No se le pone una.");
-  if (road.plan.modo === "rushear" && road.calendarioSeg != null && road.trabajoSeg > road.calendarioSeg) notas.push("El fin usa los constructores a la vez. Los días de constructor del coste son la suma del trabajo, no el calendario.");
-  if (road.plan.modo !== "rushear" && !road.conocidos) notas.push("La exportación no trae el número de constructores. No se inventan huecos libres.");
-  if (estadoColas(exp, state.now, { staleMs: staleLimit() }).desactualizada) notas.push(`Necesita actualización. Se conserva el último plan, del ${fmtWhen(exp.timestamp * 1000)}.`);
-  const fin = road.fin ? `<p class="t-body">Fin estimado ${esc(fmtFin(road.fin))} · ${road.orden.length} pasos</p>` : `<p class="t-body">${road.orden.length} pasos</p>`;
-  const cifras = road.rush ? "" : `${fin}<p class="t-body">${esc(costBits(road.coste) || "Sin coste conocido")}</p>`;
+  const road = decisionRoadmap(meta);
+  const rec = recomendar(road);
+  const current = road.currentTh || view.th || 1;
+  const puedeSubir = current < maxTownHall(state.index);
+  const subirOn = road.plan.modo === "rushear";
+  const ahora = rec.ahora.length
+    ? `<div class="mejora-grid">${rec.ahora.map((paso) => tarjetaAhora(paso, meta.tag)).join("")}</div>`
+    : `<div class="card empty"><p class="t-title3">Nada que iniciar en esta sesión.</p></div>`;
+  const sesiones = rec.sesiones.length
+    ? `<ul class="list">${rec.sesiones.map((ses) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(ses.dia)} · <span class="num">${esc(ses.hora)}</span></span></span></div></li>${ses.huecos.map((h) => `<li><div class="row"><span class="row__main"><span class="row__title">${esc(h.hueco)}</span><span class="row__sub">${esc(h.title)} <span class="num">Nv ${h.fromLvl} → ${h.toLvl}</span></span></span></div></li>`).join("")}`).join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">Nada más en estos días.</p></div>`;
+  const subir = puedeSubir
+    ? `<button type="button" data-plan-objetivo="subir" aria-pressed="${subirOn ? "true" : "false"}">Subir TH</button>`
+    : "";
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
-    ${planControls(meta, road)}
-    ${coberturaCard(meta, road)}
-    ${road.rush ? rushPanel(road) : ""}
-    <div class="section"><div class="card"><div class="section-head"><h2 class="t-headline">Criterio</h2>${infoBtn(notas.join(" "))}</div>${cifras}</div></div>
-    ${roadmapList(road)}
-    ${costCard(exp, view.th, true)}`;
+    <div class="chip-row chip-row--plan" role="toolbar" aria-label="Objetivo"><button type="button" data-plan-objetivo="maxear" aria-pressed="${subirOn ? "false" : "true"}">Maxear TH actual</button>${subir}</div>
+    <div class="section" data-plan-ahora>${sectionHead("Ahora")}${ahora}</div>
+    <div class="section" data-plan-sesiones>${sectionHead("Próximas sesiones")}${sesiones}</div>`;
 }
 
 function criterioHtml(texto, fuera) {
@@ -3192,13 +3308,16 @@ function renderMejoras() {
 function mejorasPlan() {
   const rows = allAccounts().map((meta) => {
     const exp = expOf(meta.tag);
-    const road = exp ? accountRoadmap(meta) : null;
+    const road = exp ? decisionRoadmap(meta) : null;
+    const rec = road ? recomendar(road) : null;
     const label = road ? planLabel(road.plan, road.currentTh) : "Sin datos";
     const th = road && road.currentTh != null ? `TH${road.currentTh}` : "";
-    const fin = road && road.rush && road.rush.fin ? fmtFin(road.rush.fin) : road && road.fin ? fmtFin(road.fin) : "";
-    const sub = [th, label, fin].filter(Boolean).join(" · ");
+    const sub = [th, label].filter(Boolean).join(" · ");
+    const cartas = rec && rec.ahora.length
+      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p)).join("")}</div>`
+      : "";
     const thumbHtml = exp ? thumb(1000001, { size: 44, th: viewOf(meta.tag).th }) : "";
-    return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a></li>`;
+    return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a>${cartas}</li>`;
   }).join("");
   return `<div class="section">${sectionHead("Plan", "Maxear o rushear, por cuenta. Rush esencial es el mínimo para subir el ayuntamiento. Rush estratégico suma sugerencias que se pueden quitar.")}<ul class="list list--tiles">${rows || `<li><div class="card empty"><p class="t-title3">Sin cuentas</p></div></li>`}</ul></div>`;
 }
@@ -3261,7 +3380,7 @@ function mejorasPorFin(all) {
       }).join("")}</div></div></div>` : "";
   const done = all.filter((u) => u.done);
   const pending = all.filter((u) => !u.done).sort((a, b) => a.end - b.end || rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag));
-  const doneBlock = done.length ? `<div class="section">${sectionHead("Estimadas", "Pendiente de reimportar. No es un constructor confirmado.")}<ul class="list">${done.map(upRow).join("")}</ul></div>` : "";
+  const doneBlock = done.length ? `<div class="section">${sectionHead("Estimadas", "Pendiente de reimportar. No es un constructor confirmado.")}<div class="mejora-grid">${done.map(upRow).join("")}</div></div>` : "";
   const byDay = new Map();
   for (const u of pending) {
     const key = madridDayKey(u.end);
@@ -3269,7 +3388,7 @@ function mejorasPorFin(all) {
     byDay.get(key).push(u);
   }
   for (const list of byDay.values()) list.sort((a, b) => rosterIndex(a.meta.tag) - rosterIndex(b.meta.tag) || a.end - b.end);
-  const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><ul class="list">${list.map(upRow).join("")}</ul></div>`).join("");
+  const days = [...byDay.entries()].map(([key, list]) => `<div class="section"><div class="section-header"><span>${esc(dayHeading(list[0].end, state.now))}</span></div><div class="mejora-grid">${list.map(upRow).join("")}</div></div>`).join("");
   return `<div class="section">${sectionHead("En curso", [libreInfo, estimadoInfo].filter(Boolean).join(" "))}</div>` + freeCard + doneBlock + days + helpersBlock();
 }
 
@@ -3296,7 +3415,7 @@ function mejorasPorCuenta() {
           ${builderHead(b, bob)}
           ${slots}
         </div>
-      </div><ul class="list">${list.map((u) => upRow({ ...u, meta, exp })).join("") || ""}</ul></div>`;
+      </div><div class="mejora-grid">${list.map((u) => upRow({ ...u, meta, exp })).join("")}</div></div>`;
   }).join("");
 }
 
@@ -3331,17 +3450,13 @@ function upRow(u) {
   const meta = u.meta;
   const item = state.index.items[u.id];
   const title = nameOf(u.id) || (item ? "Sin identificar" : "Ítem");
-  const unknown = !item || item.estado === "sin_identificar";
-  const level = u.nuevo ? "Nuevo" : `Nv ${u.lvl} → ${u.lvl + 1}`;
+  const from = u.lvl || 0;
+  const level = u.nuevo ? "Nuevo" : `Nv ${from} → ${from + 1}`;
   const remain = u.done ? "Estimada" : (fmtRemain(u.end, state.now) || "en < 1 min");
-  const soon = !u.done && u.end - state.now < 3600000;
   const queue = u.extra && u.queue === "constructor" ? "B.O.B" : (QUEUE_LABEL[u.queue] || u.queue);
-  return `<li><div class="row row--upgrade row--thumb40${unknown ? " is-unknown" : ""}">
-    ${thumb(u.id, { size: 40, lvl: u.lvl })}
-    <span class="row__main">${rowTitle(title)}
-      <span class="row__sub">${esc(level)} · ${accountChip(meta)} · ${esc(queue)}${u.done ? " · pendiente de reimportar" : ""}</span></span>
-    <span class="row__trail row__trail--stack"><span class="t-subhead num${u.done ? " done-label" : soon ? " soon" : ""}">${esc(remain)}</span><span class="t-footnote c-2 num">${esc(fmtWhen(u.end))}</span></span>
-  </div></li>`;
+  const pie = [remain, meta && (meta.chip || meta.nombre), queue, u.done ? "pendiente de reimportar" : ""].filter(Boolean).join(" · ");
+  const bag = costeDePaso({ id: String(u.id), fromLvl: from, toLvl: from + 1 });
+  return fichaMejora({ id: u.id, title, fromLvl: from, toLvl: from + 1, lvl: u.lvl }, { bag, nivel: level, pie });
 }
 
 function helpersBlock() {
@@ -5299,6 +5414,38 @@ function bind(r) {
       render();
       return;
     }
+    const objetivo = origen.closest("[data-plan-objetivo]");
+    if (objetivo) {
+      const tag = route().tag;
+      const meta = tag ? accountByTag(tag) : null;
+      const exp = meta && expOf(meta.tag);
+      const current = exp ? townHallLevel(exp) : null;
+      const reset = { ataque: false, defensa: false, muros: false, heroes: false, categoria: "", recurso: "todos", duracion: "", rush: "esencial" };
+      if (tag && objetivo.dataset.planObjetivo === "subir" && Number.isInteger(current) && current < maxTownHall(state.index)) {
+        setAccountPlan(tag, { ...reset, modo: "rushear", th: current + 1 });
+      } else if (tag) {
+        setAccountPlan(tag, { ...reset, modo: "maxear", th: null });
+      }
+      render();
+      return;
+    }
+    const hecho = origen.closest("[data-hecho]");
+    if (hecho) {
+      const tag = hecho.dataset.provTag;
+      const step = {
+        id: hecho.dataset.hechoId,
+        fromLvl: Number(hecho.dataset.hechoFrom),
+        toLvl: Number(hecho.dataset.hechoTo),
+        instance: hecho.dataset.hechoInstance || "",
+        queue: hecho.dataset.hechoQueue || "constructor",
+        title: hecho.dataset.hechoTitle || "Mejora",
+      };
+      if (tag) state.provisionales = toggleProvisional(state.provisionales, step, tag, state.now);
+      saveProvisionals();
+      roadCache.clear();
+      render();
+      return;
+    }
     const modo = origen.closest("[data-plan-modo]");
     if (modo) {
       const tag = route().tag;
@@ -5325,6 +5472,7 @@ function bind(r) {
       const steps = road ? road.orden.filter((s) => keys.includes(s.key)) : [];
       for (const step of steps) state.provisionales = toggleProvisional(state.provisionales, step, tag, state.now);
       saveProvisionals();
+      roadCache.clear();
       render();
       return;
     }
@@ -5844,7 +5992,7 @@ async function purgeImages() {
     const cache = await caches.open(key);
     const reqs = await cache.keys();
     for (const req of reqs) {
-      if (req.url.includes("/assets/images/")) await cache.delete(req);
+      if (req.url.includes("/assets/images/") || req.url.includes("/assets/oficial/resources/")) await cache.delete(req);
     }
   }
   state.dl.phase = "idle";

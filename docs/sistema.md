@@ -2242,6 +2242,20 @@ Un enlace `http` (la fuente de costes y la Fan Content Policy) ya no sustituye l
 
 Entra el cargador del paquete estético «Temas Clash Progreso» (`js/temas-paquete.js`). Lee `./paquete-estetico/paquete.json` y, solo en modo oscuro, carga `base.css` y el CSS del tema elegido; el tema se activa con `:root[data-tema]` cuando su hoja ya ha cargado. La elección se guarda en `localStorage["cp-tema"]`: vacío es «Ninguno» (por defecto), `auto` es «Automático» (TH de la cuenta abierta o de la principal). El selector está en Copia → Apariencia. El service worker guarda el paquete en su propia caché `cp-temas-<versión>` y borra las versiones viejas del paquete; esa caché no depende de `SHELL_CACHE`. Sin paquete, la app no cambia. `.thumb > img`, `frameOf()` y los colores semánticos no se tocan.
 
+## Nota de cambios (12 oct 2026, 4.2.1)
+
+`APP_VERSION` es `4.2.1`, `SHELL_CACHE` es `cp-shell-v48` e `IMAGE_CACHE` es `cp-img-v11`. `ROSTER_VERSION` sigue en 2. Entran 8 PNG del Fan Kit en `assets/oficial/resources/` (oro, elixir, oscuro, gemas, mena brillante, mena reluciente, mena estrellada y el martillo de Mejorar). Cada uno lleva `url_origen` en `iconos_recurso` del manifiesto. Se descargaron tal cual: la copia es idéntica al archivo de origen. La precarga de instalación pasa de 220 a 228 archivos.
+
+`js/coste-tarjeta.js` pinta cada coste de Plan (**Ahora**), de **Hoy en tus cuentas** y de Mejoras (plan, costes hasta el máximo, ayuntamiento y mejoras en curso) como una tarjeta cuadrada: la cifra arriba con el PNG oficial del recurso, la imagen del edificio o la tropa en el centro, el martillo de Mejorar sobre esa imagen y el nombre debajo. **Hecho** queda fuera de la tarjeta. Los miles se agrupan con espacio de no separación. No hay SVG propio de recursos. El encuadre usa la caja de alfa, como el resto de miniaturas, sin recortar el archivo.
+
+Los botones de la pantalla (incluida la ⓘ dorada) llevan 12 px de margen arriba y abajo, para que no queden pegados al texto de al lado. El botón que comparte fila con un título no lleva ese margen en sí: la fila usa `align-items: center` y el aire queda en el contenedor, así título e icono comparten la línea central. La barra, las pestañas de un control segmentado y las filas que son un botón no suman ese margen dentro del grupo.
+
+## Nota de cambios (12 oct 2026, 4.2.0)
+
+`APP_VERSION` es `4.2.0`, `SHELL_CACHE` es `cp-shell-v47` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2.
+
+La pantalla Plan deja de pedir filtros. `recomendar` (`js/recomendador.js`) lee el orden que ya calcula `buildRoadmap` y las sesiones de `semanaPlan` / `proximaSesion` (por defecto 19:00–21:00). `programar` guarda en cada hueco `libreEn`, la hora a la que queda libre, antes de ir colocando pasos. **Ahora** enseña una mejora por constructor, laboratorio o casa de mascotas que queda libre antes de que acabe la próxima sesión. **Hecho** es una marca provisional: no escribe niveles ni temporizadores, vacía la caché del plan y vuelve a pintar. **Próximas sesiones** agrupa, un inicio por hueco, los siete días siguientes. El chip **Maxear TH actual** / **Subir TH** cambia el modo (maxear, o rush esencial al TH siguiente) y quita filtros guardados. Sin cifras de recursos no se oculta la recomendación. Inicio pinta **Hoy en tus cuentas** en el orden del roster.
+
 ## Nota de cambios (12 oct 2026, 4.1.9)
 
 `APP_VERSION` es `4.1.9`, `SHELL_CACHE` es `cp-shell-v46` e `IMAGE_CACHE` sigue en `cp-img-v10`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos.

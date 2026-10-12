@@ -1,5 +1,5 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.1.9";
-import { precacheUrls } from "./js/images.js?v=4.1.9";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.2.1";
+import { precacheUrls } from "./js/images.js?v=4.2.1";
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -72,6 +72,8 @@ const APP = [
   "./js/colas.js",
   "./js/schedule.js",
   "./js/roadmap.js",
+  "./js/recomendador.js",
+  "./js/coste-tarjeta.js",
   "./js/provisional.js",
   "./data/costes.json",
   "./assets/manifest.json",
@@ -184,7 +186,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(paqueteEstetico(event.request, url));
     return;
   }
-  if (url.pathname.includes("/assets/images/")) {
+  if (url.pathname.includes("/assets/images/") || url.pathname.includes("/assets/oficial/resources/")) {
     event.respondWith(cacheFirst(event.request));
     return;
   }
