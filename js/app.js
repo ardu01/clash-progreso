@@ -5,6 +5,7 @@ import {
 } from "./progress.js";
 import { dayHeading, esc, fmtBytes, fmtFin, fmtNum, fmtPct, fmtRemain, madridDayKey } from "./format.js";
 import { APP_VERSION, IMAGE_CACHE } from "./caches.js";
+import { fijarDesbloqueos } from "./desbloqueos.js";
 import { ajusteOf, catalog, imageChoice, isHeavy } from "./images.js";
 import {
   BAD_FOOT, DUP_FOOT, DUPLICATE_HELP, EVOLUTION_FOOT, FIRST_FOOT, FOREIGN_HELP, NEW_FOOT, NO_CHANGE_FOOT,
@@ -32,7 +33,7 @@ import { applyFilter, chipCounts, progressRows, rowName, sortFilterRows } from "
 import { backupFilename, buildBackup, isShareCancel, mergeBackup } from "./backup.js";
 import { textoIcs } from "./calendario.js";
 import { horaMadrid, recomendar } from "./recomendador.js";
-import { htmlCoste, htmlCuerpoMejorar } from "./coste-tarjeta.js";
+import { htmlCoste, htmlCuerpoMejorar, htmlMartillo } from "./coste-tarjeta.js";
 import {
   DURATIONS, ahoraDe, buildRoadmap, constructoresParaPlan, costeDePaso, defaultPlan, effectivePlan,
   maxTownHall, planIsConfigured, planLabel, rushGaps, timelineRows,
@@ -91,7 +92,9 @@ const state = {
   cacheCount: 0,
   dl: { phase: "idle", doneBytes: 0, doneCount: 0, total: 0, errors: 0, note: "" },
   seg: {},
-  mejorasMode: ["plan", "costes", "equipo"].includes(localStorage.getItem("cp-mejoras")) ? localStorage.getItem("cp-mejoras") : "plan",
+  mejorasMode: localStorage.getItem("cp-mejoras") === "costes" || localStorage.getItem("cp-mejoras") === "equipo" ? localStorage.getItem("cp-mejoras") : "curso",
+  planHub: localStorage.getItem("cp-plan-hub") === "libres" || localStorage.getItem("cp-plan-hub") === "ocupadas" ? localStorage.getItem("cp-plan-hub") : "todas",
+  planHoja: false,
   evo: localStorage.getItem("cp-evo") || "roster",
   estrategiasCfg: { horizonte: 90, presupuesto: 90 },
   estrategiasEstado: "Sin buscar. Simulación.",
@@ -261,7 +264,8 @@ function route() {
 function baseTab(r) {
   if (r.name === "inicio" || r.name === "ahora" || r.name === "copia" || r.name === "actualizar") return "inicio";
   if (r.name === "detalle" || r.name === "progreso" || r.name === "historial" || r.name === "perfil" || r.name === "roster" || r.name === "importar" || r.name === "ajustes") return "roster";
-  if (r.name === "mejoras" || r.name === "plan" || r.name === "equipo") return "mejoras";
+  if (r.name === "plan") return r.tag ? "roster" : "inicio";
+  if (r.name === "mejoras" || r.name === "equipo") return "mejoras";
   if (r.name === "ranking" || r.name === "graficos" || r.name === "evolucion") return "analisis";
   if (r.name === "agenda" || r.name === "operaciones") return "agenda";
   return "inicio";
@@ -279,6 +283,7 @@ function sectionHead(titulo, info) {
 const ICON = {
   inicio: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 13 14 5l10 8"/><path d="M7 11v12h14V11"/><path d="M12 23v-6h4v6"/></svg>`,
   cuentas: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="8" height="8" rx="2"/><rect x="16" y="5" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/></svg>`,
+  plan: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="6" y="4" width="16" height="20" rx="2"/><path d="M10 4.5h8v3h-8z"/><path d="M10 13h8M10 17h6"/></svg>`,
   mejoras: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5"/><path d="M14 8.5V14l3.5 2.5"/></svg>`,
   analisis: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 21l6-6 4 3 9-9"/><path d="M4 24h20"/></svg>`,
   agenda: `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="6" width="20" height="18" rx="3"/><path d="M4 11h20M9 3v5M19 3v5"/></svg>`,
@@ -1139,7 +1144,9 @@ function pasoAhora(paso) {
   const nv = `Nv ${paso.fromLvl} → ${paso.toLvl}`;
   const hueco = paso.clase === "estimado" ? "estimado" : paso.clase === "ajuste" ? "ajuste" : "en la exportación";
   let when = "";
-  if (paso.sinDuracion) when = " · sin tiempo en la fuente";
+  if (paso.sinConfirmar) when = " · dato sin confirmar";
+  else if (paso.sinTiempoJuego) when = " · sin tiempo en el juego";
+  else if (paso.sinDuracion) when = " · sin tiempo en la fuente";
   else if (paso.sinHora || paso.fin == null) when = " · sin hora exacta";
   else when = ` · acaba ${fmtFin(paso.fin)}`;
   return `${paso.titulo} ${hueco} · ${paso.title} ${nv} · ${etiquetaPaso(paso)}${when}`;
@@ -1300,7 +1307,6 @@ function renderInicio() {
       <div><b class="num">${hayDatos ? snap.constructoresLibres : "—"}</b><span>Constructores libres</span></div>
       <div><b class="num">${hayDatos ? terminanHoy : "—"}</b><span>Terminan hoy</span></div>
     </div></div>`;
-  const hoy = hoyEnCuentas();
   const pend = list.filter((m) => m.objetivo != null && thOf(m) != null && thOf(m) < m.objetivo);
   const objMas = [...pend.reduce((acc, m) => acc.set(m.objetivo, (acc.get(m.objetivo) || 0) + 1), new Map()).entries()].sort((a, b) => b[1] - a[1])[0];
   const ordenadas = list.map(prioridadDe).sort(comparePrioridad);
@@ -1348,9 +1354,9 @@ function renderInicio() {
   const siguiente = ordenadas[0];
   return `<h1 class="large-title">Inicio</h1>
     <p class="large-sub">${esc(cabecera)}</p>
+    <a class="plan-destacada" href="#/plan"><span class="plan-destacada__ico" aria-hidden="true">${ICON.plan}</span><span class="row__main"><span class="row__title">Plan</span><span class="row__sub">Las 11 aldeas: qué mejorar ahora</span></span>${CHEV}</a>
     <div class="section">${sectionHead("Actualizar", "Copia cada aldea en el juego y pégala al volver. Sin la app Atajos.")}${botonActualizar()}</div>
     ${tiles}
-    ${hoy}
     ${htmlMotor()}
     <div class="section">${sectionHead("Qué hacer ahora")}<ul class="list list--tiles">${acciones}</ul></div>
     <div class="section">${sectionHead("Próximas finalizaciones")}${proxBlock}</div>
@@ -1602,9 +1608,12 @@ function roadmapList(road) {
   const rows = view.rows.map((row) => {
     const times = row.cnt > 1 ? ` × ${row.cnt}` : "";
     let when = "Sin siguiente fecha";
-    if (row.sinDuracion) when = "Sin tiempo en la fuente";
+    if (row.sinConfirmar) when = "dato sin confirmar";
+    else if (row.sinTiempoJuego) when = "Sin tiempo en el juego";
+    else if (row.sinDuracion) when = "Sin tiempo en la fuente";
     else if (row.sinHora || row.fin == null) when = "Sin hora exacta: el temporizador en curso no es un número";
     else when = `Empieza ${fmtFin(row.inicio)} · acaba ${fmtFin(row.fin)}`;
+    if (row.desbloquea && row.desbloquea.length) when += ` · Desbloquea ${row.desbloquea.join(", ")}`;
     const mark = row.rushClase === "sugerencia" ? " · Sugerencia" : (row.provisional ? " · provisional" : "");
     const pressed = row.provisional ? "true" : "false";
     const keys = encodeURIComponent(JSON.stringify(row.keys));
@@ -1667,11 +1676,17 @@ function textoFinMadrid(ms) {
   return fmtFin(ms);
 }
 
+function miniaturaDe(paso) {
+  const ayuntamiento = paso && (paso.id === "town-hall" || String(paso.id) === "1000001");
+  const id = ayuntamiento ? 1000001 : (paso ? paso.id : null);
+  const lvl = ayuntamiento && paso.toLvl != null ? paso.toLvl : (paso && paso.fromLvl != null ? paso.fromLvl : (paso ? paso.lvl : null));
+  return thumb(id, { size: 64, lvl });
+}
+
 function fichaMejora(paso, extra = {}) {
   const bag = extra.bag != null ? extra.bag : costeDePaso(paso);
-  const lvl = paso.fromLvl != null ? paso.fromLvl : paso.lvl;
   const nivel = extra.nivel != null ? extra.nivel : (paso.fromLvl != null ? `Nv ${paso.fromLvl} → ${paso.toLvl}` : "");
-  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${thumb(paso.id, { size: 64, lvl })}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
+  const card = `<article class="mejora">${htmlCoste(bag)}<div class="mejora__fig">${miniaturaDe(paso)}</div><p class="mejora__nombre">${esc(paso.title || extra.title || "")}</p>${nivel ? `<p class="mejora__nivel num">${esc(nivel)}</p>` : ""}${extra.pie ? `<p class="mejora__pie">${esc(extra.pie)}</p>` : ""}</article>`;
   const mejorar = extra.mejorar ? `<button type="button" class="btn btn--primary btn--small btn--block btn-mejorar" data-go="${esc(extra.mejorar)}">${htmlCuerpoMejorar()}</button>` : "";
   const abajo = `${mejorar}${extra.boton || ""}`;
   if (!abajo) return card;
@@ -1679,7 +1694,7 @@ function fichaMejora(paso, extra = {}) {
 }
 
 function tarjetaAhora(paso, tag) {
-  const dur = paso.seconds == null ? "" : textoSegundos(paso.seconds);
+  const dur = paso.sinConfirmar ? "dato sin confirmar" : (paso.sinTiempoJuego ? "Sin tiempo en el juego" : (paso.seconds == null ? "" : textoSegundos(paso.seconds)));
   const fin = textoFinMadrid(paso.fin);
   const pie = [dur, fin ? `acaba ${fin}` : "", paso.hueco].filter(Boolean).join(" · ");
   const aria = `Hecho, ${paso.title} Nv ${paso.fromLvl} a ${paso.toLvl}`;
@@ -1687,24 +1702,64 @@ function tarjetaAhora(paso, tag) {
   return fichaMejora(paso, { pie, boton, mejorar: `#/progreso/${tag.slice(1)}/plan` });
 }
 
-function hoyEnCuentas() {
-  const porTag = new Map(allAccounts().map((m) => [m.tag, m]));
-  const cuentas = state.accounts.map((a) => porTag.get(a.tag)).filter(Boolean);
-  if (!cuentas.length) return "";
-  const filas = cuentas.map((meta) => {
-    const road = expOf(meta.tag) ? decisionRoadmap(meta) : null;
+function bloqueosDe(orden) {
+  const grupos = new Map();
+  for (const step of orden || []) {
+    if (!step || !step.noCabe) continue;
+    const motivo = step.motivo || "No cabe en los almacenes.";
+    if (!grupos.has(motivo)) grupos.set(motivo, []);
+    grupos.get(motivo).push(step);
+  }
+  if (!grupos.size) return "";
+  const filas = [];
+  for (const [motivo, steps] of grupos) {
+    const primero = steps[0];
+    const mas = steps.length > 1 ? ` y ${steps.length - 1} más` : "";
+    filas.push(`<li><div class="row"><span class="row__main"><span class="row__title">${esc(primero.title || "Mejora")} <span class="num">Nv ${primero.fromLvl} → ${primero.toLvl}</span>${esc(mas)}</span><span class="row__sub">${esc(motivo)}</span></span></div></li>`);
+  }
+  return `<div class="section" data-plan-bloqueo>${sectionHead("No cabe")}<ul class="list">${filas.join("")}</ul></div>`;
+}
+
+function renderPlanHub(opts) {
+  const filtro = state.planHub === "libres" || state.planHub === "ocupadas" ? state.planHub : "todas";
+  const todas = allAccounts();
+  const visibles = todas.filter((meta) => accountVisible(accountFilterMeta(meta), state.filters));
+  const chip = (id, label) => filterChip("data-plan-filtro", id, label, filtro === id);
+  const filas = [];
+  for (const meta of visibles) {
+    const row = fleetRow(meta);
+    const known = !!(row && row.builders.known);
+    const free = known ? row.builders.free : 0;
+    if (filtro === "libres" && !(known && free > 0)) continue;
+    if (filtro === "ocupadas" && !(known && free === 0)) continue;
+    const road = row ? decisionRoadmap(meta) : null;
     const rec = road ? recomendar(road) : null;
-    const href = `#/progreso/${meta.tag.slice(1)}/plan`;
-    const cuerpo = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { mejorar: href })).join("")}</div>`
-      : `<span class="row__sub">${expOf(meta.tag) ? "Nada en esta sesión" : "Sin importar"}</span>`;
-    const dentro = rec && rec.ahora.length
-      ? `<span class="row__title">${esc(meta.nombre)}</span>`
-      : `<span class="row__title">${esc(meta.nombre)}</span>${cuerpo}`;
-    const fuera = rec && rec.ahora.length ? cuerpo : "";
-    return `<li data-hoy-cuenta><a class="hoy-cuenta" href="${href}">${dentro}</a>${fuera}</li>`;
-  }).join("");
-  return `<div class="section" data-hoy-cuentas>${sectionHead("Hoy en tus cuentas")}<ul class="list list--tiles">${filas}</ul></div>`;
+    const cartas = rec && rec.ahora.length
+      ? `<span class="mejora-grid">${rec.ahora.slice(0, 4).map((p) => fichaMejora(p, { pie: p.sinConfirmar ? "dato sin confirmar" : (p.sinTiempoJuego ? "Sin tiempo en el juego" : (p.seconds == null ? "" : textoSegundos(p.seconds))) })).join("")}</span>`
+      : `<span class="plan-hub__vacio">—</span>`;
+    const th = row && row.th != null ? row.th : null;
+    const figura = th != null ? thumb(1000001, { size: 44, th }) : `<span class="thumb thumb--44 thumb--empty" aria-hidden="true">TH</span>`;
+    const colas = known ? `${free} libres · ${row.builders.occupied} ocupados` : "—";
+    const fin = row && row.proxima ? fmtFin(row.proxima) : "—";
+    const bloqueo = road && (road.orden || []).find((s) => s.noCabe && s.motivo);
+    const nota = bloqueo ? `<span class="plan-hub__motivo">${esc(bloqueo.motivo)}</span>` : "";
+    filas.push(`<li><a class="plan-hub" href="#/progreso/${meta.tag.slice(1)}/plan"><span class="plan-hub__head">${figura}<span class="plan-hub__id"><span class="plan-hub__nombre">${esc(meta.nombre)}</span><span class="plan-hub__colas">${esc(colas)}</span></span><span class="plan-hub__fin">${esc(fin)}</span></span>${nota}${cartas}</a></li>`);
+  }
+  const n = filas.length;
+  const sub = n === todas.length ? (n === 1 ? "1 cuenta" : `${n} cuentas`) : `${n} de ${todas.length}`;
+  const lista = filas.length
+    ? `<ul class="list list--tiles">${filas.join("")}</ul>`
+    : `<div class="card empty"><p class="t-title3">—</p></div>`;
+  const cabeza = opts && opts.hoja
+    ? `<p class="large-sub">${esc(sub)}</p>`
+    : `<h1 class="large-title">Plan</h1>
+    <p class="large-sub">${esc(sub)}</p>`;
+  return `${cabeza}
+    <div data-plan-hub>
+      ${filterBar({ tiempo: false, recurso: false, th: true, grupo: true })}
+      <div class="chip-row" role="toolbar" aria-label="Constructores">${chip("todas", "Todas")}${chip("libres", "Libres")}${chip("ocupadas", "Ocupadas")}</div>
+      ${lista}
+    </div>`;
 }
 
 function renderPlan(tag) {
@@ -1731,8 +1786,26 @@ function renderPlan(tag) {
   return `<h1 class="large-title">Plan</h1>
     <p class="large-sub">${esc(meta.nombre)} · TH${view.th}</p>
     <div class="chip-row chip-row--plan" role="toolbar" aria-label="Objetivo"><button type="button" data-plan-objetivo="maxear" aria-pressed="${subirOn ? "false" : "true"}">Maxear TH actual</button>${subir}</div>
+    ${notaAyudantes(road)}
+    ${subirOn ? notaCastillo(road) : ""}
     <div class="section" data-plan-ahora>${sectionHead("Ahora")}${ahora}</div>
+    ${bloqueosDe(road.orden)}
     <div class="section" data-plan-sesiones>${sectionHead("Próximas sesiones")}${sesiones}</div>`;
+}
+
+function notaAyudantes(road) {
+  const a = road && road.ayudantes;
+  if (!a) return "";
+  const bits = [];
+  if (a.constructorAprendiz) bits.push(`Constructor aprendiz Nv ${a.constructorAprendiz.lvl}`);
+  if (a.asistenteLaboratorio) bits.push(`Asistente de laboratorio Nv ${a.asistenteLaboratorio.lvl}`);
+  if (!bits.length) return "";
+  return `<p class="t-footnote c-2">${esc(bits.join(" · "))}. Entran en la simulación. El ahorro de tiempo no está en la fuente y no se resta.</p>`;
+}
+
+function notaCastillo(road) {
+  if (!road || !road.avisoCastillo) return "";
+  return `<p class="t-footnote c-2">${esc(road.avisoCastillo.texto)}</p>`;
 }
 
 function criterioHtml(texto, fuera) {
@@ -1761,7 +1834,7 @@ function sleepCard() {
     ? "Las dos horas son la misma: no se aplica ningún tramo."
     : "Horas de Madrid. Si lo dejas vacío, no se mueve ninguna mejora.";
   return `<div class="section"><div class="card">
-      <div class="section-head"><h2 class="t-headline">Horas de sueño</h2>${infoBtn(`La siguiente mejora no empieza ni termina en ese tramo. La hora de lo que ya se está mejorando no se cambia: sale de la exportación. ${nota}`)}</div>
+      <div class="section-head"><h2 class="t-headline">Horas de sueño</h2>${infoBtn(`La siguiente mejora no empieza en ese tramo: hace falta estar delante para lanzarla. Puede terminar de noche. La hora de lo que ya se está mejorando no se cambia: sale de la exportación. ${nota}`)}</div>
       <div class="date-row">
         <label>Dormir<input type="time" data-sueno="desde" value="${esc(s.desde)}" aria-label="Hora de dormir"></label>
         <label>Despertar<input type="time" data-sueno="hasta" value="${esc(s.hasta)}" aria-label="Hora de despertar"></label>
@@ -1821,10 +1894,11 @@ function lineaTexto(line) {
   let next = "Sin siguiente con este criterio";
   const sig = line.siguiente;
   if (sig && sig.sinHora) next = `${sig.title}. No se programa: la mejora en curso no trae hora.`;
+  else if (sig && sig.sinConfirmar) next = `${sig.title}. Dato sin confirmar.`;
   else if (sig && sig.sinDuracion) next = `${sig.title}. Sin tiempo oficial para el siguiente nivel: no se inventa el fin.`;
   else if (sig && sig.fin != null) {
     next = `${sig.title} · empieza ${fmtFin(sig.inicio)} · acaba ${fmtFin(sig.fin)}`;
-    if (sig.finEnSueno) next += " · el fin cae de noche porque dura más que el tiempo despierto";
+    if (sig.finEnSueno) next += " · acaba de noche";
   }
   return { actual, next };
 }
@@ -2488,8 +2562,14 @@ function navbar(r) {
       ? `<button class="btn-text" data-go="#/progreso/${backTag.slice(1)}">${BACK} Progreso</button>`
       : `<button class="btn-text" data-go="#/roster">${BACK} Cuentas</button>`;
     collapsed = "true";
-  } else if (r.name === "plan" || r.name === "equipo") {
-    title = r.name === "plan" ? "Plan" : "Equipamiento";
+  } else if (r.name === "plan" && r.tag) {
+    title = "Plan";
+    lead = `<button class="btn-text" data-go="#/plan">${BACK} Plan</button>`;
+    collapsed = "true";
+  } else if (r.name === "plan") {
+    title = "Plan";
+  } else if (r.name === "equipo") {
+    title = "Equipamiento";
     lead = `<button class="btn-text" data-go="#/mejoras">${BACK} Mejoras</button>`;
     collapsed = "true";
   } else if (r.name === "ranking" || r.name === "agenda" || r.name === "graficos") {
@@ -3263,34 +3343,17 @@ function builderLine(exp) {
 }
 
 function renderMejoras() {
-  const mode = state.mejorasMode === "costes" || state.mejorasMode === "equipo" ? state.mejorasMode : "plan";
+  const mode = state.mejorasMode === "costes" || state.mejorasMode === "equipo" ? state.mejorasMode : "curso";
   const n = allAccounts().filter((r) => expOf(r.tag)).length;
-  const body = mode === "costes" ? mejorasCostes() : mode === "equipo" ? mejorasEquipo() : mejorasPlan();
+  const body = mode === "costes" ? mejorasCostes() : mode === "equipo" ? mejorasEquipo() : mejorasEnCurso();
   const tab = (id, label) => `<button type="button" role="tab" data-mej="${id}" aria-selected="${mode === id}">${label}</button>`;
   return `<h1 class="large-title">Mejoras</h1>
     <p class="large-sub">${n === 1 ? "1 cuenta" : `${n} cuentas`}</p>
     <div class="seg-wrap"><div class="seg" role="tablist" aria-label="Mejoras">
-      ${tab("plan", "Plan")}${tab("costes", "Costes")}${tab("equipo", "Equipo")}
+      ${tab("curso", "En curso")}${tab("costes", "Costes")}${tab("equipo", "Equipo")}
     </div></div>
     ${body}
   `;
-}
-
-function mejorasPlan() {
-  const rows = allAccounts().map((meta) => {
-    const exp = expOf(meta.tag);
-    const road = exp ? decisionRoadmap(meta) : null;
-    const rec = road ? recomendar(road) : null;
-    const label = road ? planLabel(road.plan, road.currentTh) : "Sin datos";
-    const th = road && road.currentTh != null ? `TH${road.currentTh}` : "";
-    const sub = [th, label].filter(Boolean).join(" · ");
-    const cartas = rec && rec.ahora.length
-      ? `<div class="mejora-grid">${rec.ahora.slice(0, 2).map((p) => fichaMejora(p, { mejorar: `#/progreso/${meta.tag.slice(1)}/plan` })).join("")}</div>`
-      : "";
-    const thumbHtml = exp ? thumb(1000001, { size: 44, th: viewOf(meta.tag).th }) : "";
-    return `<li><a class="row row--tile" href="#/progreso/${meta.tag.slice(1)}/plan">${thumbHtml}<span class="row__main"><span class="row__title">${esc(meta.nombre)}</span><span class="row__sub">${esc(sub)}</span></span>${CHEV}</a>${cartas}</li>`;
-  }).join("");
-  return `<div class="section">${sectionHead("Plan", "Maxear o rushear, por cuenta. Rush esencial es el mínimo para subir el ayuntamiento. Rush estratégico suma sugerencias que se pueden quitar.")}<ul class="list list--tiles">${rows || `<li><div class="card empty"><p class="t-title3">Sin cuentas</p></div></li>`}</ul></div>`;
 }
 
 function mejorasEquipo() {
@@ -4699,7 +4762,8 @@ function screenFor(r) {
   if (r.name === "ranking") return renderRanking();
   if (r.name === "agenda" && r.sub) return renderAtencion(r);
   if (r.name === "agenda") return renderAgenda();
-  if (r.name === "plan") return renderPlan(r.tag);
+  if (r.name === "plan" && r.tag) return renderPlan(r.tag);
+  if (r.name === "plan") return renderPlanHub();
   if (r.name === "historial") return renderHistorial(r.tag);
   if (r.name === "equipo") return renderEquipo(r.tag);
   if (r.name === "perfil") return renderPerfil(r.tag);
@@ -4998,7 +5062,7 @@ function rememberOpener(el, sel) {
 
 function settleSheetFocus() {
   const sheet = document.querySelector(".sheet");
-  for (const sel of [".navbar", "#screen", ".tabbar"]) {
+  for (const sel of [".navbar", "#screen", ".tabbar", ".plan-fab"]) {
     const el = document.querySelector(sel);
     if (!el) continue;
     if (sheet) el.setAttribute("inert", "");
@@ -5058,6 +5122,11 @@ function focusImportTarget() {
 
 function onSheetEscape(ev) {
   if (!ev || ev.key !== "Escape" || state.alert) return false;
+  if (state.planHoja) {
+    state.planHoja = false;
+    render();
+    return true;
+  }
   if (state.editor) {
     state.editor = null;
     render();
@@ -5135,6 +5204,166 @@ function abrirFuera(ev, enlace) {
   }
 }
 
+const PLAN_FAB_KEY = "cp-plan-fab";
+const PLAN_FAB_UMBRAL = 8;
+let planFabSafe = null;
+let planFabGesto = null;
+let planFabSuprimir = false;
+
+function leerPlanFab() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PLAN_FAB_KEY) || "");
+    if (!raw || (raw.lado !== "izq" && raw.lado !== "der")) return null;
+    const y = Number(raw.y);
+    if (!Number.isFinite(y)) return null;
+    return { lado: raw.lado, y: Math.min(1, Math.max(0, y)) };
+  } catch {
+    return null;
+  }
+}
+
+function guardarPlanFab(pos) {
+  localStorage.setItem(PLAN_FAB_KEY, JSON.stringify({ lado: pos.lado, y: Math.round(pos.y * 1000) / 1000 }));
+}
+
+function insetsPlanFab() {
+  if (planFabSafe) return planFabSafe;
+  const leer = (nombre) => {
+    const el = document.createElement("div");
+    el.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;height:0;";
+    el.style.width = `env(${nombre})`;
+    document.body.appendChild(el);
+    const n = el.getBoundingClientRect().width;
+    el.remove();
+    return Number.isFinite(n) ? n : 0;
+  };
+  planFabSafe = {
+    top: leer("safe-area-inset-top"),
+    right: leer("safe-area-inset-right"),
+    bottom: leer("safe-area-inset-bottom"),
+    left: leer("safe-area-inset-left"),
+  };
+  return planFabSafe;
+}
+
+function limitesPlanFab(fab) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const size = fab.offsetWidth || 56;
+  const borde = 16;
+  const hueco = 14;
+  const safe = insetsPlanFab();
+  const tab = document.querySelector(".tabbar");
+  const tabTop = tab ? tab.getBoundingClientRect().top : h - safe.bottom;
+  const minX = safe.left + borde;
+  const maxX = Math.max(minX, w - safe.right - borde - size);
+  const minY = safe.top + borde;
+  const suelo = Math.min(h - safe.bottom, tabTop) - hueco - size;
+  return { minX, maxX, minY, maxY: Math.max(minY, suelo), size, w };
+}
+
+function fijarPlanFab(fab, x, y) {
+  fab.style.left = Math.round(x) + "px";
+  fab.style.top = Math.round(y) + "px";
+  fab.style.right = "auto";
+  fab.style.bottom = "auto";
+  return fab.getBoundingClientRect();
+}
+
+function aplicarPlanFab(fab, pos, animar) {
+  if (!fab) return;
+  const box = limitesPlanFab(fab);
+  const y = box.minY + (box.maxY - box.minY) * pos.y;
+  const x = pos.lado === "izq" ? box.minX : box.maxX;
+  fab.classList.toggle("is-snap", !!animar);
+  fijarPlanFab(fab, x, y);
+}
+
+function posicionPlanFab() {
+  return leerPlanFab() || { lado: "der", y: 1 };
+}
+
+function cortarPlanFab() {
+  document.removeEventListener("pointermove", moverPlanFab);
+  document.removeEventListener("pointerup", soltarPlanFab);
+  document.removeEventListener("pointercancel", soltarPlanFab);
+  planFabGesto = null;
+}
+
+function moverPlanFab(ev) {
+  const gesto = planFabGesto;
+  if (!gesto || ev.pointerId !== gesto.id) return;
+  const fab = gesto.el && gesto.el.isConnected ? gesto.el : null;
+  if (!fab) return;
+  const dx = ev.clientX - gesto.x;
+  const dy = ev.clientY - gesto.y;
+  if (!gesto.movido && Math.hypot(dx, dy) < PLAN_FAB_UMBRAL) return;
+  gesto.movido = true;
+  fab.classList.add("is-arrastre");
+  if (ev.cancelable) ev.preventDefault();
+  const box = limitesPlanFab(fab);
+  const x = Math.min(box.maxX, Math.max(box.minX, gesto.left + dx));
+  const y = Math.min(box.maxY, Math.max(box.minY, gesto.top + dy));
+  fab.classList.remove("is-snap");
+  fijarPlanFab(fab, x, y);
+}
+
+function soltarPlanFab(ev) {
+  const gesto = planFabGesto;
+  if (!gesto || (ev && ev.pointerId != null && ev.pointerId !== gesto.id)) return;
+  cortarPlanFab();
+  const fab = gesto.el && gesto.el.isConnected ? gesto.el : null;
+  if (fab) fab.classList.remove("is-arrastre");
+  if (!gesto.movido || !fab) return;
+  planFabSuprimir = true;
+  const rect = fab.getBoundingClientRect();
+  const box = limitesPlanFab(fab);
+  const lado = rect.left + rect.width / 2 < box.w / 2 ? "izq" : "der";
+  const rango = Math.max(1, box.maxY - box.minY);
+  const y = Math.min(1, Math.max(0, (rect.top - box.minY) / rango));
+  const pos = { lado, y };
+  guardarPlanFab(pos);
+  aplicarPlanFab(fab, pos, true);
+}
+
+function engancharPlanFab() {
+  const fab = document.querySelector(".plan-fab");
+  if (planFabGesto && (!fab || planFabGesto.el !== fab)) cortarPlanFab();
+  if (!fab) return;
+  aplicarPlanFab(fab, posicionPlanFab(), false);
+  fab.addEventListener("pointerdown", (ev) => {
+    if (planFabGesto && planFabGesto.el === fab && planFabGesto.id === ev.pointerId) return;
+    if (planFabGesto) cortarPlanFab();
+    if (ev.pointerType !== "touch" && ev.button !== 0) return;
+    planFabSuprimir = false;
+    const r = fab.getBoundingClientRect();
+    planFabGesto = { id: ev.pointerId, el: fab, x: ev.clientX, y: ev.clientY, left: r.left, top: r.top, movido: false };
+    try { fab.setPointerCapture(ev.pointerId); } catch { /* un toque de prueba no siempre deja capturar */ }
+    document.addEventListener("pointermove", moverPlanFab, { passive: false });
+    document.addEventListener("pointerup", soltarPlanFab);
+    document.addEventListener("pointercancel", soltarPlanFab);
+  });
+  fab.addEventListener("click", (ev) => {
+    if (!planFabSuprimir) return;
+    planFabSuprimir = false;
+    ev.preventDefault();
+    ev.stopPropagation();
+  }, true);
+}
+
+function planFab() {
+  return `<button type="button" class="plan-fab" data-plan-hoja="1" aria-label="Plan de mejoras">${htmlMartillo(40, "plan-fab__icono")}</button>`;
+}
+
+function renderPlanSheet() {
+  return `<div class="sheet-backdrop" data-plan-cerrar="1"></div>
+    <div class="sheet sheet--plan" role="dialog" aria-modal="true" aria-labelledby="plan-hoja-title">
+      <div class="sheet__grabber"></div>
+      <div class="sheet__bar"><span></span><h2 id="plan-hoja-title" tabindex="-1">Plan</h2><button type="button" class="btn-text btn-text--bold" data-plan-cerrar="1">OK</button></div>
+      <div class="sheet__body">${renderPlanHub({ hoja: true })}</div>
+    </div>`;
+}
+
 function render() {
   const r = route();
   aplicarTemaApp();
@@ -5161,12 +5390,15 @@ function render() {
     screen = `<h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div>`;
   }
   try {
-    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
+    const planHoja = state.planHoja ? renderPlanSheet() : "";
+    const fab = planHoja || state.editor || state.ficha || r.name === "ajustes" || r.name === "importar" ? "" : planFab();
+    root.innerHTML = `${navbar(r)}<main class="screen" id="screen">${screen}</main>${tabbar(r)}${fab}${planHoja}${r.name === "ajustes" ? renderAjustes() : ""}${state.editor ? renderEditor() : ""}${r.name === "importar" ? renderImport() : ""}${fichaSheet()}${renderAlert()}${renderToast()}`;
   } catch (err) {
     console.error(err);
     root.innerHTML = `<main class="screen" id="screen"><h1 class="large-title">Esta pantalla</h1><div class="section"><div class="card"><p class="t-body">No se pudo pintar esta pantalla.</p></div></div></main>${tabbar(r)}`;
   }
   bind(r);
+  engancharPlanFab();
   const title = document.querySelector(".large-title");
   const nav = document.querySelector(".navbar");
   if (tituloObserver) { tituloObserver.disconnect(); tituloObserver = null; }
@@ -5277,6 +5509,14 @@ function bind(r) {
     const dest = destinoDelToque(ev);
     if (dest) {
       seguirEnlace(ev, dest);
+      return;
+    }
+    if (origen.closest("[data-plan-hoja]")) {
+      ev.preventDefault();
+      rememberOpener(origen.closest("[data-plan-hoja]"), "[data-plan-hoja]");
+      state.sheetKey = "";
+      state.planHoja = true;
+      render();
       return;
     }
     const eqVista = origen.closest("[data-eq-vista]");
@@ -5521,8 +5761,16 @@ function bind(r) {
     }
     const mej = origen.closest("[data-mej]");
     if (mej) {
-      state.mejorasMode = mej.dataset.mej;
+      state.mejorasMode = mej.dataset.mej === "costes" || mej.dataset.mej === "equipo" ? mej.dataset.mej : "curso";
       localStorage.setItem("cp-mejoras", state.mejorasMode);
+      render();
+      return;
+    }
+    const planFiltro = origen.closest("[data-plan-filtro]");
+    if (planFiltro) {
+      const id = planFiltro.dataset.planFiltro;
+      state.planHub = id === "libres" || id === "ocupadas" ? id : "todas";
+      localStorage.setItem("cp-plan-hub", state.planHub);
       render();
       return;
     }
@@ -5606,6 +5854,7 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-close-ficha]")) { state.ficha = null; render(); return; }
+    if (origen.closest("[data-plan-cerrar]")) { state.planHoja = false; render(); return; }
     if (origen.closest("[data-close]")) { location.hash = "#/roster"; return; }
     if (origen.closest("[data-restore]")) {
       rememberAlertOpener(origen.closest("[data-restore]"), "[data-restore]");
@@ -6072,6 +6321,7 @@ function fichasOperacion() {
       labLibre: !!(colas && colas.laboratorio.libreAccion),
       mascotasLibres: !!(colas && colas.mascotas.libreAccion),
       ayudanteLibre: !!(exp && helpersOf(exp).some((h) => !h.cooldown || (h.end != null && h.end <= state.now))),
+      helpers: exp ? helpersOf(exp).map((h) => ({ id: h.id, lvl: h.lvl })) : [],
       herreriaLibre: !!(exp && (exp.buildings || []).some((b) => b && String(b.data) === "1000070" && b.timer == null)),
       desactualizada: colas ? !!colas.desactualizada : !exp,
       heroesConTimer: !!(exp && meta.tag !== HEROES_FUERA && (exp.heroes || []).some((h) => h && h.timer != null)),
@@ -6269,11 +6519,13 @@ async function boot() {
   state.added = loadAdded();
   announce("");
   render();
-  const [manifest, caps, bundle] = await Promise.all([
+  const [manifest, caps, bundle, desbloqueos] = await Promise.all([
     fetch("./assets/manifest.json?v=" + APP_VERSION).then((r) => r.json()),
     fetch("./data/caps_clashrecord.json?v=" + APP_VERSION).then((r) => r.json()),
     fetch("./data/bundle.json?v=" + APP_VERSION).then((r) => r.json()),
+    fetch("./data/ref/desbloqueos.json?v=" + APP_VERSION).then((r) => r.json()),
   ]);
+  fijarDesbloqueos(desbloqueos, manifest.items);
   state.manifest = manifest;
   state.caps = caps;
   state.peso = manifest.peso_imagenes;
@@ -6324,8 +6576,20 @@ async function boot() {
   }
 }
 
+function recolocarPlanFab() {
+  planFabSafe = null;
+  if (planFabGesto) return;
+  const fab = document.querySelector(".plan-fab");
+  if (fab) aplicarPlanFab(fab, posicionPlanFab(), false);
+}
+window.addEventListener("resize", recolocarPlanFab);
+window.visualViewport?.addEventListener("resize", recolocarPlanFab);
 window.addEventListener("hashchange", () => {
   try {
+    if (state.planHoja) {
+      state.planHoja = false;
+      state.focusReturn = "";
+    }
     render();
     if (route().name === "ajustes" || route().name === "copia") measureCache();
   } catch (err) {

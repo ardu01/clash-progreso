@@ -93,17 +93,50 @@ async function barraUnaFila(page, hash) {
     const delta = tops.length ? Math.max(...tops) - Math.min(...tops) : 0;
     const doc = document.documentElement;
     const body = document.body;
+    const bar = document.querySelector(".tabbar");
+    const span = links[0] ? links[0].querySelector("span") : null;
+    const st = bar ? getComputedStyle(bar) : null;
+    const spanSt = span ? getComputedStyle(span) : null;
+    const fab = document.querySelector(".plan-fab");
+    const fabSt = fab ? getComputedStyle(fab) : null;
+    const fabBox = fab ? fab.getBoundingClientRect() : null;
+    const barBox = bar ? bar.getBoundingClientRect() : null;
     return {
       n: links.length,
       labels: links.map((a) => (a.querySelector("span")?.textContent || "").trim()),
       rows: delta > 8 ? 2 : 1,
       scrollX: Math.max(doc.scrollWidth, body.scrollWidth) > doc.clientWidth + 1,
+      cols: st ? st.gridTemplateColumns.split(" ").filter(Boolean).length : 0,
+      gap: st ? st.columnGap || st.gap : "",
+      font: spanSt ? spanSt.fontSize : "",
+      tracking: spanSt ? spanSt.letterSpacing : "",
+      pad: st ? st.paddingLeft : "",
+      fab: !fab ? "ausente" : (bar && bar.contains(fab) ? "dentro" : "fuera"),
+      fabPos: fabSt ? fabSt.position : "",
+      fabRound: !!(fabSt && fabBox && parseFloat(fabSt.borderTopLeftRadius) >= fabBox.width / 2 - 1),
+      fabSobre: !!(fabBox && barBox && fabBox.bottom <= barBox.top + 1),
+      fabIcon: !fab ? "" : (fab.querySelector("svg") ? "svg" : (fab.querySelector("img")?.getAttribute("src") || "")),
+      fabW: Number(fab?.querySelector("img")?.getAttribute("width") || 0),
+      hoja: !!document.querySelector(".sheet"),
     };
   });
   if (info.n !== 5) bad(hash + " la barra tiene " + info.n + " pestañas");
   if (info.labels.join(",") !== "Inicio,Cuentas,Mejoras,Análisis,Agenda") bad(hash + " barra " + info.labels.join(","));
   if (info.rows !== 1) bad(hash + " la barra ocupa " + info.rows + " filas");
   if (info.scrollX) bad(hash + " hay scroll horizontal");
+  if (info.cols !== 5) bad(hash + " la barra tiene " + info.cols + " columnas");
+  if (info.gap !== "4px") bad(hash + " el hueco de la barra es " + info.gap);
+  if (info.font !== "10px") bad(hash + " la etiqueta mide " + info.font);
+  if (info.tracking !== "0px" && info.tracking !== "normal") bad(hash + " el tracking de la etiqueta es " + info.tracking);
+  if (info.pad !== "4px") bad(hash + " el relleno de la barra es " + info.pad);
+  if (!info.hoja) {
+    if (info.fab !== "fuera") bad(hash + " el botón Plan está " + info.fab);
+    if (info.fabPos !== "fixed") bad(hash + " el botón Plan no flota");
+    if (!info.fabRound) bad(hash + " el botón Plan no es redondo");
+    if (!info.fabSobre) bad(hash + " el botón Plan pisa la barra");
+    if (!String(info.fabIcon).includes("oficial/resources/martillo.png")) bad(hash + " el botón Plan no usa el martillo oficial");
+    if (info.fabW < 1024) bad(hash + " el martillo del botón no está a 1024");
+  }
 }
 
 async function barrer(page, donde) {
@@ -182,7 +215,7 @@ async function barrer(page, donde) {
   }
   for (let i = 0; i < 4; i += 1) {
     const closed = await page.evaluate(() => {
-      const btn = document.querySelector(".alert [data-alert-cancel], .sheet [data-close-editor], .sheet [data-close-ficha], .sheet [data-close]");
+      const btn = document.querySelector(".alert [data-alert-cancel], .sheet [data-close-editor], .sheet [data-close-ficha], .sheet [data-plan-cerrar], .sheet [data-close]");
       if (!btn) return false;
       btn.click();
       return true;
@@ -196,22 +229,58 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.3"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.3")).join(" "));
-const hoy = await page.evaluate(() => {
-  const root = document.querySelector("[data-hoy-cuentas]");
-  const links = root ? [...root.querySelectorAll("a[href*='/plan']")] : [];
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.4"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.4")).join(" "));
+if (await page.evaluate(() => !!document.querySelector("[data-hoy-cuentas]"))) bad("Inicio sigue duplicando el plan");
+await ir(page, "#/plan");
+const hub = await page.evaluate(() => {
+  const root = document.querySelector("[data-plan-hub]");
+  const links = root ? [...root.querySelectorAll("a.plan-hub")] : [];
   return {
+    title: (document.querySelector("h1.large-title")?.textContent || "").trim(),
     n: links.length,
     hrefs: links.map((a) => a.getAttribute("href")),
-    titulo: root ? (root.querySelector(".section-header span")?.textContent || "") : "",
+    costes: root ? root.querySelectorAll(".recurso").length : 0,
+    mejorar: root ? root.querySelectorAll(".btn-mejorar").length : 0,
+    tab: (document.querySelector(".tabbar a[aria-current='page'] span")?.textContent || "").trim(),
   };
 });
-if (hoy.titulo !== "Hoy en tus cuentas") bad("falta Hoy en tus cuentas");
-if (hoy.n !== 11) bad("Hoy en tus cuentas muestra " + hoy.n + " cuentas");
-if (!hoy.hrefs[0] || !hoy.hrefs[0].includes("28PLGP0G2")) bad("Hoy no empieza por C1: " + hoy.hrefs[0]);
-if (!hoy.hrefs[1] || !hoy.hrefs[1].includes("R00C8CPQC")) bad("Hoy no sigue por C2: " + hoy.hrefs[1]);
+if (hub.title !== "Plan") bad("el hub no es Plan");
+if (hub.tab !== "Inicio") bad("el hub marca " + hub.tab);
+if (hub.n !== 11) bad("el plan muestra " + hub.n + " cuentas");
+if (!hub.hrefs[0] || !hub.hrefs[0].includes("28PLGP0G2")) bad("el plan no empieza por C1: " + hub.hrefs[0]);
+if (!hub.hrefs[1] || !hub.hrefs[1].includes("R00C8CPQC")) bad("el plan no sigue por C2: " + hub.hrefs[1]);
+if (hub.mejorar !== 0) bad("el hub pinta el botón Mejorar");
+if (hub.costes < 1) bad("el hub no pinta iconos de coste");
 
-for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
+await ir(page, "#/mejoras");
+await page.evaluate(() => document.querySelector("[data-plan-hoja]")?.click());
+await page.waitForSelector(".sheet [data-plan-hub]");
+const hoja = await page.evaluate(() => ({
+  hash: location.hash,
+  hub: !!document.querySelector(".sheet [data-plan-hub]"),
+  fab: !!document.querySelector(".plan-fab"),
+  tab: (document.querySelector(".tabbar a[aria-current='page'] span")?.textContent || "").trim(),
+  n: document.querySelectorAll(".sheet a.plan-hub").length,
+  dentro: !!document.querySelector(".tabbar .plan-fab"),
+}));
+if (hoja.hash !== "#/mejoras") bad("la hoja cambió de pantalla: " + hoja.hash);
+if (!hoja.hub) bad("la hoja no es el hub");
+if (hoja.fab) bad("el botón flotante tapa la hoja");
+if (hoja.dentro) bad("el botón Plan está dentro de la barra");
+if (hoja.tab !== "Mejoras") bad("la hoja marcó " + hoja.tab);
+if (hoja.n !== 11) bad("la hoja muestra " + hoja.n + " cuentas");
+await page.evaluate(() => document.querySelector("[data-plan-cerrar]")?.click());
+await page.waitForFunction(() => !document.querySelector(".sheet"));
+if (await page.evaluate(() => location.hash) !== "#/mejoras") bad("cerrar la hoja salió de Mejoras");
+
+await ir(page, "#/inicio");
+const tarjeta = await page.evaluate(() => document.querySelector("a.plan-destacada")?.getAttribute("href") || "");
+if (tarjeta !== "#/plan") bad("la tarjeta de Inicio no abre el plan");
+await page.click("a.plan-destacada");
+await page.waitForFunction(() => location.hash === "#/plan");
+if (!(await page.evaluate(() => !!document.querySelector("#screen [data-plan-hub]")))) bad("la tarjeta no abre el mismo hub");
+
+for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/plan", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);
   await barrer(page, hash);
 }
@@ -275,6 +344,87 @@ await tab.waitForFunction(() => location.hash === "#/agenda");
 await tab.evaluate(() => history.back());
 await tab.waitForFunction(() => location.hash === "#/mejoras");
 await barraUnaFila(tab, "#/mejoras");
+
+await ir(page, "#/roster");
+const dedo = async (deltas, yClick) => page.evaluate(({ deltas, yClick }) => {
+  const fab = document.querySelector(".plan-fab");
+  const r = fab.getBoundingClientRect();
+  let x = r.left + r.width / 2;
+  let y = r.top + r.height / 2;
+  const id = 7;
+  const ev = (tipo, px, py) => fab.dispatchEvent(new PointerEvent(tipo, {
+    bubbles: true, cancelable: true, pointerId: id, pointerType: "touch",
+    clientX: px, clientY: py, button: 0, buttons: tipo === "pointerup" ? 0 : 1, isPrimary: true,
+  }));
+  ev("pointerdown", x, y);
+  for (const d of deltas) {
+    x += d.x;
+    y += d.y;
+    ev("pointermove", x, y);
+  }
+  ev("pointerup", x, y);
+  if (yClick) fab.click();
+  const box = document.querySelector(".plan-fab");
+  const rect = box ? box.getBoundingClientRect() : fab.getBoundingClientRect();
+  const bar = document.querySelector(".tabbar").getBoundingClientRect();
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem("cp-plan-fab") || "null"); } catch { guardado = "roto"; }
+  return {
+    left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+    vw: innerWidth, barTop: bar.top, hoja: !!document.querySelector(".sheet"),
+    hash: location.hash, guardado,
+  };
+}, { deltas, yClick });
+
+const corto = await dedo([{ x: 3, y: 2 }], true);
+if (!corto.hoja) bad("un toque sin arrastrar no abre el plan");
+if (corto.hash !== "#/roster") bad("el toque cambió de pantalla: " + corto.hash);
+if (corto.guardado) bad("un toque guardó posición");
+await page.evaluate(() => document.querySelector("[data-plan-cerrar]")?.click());
+await page.waitForFunction(() => !document.querySelector(".sheet"));
+
+const izquierda = await dedo([{ x: -320, y: -2000 }], true);
+if (izquierda.hoja) bad("arrastrar abrió la hoja");
+if (izquierda.hash !== "#/roster") bad("arrastrar cambió de pantalla");
+if (!izquierda.guardado || izquierda.guardado.lado !== "izq") bad("no guardó el borde izquierdo: " + JSON.stringify(izquierda.guardado));
+if (izquierda.left > 20) bad("no se pegó a la izquierda: " + izquierda.left);
+if (izquierda.top < 12 || izquierda.top > 20) bad("no respeta el margen de arriba: " + izquierda.top);
+if (izquierda.bottom > izquierda.barTop + 1) bad("el botón pisa la barra");
+await ir(page, "#/agenda");
+const sigue = await page.evaluate(() => document.querySelector(".plan-fab").getBoundingClientRect().left);
+if (Math.abs(sigue - izquierda.left) > 2) bad("al cambiar de pantalla no conserva el borde");
+
+const abajo = await dedo([{ x: 0, y: 800 }], false);
+if (abajo.bottom > abajo.barTop - 8) bad("al bajar no deja aire sobre la barra: " + abajo.bottom + " / " + abajo.barTop);
+if (abajo.top < 12) bad("al bajar se sale por arriba");
+if (abajo.guardado.lado !== "izq") bad("al bajar cambió de borde: " + abajo.guardado.lado);
+
+const derecha = await dedo([{ x: 400, y: -80 }], true);
+if (derecha.hoja) bad("el segundo arrastre abrió la hoja");
+if (derecha.guardado.lado !== "der") bad("no guardó el borde derecho: " + JSON.stringify(derecha.guardado));
+if (derecha.right < derecha.vw - 20) bad("no se pegó a la derecha: " + derecha.right);
+if (derecha.bottom > derecha.barTop + 1) bad("a la derecha pisa la barra");
+const yGuardada = derecha.guardado.y;
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.waitForSelector(".plan-fab");
+const recarga = await page.evaluate(() => {
+  const r = document.querySelector(".plan-fab").getBoundingClientRect();
+  const g = JSON.parse(localStorage.getItem("cp-plan-fab") || "null");
+  return { left: r.left, right: r.right, bottom: r.bottom, barTop: document.querySelector(".tabbar").getBoundingClientRect().top, g };
+});
+if (!recarga.g || recarga.g.lado !== "der") bad("al recargar olvidó el borde");
+if (Math.abs(recarga.g.y - yGuardada) > 0.02) bad("al recargar olvidó la altura");
+if (recarga.right < 375 - 20) bad("al recargar no está a la derecha");
+if (recarga.bottom > recarga.barTop + 1) bad("al recargar pisa la barra");
+await page.evaluate(() => localStorage.setItem("cp-plan-fab", "{\"lado\":\"arriba\"}"));
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.waitForSelector(".plan-fab");
+const rota = await page.evaluate(() => {
+  const r = document.querySelector(".plan-fab").getBoundingClientRect();
+  return { left: r.left, right: r.right, vw: innerWidth, hoja: !!document.querySelector(".sheet") };
+});
+if (rota.hoja) bad("una posición rota abrió la hoja");
+if (rota.left < rota.vw / 2) bad("una posición rota no vuelve al borde derecho");
 
 if (fails.length) {
   console.log(fails.join("\n"));

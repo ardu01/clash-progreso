@@ -56,8 +56,8 @@ export function iconoRecurso(id) {
   return marcaHtml(ICONO[id] ? id : "oro", 18);
 }
 
-export function htmlMartillo() {
-  return marcaHtml("martillo", 24, "btn-mejorar__icono");
+export function htmlMartillo(size = 24, clase = "btn-mejorar__icono") {
+  return marcaHtml("martillo", size, clase);
 }
 
 /** Icono y palabra «Mejorar» en un solo grupo, para centrarlos dentro del botón. */

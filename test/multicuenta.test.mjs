@@ -54,7 +54,7 @@ test("finDe no inventa una hora si el timer no es un número", () => {
   assert.equal(finDe(undefined, 10).exacta, false);
 });
 
-test("el sueño de Madrid no deja empezar ni acabar dentro del tramo", () => {
+test("4.2.4: el sueño no deja empezar dentro del tramo, pero la mejora puede acabar de noche", () => {
   const sleep = sleepFromClocks("23:00", "08:00");
   assert.ok(sleep);
   assert.equal(sleepFromClocks("", "08:00"), null);
@@ -68,16 +68,22 @@ test("el sueño de Madrid no deja empezar ni acabar dentro del tramo", () => {
   const short = scheduleNext(evening, 2 * 3600, sleep);
   assert.equal(short.inicio, evening);
   assert.equal(short.fin, evening + 2 * 3600 * 1000);
+  assert.equal(short.finEnSueno, false);
   const late = scheduleNext(Date.parse("2026-10-11T20:00:00Z"), 3 * 3600, sleep);
+  assert.equal(late.inicio, Date.parse("2026-10-11T20:00:00Z"));
+  assert.equal(late.fin, late.inicio + 3 * 3600 * 1000);
   assert.equal(inSleep(late.inicio, sleep), false);
-  assert.equal(inSleep(late.fin, sleep), false);
-  assert.equal(late.finEnSueno, false);
+  assert.equal(inSleep(late.fin, sleep), true);
+  assert.equal(late.finEnSueno, true);
   const long = scheduleNext(Date.parse("2026-10-11T08:00:00Z"), 20 * 3600, null);
   assert.equal(long.fin - long.inicio, 20 * 3600 * 1000);
   const overnight = scheduleNext(Date.parse("2026-10-11T06:00:00Z"), 20 * 3600, sleep);
+  assert.equal(overnight.inicio, Date.parse("2026-10-11T06:00:00Z"));
   assert.equal(overnight.fin - overnight.inicio, 20 * 3600 * 1000);
-  assert.equal(inSleep(overnight.inicio, sleep), false);
-  assert.equal(inSleep(overnight.fin, sleep), false);
+  assert.equal(inSleep(overnight.fin, sleep), true);
+  const dormido = scheduleNext(night, 3600, sleep);
+  assert.equal(dormido.inicio, wake);
+  assert.equal(inSleep(dormido.inicio, sleep), false);
   const missing = scheduleNext(evening, null, sleep);
   assert.equal(missing.fin, null);
   assert.equal(missing.sinDuracion, true);
@@ -191,11 +197,13 @@ test("4.1.6: el plan usa las sesiones y no el sueño de 23 a 07", () => {
   assert.equal(larga.pasaSesion, true);
   assert.equal(larga.inicio, Date.parse("2026-10-11T17:00:00Z"));
   const otono = scheduleNext(Date.parse("2026-10-11T17:00:00Z"), 25 * 3600, semana);
-  assert.equal(otono.pasaSesion, false);
-  assert.equal(otono.inicio, Date.parse("2026-10-24T17:00:00Z"));
+  assert.equal(otono.inicio, Date.parse("2026-10-11T17:00:00Z"));
+  assert.equal(otono.fin, otono.inicio + 25 * 3600 * 1000);
+  assert.equal(otono.pasaSesion, true);
   const cabe = scheduleNext(Date.parse("2026-10-11T18:30:00Z"), 23 * 3600, semana);
-  assert.equal(cabe.inicio, Date.parse("2026-10-12T17:00:00Z"));
-  assert.equal(cabe.pasaSesion, false);
+  assert.equal(cabe.inicio, Date.parse("2026-10-11T18:30:00Z"));
+  assert.equal(cabe.fin, cabe.inicio + 23 * 3600 * 1000);
+  assert.equal(cabe.pasaSesion, true);
   const sleep = { desde: 23 * 60, hasta: 7 * 60 };
   const enSueno = scheduleNext(Date.parse("2026-10-11T22:30:00Z"), 30 * 60, sleep);
   const enSesion = scheduleNext(Date.parse("2026-10-11T22:30:00Z"), 30 * 60, semana);

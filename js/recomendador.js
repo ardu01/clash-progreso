@@ -35,6 +35,7 @@ function ficha(step, lane) {
     fin: step.fin,
     categoryKey: step.categoryKey,
     noCabe: !!step.noCabe,
+    motivo: step.motivo || "",
   };
 }
 
@@ -54,7 +55,8 @@ function linea(step, hueco) {
 /**
  * Una mejora por hueco que queda libre antes de que acabe la próxima sesión,
  * y lo que toca iniciar en cada sesión de los próximos días.
- * No mira el oro de la cuenta: el orden ya viene del plan.
+ * No mira el oro guardado de la cuenta. Si el coste no entra en los almacenes,
+ * ese paso ya viene bloqueado y no se inicia.
  */
 export function recomendar(roadmap, semana, now) {
   const week = Array.isArray(semana) ? semana : semanaPlan();
@@ -75,7 +77,7 @@ export function recomendar(roadmap, semana, now) {
     if (sesion) {
       if (libre >= sesion.end) continue;
     } else if (libre > momento) continue;
-    const paso = (porLane.get(lane.id) || []).find((s) => !s.provisional && (sesion ? s.inicio < sesion.end : s.inicio <= momento));
+    const paso = (porLane.get(lane.id) || []).find((s) => !s.provisional && !s.noCabe && (sesion ? s.inicio < sesion.end : s.inicio <= momento));
     if (!paso) continue;
     ahora.push(ficha(paso, lane));
   }
@@ -94,7 +96,7 @@ function proximasSesiones(orden, lanes, week, now, dias) {
     const huecos = [];
     const candidatos = [];
     for (const step of orden || []) {
-      if (!step || step.provisional || step.inicio == null || step.inicio < now) continue;
+      if (!step || step.provisional || step.noCabe || step.inicio == null || step.inicio < now) continue;
       if (step.inicio < ses.start || step.inicio >= ses.end) continue;
       candidatos.push(step);
     }

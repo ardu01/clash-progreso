@@ -1,0 +1,4584 @@
+{
+  "schema_version": 1,
+  "generated": "2026-10-12",
+  "game_state": "Clash of Clans, aldea principal, TH1-TH18 (octubre 2026)",
+  "conventions": {
+    "cost": "{resource, amount}; resource in Gold|Elixir|Dark Elixir",
+    "time": "build_time_seconds (int) + build_time (texto original de la wiki)",
+    "null": "dato no verificado -> null y notes incluye \"sin confirmar\"",
+    "name_es": "nombre oficial de la traducción del juego vía ClashKing static API"
+  },
+  "sources": {
+    "fandom": "https://clashofclans.fandom.com/wiki/",
+    "clashking_names": "https://api.clashk.ing/v2/static/{category}/names?locale=ES"
+  },
+  "buildings": [
+    {
+      "key": "air_bomb",
+      "name_en": "Air Bomb",
+      "name_es": "Bomba aérea",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 5,
+      "level1_th_required": 5,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 4000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 4,
+        "9": 4,
+        "10": 5,
+        "11": 5,
+        "12": 6,
+        "13": 6,
+        "14": 7,
+        "15": 7,
+        "16": 7,
+        "17": 7,
+        "18": 8
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Air_Bomb",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "air_defense",
+      "name_en": "Air Defense",
+      "name_es": "Cohetes de defensa",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 4,
+      "level1_th_required": 4,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 22000
+      },
+      "level1_build_time_seconds": 3600,
+      "level1_build_time": "1h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 3,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": 4
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Air_Defense/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "air_sweeper",
+      "name_en": "Air Sweeper",
+      "name_es": "Controlador aéreo",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 6,
+      "level1_th_required": 6,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 200000
+      },
+      "level1_build_time_seconds": 14400,
+      "level1_build_time": "4h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 2,
+        "10": 2,
+        "11": 2,
+        "12": 2,
+        "13": 2,
+        "14": 2,
+        "15": 2,
+        "16": 2,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Air_Sweeper",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "archer_tower",
+      "name_en": "Archer Tower",
+      "name_es": "Torre de arqueras",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 2,
+      "level1_th_required": 2,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 1000
+      },
+      "level1_build_time_seconds": 15,
+      "level1_build_time": "15s",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 1,
+        "3": 1,
+        "4": 2,
+        "5": 3,
+        "6": 3,
+        "7": 4,
+        "8": 5,
+        "9": 6,
+        "10": 7,
+        "11": 8,
+        "12": 8,
+        "13": 8,
+        "14": 8,
+        "15": 8,
+        "16": 4,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Archer_Tower/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "TH16: \"4*\" en la wiki (asterisco = tras fusiones / caso especial)",
+        "TH17: \"2*\" en la wiki (asterisco = tras fusiones / caso especial)"
+      ]
+    },
+    {
+      "key": "army_camp",
+      "name_en": "Army Camp",
+      "name_es": "Campamento",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 200
+      },
+      "level1_build_time_seconds": 60,
+      "level1_build_time": "1m",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "4": 2,
+        "5": 3,
+        "6": 3,
+        "7": 4,
+        "8": 4,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": 4
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Army_Camp/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "barracks",
+      "name_en": "Barracks",
+      "name_es": "Cuartel",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 100
+      },
+      "level1_build_time_seconds": 10,
+      "level1_build_time": "10s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "blacksmith",
+      "name_en": "Blacksmith",
+      "name_es": "Herrería",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 8,
+      "level1_th_required": 8,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "level1_build_time_seconds": 43200,
+      "level1_build_time": "12h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "fila de nivel 1 leída a mano (tabla con columnas extra)"
+      ]
+    },
+    {
+      "key": "bomb",
+      "name_en": "Bomb",
+      "name_es": "Bomba",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 3,
+      "level1_th_required": 3,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 400
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 2,
+        "4": 2,
+        "5": 4,
+        "6": 4,
+        "7": 6,
+        "8": 6,
+        "9": 6,
+        "10": 6,
+        "11": 6,
+        "12": 6,
+        "13": 7,
+        "14": 8,
+        "15": 8,
+        "16": 8,
+        "17": 8,
+        "18": 8
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Bomb",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "bomb_tower",
+      "name_en": "Bomb Tower",
+      "name_es": "Torre bombardera",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 8,
+      "level1_th_required": 8,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 700000
+      },
+      "level1_build_time_seconds": 43200,
+      "level1_build_time": "12h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 1,
+        "9": 1,
+        "10": 2,
+        "11": 2,
+        "12": 2,
+        "13": 2,
+        "14": 2,
+        "15": 2,
+        "16": 2,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Bomb_Tower/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "builders_hut",
+      "name_en": "Builder's Hut",
+      "name_es": "Choza de constructor",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": "None",
+      "quantity_by_th": {
+        "1": 5,
+        "2": 5,
+        "3": 5,
+        "4": 5,
+        "5": 5,
+        "6": 5,
+        "7": 5,
+        "8": 5,
+        "9": 5,
+        "10": 5,
+        "11": 5,
+        "12": 5,
+        "13": 5,
+        "14": 5,
+        "15": 5,
+        "16": 5,
+        "17": 5,
+        "18": 5
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Builder's_Hut",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste de nivel 1 sin confirmar (wiki: \"Varies**\")",
+        "tiempo de construcción sin confirmar (wiki: \"None\")"
+      ]
+    },
+    {
+      "key": "cannon",
+      "name_en": "Cannon",
+      "name_es": "Cañón",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 250
+      },
+      "level1_build_time_seconds": 5,
+      "level1_build_time": "5s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 3,
+        "6": 3,
+        "7": 5,
+        "8": 5,
+        "9": 5,
+        "10": 6,
+        "11": 7,
+        "12": 7,
+        "13": 7,
+        "14": 7,
+        "15": 7,
+        "16": 3,
+        "17": 0,
+        "18": 0
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Cannon/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "TH16: \"3*\" en la wiki (asterisco = tras fusiones / caso especial)",
+        "TH17: \"0*\" en la wiki (asterisco = tras fusiones / caso especial)"
+      ]
+    },
+    {
+      "key": "clan_castle",
+      "name_en": "Clan Castle",
+      "name_es": "Castillo del clan",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 2,
+      "level1_th_required": 2,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 10000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Clan_Castle",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "TH2: \"1*\" en la wiki (asterisco = tras fusiones / caso especial)",
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)",
+        "tiempo de construcción sin confirmar (wiki: \"N/A\")"
+      ]
+    },
+    {
+      "key": "crafting_station",
+      "name_en": "Crafting Station",
+      "name_es": "Puesto de artesanía",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 18,
+      "level1_th_required": null,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": null,
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Crafting_Station",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste y tiempo de nivel 1 sin confirmar",
+        "wiki: Build Cost \"None\", Build Time \"None\""
+      ]
+    },
+    {
+      "key": "dark_barracks",
+      "name_en": "Dark Barracks",
+      "name_es": "Cuartel oscuro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 7,
+      "level1_th_required": 7,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 200000
+      },
+      "level1_build_time_seconds": 28800,
+      "level1_build_time": "8h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "dark_elixir_drill",
+      "name_en": "Dark Elixir Drill",
+      "name_es": "Extractor de elixir oscuro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 7,
+      "level1_th_required": 7,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 180000
+      },
+      "level1_build_time_seconds": 14400,
+      "level1_build_time": "4h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 2,
+        "9": 3,
+        "10": 3,
+        "11": 3,
+        "12": 3,
+        "13": 3,
+        "14": 3,
+        "15": 3,
+        "16": 3,
+        "17": 3,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Elixir_Drill",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "dark_elixir_storage",
+      "name_en": "Dark Elixir Storage",
+      "name_es": "Almacén de elixir oscuro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 7,
+      "level1_th_required": 7,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 250000
+      },
+      "level1_build_time_seconds": 28800,
+      "level1_build_time": "8h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Elixir_Storage",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "dark_spell_factory",
+      "name_en": "Dark Spell Factory",
+      "name_es": "Caldero de hechizos oscuros",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 8,
+      "level1_th_required": 8,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 130000
+      },
+      "level1_build_time_seconds": 21600,
+      "level1_build_time": "6h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "eagle_artillery",
+      "name_en": "Eagle Artillery",
+      "name_es": "Águila de artillería",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 11,
+      "level1_th_required": 11,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 5000000
+      },
+      "level1_build_time_seconds": 345600,
+      "level1_build_time": "4d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 0,
+        "18": 0
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Eagle_Artillery",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "TH17: \"0*\" en la wiki (asterisco = tras fusiones / caso especial)"
+      ]
+    },
+    {
+      "key": "elixir_collector",
+      "name_en": "Elixir Collector",
+      "name_es": "Recolector de elixir",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 150
+      },
+      "level1_build_time_seconds": 5,
+      "level1_build_time": "5s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5,
+        "6": 6,
+        "7": 6,
+        "8": 6,
+        "9": 7,
+        "10": 7,
+        "11": 7,
+        "12": 7,
+        "13": 7,
+        "14": 7,
+        "15": 7,
+        "16": 7,
+        "17": 7,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Elixir_Collector/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "elixir_storage",
+      "name_en": "Elixir Storage",
+      "name_es": "Almacén de elixir",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 300
+      },
+      "level1_build_time_seconds": 10,
+      "level1_build_time": "10s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 3,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Elixir_Storage/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "firespitter",
+      "name_en": "Firespitter",
+      "name_es": "Escupellamas",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 17,
+      "level1_th_required": 17,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 17000000
+      },
+      "level1_build_time_seconds": 734400,
+      "level1_build_time": "8d 12h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Firespitter",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "giant_bomb",
+      "name_en": "Giant Bomb",
+      "name_es": "Conjunto de explosivos",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 6,
+      "level1_th_required": 6,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 12500
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 1,
+        "7": 2,
+        "8": 3,
+        "9": 4,
+        "10": 5,
+        "11": 5,
+        "12": 6,
+        "13": 6,
+        "14": 7,
+        "15": 7,
+        "16": 7,
+        "17": 8,
+        "18": 8
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Giant_Bomb",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "giga_bomb",
+      "name_en": "Giga Bomb",
+      "name_es": "Gigabomba",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 17,
+      "level1_th_required": 17,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 4500000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Giga_Bomb",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "giga_inferno",
+      "name_en": "Giga Inferno",
+      "name_es": null,
+      "name_es_source": null,
+      "category": "defense",
+      "unlock_th": 13,
+      "level1_th_required": null,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": null,
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 0,
+        "18": 0
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Giga_Inferno",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste y tiempo de nivel 1 sin confirmar",
+        "arma del Ayuntamiento: llega al mejorar el Ayuntamiento, sin coste propio"
+      ]
+    },
+    {
+      "key": "giga_tesla",
+      "name_en": "Giga Tesla",
+      "name_es": null,
+      "name_es_source": null,
+      "category": "defense",
+      "unlock_th": 12,
+      "level1_th_required": null,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": null,
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 1,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 0
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Giga_Tesla",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste y tiempo de nivel 1 sin confirmar",
+        "arma del Ayuntamiento: llega al mejorar el Ayuntamiento, sin coste propio"
+      ]
+    },
+    {
+      "key": "gold_mine",
+      "name_en": "Gold Mine",
+      "name_es": "Mina de oro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 150
+      },
+      "level1_build_time_seconds": 5,
+      "level1_build_time": "5s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5,
+        "6": 6,
+        "7": 6,
+        "8": 6,
+        "9": 7,
+        "10": 7,
+        "11": 7,
+        "12": 7,
+        "13": 7,
+        "14": 7,
+        "15": 7,
+        "16": 7,
+        "17": 7,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Gold_Mine/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "gold_storage",
+      "name_en": "Gold Storage",
+      "name_es": "Almacén de oro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 1,
+      "level1_th_required": 1,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 300
+      },
+      "level1_build_time_seconds": 10,
+      "level1_build_time": "10s",
+      "quantity_by_th": {
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 3,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Gold_Storage/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)"
+      ]
+    },
+    {
+      "key": "helper_hut",
+      "name_en": "Helper Hut",
+      "name_es": "Choza de los ayudantes",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "resource",
+      "unlock_th": 9,
+      "level1_th_required": null,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 1000000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "None",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": null
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Helper_Hut",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "cantidad en TH18 sin confirmar (la tabla de la wiki no incluye esa fila)",
+        "coste y tiempo de nivel 1 sin confirmar",
+        "wiki: coste 1.000.000 de elixir, tiempo \"None\"; en TH18 cantidad sin confirmar"
+      ]
+    },
+    {
+      "key": "hero_hall",
+      "name_en": "Hero Hall",
+      "name_es": "Consejo heroico",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 7,
+      "level1_th_required": 4,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 30000
+      },
+      "level1_build_time_seconds": 3600,
+      "level1_build_time": "1h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "hidden_tesla",
+      "name_en": "Hidden Tesla",
+      "name_es": "Torre Tesla",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 7,
+      "level1_th_required": 7,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 250000
+      },
+      "level1_build_time_seconds": 7200,
+      "level1_build_time": "2h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 2,
+        "8": 3,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 5,
+        "13": 5,
+        "14": 5,
+        "15": 5,
+        "16": 5,
+        "17": 5,
+        "18": 5
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Hidden_Tesla/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "inferno_artillery",
+      "name_en": "Inferno Artillery",
+      "name_es": null,
+      "name_es_source": null,
+      "category": "defense",
+      "unlock_th": 17,
+      "level1_th_required": 17,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 1,
+        "18": 0
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Town_Hall/Inferno_Artillery",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste de nivel 1 sin confirmar (wiki: \"N/A\")",
+        "tiempo de construcción sin confirmar (wiki: \"N/A\")",
+        "arma del Ayuntamiento: llega al mejorar el Ayuntamiento, sin coste propio"
+      ]
+    },
+    {
+      "key": "inferno_tower",
+      "name_en": "Inferno Tower",
+      "name_es": "Torre infernal",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 10,
+      "level1_th_required": 10,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 1000000
+      },
+      "level1_build_time_seconds": 43200,
+      "level1_build_time": "12h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 2,
+        "11": 2,
+        "12": 3,
+        "13": 3,
+        "14": 3,
+        "15": 3,
+        "16": 3,
+        "17": 3,
+        "18": 3
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Inferno_Tower/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "fila de nivel 1 leída a mano (tabla con columnas extra)"
+      ]
+    },
+    {
+      "key": "laboratory",
+      "name_en": "Laboratory",
+      "name_es": "Laboratorio",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 3,
+      "level1_th_required": 3,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 5000
+      },
+      "level1_build_time_seconds": 60,
+      "level1_build_time": "1m",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Laboratory",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "monolith",
+      "name_en": "Monolith",
+      "name_es": "Monolito",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 15,
+      "level1_th_required": 15,
+      "level1_cost": {
+        "resource": "Dark Elixir",
+        "amount": 200000
+      },
+      "level1_build_time_seconds": 604800,
+      "level1_build_time": "7d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Monolith",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "mortar",
+      "name_en": "Mortar",
+      "name_es": "Mortero",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 3,
+      "level1_th_required": 3,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 5000
+      },
+      "level1_build_time_seconds": 1800,
+      "level1_build_time": "30m",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 2,
+        "7": 3,
+        "8": 4,
+        "9": 4,
+        "10": 4,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": 4
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Mortar",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "multi_archer_tower",
+      "name_en": "Multi-Archer Tower",
+      "name_es": "Torre de arqueras múltiple",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 16,
+      "level1_th_required": 16,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 12000000
+      },
+      "level1_build_time_seconds": 604800,
+      "level1_build_time": "7d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 2,
+        "17": 3,
+        "18": 3
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Multi-Archer_Tower",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "multi_gear_tower",
+      "name_en": "Multi-Gear Tower",
+      "name_es": "Torre multiusos",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 17,
+      "level1_th_required": 17,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 17000000
+      },
+      "level1_build_time_seconds": 691200,
+      "level1_build_time": "8d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Multi-Gear_Tower",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "pet_house",
+      "name_en": "Pet House",
+      "name_es": "Caseta de animales",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 14,
+      "level1_th_required": 14,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 3000000
+      },
+      "level1_build_time_seconds": 86400,
+      "level1_build_time": "1d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "revenge_tower",
+      "name_en": "Revenge Tower",
+      "name_es": "Torre vengativa",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 18,
+      "level1_th_required": 18,
+      "level1_cost": {
+        "resource": "Dark Elixir",
+        "amount": 430000
+      },
+      "level1_build_time_seconds": 1123205,
+      "level1_build_time": "13d 5s",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Revenge_Tower",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "ricochet_cannon",
+      "name_en": "Ricochet Cannon",
+      "name_es": "Cañón con rebote",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 16,
+      "level1_th_required": 16,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 12000000
+      },
+      "level1_build_time_seconds": 604800,
+      "level1_build_time": "7d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 2,
+        "17": 3,
+        "18": 3
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Ricochet_Cannon",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "scattershot",
+      "name_en": "Scattershot",
+      "name_es": "Catapulta",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 13,
+      "level1_th_required": 13,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 8000000
+      },
+      "level1_build_time_seconds": 432000,
+      "level1_build_time": "5d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 2,
+        "14": 2,
+        "15": 2,
+        "16": 2,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Scattershot",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "seeking_air_mine",
+      "name_en": "Seeking Air Mine",
+      "name_es": "Mina de rastreo aéreo",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 7,
+      "level1_th_required": 7,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 12000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 2,
+        "9": 4,
+        "10": 5,
+        "11": 5,
+        "12": 6,
+        "13": 7,
+        "14": 8,
+        "15": 8,
+        "16": 8,
+        "17": 9,
+        "18": 9
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Seeking_Air_Mine",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "skeleton_trap",
+      "name_en": "Skeleton Trap",
+      "name_es": "Trampa de esqueletos",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 8,
+      "level1_th_required": 8,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 6000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 2,
+        "9": 2,
+        "10": 3,
+        "11": 3,
+        "12": 3,
+        "13": 3,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": 4
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Skeleton_Trap",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "spell_factory",
+      "name_en": "Spell Factory",
+      "name_es": "Caldero de hechizos",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 5,
+      "level1_th_required": 5,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 150000
+      },
+      "level1_build_time_seconds": 21600,
+      "level1_build_time": "6h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "spell_tower",
+      "name_en": "Spell Tower",
+      "name_es": "Torre de hechizos",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 15,
+      "level1_th_required": 15,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 9000000
+      },
+      "level1_build_time_seconds": 604800,
+      "level1_build_time": "7d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 2,
+        "16": 2,
+        "17": 2,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Tower",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "spring_trap",
+      "name_en": "Spring Trap",
+      "name_es": "Trampa con muelle",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 4,
+      "level1_th_required": 4,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 2000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 2,
+        "5": 2,
+        "6": 4,
+        "7": 4,
+        "8": 6,
+        "9": 6,
+        "10": 6,
+        "11": 6,
+        "12": 8,
+        "13": 9,
+        "14": 9,
+        "15": 9,
+        "16": 9,
+        "17": 9,
+        "18": 9
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Spring_Trap/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "super_wizard_tower",
+      "name_en": "Super Wizard Tower",
+      "name_es": "Torre de supermagos",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 18,
+      "level1_th_required": 18,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 29000000
+      },
+      "level1_build_time_seconds": 1123200,
+      "level1_build_time": "13d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 0,
+        "13": 0,
+        "14": 0,
+        "15": 0,
+        "16": 0,
+        "17": 0,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Super_Wizard_Tower/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "tornado_trap",
+      "name_en": "Tornado Trap",
+      "name_es": "Trampa tornado",
+      "name_es_source": "https://api.clashk.ing/v2/static/traps/names?locale=ES",
+      "category": "trap",
+      "unlock_th": 11,
+      "level1_th_required": 11,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 1800000
+      },
+      "level1_build_time_seconds": null,
+      "level1_build_time": "N/A",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Tornado_Trap",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "tiempo de construcción sin confirmar (wiki: \"N/A\"); las trampas se colocan al instante según la wiki"
+      ]
+    },
+    {
+      "key": "walls",
+      "name_en": "Walls",
+      "name_es": "Muro",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 2,
+      "level1_th_required": 2,
+      "level1_cost": null,
+      "level1_build_time_seconds": null,
+      "level1_build_time": null,
+      "quantity_by_th": {
+        "1": 0,
+        "2": 25,
+        "3": 50,
+        "4": 75,
+        "5": 100,
+        "6": 125,
+        "7": 175,
+        "8": 225,
+        "9": 250,
+        "10": 275,
+        "11": 300,
+        "12": 300,
+        "13": 325,
+        "14": 325,
+        "15": 325,
+        "16": 325,
+        "17": 325,
+        "18": 325
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Wall/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "coste de nivel 1 sin confirmar (wiki: \"N/A\")",
+        "tiempo de construcción sin confirmar (wiki: \"None\")"
+      ]
+    },
+    {
+      "key": "wizard_tower",
+      "name_en": "Wizard Tower",
+      "name_es": "Torre de mago",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 5,
+      "level1_th_required": 5,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 100000
+      },
+      "level1_build_time_seconds": 3600,
+      "level1_build_time": "1h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 1,
+        "6": 2,
+        "7": 2,
+        "8": 3,
+        "9": 4,
+        "10": 4,
+        "11": 5,
+        "12": 5,
+        "13": 5,
+        "14": 5,
+        "15": 5,
+        "16": 5,
+        "17": 5,
+        "18": 2
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Wizard_Tower",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": [
+        "TH18: \"2*\" en la wiki (asterisco = tras fusiones / caso especial)"
+      ]
+    },
+    {
+      "key": "workshop",
+      "name_en": "Workshop",
+      "name_es": "Taller",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "army",
+      "unlock_th": 12,
+      "level1_th_required": 12,
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 2400000
+      },
+      "level1_build_time_seconds": 172800,
+      "level1_build_time": "2d",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 0,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    },
+    {
+      "key": "x_bow",
+      "name_en": "X-Bow",
+      "name_es": "Ballesta",
+      "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+      "category": "defense",
+      "unlock_th": 9,
+      "level1_th_required": 9,
+      "level1_cost": {
+        "resource": "Gold",
+        "amount": 1000000
+      },
+      "level1_build_time_seconds": 43200,
+      "level1_build_time": "12h",
+      "quantity_by_th": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 2,
+        "10": 3,
+        "11": 4,
+        "12": 4,
+        "13": 4,
+        "14": 4,
+        "15": 4,
+        "16": 4,
+        "17": 4,
+        "18": 4
+      },
+      "source_url": "https://clashofclans.fandom.com/wiki/X-Bow/Home_Village",
+      "quantity_source_url": "https://clashofclans.fandom.com/wiki/Town_Hall",
+      "notes": []
+    }
+  ],
+  "guardians": [
+    {
+      "key": "longshot",
+      "name_en": "Longshot",
+      "name_es": "Tiradora",
+      "name_es_source": "https://api.clashk.ing/v2/static/guardians/names?locale=ES",
+      "unlock_th": 18,
+      "cost": null,
+      "build_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Town_Hall/Guardians",
+      "notes": [
+        "Guardián del Ayuntamiento 18; coste/tiempo de desbloqueo sin confirmar"
+      ]
+    },
+    {
+      "key": "smasher",
+      "name_en": "Smasher",
+      "name_es": "Destructor",
+      "name_es_source": "https://api.clashk.ing/v2/static/guardians/names?locale=ES",
+      "unlock_th": 18,
+      "cost": null,
+      "build_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Town_Hall/Guardians",
+      "notes": [
+        "Guardián del Ayuntamiento 18; coste/tiempo de desbloqueo sin confirmar"
+      ]
+    },
+    {
+      "key": "logger",
+      "name_en": "Logger",
+      "name_es": "Arrojatroncos",
+      "name_es_source": "https://api.clashk.ing/v2/static/guardians/names?locale=ES",
+      "unlock_th": 18,
+      "cost": null,
+      "build_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Town_Hall/Guardians",
+      "notes": [
+        "Guardián del Ayuntamiento 18; coste/tiempo de desbloqueo sin confirmar"
+      ]
+    }
+  ],
+  "hero_hall": {
+    "key": "hero_hall",
+    "name_en": "Hero Hall",
+    "name_es": "Consejo heroico",
+    "name_es_source": "https://api.clashk.ing/v2/static/buildings/names?locale=ES",
+    "levels": [
+      {
+        "level": 1,
+        "th_required": 4,
+        "hero_slots": 1,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 30000
+        },
+        "build_time_seconds": 3600,
+        "build_time": "1h",
+        "unlocks_hero": "barbarian_king"
+      },
+      {
+        "level": 2,
+        "th_required": 8,
+        "hero_slots": 1,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 1600000
+        },
+        "build_time_seconds": 172800,
+        "build_time": "2d",
+        "unlocks_hero": "archer_queen"
+      },
+      {
+        "level": 3,
+        "th_required": 9,
+        "hero_slots": 2,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 2300000
+        },
+        "build_time_seconds": 259200,
+        "build_time": "3d",
+        "unlocks_hero": "minion_prince"
+      },
+      {
+        "level": 4,
+        "th_required": 10,
+        "hero_slots": 2,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 2500000
+        },
+        "build_time_seconds": 345600,
+        "build_time": "4d",
+        "unlocks_hero": null
+      },
+      {
+        "level": 5,
+        "th_required": 11,
+        "hero_slots": 3,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 4500000
+        },
+        "build_time_seconds": 388800,
+        "build_time": "4d 12h",
+        "unlocks_hero": "grand_warden"
+      },
+      {
+        "level": 6,
+        "th_required": 12,
+        "hero_slots": 3,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 5500000
+        },
+        "build_time_seconds": 432000,
+        "build_time": "5d",
+        "unlocks_hero": null
+      },
+      {
+        "level": 7,
+        "th_required": 13,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 8500000
+        },
+        "build_time_seconds": 518400,
+        "build_time": "6d",
+        "unlocks_hero": "royal_champion"
+      },
+      {
+        "level": 8,
+        "th_required": 14,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 9500000
+        },
+        "build_time_seconds": 561600,
+        "build_time": "6d 12h",
+        "unlocks_hero": null
+      },
+      {
+        "level": 9,
+        "th_required": 15,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 11000000
+        },
+        "build_time_seconds": 604800,
+        "build_time": "7d",
+        "unlocks_hero": "dragon_duke"
+      },
+      {
+        "level": 10,
+        "th_required": 16,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 13000000
+        },
+        "build_time_seconds": 691200,
+        "build_time": "8d",
+        "unlocks_hero": null
+      },
+      {
+        "level": 11,
+        "th_required": 17,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 17000000
+        },
+        "build_time_seconds": 777600,
+        "build_time": "9d",
+        "unlocks_hero": null
+      },
+      {
+        "level": 12,
+        "th_required": 18,
+        "hero_slots": 4,
+        "cost": {
+          "resource": "Elixir",
+          "amount": 26000000
+        },
+        "build_time_seconds": 1166400,
+        "build_time": "13d 12h",
+        "unlocks_hero": null
+      }
+    ],
+    "source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+    "notes": [
+      "Nivel 1 en TH4-6 con capacidad limitada (1* slot)"
+    ]
+  },
+  "heroes": [
+    {
+      "key": "barbarian_king",
+      "name_en": "Barbarian King",
+      "name_es": "Rey bárbaro",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 1,
+      "th_required": 4,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 30000
+      },
+      "hero_hall_build_time_seconds": 3600,
+      "hero_hall_build_time": "1h",
+      "level1_cost": null,
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Barbarian_King",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "nivel 1 sin coste propio (wiki: N/A): se obtiene al mejorar el Consejo de héroes"
+      ]
+    },
+    {
+      "key": "archer_queen",
+      "name_en": "Archer Queen",
+      "name_es": "Reina arquera",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 2,
+      "th_required": 8,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 1600000
+      },
+      "hero_hall_build_time_seconds": 172800,
+      "hero_hall_build_time": "2d",
+      "level1_cost": null,
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Archer_Queen",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "nivel 1 sin coste propio (wiki: N/A): se obtiene al mejorar el Consejo de héroes"
+      ]
+    },
+    {
+      "key": "minion_prince",
+      "name_en": "Minion Prince",
+      "name_es": "Príncipe esbirro",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 3,
+      "th_required": 9,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 2300000
+      },
+      "hero_hall_build_time_seconds": 259200,
+      "hero_hall_build_time": "3d",
+      "level1_cost": null,
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Minion_Prince",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "nivel 1 sin coste propio (wiki: N/A): se obtiene al mejorar el Consejo de héroes"
+      ]
+    },
+    {
+      "key": "grand_warden",
+      "name_en": "Grand Warden",
+      "name_es": "Gran centinela",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 5,
+      "th_required": 11,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 4500000
+      },
+      "hero_hall_build_time_seconds": 388800,
+      "hero_hall_build_time": "4d 12h",
+      "level1_cost": {
+        "resource": "Elixir",
+        "amount": 1000000
+      },
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Grand_Warden",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "la wiki lista coste 1.000.000 de elixir en el nivel 1 y tiempo N/A"
+      ]
+    },
+    {
+      "key": "royal_champion",
+      "name_en": "Royal Champion",
+      "name_es": "Luchadora real",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 7,
+      "th_required": 13,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 8500000
+      },
+      "hero_hall_build_time_seconds": 518400,
+      "hero_hall_build_time": "6d",
+      "level1_cost": null,
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Royal_Champion",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "nivel 1 sin coste propio (wiki: N/A): se obtiene al mejorar el Consejo de héroes"
+      ]
+    },
+    {
+      "key": "dragon_duke",
+      "name_en": "Dragon Duke",
+      "name_es": "Duque dragón",
+      "name_es_source": "https://api.clashk.ing/v2/static/heroes/names?locale=ES",
+      "hero_hall_level": 9,
+      "th_required": 15,
+      "hero_hall_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "hero_hall_build_time_seconds": 604800,
+      "hero_hall_build_time": "7d",
+      "level1_cost": null,
+      "level1_time_seconds": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Dragon_Duke",
+      "hero_hall_source_url": "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "notes": [
+        "nivel 1 sin coste propio (wiki: N/A): se obtiene al mejorar el Consejo de héroes"
+      ]
+    }
+  ],
+  "troops": [
+    {
+      "key": "barbarian",
+      "name_en": "Barbarian",
+      "name_es": "Bárbaro",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 1,
+      "th_required": 1,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 100
+      },
+      "building_level_build_time_seconds": 10,
+      "building_level_build_time": "10s",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "archer",
+      "name_en": "Archer",
+      "name_es": "Arquera",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 2,
+      "th_required": 1,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 500
+      },
+      "building_level_build_time_seconds": 15,
+      "building_level_build_time": "15s",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": [
+        "TH requerido \"1*\" en la wiki"
+      ]
+    },
+    {
+      "key": "giant",
+      "name_en": "Giant",
+      "name_es": "Gigante",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 3,
+      "th_required": 1,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2500
+      },
+      "building_level_build_time_seconds": 120,
+      "building_level_build_time": "2m",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": [
+        "TH requerido \"1*\" en la wiki"
+      ]
+    },
+    {
+      "key": "goblin",
+      "name_en": "Goblin",
+      "name_es": "Duende",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 4,
+      "th_required": 2,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 5000
+      },
+      "building_level_build_time_seconds": 1800,
+      "building_level_build_time": "30m",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "wall_breaker",
+      "name_en": "Wall Breaker",
+      "name_es": "Rompemuros",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 5,
+      "th_required": 3,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 20000
+      },
+      "building_level_build_time_seconds": 7200,
+      "building_level_build_time": "2h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "balloon",
+      "name_en": "Balloon",
+      "name_es": "Globo bombástico",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 6,
+      "th_required": 4,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 120000
+      },
+      "building_level_build_time_seconds": 14400,
+      "building_level_build_time": "4h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "wizard",
+      "name_en": "Wizard",
+      "name_es": "Mago",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 7,
+      "th_required": 5,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 270000
+      },
+      "building_level_build_time_seconds": 21600,
+      "building_level_build_time": "6h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "healer",
+      "name_en": "Healer",
+      "name_es": "Curandera",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 8,
+      "th_required": 6,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "building_level_build_time_seconds": 43200,
+      "building_level_build_time": "12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "dragon",
+      "name_en": "Dragon",
+      "name_es": "Dragón",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 9,
+      "th_required": 7,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1000000
+      },
+      "building_level_build_time_seconds": 86400,
+      "building_level_build_time": "1d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "pekka",
+      "name_en": "P.E.K.K.A",
+      "name_es": "P.E.K.K.A.",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 10,
+      "th_required": 8,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1400000
+      },
+      "building_level_build_time_seconds": 129600,
+      "building_level_build_time": "1d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "baby_dragon",
+      "name_en": "Baby Dragon",
+      "name_es": "Bebé dragón",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 11,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2600000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "miner",
+      "name_en": "Miner",
+      "name_es": "Minero",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 12,
+      "th_required": 10,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 3700000
+      },
+      "building_level_build_time_seconds": 345600,
+      "building_level_build_time": "4d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "electro_dragon",
+      "name_en": "Electro Dragon",
+      "name_es": "Dragón eléctrico",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 13,
+      "th_required": 11,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 6000000
+      },
+      "building_level_build_time_seconds": 432000,
+      "building_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "yeti",
+      "name_en": "Yeti",
+      "name_es": "Yeti",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 14,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 7000000
+      },
+      "building_level_build_time_seconds": 518400,
+      "building_level_build_time": "6d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "dragon_rider",
+      "name_en": "Dragon Rider",
+      "name_es": "Montadragones",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 15,
+      "th_required": 13,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 9000000
+      },
+      "building_level_build_time_seconds": 604800,
+      "building_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "electro_titan",
+      "name_en": "Electro Titan",
+      "name_es": "Titánide eléctrica",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 16,
+      "th_required": 14,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "building_level_build_time_seconds": 648000,
+      "building_level_build_time": "7d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "root_rider",
+      "name_en": "Root Rider",
+      "name_es": "Druida salvaje",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 17,
+      "th_required": 15,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 12600000
+      },
+      "building_level_build_time_seconds": 691200,
+      "building_level_build_time": "8d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "thrower",
+      "name_en": "Thrower",
+      "name_es": "Lancero",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 18,
+      "th_required": 16,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 15000000
+      },
+      "building_level_build_time_seconds": 777600,
+      "building_level_build_time": "9d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "meteor_golem",
+      "name_en": "Meteor Golem",
+      "name_es": "Gólem meteórico",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "barracks",
+      "unlock_building_level": 19,
+      "th_required": 17,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 26000000
+      },
+      "building_level_build_time_seconds": 907200,
+      "building_level_build_time": "10d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Barracks",
+      "notes": []
+    },
+    {
+      "key": "minion",
+      "name_en": "Minion",
+      "name_es": "Esbirro",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 1,
+      "th_required": 7,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 200000
+      },
+      "building_level_build_time_seconds": 28800,
+      "building_level_build_time": "8h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "hog_rider",
+      "name_en": "Hog Rider",
+      "name_es": "Montapuercos",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 2,
+      "th_required": 7,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "building_level_build_time_seconds": 86400,
+      "building_level_build_time": "1d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "valkyrie",
+      "name_en": "Valkyrie",
+      "name_es": "Valquiria",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 3,
+      "th_required": 8,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1000000
+      },
+      "building_level_build_time_seconds": 129600,
+      "building_level_build_time": "1d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "golem",
+      "name_en": "Golem",
+      "name_es": "Gólem",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 4,
+      "th_required": 8,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1600000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "witch",
+      "name_en": "Witch",
+      "name_es": "Bruja",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 5,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2200000
+      },
+      "building_level_build_time_seconds": 216000,
+      "building_level_build_time": "2d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "lava_hound",
+      "name_en": "Lava Hound",
+      "name_es": "Sabueso de lava",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 6,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2900000
+      },
+      "building_level_build_time_seconds": 259200,
+      "building_level_build_time": "3d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "bowler",
+      "name_en": "Bowler",
+      "name_es": "Lanzarrocas",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 7,
+      "th_required": 10,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 4000000
+      },
+      "building_level_build_time_seconds": 432000,
+      "building_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "ice_golem",
+      "name_en": "Ice Golem",
+      "name_es": "Gólem de hielo",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 8,
+      "th_required": 11,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 7000000
+      },
+      "building_level_build_time_seconds": 518400,
+      "building_level_build_time": "6d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "headhunter",
+      "name_en": "Headhunter",
+      "name_es": "Cazadora de héroes",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 9,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 7200000
+      },
+      "building_level_build_time_seconds": 604800,
+      "building_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "apprentice_warden",
+      "name_en": "Apprentice Warden",
+      "name_es": "Centinela aprendiz",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 10,
+      "th_required": 13,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 10000000
+      },
+      "building_level_build_time_seconds": 648000,
+      "building_level_build_time": "7d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "druid",
+      "name_en": "Druid",
+      "name_es": "Druida",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 11,
+      "th_required": 14,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 12000000
+      },
+      "building_level_build_time_seconds": 691200,
+      "building_level_build_time": "8d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "furnace",
+      "name_en": "Furnace",
+      "name_es": "Horno",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 12,
+      "th_required": 15,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 20000000
+      },
+      "building_level_build_time_seconds": 777600,
+      "building_level_build_time": "9d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    },
+    {
+      "key": "ruin_witch",
+      "name_en": "Ruin Witch",
+      "name_es": "Bruja caída",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "dark_barracks",
+      "unlock_building_level": 13,
+      "th_required": 16,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 23000000
+      },
+      "building_level_build_time_seconds": 864000,
+      "building_level_build_time": "10d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Barracks",
+      "notes": []
+    }
+  ],
+  "spells": [
+    {
+      "key": "lightning_spell",
+      "name_en": "Lightning Spell",
+      "name_es": "Hechizo de rayo",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 1,
+      "th_required": 5,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 150000
+      },
+      "building_level_build_time_seconds": 21600,
+      "building_level_build_time": "6h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "healing_spell",
+      "name_en": "Healing Spell",
+      "name_es": "Hechizo curativo",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 2,
+      "th_required": 6,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 300000
+      },
+      "building_level_build_time_seconds": 43200,
+      "building_level_build_time": "12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "rage_spell",
+      "name_en": "Rage Spell",
+      "name_es": "Hechizo de furia",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 3,
+      "th_required": 7,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "building_level_build_time_seconds": 86400,
+      "building_level_build_time": "1d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "jump_spell",
+      "name_en": "Jump Spell",
+      "name_es": "Hechizo de salto",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 4,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1200000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "freeze_spell",
+      "name_en": "Freeze Spell",
+      "name_es": "Hechizo de hielo",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 4,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1200000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "clone_spell",
+      "name_en": "Clone Spell",
+      "name_es": "Hechizo clonador",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 5,
+      "th_required": 10,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2000000
+      },
+      "building_level_build_time_seconds": 259200,
+      "building_level_build_time": "3d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "invisibility_spell",
+      "name_en": "Invisibility Spell",
+      "name_es": "Hechizo de invisibilidad",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 6,
+      "th_required": 11,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 3500000
+      },
+      "building_level_build_time_seconds": 432000,
+      "building_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "recall_spell",
+      "name_en": "Recall Spell",
+      "name_es": "Hechizo de invocación",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 7,
+      "th_required": 13,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 9000000
+      },
+      "building_level_build_time_seconds": 604800,
+      "building_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "revive_spell",
+      "name_en": "Revive Spell",
+      "name_es": "Hechizo de reanimación",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 8,
+      "th_required": 15,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 14000000
+      },
+      "building_level_build_time_seconds": 691200,
+      "building_level_build_time": "8d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "totem_spell",
+      "name_en": "Totem Spell",
+      "name_es": "Hechizo de tótem",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "spell_factory",
+      "unlock_building_level": 9,
+      "th_required": 16,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 24000000
+      },
+      "building_level_build_time_seconds": 777600,
+      "building_level_build_time": "9d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "poison_spell",
+      "name_en": "Poison Spell",
+      "name_es": "Hechizo de veneno",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 1,
+      "th_required": 8,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 130000
+      },
+      "building_level_build_time_seconds": 21600,
+      "building_level_build_time": "6h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "earthquake_spell",
+      "name_en": "Earthquake Spell",
+      "name_es": "Hechizo de terremoto",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 2,
+      "th_required": 8,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 260000
+      },
+      "building_level_build_time_seconds": 43200,
+      "building_level_build_time": "12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "haste_spell",
+      "name_en": "Haste Spell",
+      "name_es": "Hechizo de aceleración",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 3,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "skeleton_spell",
+      "name_en": "Skeleton Spell",
+      "name_es": "Hechizo esquelético",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 4,
+      "th_required": 9,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 1200000
+      },
+      "building_level_build_time_seconds": 259200,
+      "building_level_build_time": "3d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "bat_spell",
+      "name_en": "Bat Spell",
+      "name_es": "Hechizo de murciélagos",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 5,
+      "th_required": 10,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2500000
+      },
+      "building_level_build_time_seconds": 432000,
+      "building_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "overgrowth_spell",
+      "name_en": "Overgrowth Spell",
+      "name_es": "Hechizo de crecimiento salvaje",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 6,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 4000000
+      },
+      "building_level_build_time_seconds": 518400,
+      "building_level_build_time": "6d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "ice_block_spell",
+      "name_en": "Ice Block Spell",
+      "name_es": "Hechizo de bloque de hielo",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 7,
+      "th_required": 14,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "building_level_build_time_seconds": 604800,
+      "building_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    },
+    {
+      "key": "angry_spell",
+      "name_en": "Angry Spell",
+      "name_es": "Hechizo de cólera",
+      "name_es_source": "https://api.clashk.ing/v2/static/spells/names?locale=ES",
+      "unlock_building": "dark_spell_factory",
+      "unlock_building_level": 8,
+      "th_required": 15,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 18000000
+      },
+      "building_level_build_time_seconds": 864000,
+      "building_level_build_time": "10d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "notes": []
+    }
+  ],
+  "siege_machines": [
+    {
+      "key": "wall_wrecker",
+      "name_en": "Wall Wrecker",
+      "name_es": "Destrozamuros",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 1,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 2400000
+      },
+      "building_level_build_time_seconds": 172800,
+      "building_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "battle_blimp",
+      "name_en": "Battle Blimp",
+      "name_es": "Dirigible bélico",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 2,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 3700000
+      },
+      "building_level_build_time_seconds": 259200,
+      "building_level_build_time": "3d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "stone_slammer",
+      "name_en": "Stone Slammer",
+      "name_es": "Arrojapiedras",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 3,
+      "th_required": 12,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 5000000
+      },
+      "building_level_build_time_seconds": 302400,
+      "building_level_build_time": "3d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "siege_barracks",
+      "name_en": "Siege Barracks",
+      "name_es": "Cuartel de asedio",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 4,
+      "th_required": 13,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 8700000
+      },
+      "building_level_build_time_seconds": 345600,
+      "building_level_build_time": "4d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "log_launcher",
+      "name_en": "Log Launcher",
+      "name_es": "Lanzatroncos",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 5,
+      "th_required": 13,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 9000000
+      },
+      "building_level_build_time_seconds": 432000,
+      "building_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "flame_flinger",
+      "name_en": "Flame Flinger",
+      "name_es": "Lanzallamas",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 6,
+      "th_required": 14,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 10000000
+      },
+      "building_level_build_time_seconds": 475200,
+      "building_level_build_time": "5d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "battle_drill",
+      "name_en": "Battle Drill",
+      "name_es": "Excavadora de batalla",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 7,
+      "th_required": 15,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "building_level_build_time_seconds": 518400,
+      "building_level_build_time": "6d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "troop_launcher",
+      "name_en": "Troop Launcher",
+      "name_es": "Lanzatropas",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 8,
+      "th_required": 16,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 13000000
+      },
+      "building_level_build_time_seconds": 604800,
+      "building_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    },
+    {
+      "key": "sky_wagon",
+      "name_en": "Sky Wagon",
+      "name_es": "Aerovagón",
+      "name_es_source": "https://api.clashk.ing/v2/static/troops/names?locale=ES",
+      "unlock_building": "workshop",
+      "unlock_building_level": 9,
+      "th_required": 17,
+      "building_level_cost": {
+        "resource": "Elixir",
+        "amount": 26000000
+      },
+      "building_level_build_time_seconds": 1166400,
+      "building_level_build_time": "13d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Workshop",
+      "notes": []
+    }
+  ],
+  "troops_notes": [
+    "Supertropas, tropas temporales de eventos y Aldea del Constructor no incluidas"
+  ],
+  "pets": [
+    {
+      "key": "lassi",
+      "name_en": "L.A.S.S.I",
+      "name_es": "L.A.S.S.I.",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 1,
+      "th_required": 14,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 3000000
+      },
+      "pet_house_level_build_time_seconds": 86400,
+      "pet_house_level_build_time": "1d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "electro_owl",
+      "name_en": "Electro Owl",
+      "name_es": "Búho eléctrico",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 2,
+      "th_required": 14,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 4000000
+      },
+      "pet_house_level_build_time_seconds": 172800,
+      "pet_house_level_build_time": "2d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "mighty_yak",
+      "name_en": "Mighty Yak",
+      "name_es": "Yak",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 3,
+      "th_required": 14,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 5000000
+      },
+      "pet_house_level_build_time_seconds": 259200,
+      "pet_house_level_build_time": "3d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "unicorn",
+      "name_en": "Unicorn",
+      "name_es": "Unicornio",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 4,
+      "th_required": 14,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 6000000
+      },
+      "pet_house_level_build_time_seconds": 302400,
+      "pet_house_level_build_time": "3d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "frosty",
+      "name_en": "Frosty",
+      "name_es": "Morsa glacial",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 5,
+      "th_required": 15,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 7000000
+      },
+      "pet_house_level_build_time_seconds": 345600,
+      "pet_house_level_build_time": "4d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "diggy",
+      "name_en": "Diggy",
+      "name_es": "Pangolín excavador",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 6,
+      "th_required": 15,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 8000000
+      },
+      "pet_house_level_build_time_seconds": 388800,
+      "pet_house_level_build_time": "4d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "poison_lizard",
+      "name_en": "Poison Lizard",
+      "name_es": "Lagarto venenoso",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 7,
+      "th_required": 15,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 9000000
+      },
+      "pet_house_level_build_time_seconds": 432000,
+      "pet_house_level_build_time": "5d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "phoenix",
+      "name_en": "Phoenix",
+      "name_es": "Fénix",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 8,
+      "th_required": 15,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 10000000
+      },
+      "pet_house_level_build_time_seconds": 475200,
+      "pet_house_level_build_time": "5d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "spirit_fox",
+      "name_en": "Spirit Fox",
+      "name_es": "Zorro espiritual",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 9,
+      "th_required": 16,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "pet_house_level_build_time_seconds": 518400,
+      "pet_house_level_build_time": "6d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "angry_jelly",
+      "name_en": "Angry Jelly",
+      "name_es": "Medusa furiosa",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 10,
+      "th_required": 16,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 12000000
+      },
+      "pet_house_level_build_time_seconds": 604800,
+      "pet_house_level_build_time": "7d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "sneezy",
+      "name_en": "Sneezy",
+      "name_es": "Achús",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 11,
+      "th_required": 17,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 16500000
+      },
+      "pet_house_level_build_time_seconds": 691200,
+      "pet_house_level_build_time": "8d",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    },
+    {
+      "key": "greedy_raven",
+      "name_en": "Greedy Raven",
+      "name_es": "Cuervo avaricioso",
+      "name_es_source": "https://api.clashk.ing/v2/static/pets/names?locale=ES",
+      "pet_house_level": 12,
+      "th_required": 18,
+      "pet_house_level_cost": {
+        "resource": "Elixir",
+        "amount": 25500000
+      },
+      "pet_house_level_build_time_seconds": 1166400,
+      "pet_house_level_build_time": "13d 12h",
+      "source_url": "https://clashofclans.fandom.com/wiki/Pet_House",
+      "notes": []
+    }
+  ],
+  "hero_equipment": [
+    {
+      "key": "barbarian_puppet",
+      "name_en": "Barbarian Puppet",
+      "name_es": "Bárbaro títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Barbarian_King",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "rage_vial",
+      "name_en": "Rage Vial",
+      "name_es": "Frasco de furia",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Barbarian_King",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "archer_puppet",
+      "name_en": "Archer Puppet",
+      "name_es": "Arquera títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "archer_queen",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Archer_Queen",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "invisibility_vial",
+      "name_en": "Invisibility Vial",
+      "name_es": "Frasco de invisibilidad",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "archer_queen",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Archer_Queen",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "eternal_tome",
+      "name_en": "Eternal Tome",
+      "name_es": "Libro eterno",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "grand_warden",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Grand_Warden",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "life_gem",
+      "name_en": "Life Gem",
+      "name_es": "Gema vital",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "grand_warden",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Grand_Warden",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "royal_gem",
+      "name_en": "Royal Gem",
+      "name_es": "Gema real",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "royal_champion",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Royal_Champion",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "seeking_shield",
+      "name_en": "Seeking Shield",
+      "name_es": "Escudo letal",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "royal_champion",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Royal_Champion",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "henchmen_puppet",
+      "name_en": "Henchmen Puppet",
+      "name_es": "Escolta títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "minion_prince",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Minion_Prince",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "dark_orb",
+      "name_en": "Dark Orb",
+      "name_es": "Orbe oscuro",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "minion_prince",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Minion_Prince",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "fire_heart",
+      "name_en": "Fire Heart",
+      "name_es": "Corazón ardiente",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "dragon_duke",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Dragon_Duke",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "flame_blower",
+      "name_en": "Flame Blower",
+      "name_es": "Fuelle llameante",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "dragon_duke",
+      "source_type": "default_with_hero",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Dragon_Duke",
+      "notes": [
+        "equipamiento por defecto al desbloquear el héroe (wiki: \"default Hero Equipment\")"
+      ]
+    },
+    {
+      "key": "earthquake_boots",
+      "name_en": "Earthquake Boots",
+      "name_es": "Botas de terremoto",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 1,
+      "th_required": 8,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 600000
+      },
+      "blacksmith_level_build_time": "12h",
+      "blacksmith_level_build_time_seconds": 43200,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "giant_arrow",
+      "name_en": "Giant Arrow",
+      "name_es": "Flecha gigante",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 2,
+      "th_required": 9,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 1200000
+      },
+      "blacksmith_level_build_time": "1d",
+      "blacksmith_level_build_time_seconds": 86400,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "vampstache",
+      "name_en": "Vampstache",
+      "name_es": "Vampigote",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 3,
+      "th_required": 10,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 2300000
+      },
+      "blacksmith_level_build_time": "2d",
+      "blacksmith_level_build_time_seconds": 172800,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "metal_pants",
+      "name_en": "Metal Pants",
+      "name_es": "Pantalones de metal",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 3,
+      "th_required": 10,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 2300000
+      },
+      "blacksmith_level_build_time": "2d",
+      "blacksmith_level_build_time_seconds": 172800,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "rage_gem",
+      "name_en": "Rage Gem",
+      "name_es": "Gema de furia",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 4,
+      "th_required": 11,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 3000000
+      },
+      "blacksmith_level_build_time": "3d",
+      "blacksmith_level_build_time_seconds": 259200,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "healer_puppet",
+      "name_en": "Healer Puppet",
+      "name_es": "Curandera títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 5,
+      "th_required": 12,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 5000000
+      },
+      "blacksmith_level_build_time": "4d",
+      "blacksmith_level_build_time_seconds": 345600,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "noble_iron",
+      "name_en": "Noble Iron",
+      "name_es": "Mancuerna de hierro",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 5,
+      "th_required": 12,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 5000000
+      },
+      "blacksmith_level_build_time": "4d",
+      "blacksmith_level_build_time_seconds": 345600,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "healing_tome",
+      "name_en": "Healing Tome",
+      "name_es": "Libro curativo",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 6,
+      "th_required": 13,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 6200000
+      },
+      "blacksmith_level_build_time": "4d 12h",
+      "blacksmith_level_build_time_seconds": 388800,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "hog_rider_puppet",
+      "name_en": "Hog Rider Puppet",
+      "name_es": "Montapuercos títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 7,
+      "th_required": 14,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 9200000
+      },
+      "blacksmith_level_build_time": "5d",
+      "blacksmith_level_build_time_seconds": 432000,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "haste_vial",
+      "name_en": "Haste Vial",
+      "name_es": "Frasco de aceleración",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 8,
+      "th_required": 15,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 10000000
+      },
+      "blacksmith_level_build_time": "6d",
+      "blacksmith_level_build_time_seconds": 518400,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "stun_blaster",
+      "name_en": "Stun Blaster",
+      "name_es": "Pistola aturdidora",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 9,
+      "th_required": 16,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 11000000
+      },
+      "blacksmith_level_build_time": "7d",
+      "blacksmith_level_build_time_seconds": 604800,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "electro_fangs",
+      "name_en": "Electro Fangs",
+      "name_es": "Colmillos eléctricos",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": null,
+      "source_type": "blacksmith",
+      "blacksmith_level": 10,
+      "th_required": 17,
+      "blacksmith_level_cost": {
+        "resource": "Elixir",
+        "amount": 18000000
+      },
+      "blacksmith_level_build_time": "10d",
+      "blacksmith_level_build_time_seconds": 864000,
+      "source_url": "https://clashofclans.fandom.com/wiki/Blacksmith",
+      "notes": [
+        "héroe asociado sin confirmar en este JSON (no extraído)"
+      ]
+    },
+    {
+      "key": "giant_gauntlet",
+      "name_en": "Giant Gauntlet",
+      "name_es": "Guantelete gigante",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "event",
+      "event": "[[Cookie Rumble]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "frozen_arrow",
+      "name_en": "Frozen Arrow",
+      "name_es": "Flecha congelada",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "archer_queen",
+      "source_type": "event",
+      "event": "[[Dragon Festival]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "fireball",
+      "name_en": "Fireball",
+      "name_es": "Bola de fuego",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "grand_warden",
+      "source_type": "event",
+      "event": "[[Super Dragon Spotlight]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "spiky_ball",
+      "name_en": "Spiky Ball",
+      "name_es": "Balón punzante",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "event",
+      "event": "[[Clash with Haaland]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "rocket_spear",
+      "name_en": "Rocket Spear",
+      "name_es": "Lanza cohete",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "royal_champion",
+      "source_type": "event",
+      "event": "[[Super Wall Breaker Spotlight]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "magic_mirror",
+      "name_en": "Magic Mirror",
+      "name_es": "Espejo mágico",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "archer_queen",
+      "source_type": "event",
+      "event": "[[Anime Clash]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "lavaloon_puppet",
+      "name_en": "Lavaloon Puppet",
+      "name_es": "Globo magmático títere",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "grand_warden",
+      "source_type": "event",
+      "event": "[[Mashup Mania]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "electro_boots",
+      "name_en": "Electro Boots",
+      "name_es": "Botas eléctricas",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "royal_champion",
+      "source_type": "event",
+      "event": "[[Toyshop Throwdown]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "snake_bracelet",
+      "name_en": "Snake Bracelet",
+      "name_es": "Brazalete de la sierpe",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "event",
+      "event": "[[Snake Festival]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "action_figure",
+      "name_en": "Action Figure",
+      "name_es": "Figura de acción",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "archer_queen",
+      "source_type": "event",
+      "event": "[[Friend or Foe]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "dark_crown",
+      "name_en": "Dark Crown",
+      "name_es": "Corona tenebrosa",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "minion_prince",
+      "source_type": "event",
+      "event": "[[Dark Deal]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "heroic_torch",
+      "name_en": "Heroic Torch",
+      "name_es": "Antorcha heroica",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "grand_warden",
+      "source_type": "event",
+      "event": "[[Splash Bash]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "meteor_staff",
+      "name_en": "Meteor Staff",
+      "name_es": "Bastón de meteoritos",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "minion_prince",
+      "source_type": "event",
+      "event": "[[Cosmic Rock]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "frost_flake",
+      "name_en": "Frost Flake",
+      "name_es": "Copo de escarcha",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "royal_champion",
+      "source_type": "event",
+      "event": "[[Meltdown Mayhem]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "stick_horse",
+      "name_en": "Stick Horse",
+      "name_es": "Galopalo",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "barbarian_king",
+      "source_type": "event",
+      "event": "[[Wise Warriors]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    },
+    {
+      "key": "rocket_backpack",
+      "name_en": "Rocket Backpack",
+      "name_es": "Mochila cohete",
+      "name_es_source": "https://api.clashk.ing/v2/static/equipment/names?locale=ES",
+      "hero": "dragon_duke",
+      "source_type": "event",
+      "event": "[[Sound of Clash]]",
+      "blacksmith_level": null,
+      "th_required": null,
+      "source_url": "https://clashofclans.fandom.com/wiki/Hero_Equipment",
+      "notes": [
+        "obtenido en evento; requisito de TH sin confirmar"
+      ]
+    }
+  ],
+  "capacity_by_th": {
+    "rows": [
+      {
+        "th": 1,
+        "army_camps": 1,
+        "army_camp_max_level": 1,
+        "troop_capacity_per_camp": 20,
+        "troop_capacity_total": 20,
+        "spell_factory_max_level": null,
+        "spell_capacity_spell_factory": 0,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 0,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": null,
+        "hero_slots": 0
+      },
+      {
+        "th": 2,
+        "army_camps": 1,
+        "army_camp_max_level": 2,
+        "troop_capacity_per_camp": 30,
+        "troop_capacity_total": 30,
+        "spell_factory_max_level": null,
+        "spell_capacity_spell_factory": 0,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 0,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": null,
+        "hero_slots": 0
+      },
+      {
+        "th": 3,
+        "army_camps": 2,
+        "army_camp_max_level": 3,
+        "troop_capacity_per_camp": 35,
+        "troop_capacity_total": 70,
+        "spell_factory_max_level": null,
+        "spell_capacity_spell_factory": 0,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 0,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": null,
+        "hero_slots": 0
+      },
+      {
+        "th": 4,
+        "army_camps": 2,
+        "army_camp_max_level": 4,
+        "troop_capacity_per_camp": 40,
+        "troop_capacity_total": 80,
+        "spell_factory_max_level": null,
+        "spell_capacity_spell_factory": 0,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 0,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 1,
+        "hero_slots": 1
+      },
+      {
+        "th": 5,
+        "army_camps": 3,
+        "army_camp_max_level": 5,
+        "troop_capacity_per_camp": 45,
+        "troop_capacity_total": 135,
+        "spell_factory_max_level": 1,
+        "spell_capacity_spell_factory": 2,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 2,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 1,
+        "hero_slots": 1
+      },
+      {
+        "th": 6,
+        "army_camps": 3,
+        "army_camp_max_level": 6,
+        "troop_capacity_per_camp": 50,
+        "troop_capacity_total": 150,
+        "spell_factory_max_level": 2,
+        "spell_capacity_spell_factory": 4,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 4,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 1,
+        "hero_slots": 1
+      },
+      {
+        "th": 7,
+        "army_camps": 4,
+        "army_camp_max_level": 6,
+        "troop_capacity_per_camp": 50,
+        "troop_capacity_total": 200,
+        "spell_factory_max_level": 3,
+        "spell_capacity_spell_factory": 6,
+        "dark_spell_factory_max_level": null,
+        "spell_capacity_dark_spell_factory": 0,
+        "spell_capacity_total": 6,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 1,
+        "hero_slots": 1
+      },
+      {
+        "th": 8,
+        "army_camps": 4,
+        "army_camp_max_level": 6,
+        "troop_capacity_per_camp": 50,
+        "troop_capacity_total": 200,
+        "spell_factory_max_level": 3,
+        "spell_capacity_spell_factory": 6,
+        "dark_spell_factory_max_level": 2,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 7,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 2,
+        "hero_slots": 1
+      },
+      {
+        "th": 9,
+        "army_camps": 4,
+        "army_camp_max_level": 7,
+        "troop_capacity_per_camp": 55,
+        "troop_capacity_total": 220,
+        "spell_factory_max_level": 4,
+        "spell_capacity_spell_factory": 8,
+        "dark_spell_factory_max_level": 4,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 9,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 3,
+        "hero_slots": 2
+      },
+      {
+        "th": 10,
+        "army_camps": 4,
+        "army_camp_max_level": 8,
+        "troop_capacity_per_camp": 60,
+        "troop_capacity_total": 240,
+        "spell_factory_max_level": 5,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 5,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 4,
+        "hero_slots": 2
+      },
+      {
+        "th": 11,
+        "army_camps": 4,
+        "army_camp_max_level": 9,
+        "troop_capacity_per_camp": 65,
+        "troop_capacity_total": 260,
+        "spell_factory_max_level": 6,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 5,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": null,
+        "siege_capacity": 0,
+        "hero_hall_max_level": 5,
+        "hero_slots": 3
+      },
+      {
+        "th": 12,
+        "army_camps": 4,
+        "army_camp_max_level": 10,
+        "troop_capacity_per_camp": 70,
+        "troop_capacity_total": 280,
+        "spell_factory_max_level": 6,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 6,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 3,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 6,
+        "hero_slots": 3
+      },
+      {
+        "th": 13,
+        "army_camps": 4,
+        "army_camp_max_level": 11,
+        "troop_capacity_per_camp": 75,
+        "troop_capacity_total": 300,
+        "spell_factory_max_level": 7,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 6,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 5,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 7,
+        "hero_slots": 4
+      },
+      {
+        "th": 14,
+        "army_camps": 4,
+        "army_camp_max_level": 11,
+        "troop_capacity_per_camp": 75,
+        "troop_capacity_total": 300,
+        "spell_factory_max_level": 7,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 7,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 6,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 8,
+        "hero_slots": 4
+      },
+      {
+        "th": 15,
+        "army_camps": 4,
+        "army_camp_max_level": 12,
+        "troop_capacity_per_camp": 80,
+        "troop_capacity_total": 320,
+        "spell_factory_max_level": 8,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 8,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 7,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 9,
+        "hero_slots": 4
+      },
+      {
+        "th": 16,
+        "army_camps": 4,
+        "army_camp_max_level": 12,
+        "troop_capacity_per_camp": 80,
+        "troop_capacity_total": 320,
+        "spell_factory_max_level": 9,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 8,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 8,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 10,
+        "hero_slots": 4
+      },
+      {
+        "th": 17,
+        "army_camps": 4,
+        "army_camp_max_level": 13,
+        "troop_capacity_per_camp": 85,
+        "troop_capacity_total": 340,
+        "spell_factory_max_level": 9,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 8,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 9,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 11,
+        "hero_slots": 4
+      },
+      {
+        "th": 18,
+        "army_camps": 4,
+        "army_camp_max_level": 14,
+        "troop_capacity_per_camp": 88,
+        "troop_capacity_total": 352,
+        "spell_factory_max_level": 9,
+        "spell_capacity_spell_factory": 10,
+        "dark_spell_factory_max_level": 8,
+        "spell_capacity_dark_spell_factory": 1,
+        "spell_capacity_total": 11,
+        "workshop_max_level": 9,
+        "siege_capacity": 3,
+        "hero_hall_max_level": 12,
+        "hero_slots": 4
+      }
+    ],
+    "source_urls": [
+      "https://clashofclans.fandom.com/wiki/Army_Camp/Home_Village",
+      "https://clashofclans.fandom.com/wiki/Spell_Factory",
+      "https://clashofclans.fandom.com/wiki/Dark_Spell_Factory",
+      "https://clashofclans.fandom.com/wiki/Workshop",
+      "https://clashofclans.fandom.com/wiki/Hero_Hall",
+      "https://clashofclans.fandom.com/wiki/Town_Hall"
+    ],
+    "notes": [
+      "Derivado: nivel máximo = último nivel cuyo TH requerido <= TH; total = capacidad por campamento × nº de campamentos",
+      "spell_capacity_total = suma Fábrica + Fábrica oscura (derivado, verificar en juego)",
+      "Capacidad del Castillo del clan no incluida"
+    ]
+  },
+  "summary": {
+    "buildings": {
+      "entries": 52,
+      "unconfirmed": 22
+    },
+    "guardians": {
+      "entries": 3,
+      "unconfirmed": 3
+    },
+    "heroes": {
+      "entries": 6,
+      "unconfirmed": 0
+    },
+    "troops": {
+      "entries": 32,
+      "unconfirmed": 0
+    },
+    "spells": {
+      "entries": 18,
+      "unconfirmed": 0
+    },
+    "siege_machines": {
+      "entries": 9,
+      "unconfirmed": 0
+    },
+    "pets": {
+      "entries": 12,
+      "unconfirmed": 0
+    },
+    "hero_equipment": {
+      "entries": 40,
+      "unconfirmed": 28
+    },
+    "hero_hall_levels": {
+      "entries": 12,
+      "unconfirmed": 0
+    },
+    "capacity_by_th": {
+      "entries": 18,
+      "unconfirmed": 0
+    },
+    "missing_name_es": [
+      "Giga Inferno",
+      "Giga Tesla",
+      "Inferno Artillery"
+    ]
+  }
+}

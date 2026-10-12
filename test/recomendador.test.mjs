@@ -81,21 +81,36 @@ test("4.2.0: B.O.B entra en Ahora y los héroes de C1 no", () => {
   assert.equal(rec.sesiones.some((ses) => ses.huecos.some((h) => h.title && /héroe|reina|rey|alcaide|campeona/i.test(h.title))), false);
 });
 
-test("4.2.0: sin cifras de recursos, un paso que no cabe en el almacén sigue recomendado", () => {
+test("4.2.4: lo que no cabe no se recomienda; sin cifras de la cuenta, lo que sí cabe sigue", () => {
   const inicio = sesion1900;
-  const rec = recomendar({
+  const lanes = [{ id: "c0", cola: "constructor", titulo: "Constructor 1", libreEn: now, libreYa: true, blocked: false }];
+  const bloqueado = recomendar({
     now,
-    lanes: [{ id: "c0", cola: "constructor", titulo: "Constructor 1", libreEn: now, libreYa: true, blocked: false }],
+    lanes,
     orden: [{
       laneId: "c0", id: "1000008", title: "Cañón", fromLvl: 20, toLvl: 21, instance: "1000008#0",
-      queue: "constructor", seconds: 3600, inicio, fin: inicio + 3600000, noCabe: true, categoryKey: "defensas",
+      queue: "constructor", seconds: 3600, inicio, fin: inicio + 3600000, noCabe: true,
+      motivo: "No cabe en el oro: cuesta 3\u00a0000\u00a0000 y caben 2\u00a0350\u00a0000.",
+      categoryKey: "defensas",
     }],
   }, semanaPlan(), now);
-  assert.equal(rec.ahora.length, 1);
-  assert.equal(rec.ahora[0].title, "Cañón");
-  assert.equal(rec.ahora[0].noCabe, true);
-  assert.equal(rec.ahora[0].fromLvl, 20);
-  assert.equal(rec.ahora[0].toLvl, 21);
+  assert.equal(bloqueado.ahora.length, 0);
+  assert.equal(bloqueado.sesiones.length, 0);
+
+  const cabe = recomendar({
+    now,
+    lanes,
+    orden: [{
+      laneId: "c0", id: "1000008", title: "Cañón", fromLvl: 1, toLvl: 2, instance: "1000008#0",
+      queue: "constructor", seconds: 30, inicio, fin: inicio + 30000, categoryKey: "defensas",
+    }],
+  }, semanaPlan(), now);
+  assert.equal(cabe.ahora.length, 1);
+  assert.equal(cabe.ahora[0].title, "Cañón");
+  assert.equal(cabe.ahora[0].noCabe, false);
+  assert.equal(cabe.ahora[0].motivo, "");
+  assert.equal(cabe.ahora[0].fromLvl, 1);
+  assert.equal(cabe.ahora[0].toLvl, 2);
 });
 
 test("4.2.0: Hecho ocupa el hueco y Ahora pasa a la siguiente que aún cabe en la sesión", () => {
@@ -134,9 +149,16 @@ test("4.2.0: la pantalla Plan decide y no pide configuración ni recursos", () =
   assert.equal(plan.includes("coberturaCard"), false);
   assert.equal(plan.includes("data-plan-modo"), false);
   assert.equal(plan.includes("recursosDeCuenta"), false);
-  assert.match(inicio, /hoyEnCuentas/);
-  assert.match(app, /data-hoy-cuentas/);
-  assert.match(app, /Hoy en tus cuentas/);
+  const hub = app.slice(app.indexOf("function renderPlanHub("), app.indexOf("function renderPlan("));
+  assert.match(hub, /recomendar/);
+  assert.match(hub, /decisionRoadmap/);
+  assert.match(hub, /data-plan-hub/);
+  assert.match(hub, /fleetRow/);
+  assert.equal(hub.includes("mejorar:"), false);
+  assert.equal(inicio.includes("hoyEnCuentas"), false);
+  assert.equal(inicio.includes("data-hoy-cuentas"), false);
+  assert.equal(app.includes("Hoy en tus cuentas"), false);
+  assert.equal(app.includes("function mejorasPlan("), false);
   assert.equal(app.includes("cuello de botella"), false);
   const rec = readFileSync(new URL("../js/recomendador.js", import.meta.url), "utf8");
   assert.equal(rec.includes("recursos"), false);

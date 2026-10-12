@@ -135,38 +135,10 @@ const tablasSesion = new WeakMap();
 function tablaDe(semana) {
   let t = tablasSesion.get(semana);
   if (!t) {
-    t = { dias: new Map(), hueco: null };
+    t = { dias: new Map() };
     tablasSesion.set(semana, t);
   }
   return t;
-}
-
-/** Hueco máximo entre el inicio de una sesión y el inicio de la siguiente, más una hora por el cambio de otoño. */
-function huecoMaximoMs(semana) {
-  const t = tablaDe(semana);
-  if (t.hueco != null) return t.hueco;
-  const ancla = Date.parse("2026-01-05T12:00:00Z");
-  const lista = [];
-  for (let add = 0; add < 16; add += 1) {
-    const civil = diaCivil(ancla, add);
-    for (const ses of sesionesDelDia(semana, lunesDe(civil.dow))) {
-      const start = atClock(civil.year, civil.month, civil.day, ses.inicio);
-      lista.push({ start, end: start + ses.minutos * 60000 });
-    }
-  }
-  let max = 0;
-  let pares = 0;
-  for (let i = 0; i < lista.length; i += 1) {
-    let siguiente = null;
-    for (let j = 0; j < lista.length; j += 1) {
-      if (lista[j].end > lista[i].end) { siguiente = lista[j]; break; }
-    }
-    if (!siguiente) continue;
-    pares += 1;
-    max = Math.max(max, siguiente.start - lista[i].start);
-  }
-  t.hueco = pares ? max + 3600000 : Infinity;
-  return t.hueco;
 }
 
 function listaDesde(ms, semana) {
@@ -200,11 +172,7 @@ function sesionSiguiente(finSesion, semana) {
   return proximaSesion(finSesion, semana);
 }
 
-/**
- * El plan empieza dentro de una sesión. Si la mejora cabe, termina antes
- * de que abra la sesión siguiente. Si dura más que ese hueco, empieza
- * igual y `pasaSesion` lo dice.
- */
+/** La mejora cabe si termina antes de que abra la sesión siguiente. */
 function cabeAntesDeLaSiguiente(inicio, dur, semana) {
   const ses = proximaSesion(inicio, semana);
   if (!ses || inicio < ses.start || inicio >= ses.end) return false;
@@ -213,6 +181,12 @@ function cabeAntesDeLaSiguiente(inicio, dur, semana) {
   return inicio + dur <= siguiente.start;
 }
 
+/**
+ * El plan lanza dentro de una sesión, en cuanto el constructor o el
+ * laboratorio quedan libres. La mejora puede terminar de noche o ya
+ * entrada la sesión siguiente: no se aplaza el arranque para evitarlo.
+ * `pasaSesion` solo avisa de que sigue en marcha cuando abre la siguiente.
+ */
 function scheduleNextSesion(freeAt, durationSec, semana) {
   const dur = typeof durationSec === "number" && Number.isFinite(durationSec) && durationSec >= 0
     ? durationSec * 1000
@@ -225,28 +199,21 @@ function scheduleNextSesion(freeAt, durationSec, semana) {
   if (dur == null) {
     return { inicio: start0, fin: null, sinDuracion: true, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
   }
-  if (dur > huecoMaximoMs(semana)) {
-    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: true, ajustado: start0 !== freeAt };
-  }
-  if (cabeAntesDeLaSiguiente(start0, dur, semana)) {
-    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: false, ajustado: start0 !== freeAt };
-  }
-  let cursor = ses;
-  for (let i = 0; i < 21; i += 1) {
-    const siguiente = sesionSiguiente(cursor.end, semana);
-    if (!siguiente) break;
-    if (siguiente.start >= freeAt && cabeAntesDeLaSiguiente(siguiente.start, dur, semana)) {
-      return { inicio: siguiente.start, fin: siguiente.start + dur, sinDuracion: false, finEnSueno: false, pasaSesion: false, ajustado: true };
-    }
-    cursor = siguiente;
-  }
-  return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, pasaSesion: true, ajustado: start0 !== freeAt };
+  return {
+    inicio: start0,
+    fin: start0 + dur,
+    sinDuracion: false,
+    finEnSueno: false,
+    pasaSesion: !cabeAntesDeLaSiguiente(start0, dur, semana),
+    ajustado: start0 !== freeAt,
+  };
 }
 
 /**
  * La mejora en curso conserva su fin. Con un sueño, la siguiente no
- * empieza ni acaba dentro de ese tramo si cabe despierta. Con una semana
- * de sesiones, el plan usa esas sesiones y no el sueño.
+ * empieza dentro de ese tramo: hace falta estar delante para lanzarla.
+ * Puede terminar de noche. Con una semana de sesiones, el plan usa esas
+ * sesiones y no el sueño.
  */
 export function scheduleNext(freeAt, durationSec, sleep) {
   if (Array.isArray(sleep)) return scheduleNextSesion(freeAt, durationSec, sleep);
@@ -257,17 +224,14 @@ export function scheduleNext(freeAt, durationSec, sleep) {
   if (dur == null) {
     return { inicio: start0, fin: null, sinDuracion: true, finEnSueno: false, ajustado: start0 !== freeAt };
   }
-  if (!inSleep(start0 + dur, sleep)) {
-    return { inicio: start0, fin: start0 + dur, sinDuracion: false, finEnSueno: false, ajustado: start0 !== freeAt };
-  }
-  const wake = nextAwake(start0 + dur, sleep);
-  const earlier = wake - dur;
-  if (earlier >= freeAt && !inSleep(earlier, sleep)) {
-    return { inicio: earlier, fin: wake, sinDuracion: false, finEnSueno: false, ajustado: true };
-  }
-  const start = wake;
-  const end = start + dur;
-  return { inicio: start, fin: end, sinDuracion: false, finEnSueno: inSleep(end, sleep), ajustado: true };
+  const fin = start0 + dur;
+  return {
+    inicio: start0,
+    fin,
+    sinDuracion: false,
+    finEnSueno: inSleep(fin, sleep),
+    ajustado: start0 !== freeAt,
+  };
 }
 
 function lineFrom(cola, titulo, cur, nowMs, sleep) {

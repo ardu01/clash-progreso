@@ -1,5 +1,7 @@
-import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.2.3";
-import { precacheUrls } from "./js/images.js?v=4.2.3";
+import { IMAGE_CACHE, SHELL_CACHE } from "./js/caches.js?v=4.2.4";
+import { precacheUrls } from "./js/images.js?v=4.2.4";
+
+// El nombre de la caché de interfaz vive en SHELL_CACHE. Al cambiar, este archivo cambia con él y el worker se reinstala.
 
 const SHELL = SHELL_CACHE;
 const IMAGES = IMAGE_CACHE;
@@ -72,11 +74,13 @@ const APP = [
   "./js/charts.js",
   "./js/colas.js",
   "./js/schedule.js",
+  "./js/desbloqueos.js",
   "./js/roadmap.js",
   "./js/recomendador.js",
   "./js/coste-tarjeta.js",
   "./js/provisional.js",
   "./data/costes.json",
+  "./data/ref/desbloqueos.json",
   "./data/armas-th.json",
   "./data/supercargas.json",
   "./assets/manifest.json",

@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.2.3</strong><br>
+  <strong>Versión 4.2.4</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -24,7 +24,15 @@ La primera visita con red guarda la interfaz. Las imágenes se pueden descargar 
 
 ## Capturas
 
-Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operaciones no está entre ellas. Se abre desde Agenda, y desde ahí también Explorar estrategias.
+Datos de prueba del 7 de octubre de 2026. La barra sigue con cinco pestañas. Plan reúne las 11 aldeas: se abre con la tarjeta de Inicio y con el botón redondo, en una hoja. Operaciones no está en la barra: se abre desde Agenda, y desde ahí también Explorar estrategias.
+
+| Inicio | Hoja del plan |
+| --- | --- |
+| <img src="docs/capturas/424-inicio-plan.png" width="200" alt="Inicio en oscuro: tarjeta Plan arriba y la barra de cinco pestañas, con el botón redondo encima."> | <img src="docs/capturas/424-hoja-plan.png" width="200" alt="Hoja del plan en oscuro, sobre la barra de cinco pestañas: las aldeas, constructores y el coste."> |
+
+| No cabe | Motivo en el hub |
+| --- | --- |
+| <img src="docs/capturas/424-no-cabe-oscuro.png" width="200" alt="Detalle del plan en oscuro: la sección No cabe lista la mejora, el nivel y el motivo. No lleva el botón Hecho."> | <img src="docs/capturas/424-hub-motivo.png" width="200" alt="Tarjeta del hub en oscuro: el motivo de lo que no cabe, el coste con icono y el tiempo de la mejora de almacén."> |
 
 | Plan | Inicio | Mejoras |
 | --- | --- | --- |
@@ -104,7 +112,7 @@ El paquete de temas pasa a la 1.1.0: 38 temas, solo en modo oscuro. A los 18 de 
 
 El plan de cada cuenta decide la siguiente mejora. Arriba, **Ahora**: una mejora por constructor libre (o que queda libre en la próxima sesión), por el laboratorio y por la casa de mascotas. Cada coste es una tarjeta cuadrada: la cifra arriba, con el icono del recurso, el dibujo del edificio o la tropa en el centro y el nombre debajo. Los miles van con espacio. **Hecho** queda bajo la tarjeta, marca la mejora como iniciada y el plan se recalcula. Debajo, **Próximas sesiones**: día a día, qué iniciar y en qué hueco. El único ajuste de esa pantalla es el chip **Maxear TH actual** / **Subir TH**. No hace falta tener el oro anotado: si no hay cifras, no bloquea.
 
-En Inicio, **Hoy en tus cuentas** resume lo que toca en la próxima sesión en cada aldea, en el orden de las cuentas, con la misma tarjeta. Mejoras usa esa tarjeta en el plan de cada cuenta, en los costes y en lo que está en curso.
+**Plan** reúne las 11 aldeas: qué poner a mejorar ahora, constructores libres y ocupados, la próxima finalización y el coste con los iconos oficiales. No es una pestaña. La tarjeta de arriba en Inicio abre el hub, y el botón redondo de encima de la barra abre el mismo hub en una hoja. El botón lleva el martillo oficial del Fan Kit, el PNG de 1024. Se arrastra con el dedo, se pega al borde más cercano y recuerda el sitio. Un toque sin arrastrar lo abre. Un toque en una aldea abre su detalle (Ahora, Hecho, sesiones, Maxear o Subir TH). Mejoras queda en lo que está en curso, los costes y el equipo.
 
 La ficha de cada cuenta ya no lleva el bloque Recursos. No pide oro, elixir, oscuro, brillante, reluciente ni estrellada, ni el ingreso al día. No está en ninguna pantalla. Si esas cifras ya estaban guardadas, siguen en la cuenta y en la copia JSON; una copia antigua, sin ese campo, se importa igual. Sin cifras, el plan y Explorar estrategias hacen lo mismo que hacían cuando no había datos.
 
@@ -114,13 +122,13 @@ En Copia → Apariencia hay un «Tema del juego» opcional, solo en modo oscuro.
 
 La artillería águila ya no cuenta como máximo en TH17 ni en TH18: ahí se fusiona en la Artillería infernal. El sexto constructor, B.O.B, cuenta en el plan siempre, no solo al rushear. Explorar estrategias separa oro, elixir y oscuro, con un botín estimado por recurso y por ayuntamiento. El plan sigue las sesiones (por defecto 19:00–21:00, de cero a tres por día) y no el sueño de 23:00 a 07:00. Desde TH17, subir el ayuntamiento pide las fusiones con las piezas de origen al máximo. La sesión también anota mascotas, ayudantes y herrería.
 
-La barra tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no está en la barra. Está dentro de Agenda, y **Explorar estrategias** también: se abre desde esa misma entrada.
+La barra tiene cinco pestañas: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Plan no está en la barra. Operaciones tampoco: está dentro de Agenda, y **Explorar estrategias** se abre desde esa misma entrada.
 
 El motor de atención multicuenta decide qué cuenta necesita intervención y cuándo. Vive en Inicio, Agenda y Cuentas: no añade una pestaña. Separa lo confirmado en la exportación, lo anotado a mano y lo estimado. No da por acabada una mejora porque un temporizador viejo haya llegado a cero, y no mueve los temporizadores.
 
 La entrada de Operaciones abre la sesión de juego, el mantenimiento, el simulador, los gemelos, el equilibrio, la predicción, las guerras, el diario, las plantillas, las prioridades y Explorar estrategias. Lo que calcula está marcado como simulación o como anotación. No mueve temporizadores ni porcentajes. Un gemelo o una plantilla solo entran en la aldea si se pasan al plan.
 
-Cada pestaña sigue con un solo trabajo. Inicio es el resumen y la acción. Cuentas es la lista y el detalle de cada aldea. Mejoras es el plan, el rush, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo, y desde ahí se abre Operaciones. Copia y el tema siguen en el engranaje de Inicio.
+Cada pestaña sigue con un solo trabajo. Inicio es el resumen, la tarjeta del plan y la acción. Cuentas es la lista y el detalle de cada aldea. Plan es el hub de las 11 aldeas y el detalle de cada una, fuera de la barra. Mejoras es lo que está en curso, los costes y el equipamiento. Análisis es el ranking, la comparativa y los gráficos. Agenda es el tiempo, y desde ahí se abre Operaciones. Copia y el tema siguen en el engranaje de Inicio.
 
 En pantalla quedan títulos, cifras e iconos. Las explicaciones largas están en un ⓘ que se abre al tocar. Las tarjetas, las cabeceras, los filtros, las barras y las filas usan el mismo espaciado en toda la app, con el estilo Clash.
 
@@ -132,14 +140,14 @@ En Agenda, **Añadir al calendario** guarda los fines de las mejoras de la expor
 
 ## Funciones
 
-La barra de abajo tiene cinco pestañas en una sola fila: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. Operaciones no es una de ellas. Operaciones y Explorar estrategias se abren desde Agenda. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
+La barra de abajo tiene cinco pestañas en una sola fila: **Inicio**, **Cuentas**, **Mejoras**, **Análisis** y **Agenda**. El estilo de la barra no cambia. Plan no es una de ellas: la tarjeta de Inicio abre el hub y el botón redondo, encima de la barra, abre el mismo hub en una hoja. Operaciones y Explorar estrategias se abren desde Agenda. Copia y Acerca de, con el aviso de la Fan Content Policy, se abren con el botón de ajustes de Inicio.
 
 ### Inicio
 
 El centro de mando de la flota.
 
+- Arriba, la tarjeta **Plan**: abre el hub de las 11 aldeas.
 - La cabecera y tres cifras: cuentas, constructores libres en la exportación y cuántas mejoras terminan hoy. Si no hay datos, un guion.
-- **Hoy en tus cuentas**: lo que toca iniciar en la próxima sesión en cada aldea, en el orden de las cuentas, con la tarjeta de coste. Si en esa sesión no hay nada, lo dice. Abre el plan de esa cuenta.
 - **Qué hacer ahora**: revisar constructores disponibles y preparar objetivos de ayuntamiento.
 - **Próximas finalizaciones**: las tres mejoras de la flota que acaban antes, con la cuenta y la hora. Si no hay ninguna, un guion.
 - **Abrir hoy**: en qué orden abrir las cuentas, según el plan y la hora en que queda libre un constructor, el laboratorio o la casa de mascotas. Si el temporizador no es un número, esa cuenta no entra en el orden y no se inventa la hora.
@@ -158,9 +166,13 @@ El centro de mando de la flota.
 - Aviso de cuentas que llevan tiempo sin datos. El plazo se cambia en Copia; al principio son más de 7 días.
 - El equipamiento de cada cuenta va en su propia sección, debajo de las categorías de la aldea, con las piezas y las menas.
 
+### Plan
+
+Las 11 aldeas en una sola vista, en el orden de las cuentas. En cada una: qué poner a mejorar ahora (como máximo cuatro tarjetas, con la cifra y el icono oficial del recurso), cuántos constructores están libres y ocupados, y cuándo acaba la próxima mejora. Si en esta sesión no hay nada, un guion. Los filtros son el ayuntamiento, el grupo y tres chips: Todas, Libres y Ocupadas. Tocar la cuenta abre su detalle: **Ahora**, **Hecho**, las próximas sesiones y el chip **Maxear TH actual** / **Subir TH**. El botón **Mejorar**, con el martillo, está en ese detalle, no en el hub.
+
 ### Mejoras
 
-Tres apartados: el plan de cada cuenta, el coste de llegar al máximo del ayuntamiento actual, y el equipamiento (la flota y cada cuenta). El coste es oro, elixir, oscuro, otros recursos y días de constructor. Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento ni el de las menas. Lo que está en curso, con hora, está en la Agenda.
+Tres apartados: lo que está en curso, el coste de llegar al máximo del ayuntamiento actual, y el equipamiento (la flota y cada cuenta). El coste es oro, elixir, oscuro, otros recursos y días de constructor. Un muro de «oro o elixir» se paga con uno de los dos, no con los dos. No entra el coste de subir el ayuntamiento ni el de las menas. Si la app tenía guardado el modo Plan de Mejoras, abre En curso.
 
 ### Análisis
 
@@ -178,7 +190,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 
 ### Agenda, plan y qué hacer ahora
 
-- El plan está en Mejoras, uno por cuenta. **Ahora** recomienda una mejora por hueco libre (constructor, laboratorio o casa de mascotas) que se puede iniciar en la próxima sesión. El coste se ve como una tarjeta cuadrada: cifra e icono del recurso arriba, imagen en el centro, nombre y nivel debajo. Los miles llevan espacio. **Hecho** queda bajo la tarjeta: anota la mejora como iniciada y recalcula. No cambia niveles ni porcentajes, ni escribe un temporizador.
+- El plan de cada cuenta se abre desde el hub (la tarjeta de Inicio o la hoja del botón redondo). **Ahora** recomienda una mejora por hueco libre (constructor, laboratorio o casa de mascotas) que se puede iniciar en la próxima sesión. El coste se ve como una tarjeta cuadrada: cifra e icono del recurso arriba, imagen en el centro, nombre y nivel debajo. Los miles llevan espacio. **Hecho** queda bajo la tarjeta: anota la mejora como iniciada y recalcula. No cambia niveles ni porcentajes, ni escribe un temporizador.
 - **Próximas sesiones** lista, día a día, qué iniciar en cada sesión y en qué hueco. Las sesiones siguen siendo las de la cuenta: por defecto 19:00–21:00, de cero a tres por día. Esa pantalla no las edita.
 - Arriba, un chip: **Maxear TH actual** o **Subir TH** (rush esencial al ayuntamiento siguiente). No hay más ajustes en esa pantalla. Sin oro anotado, la recomendación no se bloquea.
 - El orden es el del plan: desbloqueos, almacenes cuando hace falta, oro y elixir alternos, muros al final. B.O.B cuenta. Los héroes de la cuenta de prueba no entran. Desde TH17, subir pide las fusiones al máximo.
@@ -186,7 +198,7 @@ El ranking ordena por la media, por el ayuntamiento o por los constructores libr
 - La agenda tiene cuatro vistas: 24 horas, 7 días, por cuenta y en curso. En curso se puede ver por cuándo termina o agrupado por cuenta. Varias cuentas en la misma hora forman una sesión. Una cuenta sin actualizar no sale ahí solo porque un temporizador viejo haya llegado a cero.
 - Los héroes de la cuenta de prueba no entran en el plan.
 - El equipamiento no entra en el plan. Tiene su apartado: niveles por héroe, mena brillante, reluciente y estrellada, y el total de la flota.
-- Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza ni acaba dentro de ese tramo.
+- Horas de sueño opcionales, guardadas en el iPhone. La mejora en curso no se mueve. La siguiente no empieza dentro de ese tramo, porque hace falta estar delante para lanzarla, pero puede acabar de noche.
 - Si la exportación no trae los segundos que faltan, se avisa. No se inventa la hora.
 - La agenda junta las horas reales de la exportación. Las marcas del plan no entran en la agenda ni en los avisos.
 - **Operaciones** está en Agenda, no en la barra. La entrada abre la sesión, el simulador, los gemelos y el resto. **Explorar estrategias** está en esa misma entrada.
@@ -270,7 +282,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v50` y la de imágenes `cp-img-v11`. Oro, elixir, oscuro, gemas, las tres menas y el martillo de Mejorar son PNG del Fan Kit, en `assets/oficial/resources/`, con su `url_origen` en el manifiesto. La tarjeta de coste muestra la cifra y el icono del recurso. El martillo va solo dentro del botón Mejorar, centrado con esa palabra. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). Las armas del TH12 al TH16, las supercargas de TH18 y las menas del Portal portátil llevan su fuente en `data/armas-th.json`, `data/supercargas.json` y `data/costes.json`. Los muros del TH18 se comprobaron y no cambian. `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v55` y la de imágenes `cp-img-v11`. El plan de las 11 aldeas no es una pestaña: la tarjeta de Inicio y el botón redondo abren el mismo hub, y Mejoras no lo repite. Si el coste de una mejora no entra en la capacidad de los almacenes y del ayuntamiento, el plan adelanta esos almacenes y bloquea la mejora con el motivo. Oro, elixir, oscuro, gemas, las tres menas y el martillo de Mejorar son PNG del Fan Kit, en `assets/oficial/resources/`, con su `url_origen` en el manifiesto. La tarjeta de coste muestra la cifra y el icono del recurso. El martillo va solo dentro del botón Mejorar, centrado con esa palabra. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). Las armas del TH12 al TH16, las supercargas de TH18 y las menas del Portal portátil llevan su fuente en `data/armas-th.json`, `data/supercargas.json` y `data/costes.json`. Los muros del TH18 se comprobaron y no cambian. `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -278,6 +290,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.2.4 | Un desbloqueo ya no sale como un paso de nivel 0 a 1 sin tiempo: el edificio nuevo es una construcción con su coste y su tiempo, y el héroe, la tropa, el hechizo, la máquina o la mascota esperan al nivel del Consejo de héroes, del cuartel, de la fábrica, del taller o de la caseta. Las reglas y la fuente están en `data/ref/desbloqueos.json`. Lo que la fuente deja sin confirmar se muestra como «dato sin confirmar» y no se inventa. El hub Plan reúne las 11 aldeas: qué mejorar ahora, constructores libres y ocupados, próxima finalización y coste con iconos oficiales. Se abre con la tarjeta de Inicio y con un botón redondo, en una hoja, sin cambiar la barra de cinco pestañas. El botón lleva el martillo oficial del Fan Kit (1024 px, sin redibujarlo). Se arrastra, se pega al borde más cercano, respeta la safe area y la barra, y guarda el sitio. Un toque sin arrastrar lo abre. Un toque en una aldea abre el detalle. Mejoras deja de repetir ese plan. Si una mejora no cabe en los almacenes (oro, elixir y oscuro, incluido el ayuntamiento), el plan pone antes esos almacenes, con coste y tiempo, y deja la mejora bloqueada con el motivo. Subir el ayuntamiento muestra la imagen oficial del TH de destino. El hub muestra hasta cuatro mejoras por cuenta. |
 | 4.2.3 | Sin el botón «Activar avisos». En Copia se instalan los atajos «Copiar aldea» e «Importar a Clash». Los módulos de la defensa artesanal pasan a español. Entran las armas del TH12 al TH16 (un nivel, coste 0), las supercargas de TH18 y las menas del Portal portátil, con la fuente marcada. Los muros del TH18 se comprobaron y siguen igual. El martillo oficial sale de la tarjeta de coste y queda solo en el botón Mejorar, centrado con la palabra. |
 | 4.2.2 | Paquete de temas 1.1.0: 20 temas nuevos (mascotas, hechizos, supertropas, asedio, aldea del constructor, Alquimista y Tiradora), agrupados en el selector. Solo en modo oscuro. |
 | 4.2.1 | Cada coste de Plan, Hoy en tus cuentas y Mejoras es una tarjeta cuadrada: cifra e icono oficial arriba, imagen en el centro, texto debajo y el martillo de Mejorar. Los miles van con espacio. Los botones, y la i dorada, llevan margen arriba y abajo y siguen en la línea de su título. |

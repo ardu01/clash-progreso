@@ -122,6 +122,7 @@ export function reducir(doc, op, arg, ctx) {
       descuentoTiempo: actual.sim.descuentoTiempo,
       horasJuego: actual.sim.horas,
       segConstructor: cuenta && cuenta.segConstructor,
+      ayudantes: cuenta && cuenta.helpers,
       oro: cuenta && cuenta.oro,
       elixir: cuenta && cuenta.elixir,
       oscuro: cuenta && cuenta.oscuro,

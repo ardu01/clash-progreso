@@ -638,6 +638,8 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 [data-plan-ahora] .btn.btn--small { min-height: 44px; padding: 0 12px; }
 [data-plan-ahora] .row__sub,
 [data-plan-sesiones] .row__sub,
+[data-plan-bloqueo] .row__title,
+[data-plan-bloqueo] .row__sub,
 [data-hoy-cuentas] .row__sub { white-space: normal; overflow-wrap: anywhere; }
 
 /* 4.2.1: tarjeta de coste. Cuadrada, cifra arriba, dibujo al centro, nombre debajo. */
@@ -707,6 +709,84 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .mejora__nombre { font: 700 .75rem/1.15 var(--font); }
 .mejora__nivel, .mejora__pie { font-size: .68rem; color: var(--label-2); }
 .mejora-hecho { width: 100%; min-height: 44px; margin-top: 6px; }
+.plan-hub {
+  display: flex; flex-direction: column; gap: 8px; min-width: 0;
+  padding: 10px; border-radius: 14px; color: inherit; text-decoration: none;
+  background: var(--panel-2); border: 3px solid var(--panel-edge);
+}
+.plan-hub__head {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px; align-items: center; min-width: 0;
+}
+.plan-hub__id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.plan-hub__nombre { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan-hub__colas, .plan-hub__fin { font-size: .72rem; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.plan-hub__fin { white-space: nowrap; }
+.plan-hub__vacio { color: var(--label-2); font-weight: 800; }
+.plan-hub__motivo {
+  display: block; min-width: 0; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .72rem; color: var(--label-2);
+}
+.plan-hub .mejora { background: var(--panel); }
+.plan-destacada {
+  display: flex; align-items: center; gap: 12px;
+  margin: 8px var(--margin-r) 16px var(--margin-l);
+  min-height: 84px; padding: 12px 14px; border-radius: 16px;
+  text-decoration: none; color: #24211C;
+  background: linear-gradient(180deg, var(--gold-top), var(--gold) 46%, var(--gold-bot));
+  border: 3px solid var(--gold-edge);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.75), 0 4px 0 var(--gold-edge);
+}
+.plan-destacada:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.75), 0 1px 0 var(--gold-edge); }
+.plan-destacada__ico {
+  flex: none; width: 48px; height: 48px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--gold); background: #3E2918;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.18), 0 2px 0 #1A120C;
+}
+.plan-destacada .row__main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.plan-destacada .row__title,
+.plan-destacada .row__sub { white-space: normal; overflow: visible; text-overflow: clip; }
+.plan-destacada .row__title { font: 900 1.2rem/1.15 var(--font-ui); color: #24211C; }
+.plan-destacada .row__sub { font: 700 .78rem/1.25 var(--font-ui); color: #3E2918; }
+.plan-destacada .chevron { flex: none; width: 8px; height: 13px; }
+.plan-fab {
+  --fab-borde: var(--gold-edge);
+  position: fixed; z-index: 25;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 14px);
+  width: 56px; height: 56px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; color: #24211C;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  border: 2.5px solid var(--fab-borde);
+  background: linear-gradient(180deg, var(--gold-top), var(--gold) 55%, var(--gold-bot));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 var(--fab-borde), 0 8px 16px rgba(0,0,0,.35);
+}
+.plan-fab:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 1px 0 var(--fab-borde); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .plan-fab { --fab-borde: #1A120C; }
+}
+html[data-theme="dark"] .plan-fab { --fab-borde: #1A120C; }
+.plan-fab.is-arrastre,
+.plan-fab.is-arrastre:active {
+  transform: none; transition: none;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 6px 0 var(--fab-borde), 0 14px 28px rgba(0,0,0,.5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .plan-fab.is-snap { transition: left 180ms ease, top 180ms ease; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-fab:active { transform: none; }
+}
+.plan-fab__icono { --size: 40px; }
+.plan-destacada__ico svg {
+  width: 26px; height: 26px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.sheet--plan { background: var(--scene); }
+.sheet--plan .sheet__bar h2,
+.sheet--plan .sheet__bar .btn-text { color: #FFFFFF; }
+.sheet--plan .sheet__bar h2 { font-family: var(--font-ui); font-weight: 900; }
 .hoy-cuenta {
   display: block; color: inherit; text-decoration: none;
   padding: 10px 12px 12px;
@@ -719,7 +799,7 @@ button.row--tile:active { transform: translateY(2px); box-shadow: inset 0 2px 0 
 .t-body.cubre-no { color: var(--gold); font-weight: 700; }
 
 /* 4.2.1: aire arriba y abajo, sin sacar el botón de la línea de su título. */
-button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *),
+button:not(.navbar *):not(.seg *):not(.chip-row *):not(.alert *):not(.sheet__bar *):not(.row):not(.row *):not(.section-head > *):not(.title-line > *):not(.plan-fab),
 a.btn {
   margin-top: 12px;
   margin-bottom: 12px;
