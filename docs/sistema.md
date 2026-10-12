@@ -2270,6 +2270,12 @@ La ficha de cuenta (`renderProgreso`) ya no pinta el bloque Recursos: ni las cif
 
 El botón «Automático» del selector usa `temaAutomatico(th)`, con el TH de la cuenta abierta o de la principal, el mismo que usa el cargador cuando Automático está elegido. Antes enseñaba el tema elegido.
 
+## Nota de cambios (12 oct 2026, 4.2.6)
+
+`APP_VERSION` es `4.2.6`, `SHELL_CACHE` es `cp-shell-v57` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.
+
+Revisión de Cuentas, la ficha, importar y copia, en oscuro, con las 11 cuentas, en WebKit en línea y sin conexión. La hoja del plan ya se cerraba al cambiar el hash. La ficha de un edificio y el editor de la cuenta no: el gesto de volver del iPhone dejaba esa hoja encima de Copia, Importar o Inicio, con el fondo inert. `hashchange` las cierra igual que la hoja del plan. Importar y Ajustes siguen siendo la ruta, no un estado suelto.
+
 ## Nota de cambios (12 oct 2026, 4.2.5)
 
 `APP_VERSION` es `4.2.5`, `SHELL_CACHE` es `cp-shell-v56` e `IMAGE_CACHE` sigue en `cp-img-v11`. `ROSTER_VERSION` sigue en 2. No hay PNG nuevos. No hay funciones nuevas.

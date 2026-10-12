@@ -140,6 +140,13 @@ test("4.2.4: subir el ayuntamiento muestra el TH de destino", () => {
   assert.equal(app.includes("imagenes_por_nivel[String(th)]"), false);
 });
 
+test("4.2.6: la ficha y el editor se cierran al cambiar de pantalla", () => {
+  const hash = app.slice(app.indexOf('addEventListener("hashchange"'), app.indexOf('addEventListener("error"'));
+  assert.match(hash, /state\.ficha = null/);
+  assert.match(hash, /state\.editor = null/);
+  assert.match(hash, /state\.planHoja = false/);
+});
+
 test("4.2.5: la hora de Ahora cabe en la tarjeta", () => {
   const pie = estilo.slice(estilo.indexOf(".mejora__pie {"), estilo.indexOf(".mejora__nombre { font"));
   assert.match(pie, /-webkit-line-clamp:\s*2/);

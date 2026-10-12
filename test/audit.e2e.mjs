@@ -229,7 +229,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.2.5"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.5")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.2.6"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.2.6")).join(" "));
 if (await page.evaluate(() => !!document.querySelector("[data-hoy-cuentas]"))) bad("Inicio sigue duplicando el plan");
 await ir(page, "#/plan");
 const hub = await page.evaluate(() => {
@@ -271,6 +271,32 @@ const relojes = await page.evaluate(() => {
 });
 if (!relojes.length) bad("Ahora de C1 no muestra la hora");
 for (const r of relojes) if (!r.ok) bad("la hora de Ahora se corta: " + (r.text || ""));
+
+await ir(page, "#/progreso/28PLGP0G2");
+const abrioFicha = await page.evaluate(() => {
+  const el = document.querySelector("[data-ficha]");
+  if (!el) return false;
+  el.click();
+  return true;
+});
+if (!abrioFicha) bad("C1 no tiene una ficha que abrir");
+await page.waitForSelector("#ficha-title");
+await page.evaluate(() => { location.hash = "#/copia"; });
+await page.waitForFunction(() => location.hash === "#/copia" && !document.querySelector(".sheet"));
+if (await page.evaluate(() => !!document.querySelector(".sheet"))) bad("la ficha sigue abierta en Copia");
+
+await ir(page, "#/roster");
+const abrioEditor = await page.evaluate(() => {
+  const el = document.querySelector("[data-edit]");
+  if (!el) return false;
+  el.click();
+  return true;
+});
+if (!abrioEditor) bad("Cuentas no tiene Editar");
+await page.waitForSelector("[data-close-editor]");
+await page.evaluate(() => { location.hash = "#/inicio"; });
+await page.waitForFunction(() => location.hash === "#/inicio" && !document.querySelector(".sheet"));
+if (await page.evaluate(() => !!document.querySelector(".sheet"))) bad("el editor sigue abierto en Inicio");
 
 await ir(page, "#/mejoras");
 await page.evaluate(() => document.querySelector("[data-plan-hoja]")?.click());

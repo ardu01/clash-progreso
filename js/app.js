@@ -6586,8 +6586,10 @@ window.addEventListener("resize", recolocarPlanFab);
 window.visualViewport?.addEventListener("resize", recolocarPlanFab);
 window.addEventListener("hashchange", () => {
   try {
-    if (state.planHoja) {
+    if (state.planHoja || state.ficha || state.editor) {
       state.planHoja = false;
+      state.ficha = null;
+      state.editor = null;
       state.focusReturn = "";
     }
     render();
