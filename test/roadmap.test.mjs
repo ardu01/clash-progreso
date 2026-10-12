@@ -372,7 +372,7 @@ test("rush esencial solo programa los requisitos y rush estratégico suma sugere
   assert.match(app, /Tiempo con/);
   assert.match(app, /Fecha estimada/);
   assert.match(app, /data-cobertura/);
-  assert.match(app, /data-recursos-save/);
+  assert.equal(app.includes("data-recursos"), false);
   assert.match(app, /recursosDeCuenta/);
   assert.equal(app.includes("cuello de botella"), false);
   assert.equal(app.includes("ID deducido"), false);

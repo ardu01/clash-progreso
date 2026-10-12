@@ -5,7 +5,7 @@
 <h1 align="center">Clash Progreso</h1>
 
 <p align="center">
-  <strong>Versión 4.1.8</strong><br>
+  <strong>Versión 4.1.9</strong><br>
   El avance de varias aldeas de Clash of Clans, en el iPhone y sin cuenta.<br>
   <a href="https://ardu01.github.io/clash-progreso/">Abrir la app</a>
 </p>
@@ -45,10 +45,6 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 | Análisis en claro | Agenda en claro |
 | --- | --- |
 | <img src="docs/capturas/313-analisis-claro.png" width="200" alt="Análisis con el tema claro"> | <img src="docs/capturas/313-agenda-claro.png" width="200" alt="Agenda con el tema claro"> |
-
-| Recursos | Plan |
-| --- | --- |
-| <img src="docs/capturas/317-recursos-oscuro.png" width="200" alt="Detalle de cuenta en oscuro: oro, elixir, oscuro y menas escritos a mano, con la marca Manual"> | <img src="docs/capturas/317-plan-oscuro.png" width="200" alt="Plan en oscuro: cuánto falta para la siguiente mejora y el oro para subir el ayuntamiento"> |
 
 | Agenda, calendario | Aviso al guardar |
 | --- | --- |
@@ -95,6 +91,8 @@ Datos de prueba del 7 de octubre de 2026. La barra tiene cinco pestañas: Operac
 | <img src="docs/capturas/315-esencial-claro.png" width="200" alt="Rush esencial con el tema claro"> | <img src="docs/capturas/315-estrategico-claro.png" width="200" alt="Rush estratégico con el tema claro"> |
 
 ## En esta versión
+
+La ficha de cada cuenta ya no lleva el bloque Recursos. No pide oro, elixir, oscuro, brillante, reluciente ni estrellada, ni el ingreso al día. No está en ninguna pantalla. Si esas cifras ya estaban guardadas, siguen en la cuenta y en la copia JSON; una copia antigua, sin ese campo, se importa igual. Sin cifras, el plan y Explorar estrategias hacen lo mismo que hacían cuando no había datos.
 
 La app sabe por su propia compilación si lleva el paquete de temas (`PAQUETE_TEMAS` en `js/caches.js`). Si no lo lleva, no pide `paquete.json` y la consola queda limpia, sin 404. El botón «Automático» del selector enseña el tema que elegiría Automático (el del ayuntamiento de la cuenta abierta o, si no, de la principal), no el tema que esté elegido.
 
@@ -256,7 +254,7 @@ Material no oficial, no respaldado por Supercell. Arte © Supercell bajo la Fan 
 
 La app es una página estática. No hay backend. Las exportaciones viven en IndexedDB y no se borran al actualizar. Tras la migración, el roster, los planes, las marcas, el sueño y los documentos de Operaciones se reflejan también en IndexedDB. Si esa migración falla, siguen en localStorage. La sesión de Actualizar todas, el tema y los filtros siguen en localStorage. Safari y el icono de inicio no comparten ese almacén.
 
-El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v45` y la de imágenes `cp-img-v10`. Las cifras manuales viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
+El roster sigue en la versión 2: una cuenta borrada no se vuelve a sembrar. La caché de la interfaz es `cp-shell-v46` y la de imágenes `cp-img-v10`. Las cifras manuales, si ya estaban, viajan en la copia de la cuenta; una copia antigua, sin ese campo, se sigue importando. La ficha ya no las pide. El coste de subir el ayuntamiento sale de clash-of-clans-data 0.18.0 (`town-hall.json`). `js/recursos.js` y `js/th-costes.js` dejan esas cuentas listas para reutilizarlas. Los archivos de la interfaz llevan la versión en la dirección, para que una copia vieja no se mezcle con la nueva. Actualizar la interfaz no cambia los porcentajes de las 11 cuentas de prueba. El mapa de pantallas está en `docs/estructura.md`.
 
 Los costes y los tiempos salen de `data/costes.json` (clash-of-clans-data 0.18.0, solo aldea principal). Los héroes de la cuenta de prueba `#28PLGP0G2` no entran en el plan. El recorrido de Actualizar todas, por si hace falta el detalle, está en `docs/atajo.md`. Cálculos, rutas e interfaz están en `docs/sistema.md`.
 
@@ -264,6 +262,7 @@ Los enlaces internos los abre el toque de la app. En el icono de inicio, un enla
 
 | Versión | Qué cambió |
 | --- | --- |
+| 4.1.9 | La ficha de cuenta ya no pide recursos a mano. Esas cifras, si estaban, siguen en la copia. Sin ellas, el plan y las estrategias no cambian. |
 | 4.1.8 | Sin paquete de temas no se pide `paquete.json` (sin 404). El botón «Automático» enseña el tema que elegiría. |
 | 4.1.7 | Tema del juego opcional en Copia → Apariencia, solo en modo oscuro: «Ninguno» por defecto, «Automático» por TH o uno elegido. Los temas son un paquete aparte (`paquete-estetico/`, versión propia y caché `cp-temas-<versión>`); sin él la app no cambia. |
 | 4.1.6 | El águila sale de los máximos de TH17 y TH18. B.O.B cuenta siempre. El plan usa las sesiones, separa el botín por recurso y prioriza desbloqueos, almacenes, oro y elixir. Desde TH17 la subida pide las fusiones al máximo. |

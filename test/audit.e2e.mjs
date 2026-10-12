@@ -196,7 +196,7 @@ await preparar(page, true);
 await page.goto(base + "#/inicio", { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => (document.querySelector("h1.large-title")?.textContent || "").includes("Inicio"));
 const mods = await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => /\/js\/[^/]+\.js/.test(n)));
-if (!mods.length || mods.some((n) => !n.includes("v=4.1.8"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.1.8")).join(" "));
+if (!mods.length || mods.some((n) => !n.includes("v=4.1.9"))) bad("módulos sin versión: " + mods.filter((n) => !n.includes("v=4.1.9")).join(" "));
 
 for (const hash of ["#/inicio", "#/inicio/bandeja", "#/inicio/excepciones", "#/roster", "#/roster/hibernar", "#/roster/detector", "#/roster/rescate", "#/mejoras", "#/ranking", "#/graficos", "#/agenda", "#/agenda/presupuesto", "#/agenda/ventanas", "#/ahora", "#/copia", "#/actualizar", "#/operaciones", "#/operaciones/sesion", "#/operaciones/mantenimiento", "#/operaciones/simulador", "#/operaciones/gemelos", "#/operaciones/equilibrio", "#/operaciones/prediccion", "#/operaciones/guerras", "#/operaciones/diario", "#/operaciones/plantillas", "#/operaciones/prioridades", "#/operaciones/estrategias"]) {
   await ir(page, hash);

@@ -14,7 +14,7 @@ import {
 } from "./import.js";
 import { allExports, clearExports, deleteTag, guardarDocumentos, guardarRecuperacion, guardarSchema, latestByTag, latestCopyAt, leerDocumentos, leerSchema, putCopy, putExport, restoreBundled, seedBundled } from "./store.js";
 import {
-  addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal, setRecursos,
+  addAccount, cleanGrupos, cleanMeta, ensureTags, featuredTag, migrateRoster, orderAccounts, removeAccount, renameAccount, setGrupos, setMeta, setPrincipal,
 } from "./roster.js";
 import { clipboardImportPlan, loteTextFromUrl } from "./paste.js";
 import { accountVisible, dayInRange } from "./range.js";
@@ -2641,7 +2641,6 @@ function renderProgreso(tag) {
     </a><select aria-label="Cuenta" data-account>${options}</select></div></div>
     ${filterBar({ tiempo: true, recurso: true, th: true, grupo: true })}
     ${exp && inFleet ? summaryCard(a, meta) : ""}
-    ${recursosCard(meta)}
     ${exp && inFleet ? rushCard(meta) : ""}
     ${links}
     ${body}
@@ -2736,38 +2735,6 @@ function categoryHead(catKey, count, a) {
 
 function isWallMax(it) {
   return it.max != null && it.lvl >= it.max;
-}
-
-const RECURSO_CAMPOS = [
-  ["oro", "Oro"],
-  ["elixir", "Elixir"],
-  ["oscuro", "Oscuro"],
-  ["brillante", "Brillante"],
-  ["glowy", "Reluciente"],
-  ["starry", "Estrellada"],
-];
-
-function recursoInput(clave, etiqueta, valor, prefijo) {
-  const name = prefijo ? `${prefijo}${clave}` : clave;
-  const v = valor == null ? "" : String(valor);
-  return `<label>${esc(etiqueta)}<input inputmode="numeric" enterkeyhint="done" autocomplete="off" data-res="${esc(name)}" value="${esc(v)}" aria-label="${esc(etiqueta)}"></label>`;
-}
-
-function recursosCard(meta) {
-  if (!meta) return "";
-  const rec = recursosDeCuenta(meta);
-  const fecha = rec && rec.actualizado ? fmtFin(rec.actualizado) : "Sin fecha";
-  const abierto = !!(rec && rec.ingresos);
-  const campos = RECURSO_CAMPOS.map(([clave, etiqueta]) => recursoInput(clave, etiqueta, rec && rec[clave])).join("");
-  const ingresos = RECURSO_CAMPOS.map(([clave, etiqueta]) => recursoInput(clave, etiqueta, rec && rec.ingresos && rec.ingresos[clave], "ing-")).join("");
-  return `<div class="section" data-recursos="${esc(meta.tag)}"><div class="card">
-    <div class="section-head"><h2 class="t-headline">Recursos <span class="chip">Manual</span></h2>${infoBtn("Cifras a mano. La exportación no trae el oro ni las menas, así que no están confirmadas. Al día es un ingreso estimado.")}</div>
-    <p class="t-footnote c-2">${esc(fecha)}</p>
-    <div class="res-grid">${campos}</div>
-    <button type="button" class="btn btn--plain" data-recursos-dia aria-pressed="${abierto ? "true" : "false"}" aria-expanded="${abierto ? "true" : "false"}">Al día</button>
-    <div class="res-grid" data-recursos-ingresos ${abierto ? "" : "hidden"}>${ingresos}</div>
-    <button type="button" class="btn btn--primary btn--block" data-recursos-save>Guardar</button>
-  </div></div>`;
 }
 
 const NOMBRE_FALTA = {
@@ -5301,35 +5268,6 @@ function bind(r) {
       return;
     }
     if (origen.closest("[data-actualizar]")) { abrirActualizar(); return; }
-    const guardarRec = origen.closest("[data-recursos-save]");
-    if (guardarRec) {
-      const root = guardarRec.closest("[data-recursos]");
-      const tag = root && root.getAttribute("data-recursos");
-      const leer = (name) => {
-        const el = root && root.querySelector(`[data-res="${name}"]`);
-        return el ? el.value : "";
-      };
-      const raw = { ingresos: {} };
-      for (const [clave] of RECURSO_CAMPOS) {
-        raw[clave] = leer(clave);
-        raw.ingresos[clave] = leer(`ing-${clave}`);
-      }
-      state.accounts = setRecursos(state.accounts, tag, raw, Date.now());
-      persistRoster();
-      avisoDiscreto(recursosDeCuenta(state.accounts.find((a) => a.tag === tag)) ? "Guardado" : "Sin cifras");
-      render();
-      return;
-    }
-    const alDia = origen.closest("[data-recursos-dia]");
-    if (alDia) {
-      const root = alDia.closest("[data-recursos]");
-      const panel = root && root.querySelector("[data-recursos-ingresos]");
-      const open = alDia.getAttribute("aria-pressed") !== "true";
-      alDia.setAttribute("aria-pressed", open ? "true" : "false");
-      alDia.setAttribute("aria-expanded", open ? "true" : "false");
-      if (panel) panel.hidden = !open;
-      return;
-    }
     const ctor = origen.closest("[data-ctor]");
     if (ctor) {
       const tag = ctor.dataset.ctorTag;

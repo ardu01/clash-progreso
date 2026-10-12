@@ -956,9 +956,9 @@ test("3.1.6: el perfil muestra solo lo que trae el JSON", () => {
   assert.equal(app.includes("cuello de botella"), false);
 });
 
-test("versión 4.1.8 y cachés cp-shell-v45 / cp-img-v10", () => {
-  assert.equal(APP_VERSION, "4.1.8");
-  assert.equal(SHELL_CACHE, "cp-shell-v45");
+test("versión 4.1.9 y cachés cp-shell-v46 / cp-img-v10", () => {
+  assert.equal(APP_VERSION, "4.1.9");
+  assert.equal(SHELL_CACHE, "cp-shell-v46");
   assert.equal(IMAGE_CACHE, "cp-img-v10");
   const sw = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
@@ -1007,6 +1007,7 @@ test("versión 4.1.8 y cachés cp-shell-v45 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-shell-v42"), false);
   assert.equal(sw.includes("cp-shell-v43"), false);
   assert.equal(sw.includes("cp-shell-v44"), false);
+  assert.equal(sw.includes("cp-shell-v45"), false);
   assert.equal(sw.includes("cp-img-v8"), false);
   assert.equal(sw.includes("cp-img-v9"), false);
   assert.equal(sw.includes("cp-img-v4"), false);
@@ -1014,7 +1015,8 @@ test("versión 4.1.8 y cachés cp-shell-v45 / cp-img-v10", () => {
   assert.equal(sw.includes("cp-img-v6"), false);
   assert.equal(sw.includes("cp-img-v7"), false);
   assert.match(sw, /cajas-alfa\.json/);
-  assert.match(caches, /cp-shell-v45/);
+  assert.match(caches, /cp-shell-v46/);
+  assert.equal(caches.includes("cp-shell-v45"), false);
   assert.equal(caches.includes("cp-shell-v44"), false);
   assert.equal(caches.includes("cp-shell-v43"), false);
   assert.equal(caches.includes("cp-shell-v42"), false);
@@ -2780,7 +2782,7 @@ test("4.1.7: cargador del paquete de temas, «Ninguno» por defecto y caché pro
   const app = leer("../js/app.js");
   assert.match(cargador, /localStorage\.getItem\(CLAVE\) \|\| ""/);
   assert.match(cargador, /\.\/paquete-estetico\//);
-  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.1\.8"/);
+  assert.match(html, /"\.\/js\/temas-paquete\.js": "\.\/js\/temas-paquete\.js\?v=4\.1\.9"/);
   assert.match(sw, /"\.\/js\/temas-paquete\.js"/);
   assert.match(sw, /const TEMAS_CACHE = "cp-temas-"/);
   assert.match(sw, /!key\.startsWith\(TEMAS_CACHE\)/);
